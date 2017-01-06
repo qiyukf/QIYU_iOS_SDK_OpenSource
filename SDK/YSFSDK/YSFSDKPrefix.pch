@@ -1,0 +1,29 @@
+//
+//  YSFPrefix.pch
+//  YSFSDK
+//
+//  Created by NetEase.
+//  Copyright (c) 2015年 NetEase. All rights reserved.
+//
+
+#ifndef YSFSDKPrefix_pch
+#define YSFSDKPrefix_pch
+
+#ifdef __OBJC__
+
+#import <UIKit/UIKit.h>
+#import "NIMLogger.h"
+#import "YSFMacro.h"
+#import "UIView+YSFToast.h"
+#import "UIImage+GetImage.h"
+#import "UIView+Animation.h"
+#import "UIView+YSFWebCacheOperation.h"
+#import "UIAlertView+YSF.h"
+#import "UIView+YSF.h"
+#import "UIImage+YSF.h"
+#import "NSString+YSF.h"
+#import "NSDictionary+YSF.h"
+#import "YSFAttributedLabel+YSF.h"
+#import "NIMSDK.h"
+#endif
+#endif

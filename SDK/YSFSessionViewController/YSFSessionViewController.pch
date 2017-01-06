@@ -1,0 +1,29 @@
+//
+//  YSFVendor.pch
+//  YSFVendor
+//
+//  Created by amao on 8/27/15.
+//  Copyright (c) 2015 Netease. All rights reserved.
+//
+
+#ifndef YSFSessionViewController_YSFSessionViewController_pch
+#define YSFSessionViewController_YSFSessionViewController_pch
+
+#ifdef __OBJC__
+#import <UIKit/UIKit.h>
+#import "YSFMacro.h"
+#import "UIView+YSFToast.h"
+#import "UIImage+GetImage.h"
+#import "UIView+Animation.h"
+#import "UIView+YSFWebCacheOperation.h"
+#import "UIAlertView+YSF.h"
+#import "UIView+YSF.h"
+#import "UIImage+YSF.h"
+#import "NSString+YSF.h"
+#import "NSDictionary+YSF.h"
+#import "NIMSDK.h"
+#import "UILayoutKit.h"
+
+#endif
+
+#endif
