@@ -139,6 +139,8 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  */
 - (void)deleteRecentSession:(YSF_NIMRecentSession *)recentSession;
 
+- (YSF_NIMRecentSession *)queryRecentSession:(YSF_NIMSession *)session;
+- (void)addRecentSession:(YSF_NIMRecentSession *)recentSession;
 
 /**
  *  设置一个会话里所有消息置为已读

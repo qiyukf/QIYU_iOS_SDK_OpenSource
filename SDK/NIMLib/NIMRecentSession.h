@@ -19,12 +19,12 @@
 /**
  *  当前会话
  */
-@property (nonatomic,readonly,strong)   YSF_NIMSession  *session;
+@property (nonatomic,strong)   YSF_NIMSession  *session;
 
 /**
  *  最后一条消息
  */
-@property (nonatomic,readonly,strong)   YSF_NIMMessage  *lastMessage;
+@property (nonatomic,strong)   YSF_NIMMessage  *lastMessage;
 
 /**
  *  未读消息数(此接口需要在UI线程上调用)

@@ -99,6 +99,9 @@
 #define     YSFApiKeyMessageSessionId   @"msgSessionId"
 #define     YSFApiKeyFromImId           @"fromImId"
 #define     YSFApiKeyContent            @"content"
+#define     YSFApiKeyResult             @"result"
+#define     YSFApiKeyShop               @"shop"
+#define     YSFApiKeySessionStatus      @"sessionStatus"
 
 
 
@@ -122,6 +125,8 @@ typedef enum : NSUInteger {
     YSFCommandSetCommodityInfoRequest   =   121,    //商品信息
     YSFCommandPushMessageRequest        =   133,    //获取推送消息
     YSFCommandPushMessageStatusChangeRequest =   135,    //推送消息状态变更
+    YSFCommandSessionStatusRequest =   501,    //请求会话状态
+    YSFCommandSessionStatusResponse =   502,    //请求会话状态返回
 
 
     //客服端

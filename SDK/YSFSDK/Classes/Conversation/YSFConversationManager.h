@@ -10,4 +10,6 @@
 
 @interface YSFConversationManager : QYConversationManager
 
+- (void)onSessionListChanged;
+
 @end

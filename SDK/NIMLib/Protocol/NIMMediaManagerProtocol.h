@@ -235,4 +235,13 @@ typedef void(^YSF_NIMAudioToTextBlock)(NSError *error,NSString *text);
 - (void)transAudioToText:(YSF_NIMAudioToTextOption *)option
                   result:(YSF_NIMAudioToTextBlock)block;
 
+#pragma mark - common setting
+
+/**
+ *  设置录制或者播放完成以后是否自动deactivate AVAudioSession
+ *
+ *  @param deactivate 是否deactivate，默认为YES
+ */
+- (void)setDeactivateAudioSessionAfterComplete:(BOOL)deactivate;
+
 @end

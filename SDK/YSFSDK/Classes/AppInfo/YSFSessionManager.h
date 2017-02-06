@@ -11,12 +11,11 @@
 #import "YSFCloseServiceNotification.h"
 
 typedef enum : NSUInteger {
-    YSFSessionStateTypeOnline,      //正在服务
-    YSFSessionStateTypeWaiting,     //正在排队
-    YSFSessionStateTypeNotExist,     //客服不在线
     YSFSessionStateTypeError,       //离线
+    YSFSessionStateTypeOnline,      //正在服务
+    YSFSessionStateTypeNotExist,     //客服不在线
+    YSFSessionStateTypeWaiting,     //正在排队
 } YSFSessionStateType;
-
 
 @class QYSource;
 

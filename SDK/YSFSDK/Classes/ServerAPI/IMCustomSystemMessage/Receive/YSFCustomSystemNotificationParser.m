@@ -13,6 +13,7 @@
 #import "YSFQueryWaitingStatus.h"
 #import "YSFApiDefines.h"
 #import "YSFKFBypassNotification.h"
+#import "YSFSessionStatusResponse.h"
 
 
 @implementation YSFCustomSystemNotificationParser
@@ -36,6 +37,9 @@
                     break;
                 case YSFCommandKFBypassNotification:
                     result = [YSFKFBypassNotification dataByJson:dict];
+                    break;
+                case YSFCommandSessionStatusResponse:
+                    result = [YSFSessionStatusResponse dataByJson:dict];
                     break;
                 default:
                     NSAssert(0, @"command not supported %zd",cmd);

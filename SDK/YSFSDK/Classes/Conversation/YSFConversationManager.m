@@ -22,6 +22,7 @@
 #import "YSFReportQuestion.h"
 #import "QYSDK_Private.h"
 #import "YSFShopInfo.h"
+#import "NSDictionary+YSFJson.h"
 
 @interface YSFConversationManager ()<YSF_NIMConversationManagerDelegate, YSF_NIMChatManagerDelegate>
 @property (nonatomic,weak)  id<QYConversationManagerDelegate> delegate;
@@ -76,6 +77,17 @@
         sessionInfo.lastMessageText = [self getLastMessageTextWithMessage:item.lastMessage];
         sessionInfo.unreadCount = item.unreadCount;
         sessionInfo.lastMessageTimeStamp = item.lastMessage.timestamp;
+        YSFSessionStateType stateType = [[[[QYSDK sharedSDK] sessionManager].sessionStateType
+                               ysf_jsonString:sessionInfo.shopId] integerValue];
+        if (stateType == YSFSessionStateTypeOnline) {
+            sessionInfo.status = QYSessionStatusInSession;
+        }
+        else if (stateType == YSFSessionStateTypeWaiting) {
+            sessionInfo.status = QYSessionStatusWaiting;
+        }
+        else {
+            sessionInfo.status = QYSessionStatusNone;
+        }
         
         [sessionListArray addObject:sessionInfo];
     }

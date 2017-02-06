@@ -18,7 +18,9 @@
 #import "YSFInviteEvaluationObject.h"
 #import "YSFShopInfo.h"
 #import "NSString+YSF.h"
-
+#import "YSFConversationManager.h"
+#import "YSFSessionStatusResponse.h"
+#import "YSFQueryWaitingStatus.h"
 
 @interface YSFSessionManager ()
 <YSF_NIMSystemNotificationManagerDelegate,
@@ -245,6 +247,16 @@ YSFServiceRequestDelegate>
     else {
         [self removeSessionByShopId:shopId];
         if (code == YSFCodeServiceWaiting) {
+            YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+            YSF_NIMRecentSession *recentSession = [[[YSF_NIMSDK sharedSDK] conversationManager] queryRecentSession:session];
+            if (!recentSession) {
+                recentSession = [YSF_NIMRecentSession new];
+                YSF_NIMMessage *message = [YSFMessageMaker msgWithText:@""];
+                message.session = session;
+                recentSession.lastMessage = message;
+                recentSession.session = message.session;
+                [[[YSF_NIMSDK sharedSDK] conversationManager] addRecentSession:recentSession];
+            }
             [self setSessionStateType:shopId type:YSFSessionStateTypeWaiting];
         }
         else if (code == YSFCodeServiceNotExist)
@@ -387,14 +399,50 @@ YSFServiceRequestDelegate>
     if ([object isKindOfClass:[YSFServiceSession class]])
     {
         [self onGetNewServiceSession:object shopId:shopId];
+        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
     }
     else if ([object isKindOfClass:[YSFCloseServiceNotification class]])
     {
         [self onCloseSession:(YSFCloseServiceNotification *)object shopId:shopId];
+        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
     }
     else if ([object isKindOfClass:[YSFKFBypassNotification class]])
     {
         [self onGetKFBypassNotification:object shopId:shopId];
+    }
+    else if ([object isKindOfClass:[YSFSessionStatusResponse class]])
+    {
+        [((YSFSessionStatusResponse *)object).shopSessionStatus enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            if ([obj integerValue] == 200) {
+                [self setSessionStateType:key type:YSFSessionStateTypeOnline];
+            }
+            else if ([obj integerValue] == 203) {
+                [self setSessionStateType:key type:YSFSessionStateTypeWaiting];
+            }
+            else if ([obj integerValue] == 201) {
+                [self setSessionStateType:key type:YSFSessionStateTypeNotExist];
+            }
+        }];
+        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
+    }
+    else if ([object isKindOfClass:[YSFQueryWaitingStatusResponse class]])
+    {
+        YSFQueryWaitingStatusResponse *wait_status = object;
+        if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:shopId] == YSFSessionStateTypeWaiting
+            && wait_status.code == YSFCodeServiceWaitingToInvalid) {
+            [self setSessionStateType:shopId type:YSFSessionStateTypeNotExist];
+        
+            YSFServiceSession *session = [YSFServiceSession new];
+            session.code = YSFCodeServiceNotExist;
+            session.notExistTip = wait_status.message;
+            NSError *error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
+            if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)])
+            {
+                [_delegate didReceiveSessionError:error session:session shopId:shopId];
+            }
+            
+            [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
+        }
     }
 }
 
@@ -442,10 +490,10 @@ YSFServiceRequestDelegate>
 
     if (session) {
         [self addStaffIdIconUrl:session.staffId icornUrl:session.iconUrl];
-        [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:session.staffId];
+        [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
     }
     else {
-        [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:nil];
+        [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:nil];
     }
     
 }

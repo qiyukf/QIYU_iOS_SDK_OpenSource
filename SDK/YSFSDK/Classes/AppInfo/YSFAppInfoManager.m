@@ -15,6 +15,7 @@
 #import "YSFLoginManager.h"
 #import "YSFRelationStore.h"
 #import "YSFAppSetting.h"
+#import "YSFSessionStatusRequest.h"
 
 
 @interface YSFAppInfoManager ()
@@ -90,20 +91,6 @@
     }
 }
 
-//- (void)addUserInfo:(NSDictionary *)infos
-//{
-//    YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-//    [sessionManager onCloseSession];
-//    NSDictionary *realInfos = [infos ysf_formattedDict];
-//    if ([realInfos count])
-//    {
-//        _userBriefInfo = realInfos;
-//        _currentForeignUserId = [_userBriefInfo objectForKey:@"foreignid"];
-//        [self saveUserInfo];
-//        [self reportUserInfo];
-//    }
-//}
-
 - (void)setUserInfo:(QYUserInfo *)userInfo
 {
     if (userInfo) {
@@ -154,6 +141,7 @@
              }
              else
              {
+                 NIMLogErr(@"createAccount failed %@", error);
                  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                      [self createAccount];
                  });
@@ -162,33 +150,13 @@
 }
 
 #pragma mark - 汇报用户信息
-//- (void)reportUserInfo
-//{
-//    if (_userBriefInfo)
-//    {
-//        
-//        YSFAddInfoRequest *request = [[YSFAddInfoRequest alloc] init];
-//        request.infos = _userBriefInfo;
-//        NSDictionary *cachedUserInfo = _userBriefInfo;
-//        
-//        
-//        __weak typeof(self) weakSelf = self;
-//        [YSFIMApi request:request
-//               completion:^(NSError *error) {
-//                   if (error == nil && cachedUserInfo == _userBriefInfo)
-//                   {
-//                       _userBriefInfo = nil;
-//                       [[self store] removeObjectByID:YSFUserInfoKey];
-//                       [weakSelf mapForeignId:[cachedUserInfo objectForKey:YSFApiKeyForeignId]];
-//                   }
-//               }];
-//    }
-//}
 
 - (void)reportUserInfo
 {
     if (_qyUserInfo)
     {
+        NIMLogApp(@"reportUserInfo userId:%@ data:%@", _qyUserInfo.userId, _qyUserInfo.data);
+
         YSFSetInfoRequest *request = [[YSFSetInfoRequest alloc] init];
         request.userInfo = _qyUserInfo;
         QYUserInfo *cachedUserInfo = _qyUserInfo;
@@ -201,6 +169,7 @@
                         [self cleanCurrentUserInfo];
                         [weakSelf mapForeignId:cachedUserInfo.userId];
                     }
+                    NIMLogApp(@"reportUserInfo error:%@", error);
                }];
     }
 }
@@ -497,7 +466,17 @@
     if (step == YSF_NIMLoginStepSyncOK)
     {
         [self reportUserInfo];
+        [self requestSessionStatus];
     }
+}
+
+- (void)requestSessionStatus
+{
+    YSFSessionStatusRequest *request = [YSFSessionStatusRequest new];
+    [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
+                                      NIMLogApp(@"requestSessionStatus error:%@", error);
+                                  }];
+    
 }
 
 @end

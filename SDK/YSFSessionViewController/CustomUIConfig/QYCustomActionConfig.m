@@ -12,4 +12,9 @@
     return instance;
 }
 
+- (void)setDeactivateAudioSessionAfterComplete:(BOOL)deactivate
+{
+    [[[YSF_NIMSDK sharedSDK] mediaManager] setDeactivateAudioSessionAfterComplete:deactivate];
+}
+
 @end

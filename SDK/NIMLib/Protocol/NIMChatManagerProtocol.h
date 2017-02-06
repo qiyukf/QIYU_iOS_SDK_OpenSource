@@ -149,6 +149,6 @@
 - (void)removeDelegate:(id<YSF_NIMChatManagerDelegate>)delegate;
 
 //七鱼新增接口
-- (void)setReceiveMessageFrom:(NSString *)receiveMessageFrom;
+- (void)setReceiveMessageFrom:(NSString *)shopID receiveMessageFrom:(NSString *)receiveMessageFrom;
 
 @end

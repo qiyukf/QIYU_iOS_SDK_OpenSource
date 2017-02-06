@@ -61,7 +61,7 @@ static long long sessionId;
 @property (nonatomic,strong)    UIButton *humanService;
 @property (nonatomic,strong)    UIButton *humanServiceText;
 @property (nonatomic,strong)    UIButton *shopEntrance;
-@property (nonatomic,strong)    UILabel *shopEntranceLabel;
+@property (nonatomic,strong)    UIButton *shopEntranceText;
 @property (nonatomic,strong)    UIButton *evaluation;
 @property (nonatomic,strong)    UIButton *evaluationText;
 @property (nonatomic,strong)    UIImageView *sessionListImageView;
@@ -74,16 +74,9 @@ static long long sessionId;
 @property (nonatomic,strong)    YSF_NIMMessage *currentInviteEvaluationMessage;
 @property (nonatomic,assign)    BOOL hasRequested;
 @property (nonatomic,strong)    YSFTimer *queryWaitingStatusTimer;
-
-/**
- *  平台电商店铺Id，不是平台电商不用管
- */
-@property (nonatomic,copy)    NSString *shopId;
-
-/**
- *  会话窗口回调
- */
-@property (nonatomic, weak) id<QYSessionViewDelegate> delegate;
+@property (nonatomic,copy)      NSString *shopId;                       //平台电商店铺Id，不是平台电商不用管
+@property (nonatomic,weak)      id<QYSessionViewDelegate> delegate;     //会话窗口回调
+@property (nonatomic,assign)    BOOL hasHumanEntrance;                  //右上角有人工客服入口
 
 @end
 
@@ -107,6 +100,7 @@ static long long sessionId;
         _handler.delegate = self;
         _specifiedId = NO;
         _hasRequested = NO;
+        _hasHumanEntrance = YES;
         _openRobotInShuntMode = NO;
         _queryWaitingStatusTimer = [[YSFTimer alloc]init];
     }
@@ -116,7 +110,7 @@ static long long sessionId;
 //初始化会话session
 - (void)initSession
 {
-    YSF_NIMSession *session  =[YSF_NIMSession session:_shopId type:YSF_NIMSessionTypeYSF];
+    YSF_NIMSession *session  = [YSF_NIMSession session:_shopId type:YSF_NIMSessionTypeYSF];
     _session = session;
 }
 
@@ -134,12 +128,6 @@ static long long sessionId;
     BOOL shouldRequestService = YES;
     id model = [[_sessionDatasource modelArray] lastObject];
     if ([model isKindOfClass:[YSFMessageModel class]]) {
-//        long long messageSessionId = [((YSFMessageModel *)model).message extSessionId];
-//        long long sessionId = [sessionManager getLastUnreadPushMessageSessionId];
-//        if (messageSessionId != 0 && messageSessionId == sessionId) {
-//            shouldRequestService = NO;
-//        }
-        
         YSF_NIMMessage *message = ((YSFMessageModel *)model).message;
         if (message.messageType == YSF_NIMMessageTypeCustom) {
             id<YSF_NIMCustomAttachment> attachment = [(YSF_NIMCustomObject *)(message.messageObject) attachment];
@@ -253,18 +241,19 @@ static long long sessionId;
     _shopEntrance.imageView.contentMode = UIViewContentModeScaleAspectFit;
     [_shopEntrance addTarget:self action:@selector(onShopEntranceTap:) forControlEvents:UIControlEventTouchUpInside];
     [rightButtonView addSubview:_shopEntrance];
-    _shopEntranceLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 20, 30, 20)];
-    [rightButtonView addSubview:_shopEntranceLabel];
-    _shopEntranceLabel.font = [UIFont systemFontOfSize:14];
-    _shopEntranceLabel.lineBreakMode = NSLineBreakByTruncatingTail;
-    _shopEntranceLabel.textAlignment = NSTextAlignmentCenter;
+    _shopEntranceText = [[UIButton alloc] initWithFrame:CGRectMake(10, 20, 30, 20)];
+    [rightButtonView addSubview:_shopEntranceText];
+    _shopEntranceText.titleLabel.font = [UIFont systemFontOfSize:14];
+    _shopEntranceText.titleLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    _shopEntranceText.titleLabel.textAlignment = NSTextAlignmentCenter;
     if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
-        _shopEntranceLabel.textColor = YSFRGB(0x76838f);
+        [_shopEntranceText setTitleColor:YSFRGB(0x76838f) forState:UIControlStateNormal];
     }
     else {
-        _shopEntranceLabel.textColor = [UIColor whiteColor];
+        [_shopEntranceText setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     }
-    _shopEntranceLabel.text = [QYCustomUIConfig sharedInstance].shopEntranceText;
+    [_shopEntranceText setTitle:[QYCustomUIConfig sharedInstance].shopEntranceText forState:UIControlStateNormal];
+    [_shopEntranceText addTarget:self action:@selector(onShopEntranceTap:) forControlEvents:UIControlEventTouchUpInside];
     //评价
     _evaluation = [[UIButton alloc] initWithFrame:CGRectMake(40, 0, 50, 20)];
     [rightButtonView addSubview:_evaluation];
@@ -338,6 +327,8 @@ static long long sessionId;
     {
         YSFServiceSession *session = [sessionManager getSession:_shopId];
         if (session) {
+            _hasHumanEntrance = session.operatorEable;
+            [self setRightButtonViewFrame];
             [self changeHumanOrMachineState:session.humanOrMachine operatorEable:session.operatorEable];
             
             if (session.humanOrMachine) {
@@ -365,15 +356,25 @@ static long long sessionId;
     if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown) {
         _humanService.frame = CGRectMake(40, 0, 50, 20);
         _humanServiceText.frame = CGRectMake(40, 20, 50, 20);
-        _shopEntrance.frame = CGRectMake(0, 0, 50, 20);
-        _shopEntranceLabel.frame = CGRectMake(10, 20, 30, 20);
+        if (_hasHumanEntrance) {
+            _shopEntrance.frame = CGRectMake(0, 0, 50, 20);
+            _shopEntranceText.frame = CGRectMake(10, 20, 30, 20);
+        } else {
+            _shopEntrance.frame = CGRectMake(40, 0, 50, 20);
+            _shopEntranceText.frame = CGRectMake(50, 20, 30, 20);
+        }
         _evaluation.frame = CGRectMake(40, 0, 50, 20);
         _evaluationText.frame = CGRectMake(40, 20, 50, 20);
     } else {
         _humanService.frame = CGRectMake(40, 7, 50, 20);
         _humanServiceText.frame = CGRectMake(40, 23, 50, 20);
-        _shopEntrance.frame = CGRectMake(0, 7, 50, 20);
-        _shopEntranceLabel.frame = CGRectMake(10, 23, 30, 20);
+        if (_hasHumanEntrance) {
+            _shopEntrance.frame = CGRectMake(0, 7, 50, 20);
+            _shopEntranceText.frame = CGRectMake(10, 23, 30, 20);
+        } else {
+            _shopEntrance.frame = CGRectMake(40, 7, 50, 20);
+            _shopEntranceText.frame = CGRectMake(50, 23, 30, 20);
+        }
         _evaluation.frame = CGRectMake(40, 7, 50, 20);
         _evaluationText.frame = CGRectMake(40, 23, 50, 20);
     }
@@ -430,24 +431,14 @@ static long long sessionId;
             _humanServiceText.hidden = NO;
         }
         self.sessionInputView.humanOrMachine = NO;
-        _shopEntrance.hidden = YES;
-        _shopEntranceLabel.hidden = YES;
         _evaluation.hidden = YES;
         _evaluationText.hidden = YES;
-    }
-    else {
+    } else {
         _humanService.hidden = YES;
         _humanServiceText.hidden = YES;
         self.sessionInputView.humanOrMachine = YES;
         _evaluation.hidden = NO;
         _evaluationText.hidden = NO;
-        if ([QYCustomUIConfig sharedInstance].showShopEntrance) {
-            _shopEntrance.hidden = NO;
-            _shopEntranceLabel.hidden = NO;
-        } else {
-            _shopEntrance.hidden = YES;
-            _shopEntranceLabel.hidden = YES;
-        }
     }
 }
 
@@ -479,10 +470,10 @@ static long long sessionId;
     _humanServiceText.hidden = YES;
     if ([QYCustomUIConfig sharedInstance].showShopEntrance) {
         _shopEntrance.hidden = NO;
-        _shopEntranceLabel.hidden = NO;
+        _shopEntranceText.hidden = NO;
     } else {
         _shopEntrance.hidden = YES;
-        _shopEntranceLabel.hidden = YES;
+        _shopEntranceText.hidden = YES;
     }
     [self changeEvaluationButtonToInit];
 }
@@ -2045,15 +2036,6 @@ static long long sessionId;
         }
         else {
             [self queryWaitingStatus:shopId];
-        }
-        
-        if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:shopId] == YSFSessionStateTypeWaiting
-            && wait_status.code == YSFCodeServiceWaitingToInvalid) {
-            YSFServiceSession *session = [YSFServiceSession new];
-            session.code = YSFCodeServiceNotExist;
-            session.notExistTip = wait_status.message;
-            NSError *error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
-            [self didReceiveSessionError:error session:session shopId:shopId];
         }
     }
     
