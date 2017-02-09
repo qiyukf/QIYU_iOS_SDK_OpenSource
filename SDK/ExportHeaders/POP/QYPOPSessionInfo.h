@@ -11,8 +11,8 @@
 
 typedef NS_ENUM(NSInteger, QYSessionStatus) {
     QYSessionStatusNone,
-    QYSessionStatusInSession,
-    QYSessionStatusWaiting
+    QYSessionStatusWaiting,
+    QYSessionStatusInSession
 };
 
 /**
