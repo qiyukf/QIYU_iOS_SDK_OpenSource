@@ -77,6 +77,7 @@ static long long sessionId;
 @property (nonatomic,copy)      NSString *shopId;                       //平台电商店铺Id，不是平台电商不用管
 @property (nonatomic,weak)      id<QYSessionViewDelegate> delegate;     //会话窗口回调
 @property (nonatomic,assign)    BOOL hasHumanEntrance;                  //右上角有人工客服入口
+@property (nonatomic,assign)    BOOL humanOrMachine;                    //机器人状态or人工状态
 
 @end
 
@@ -101,6 +102,7 @@ static long long sessionId;
         _specifiedId = NO;
         _hasRequested = NO;
         _hasHumanEntrance = YES;
+        _humanOrMachine = YES;
         _openRobotInShuntMode = NO;
         _queryWaitingStatusTimer = [[YSFTimer alloc]init];
     }
@@ -327,8 +329,6 @@ static long long sessionId;
     {
         YSFServiceSession *session = [sessionManager getSession:_shopId];
         if (session) {
-            _hasHumanEntrance = session.operatorEable;
-            [self setRightButtonViewFrame];
             [self changeHumanOrMachineState:session.humanOrMachine operatorEable:session.operatorEable];
             
             if (session.humanOrMachine) {
@@ -356,24 +356,24 @@ static long long sessionId;
     if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown) {
         _humanService.frame = CGRectMake(40, 0, 50, 20);
         _humanServiceText.frame = CGRectMake(40, 20, 50, 20);
-        if (_hasHumanEntrance) {
-            _shopEntrance.frame = CGRectMake(0, 0, 50, 20);
-            _shopEntranceText.frame = CGRectMake(10, 20, 30, 20);
-        } else {
+        if (!_humanOrMachine && !_hasHumanEntrance) {
             _shopEntrance.frame = CGRectMake(40, 0, 50, 20);
             _shopEntranceText.frame = CGRectMake(50, 20, 30, 20);
+        } else {
+            _shopEntrance.frame = CGRectMake(0, 0, 50, 20);
+            _shopEntranceText.frame = CGRectMake(10, 20, 30, 20);
         }
         _evaluation.frame = CGRectMake(40, 0, 50, 20);
         _evaluationText.frame = CGRectMake(40, 20, 50, 20);
     } else {
         _humanService.frame = CGRectMake(40, 7, 50, 20);
         _humanServiceText.frame = CGRectMake(40, 23, 50, 20);
-        if (_hasHumanEntrance) {
-            _shopEntrance.frame = CGRectMake(0, 7, 50, 20);
-            _shopEntranceText.frame = CGRectMake(10, 23, 30, 20);
-        } else {
+        if (!_humanOrMachine && !_hasHumanEntrance) {
             _shopEntrance.frame = CGRectMake(40, 7, 50, 20);
             _shopEntranceText.frame = CGRectMake(50, 23, 30, 20);
+        } else {
+            _shopEntrance.frame = CGRectMake(0, 7, 50, 20);
+            _shopEntranceText.frame = CGRectMake(10, 23, 30, 20);
         }
         _evaluation.frame = CGRectMake(40, 7, 50, 20);
         _evaluationText.frame = CGRectMake(40, 23, 50, 20);
@@ -440,6 +440,9 @@ static long long sessionId;
         _evaluation.hidden = NO;
         _evaluationText.hidden = NO;
     }
+    _hasHumanEntrance = operatorEable;
+    _humanOrMachine = humanOrMachine;
+    [self setRightButtonViewFrame];
 }
 
 //初始化右上角：人工、商铺、评价的状态和显示关系
