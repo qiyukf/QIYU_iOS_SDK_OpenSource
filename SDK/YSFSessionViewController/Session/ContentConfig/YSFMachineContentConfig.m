@@ -18,9 +18,7 @@
 - (CGSize)contentSize:(CGFloat)cellWidth
 {
     CGFloat msgBubbleMaxWidth    = (cellWidth - 112);
-    CGFloat bubbleLeftToContent  = 18;
-    CGFloat contentRightToBubble = 14;
-    CGFloat msgContentMaxWidth = (msgBubbleMaxWidth - contentRightToBubble - bubbleLeftToContent);
+    CGFloat msgContentMaxWidth = msgBubbleMaxWidth - self.contentViewInsets.left - self.contentViewInsets.right;
     CGFloat offsetX = 0;
     __block CGFloat offsetY = 0;
     
@@ -110,7 +108,6 @@
 - (YSFAttributedLabel *)newAttrubutedLabel
 {
     YSFAttributedLabel *answerLabel = [[YSFAttributedLabel alloc] initWithFrame:CGRectZero];
-    answerLabel.delegate = self;
     answerLabel.numberOfLines = 0;
     answerLabel.underLineForLink = NO;
     answerLabel.lineBreakMode = NSLineBreakByWordWrapping;

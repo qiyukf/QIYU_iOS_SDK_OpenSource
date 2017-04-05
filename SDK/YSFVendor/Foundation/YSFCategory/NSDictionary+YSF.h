@@ -17,4 +17,18 @@
 
 - (NSString *)ysf_toUTF8String;
 
+- (NSString *)ysf_jsonString: (NSString *)key;
+
+- (NSDictionary *)ysf_jsonDict: (NSString *)key;
+- (NSArray *)ysf_jsonArray: (NSString *)key;
+- (NSArray *)ysf_jsonStringArray: (NSString *)key;
+
+
+- (BOOL)ysf_jsonBool: (NSString *)key;
+- (NSInteger)ysf_jsonInteger: (NSString *)key;
+- (long long)ysf_jsonLongLong: (NSString *)key;
+- (unsigned long long)ysf_jsonUnsignedLongLong:(NSString *)key;
+
+- (double)ysf_jsonDouble: (NSString *)key;
+
 @end

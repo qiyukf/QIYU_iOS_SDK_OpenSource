@@ -31,6 +31,7 @@
 @property (nonatomic, weak) id<YSFInputDelegate> inputDelegate;
 @property (nonatomic, weak) id<YSFInputActionDelegate> actionDelegate;
 @property (nonatomic, assign) NIMInputType inputType;
+@property (nonatomic, assign) CGFloat bottomHeight;
 
 @end
 
@@ -55,8 +56,20 @@
         }
         
         [self addKeyboardObserver];
+        
+        _actionBar = [[YSFActionBar alloc] init];
+        _actionBar.hidden = YES;
+        _actionBar.ysf_frameHeight = YSFActionBarHeight;
+        __weak typeof(self) weakSelf = self;
+        _actionBar.selectActionCallback = ^(YSFActionInfo *action)
+        {
+            if ([weakSelf.actionDelegate respondsToSelector:@selector(onSendText:)]) {
+                [weakSelf.actionDelegate onSendText:action.label];
+            }
+        };
+        [self addSubview:_actionBar];
+
         _toolBar = [[YSFInputToolBar alloc] initWithFrame:CGRectZero];
-        _toolBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [_toolBar.emoticonBtn addTarget:self action:@selector(onTouchEmoticonBtn:) forControlEvents:UIControlEventTouchUpInside];
         [_toolBar.voiceBtn addTarget:self action:@selector(onTouchVoiceBtn:) forControlEvents:UIControlEventTouchUpInside];
         [_toolBar.recordButton addTarget:self action:@selector(onTouchRecordBtnDown:) forControlEvents:UIControlEventTouchDown];
@@ -74,7 +87,6 @@
         [_toolBar.recordLabel setHidden:YES];
         
         [_toolBar.imageButton addTarget:self action:@selector(onTouchImageBtn:) forControlEvents:UIControlEventTouchUpInside];
-        __weak typeof(self) weakSelf = self;
         _toolBar.inputTextView.pasteImageCallback = ^(UIImage *image) {
             [weakSelf.actionDelegate onPasteImage:image];
         };
@@ -111,6 +123,20 @@
 {
     _inputDelegate = delegate;
 
+}
+
+- (void)setActionInfoArray:(NSArray *)actionInfoArray
+{
+    if (_actionBar.actionInfoArray.count == 0 && actionInfoArray.count > 0) {
+        self.ysf_frameHeight += YSFActionBarHeight;
+    }
+    else if (_actionBar.actionInfoArray.count > 0 && actionInfoArray.count == 0) {
+        self.ysf_frameHeight -= YSFActionBarHeight;
+    }
+    _actionBar.actionInfoArray = actionInfoArray;
+    _actionBar.hidden = actionInfoArray.count == 0;
+    
+    [self willShowBottomHeight:_bottomHeight];
 }
 
 - (void)setInputActionDelegate:(id<YSFInputActionDelegate>)actionDelegate
@@ -327,8 +353,12 @@
 
 - (void)willShowBottomHeight:(CGFloat)bottomHeight
 {
+    self.bottomHeight = bottomHeight;
     CGRect fromFrame = self.frame;
     CGFloat toHeight = self.toolBar.frame.size.height + bottomHeight;
+    if (!_actionBar.hidden) {
+        toHeight += _actionBar.ysf_frameHeight;
+    }
     CGRect toFrame = CGRectMake(fromFrame.origin.x, fromFrame.origin.y + (fromFrame.size.height - toHeight), fromFrame.size.width, toHeight);
     
     if(bottomHeight == 0 && self.frame.size.height == self.toolBar.frame.size.height)
@@ -502,7 +532,9 @@
     if (_inputType != InputTypeEmot) {
         if (!_emoticonContainer) {
             _emoticonContainer = [[YSFInputEmoticonContainerView alloc] initWithFrame:CGRectMake(0, _inputTextViewOlderHeight, self.ysf_frameWidth, YSFBottomInputViewHeight)];
-            
+            if (!_actionBar.hidden) {
+                _emoticonContainer.ysf_frameTop += YSFActionBarHeight;
+            }
             _emoticonContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth;
             _emoticonContainer.delegate = self;
             _emoticonContainer.hidden = YES;
@@ -721,6 +753,19 @@
     if (!humanOrMachine) {
         [self changeInputTypeToText];
     }
+}
+
+- (void)layoutSubviews
+{
+    _actionBar.ysf_frameTop = 0;
+    _actionBar.ysf_frameWidth = self.ysf_frameWidth;
+    if (_actionBar.hidden == NO) {
+        _toolBar.ysf_frameTop = _actionBar.ysf_frameHeight;
+    }
+    else {
+        _toolBar.ysf_frameTop = 0;
+    }
+    _toolBar.ysf_frameWidth = self.ysf_frameWidth;
 }
 
 @end

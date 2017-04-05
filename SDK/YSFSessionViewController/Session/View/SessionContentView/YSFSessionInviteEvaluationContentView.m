@@ -8,7 +8,7 @@
 
 
 
-@interface YSFSessionInviteEvaluationContentView()<YSFAttributedLabelDelegate>
+@interface YSFSessionInviteEvaluationContentView()
 
 @property (nonatomic, strong) YSFAttributedLabel *textLabel;
 @property (nonatomic, strong) UIButton *evaluationButton;
@@ -32,7 +32,6 @@
         _panel.layer.borderWidth = 1;
         _panel.layer.borderColor = YSFColorFromRGB(0xdadada).CGColor;
         _textLabel = [[YSFAttributedLabel alloc] initWithFrame:CGRectZero];
-        _textLabel.delegate = self;
         _textLabel.numberOfLines = 0;
         _textLabel.lineBreakMode = NSLineBreakByWordWrapping;
         _textLabel.font = [UIFont systemFontOfSize:14.f];

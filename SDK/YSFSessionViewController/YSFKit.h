@@ -28,6 +28,8 @@
  */
 @property (nonatomic,copy)   NSString *avatarUrlString;
 
+@property (nonatomic,assign)   NSInteger vipLevel;
+
 /**
  *  头像图片
  */

@@ -1,9 +1,9 @@
 //
 //  QYCommodityInfo.h
-//  YSFSDK
+//  QYSDK
 //
 //  Created by JackyYu on 16/5/26.
-//  Copyright © 2016年 Netease. All rights reserved.
+//  Copyright (c) 2017 Netease. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

@@ -2,10 +2,10 @@
 //  QYSDK.h
 //  QYSDK
 //
-//  version 3.3.1
+//  version 3.5.0
 //
 //  Created by towik on 12/21/15.
-//  Copyright (c) 2016 Netease. All rights reserved.
+//  Copyright (c) 2017 Netease. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -20,6 +20,11 @@ typedef void(^QYCompletionBlock)();
  *  推送消息回调
  */
 typedef void(^QYPushMessageBlock)(QYPushMessage *);
+
+/**
+ *  清理文件缓存回调
+ */
+typedef void(^QYCleanResourceCacheCompleteBlock)(NSError *error);
 
 /**
  *  所有SDK接口都从此类获得
@@ -69,7 +74,6 @@ typedef void(^QYPushMessageBlock)(QYPushMessage *);
  */
 - (QYConversationManager *)conversationManager;
 
-
 /**
  *  更新推送token
  *
@@ -91,6 +95,13 @@ typedef void(^QYPushMessageBlock)(QYPushMessage *);
  */
 - (void)setUserInfo:(QYUserInfo *)userInfo;
 
+
+/**
+ *  设置authToken
+ *
+ */
+- (void)setAuthToken:(NSString *)authToken;
+
 /**
  *  获取推送消息
  *
@@ -101,7 +112,7 @@ typedef void(^QYPushMessageBlock)(QYPushMessage *);
 /**
  *  注册推送消息通知回调
  *
- *  @param messageId 消息id
+ *  @param block 收到消息的回调
  */
 - (void)registerPushMessageNotification:(QYPushMessageBlock)block;
 
@@ -119,6 +130,19 @@ typedef void(^QYPushMessageBlock)(QYPushMessage *);
  *  @param attributes 附加信息
  */
 - (void)trackHistory:(NSString *)urlString withAttributes:(NSDictionary *)attributes;
+
+/**
+ 清理接收文件缓存
+ @param completeBlock 清理缓存完成block
+ */
+- (void)cleanResourceCacheWithBlock:(QYCleanResourceCacheCompleteBlock)completeBlock;
+
+/**
+ 获取七鱼的日志文件路径
+ *
+ *  @return 日志文件路径
+ */
+- (NSString *)qiyuLogPath;
 
 
 #pragma mark - Deprecated

@@ -14,6 +14,9 @@
 #import "YSFApiDefines.h"
 #import "YSFKFBypassNotification.h"
 #import "YSFSessionStatusResponse.h"
+#import "YSFUploadLog.h"
+#import "YSFServerSetting.h"
+#import "YSFQueryOrderListResponse.h"
 
 
 @implementation YSFCustomSystemNotificationParser
@@ -41,10 +44,30 @@
                 case YSFCommandSessionStatusResponse:
                     result = [YSFSessionStatusResponse dataByJson:dict];
                     break;
-                default:
-                    NSAssert(0, @"command not supported %zd",cmd);
-                    NIMLogErr(@"command not supported %zd",cmd);
+                case YSFCommandQueryOrdersResponse:
+                    result = [YSFQueryOrderListResponse dataByJson:dict];
                     break;
+                case YSFCommandUploadLog:
+                {
+                    YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
+                    uploadLog.apiAddress = [[YSFServerSetting sharedInstance] apiAddress];
+                    uploadLog.version = @"sdk_3.5.0";
+                    uploadLog.type = @"invite";
+                    uploadLog.message = YSF_GetMessage(1000000);
+                    uploadLog.time = [[NSDate date] timeIntervalSince1970] * 1000;
+                    [YSFHttpApi post:uploadLog
+                          completion:^(NSError *error, id returendObject) {
+                              
+                          }];
+                    
+                }
+                    break;
+                    
+                default:
+                    assert(false);
+                    YSFLogErr(@"command not supported %zd",cmd);
+                    break;
+                    
             }
         }
     }

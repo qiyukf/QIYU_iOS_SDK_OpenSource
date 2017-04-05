@@ -27,12 +27,14 @@
                                        YSFApiKeyFromType    :   YSFApiValueIOS,
                                        YSFApiKeyFromSubType :   [[UIDevice currentDevice] systemVersion],
                                        YSFApiKeyStaffType   :   @(intOnlyManual),
-                                       YSFApiKeyVersion     :   @"13",
+                                       YSFApiKeyVersion     :   @"27",
                                        YSFApiKeyStaffId     :   @(_staffId),
                                        YSFApiKeyGroupId     :   @(_groupId),
                                        YSFApiKeyEntryId     :   @(_entryId),
                                        YSFApiKeyRobotShuntSwitch : @(intOpenRobotInShuntMode),
                                        YSFApiKeyCommonQuestionTemplateId  :  @(_commonQuestionTemplateId),
+                                       YSFApiKeyLevel  :  @(_vipLevel),
+                                       YSFApiKeyAuthToken  :  YSFStrParam(_authToken),
                                        }];
     
     //附带信息

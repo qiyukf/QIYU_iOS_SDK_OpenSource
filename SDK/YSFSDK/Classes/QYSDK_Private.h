@@ -23,11 +23,12 @@
 
 @property (nonatomic,strong)    YSFPathManager      *pathManager;
 
-@property (nonatomic,strong)    YSFServerSetting    *serverSetting;
-
 @property (nonatomic,strong)    YSFConversationManager  *sdkConversationManager;
 
 @property (nonatomic,copy)    QYPushMessageBlock   pushMessageBlock;
+
+@property (nonatomic,copy)    NSString   *authToken;
+
 
 - (NSString *)deviceId;
 

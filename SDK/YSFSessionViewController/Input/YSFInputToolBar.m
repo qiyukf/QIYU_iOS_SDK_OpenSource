@@ -95,7 +95,7 @@
     
     //左边话筒按钮
     self.voiceBtn.ysf_frameLeft        = leftSpacing - 7;
-    self.voiceBtn.ysf_frameBottom     = self.ysf_frameBottom - 2;
+    self.voiceBtn.ysf_frameBottom     = self.ysf_frameHeight - 2;
     
     if (_humanOrMachine) {
         //中间输入框按钮
@@ -138,10 +138,10 @@
 
     //右边表情按钮
     self.emoticonBtn.ysf_frameLeft     = self.recordButton.ysf_frameRight + leftSpacing - 7;
-    self.emoticonBtn.ysf_frameBottom     = self.ysf_frameBottom - 2;
+    self.emoticonBtn.ysf_frameBottom     = self.ysf_frameHeight - 2;
     
     self.imageButton.ysf_frameRight      = self.ysf_frameWidth - leftSpacing + 7;
-    self.imageButton.ysf_frameBottom     = self.ysf_frameBottom - 2;
+    self.imageButton.ysf_frameBottom     = self.ysf_frameHeight - 2;
     
     //底部分割线
     _topSep.ysf_frameSize        = CGSizeMake(self.ysf_frameWidth, sepHeight);

@@ -59,5 +59,10 @@
  */
 @property (nonatomic, assign, readonly) long long fileLength;
 
+/**
+ *  失效时间
+ */
+@property (nonatomic,assign, readonly) NSTimeInterval expire;
+
 
 @end

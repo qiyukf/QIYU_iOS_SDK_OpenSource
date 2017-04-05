@@ -30,7 +30,7 @@ static NSInteger YSFMaxRetryDelay = 64;
 - (void)tryToLogin:(YSFAccountInfo *)info
 {
     self.appInfo = info;
-    NIMLogApp(@"try to login using %@ ",info.accid);
+    YSFLogApp(@"try to login using %@ ",info.accid);
     NSString *account   = info.accid;
     NSString *token     = info.token;
     
@@ -82,7 +82,7 @@ static NSInteger YSFMaxRetryDelay = 64;
         {
             _retryDelay = 1;
         }
-        NIMLogApp(@"retry login after %zd seconds",_retryDelay);
+        YSFLogApp(@"retry login after %zd seconds",_retryDelay);
 
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_retryDelay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{

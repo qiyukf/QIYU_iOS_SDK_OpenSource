@@ -10,6 +10,5 @@
 
 @interface YSFSessionFileTransContentView : YSFSessionMessageContentView
 
-@property (nonatomic,strong,readonly) UIImageView * imageView;
 
 @end

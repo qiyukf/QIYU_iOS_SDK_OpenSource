@@ -10,4 +10,11 @@
 
 @interface NSData (YSF)
 - (NSString *)ysf_md5;
+
+- (NSData *)ysf_gzippedData;
+
+- (NSData *)ysf_gunzippedData;
+
+- (NSData *)ysf_gzippedDataWithCompressLevel:(float)level;
+
 @end

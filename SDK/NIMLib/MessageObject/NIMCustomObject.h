@@ -44,7 +44,7 @@
  *  自定义消息对象附件协议
  */
 @protocol YSF_NIMCustomAttachment <NSObject>
-@required
+@optional
 
 /**
  *  序列化attachment
@@ -53,7 +53,7 @@
  */
 - (NSDictionary *)encodeAttachment;
 
-@optional
+
 #pragma mark - 上传相关接口
 /**
  *  是否需要上传附件

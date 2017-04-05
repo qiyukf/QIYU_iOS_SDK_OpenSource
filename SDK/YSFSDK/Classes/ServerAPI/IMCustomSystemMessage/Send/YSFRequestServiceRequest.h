@@ -19,5 +19,7 @@
 @property (nonatomic,assign)        long long   entryId;
 @property (nonatomic,assign)        long long commonQuestionTemplateId;
 @property (nonatomic,assign)        BOOL   openRobotInShuntMode;
+@property (nonatomic,assign)        NSInteger   vipLevel;
+@property (nonatomic,copy)          NSString *authToken;
 
 @end

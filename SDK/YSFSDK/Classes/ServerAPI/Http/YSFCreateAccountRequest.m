@@ -16,7 +16,7 @@
 
 - (NSString *)apiPath
 {
-    NSString *apiAddress = [[[QYSDK sharedSDK] serverSetting] apiAddress];
+    NSString *apiAddress = [[YSFServerSetting sharedInstance] apiAddress];
     NSString *urlString = [apiAddress ysf_StringByAppendingApiPath:@"/webapi/user/create.action"];
     return urlString;
 }
@@ -57,7 +57,7 @@
                                 userInfo:nil];
     }
     
-    NIMLogApp(@"YSFCreateAccountRequest result: %@",parseError);
+    YSFLogApp(@"YSFCreateAccountRequest result: %@",parseError);
     
     if (error) {
         *error = parseError;

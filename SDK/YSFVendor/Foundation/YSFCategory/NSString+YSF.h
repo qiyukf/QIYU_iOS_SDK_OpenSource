@@ -34,4 +34,18 @@
 
 - (NSString *)ysf_https;
 
+
+- (NSString *)ysf_stringByAppendExt:(NSString *)ext;
+
+
+//判断是否为纯整形
+- (BOOL)ysf_isPureInteger;
+
+//判断是否为浮点形：
+- (BOOL)ysf_isPureFloat;
+
+- (NSString *)ysf_urlEncodeString;
+
+- (NSString *)ysf_urlDecodeString;
+
 @end

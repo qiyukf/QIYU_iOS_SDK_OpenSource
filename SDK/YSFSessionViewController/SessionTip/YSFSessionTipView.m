@@ -85,7 +85,7 @@
     }
     
     _type = YSFSessionTipServicewaiting;
-    NSString * tip_str = [NSString stringWithFormat:@"正在排队，您的前面还有%ld个人，请稍等...", waitingNumber];
+    NSString * tip_str = [NSString stringWithFormat:@"正在排队，您的前面还有%ld个人，请稍等...", (long)waitingNumber];
     [_tipLabel setText:tip_str];
     [self setHidden:NO];
     [[self ysf_viewController].view setNeedsLayout];

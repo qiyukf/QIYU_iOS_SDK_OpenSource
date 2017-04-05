@@ -145,7 +145,7 @@ YSFServiceRequestDelegate>
     }
     if (result)
     {
-        NIMLogApp(@"@%: out of date", shopId);
+        YSFLogApp(@"@%: out of date", shopId);
     }
     return result;
 }
@@ -157,7 +157,7 @@ YSFServiceRequestDelegate>
                                || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist)) {
         waitingOrNotExist = true;
     }
-    NIMLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
+    YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
     if ([self serviceOutOfDate:shopId] && (isInit || !waitingOrNotExist)) {
         return true;
     }
@@ -171,7 +171,7 @@ YSFServiceRequestDelegate>
 {
     if ([_requestManager isInRequest:shopId])
     {
-        NIMLogWar(@"@%: in request service process", shopId);
+        YSFLogWar(@"@%: in request service process", shopId);
         return;
     }
     
@@ -387,7 +387,7 @@ YSFServiceRequestDelegate>
 - (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification
 {
     NSString *content = notification.content;
-    NIMLogApp(@"notification: %@",content);
+    YSFLogApp(@"notification: %@",content);
     
     //平台电商时sender就等于shopId，目前服务器这样处理
     NSString *shopId = notification.sender;

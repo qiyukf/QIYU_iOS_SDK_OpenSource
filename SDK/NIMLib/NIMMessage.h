@@ -87,6 +87,8 @@ typedef NS_ENUM(NSInteger, YSF_NIMMessageStatus) {
 
 @property (nonatomic, assign) YSF_NIMMessageSubStatus  subStatus;
 
+@property (nonatomic, copy) NSString *rawAttachContent;
+
 /**
  *  消息类型
  */

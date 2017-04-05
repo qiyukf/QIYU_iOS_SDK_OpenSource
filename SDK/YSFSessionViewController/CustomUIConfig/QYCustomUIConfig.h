@@ -7,7 +7,7 @@
 //
 
 /**
- *  提供了所有自定义UI的接口；如果想要替换图片素材，可以在QYCustomResource.bundle中放置跟QYResource.bundle中同名的图片素材，即可对应替换
+ *  自定义UI配置类；如果想要替换图片素材，可以在QYCustomResource.bundle中放置跟QYResource.bundle中同名的图片素材，即可对应替换
  */
 @interface QYCustomUIConfig : NSObject
 
@@ -29,6 +29,11 @@
  *  会话窗口上方提示条中的文本字体大小
  */
 @property (nonatomic, assign) CGFloat sessionTipTextFontSize;
+
+/**
+ *  会话窗口上方提示条中的背景颜色
+ */
+@property (nonatomic, strong) UIColor *sessionTipBackgroundColor;
 
 /**
  *  访客文本消息字体颜色
@@ -61,12 +66,12 @@
 @property (nonatomic, assign) CGFloat serviceMessageTextFontSize;
 
 /**
- *  提示文本消息字体颜色
+ *  提示文本消息字体颜色；提示文本消息有很多种，比如“***为你服务”就是一种
  */
 @property (nonatomic, strong) UIColor *tipMessageTextColor;
 
 /**
- *  提示文本消息字体大小
+ *  提示文本消息字体大小；提示文本消息有很多种，比如“***为你服务”就是一种
  */
 @property (nonatomic, assign) CGFloat tipMessageTextFontSize;
 
@@ -86,11 +91,6 @@
 @property (nonatomic, strong) UIImageView *sessionBackground;
 
 /**
- *  会话窗口上方提示条中的背景颜色
- */
-@property (nonatomic, strong) UIColor *sessionTipBackgroundColor;
-
-/**
  *  访客头像
  */
 @property (nonatomic, strong) UIImage *customerHeadImage;
@@ -108,14 +108,14 @@
 @property (nonatomic, strong) UIImage *customerMessageBubbleNormalImage;
 
 /**
- *  客服消息气泡normal图片
- */
-@property (nonatomic, strong) UIImage *serviceMessageBubbleNormalImage;
-
-/**
  *  访客消息气泡pressed图片
  */
 @property (nonatomic, strong) UIImage *customerMessageBubblePressedImage;
+
+/**
+ *  客服消息气泡normal图片
+ */
+@property (nonatomic, strong) UIImage *serviceMessageBubbleNormalImage;
 
 /**
  *  客服消息气泡pressed图片

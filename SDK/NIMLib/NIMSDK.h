@@ -144,4 +144,11 @@
 
 @property (nonatomic,strong)    YSF_NIMServerSetting    *setting;
 
+/**
+ 接收文件目录（所有接收的文件放在统一个目录下）
+
+ @return 接受目录路径
+ */
+- (NSString *)sdkRecvFilesPath;
+
 @end

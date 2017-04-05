@@ -32,7 +32,8 @@ typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
             nimSetting.lbsAddress                  = [dict objectForKey:@"nim_lbs"];
             nimSetting.linkAddress                 = [dict objectForKey:@"nim_link"];
             nimSetting.rsaPublicKeyModule          = [dict objectForKey:@"nim_module"];
-        }else if ([isTest integerValue] == YSFUseServerSettingPre)
+        }
+        else if ([isTest integerValue] == YSFUseServerSettingPre)
         {
             //预上线和线上服配置一样
 //            nimSetting.lbsAddress                  = @"http://lbs.netease.im/lbs/conf.jsp";
@@ -42,16 +43,15 @@ typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
         [[YSF_NIMSDK sharedSDK] setSetting:nimSetting];
         
         //云商服
-        YSFServerSetting *ysfSetting = [[YSFServerSetting alloc] init];
         if ([isTest integerValue] == YSFUseServerSettingTest
             || [isTest integerValue] == YSFUseServerSettingTest2)
         {
-            ysfSetting.apiAddress = [dict objectForKey:@"ysf_api"];
-        }else if ([isTest integerValue] == YSFUseServerSettingPre)
-        {
-            ysfSetting.apiAddress = @"http://ysf.date/";
+            [YSFServerSetting sharedInstance].apiAddress = [dict objectForKey:@"ysf_api"];
         }
-        [self setServerSetting:ysfSetting];
+        else if ([isTest integerValue] == YSFUseServerSettingPre)
+        {
+            [YSFServerSetting sharedInstance].apiAddress = @"http://ysf.date/";
+        }
     }
 }
 

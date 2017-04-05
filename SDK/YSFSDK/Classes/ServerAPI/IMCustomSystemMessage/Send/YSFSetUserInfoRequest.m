@@ -10,6 +10,7 @@
                                     YSFApiKeyCmd          :      @(YSFCommandSetUserInfoRequest),
                                     YSFApiKeyForeignid       :      YSFStrParam(_userInfo.userId),
                                     YSFApiKeyUserInfo     :      YSFStrParam(_userInfo.data),
+                                    YSFApiKeyAuthToken     :      YSFStrParam(_authToken),
                              };
     
     [infos setDictionary:params];

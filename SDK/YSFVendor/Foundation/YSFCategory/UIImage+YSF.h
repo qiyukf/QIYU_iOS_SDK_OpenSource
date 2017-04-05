@@ -18,4 +18,11 @@
                               maxSize:(CGSize)imageMaxSiz;
 
 
+
+- (BOOL)ysf_saveToFilepathWithPng:(NSString*)filepath;
+
+- (BOOL)ysf_saveToFilepathWithJpeg:(NSString *)filepath;
+
+- (UIImage *)ysf_externalScaleSize: (CGSize)scaledSize;
+
 @end

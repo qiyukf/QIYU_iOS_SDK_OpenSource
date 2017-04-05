@@ -22,7 +22,7 @@
     NSDictionary *dict = [api toDict];
     YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
 
-    NIMLogApp(@"YSFIMApi request %@ for %@",dict,session);
+    YSFLogApp(@"YSFIMApi request %@ for %@",dict,session);
     
     
     NSString *content = nil;
@@ -53,7 +53,7 @@
                                                                      toSession:session
                                                                     completion:^(NSError *error) {
                                                                         if (error) {
-                                                                            NIMLogApp(@"YSFIMApi request failed: %@",error);
+                                                                            YSFLogApp(@"YSFIMApi request failed: %@",error);
                                                                         }
                                                                         if (block) {
                                                                             block(error);

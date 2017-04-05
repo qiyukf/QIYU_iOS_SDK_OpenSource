@@ -34,7 +34,7 @@
     }
     else
     {
-        NIMLogErr(@"invalid app info");
+        YSFLogErr(@"invalid app info");
     }
     return dict;
 }

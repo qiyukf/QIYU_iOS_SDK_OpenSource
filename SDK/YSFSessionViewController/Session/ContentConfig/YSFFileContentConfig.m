@@ -11,7 +11,7 @@
 @implementation YSFFileContentConfig
 - (CGSize)contentSize:(CGFloat)cellWidth
 {
-    return CGSizeMake(220, 110);
+    return CGSizeMake(225, 85);
 }
 
 - (NSString *)cellContent
@@ -22,6 +22,6 @@
 
 - (UIEdgeInsets)contentViewInsets
 {
-    return self.message.isOutgoingMsg ? UIEdgeInsetsMake(3,3,3,8) : UIEdgeInsetsMake(3,8,3,3);
+    return self.message.isOutgoingMsg ? UIEdgeInsetsMake(0, 0, 0, 0) : UIEdgeInsetsMake(0, 0, 0, 0);
 }
 @end

@@ -16,9 +16,29 @@
     return 0;
 }
 
+- (void)clearUnreadCount
+{
+    
+}
+
+- (void)clearUnreadCount:(NSString *)shopId
+{
+    
+}
+
 - (void)setDelegate:(id<QYConversationManagerDelegate>)delegate
 {
     
+}
+
+- (QYMessageInfo *)getLastMessage
+{
+    return nil;
+}
+
+- (NSArray<QYSessionInfo*> *)getSessionList
+{
+    return nil;
 }
 
 @end

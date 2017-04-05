@@ -9,6 +9,7 @@
 
 @class YSFShopInfo;
 
+
 @interface YSFServiceSession : NSObject
 
 @property (nonatomic,copy)      NSString        *serviceId;
@@ -25,7 +26,9 @@
 @property (nonatomic,assign)    BOOL            operatorEable;
 @property (nonatomic,copy)      NSString        *notExistTip;
 @property (nonatomic,strong)    NSDictionary    *evaluation;
-@property (nonatomic,strong)    YSFShopInfo    *shopInfo;           //平台电商的商铺信息
+@property (nonatomic,copy)      NSArray         *actionInfoArray;
+@property (nonatomic,strong)    YSFShopInfo     *shopInfo;           //平台电商的商铺信息
+
 
 - (BOOL)canOfferService;
 

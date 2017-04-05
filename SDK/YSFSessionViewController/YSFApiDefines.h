@@ -102,12 +102,62 @@
 #define     YSFApiKeyResult             @"result"
 #define     YSFApiKeyShop               @"shop"
 #define     YSFApiKeySessionStatus      @"sessionStatus"
+#define     YSFApiKeyTerminal           @"terminal"
+#define     YSFApiKeyVersion            @"version"
+#define     YSFApiKeyPlatform           @"platform"
+#define     YSFApiKeyChannel            @"channel"
+#define     YSFApiKeyType               @"type"
+#define     YSFApiKeyIdentity           @"identity"
+#define     YSFApiKeyAppkey             @"appkey"
+#define     YSFApiKeyClientId           @"clientid"
+#define     YSFApiKeyLevel              @"level"
+#define     YSFApiKeyAuthToken          @"authToken"
+#define     YSFApiKeyMessage            @"message"
+#define     YSFApiKeyAttachment         @"attachment"
+#define     YSFApiKeyExtra              @"extra"
+#define     YSFApiKeyTimestamp          @"timestamp"
+#define     YSFApiKeySign               @"sign"
+#define     YSFApiKeyVer                @"ver"
+#define     YSFApiKeyBot                @"bot"
+#define     YSFApiKeyAction             @"action"
+#define     YSFApiKeyLabel              @"label"
+#define     YSFApiKeyUrl                @"url"
+#define     YSFApiKeyLogistic           @"logistic"
+#define     YSFApiKeyPName              @"p_name"
+#define     YSFApiKeyStyle              @"style"
+#define     YSFApiKeyParams             @"params"
+#define     YSFApiKeyTarget             @"target"
+#define     YSFApiKeySStatus            @"s_status"
+#define     YSFApiKeySName              @"s_name"
+#define     YSFApiKeyGoods              @"goods"
+#define     YSFApiKeyPStatus            @"p_status"
+#define     YSFApiKeyPImg               @"p_img"
+#define     YSFApiKeyPStock             @"p_stock"
+#define     YSFApiKeyPPrice             @"p_price"
+#define     YSFApiKeyPCount             @"p_count"
+#define     YSFApiKeyData               @"data"
+#define     YSFApiKeyState              @"state"
+#define     YSFApiKeyImg                @"img"
+#define     YSFApiKeyActionCnt          @"action_cnt"
+#define     YSFApiKeyActionUrl          @"action_url"
+#define     YSFApiKeyValidOperation     @"valid_operation"
+#define     YSFApiKeyStyle              @"style"
+#define     YSFApiKeyType               @"type"
+#define     YSFApiKeyTarget             @"target"
+#define     YSFApiKeyTemplate           @"template"
+#define     YSFApiKeyUserName           @"user_name"
+#define     YSFApiKeyAddress            @"address"
+#define     YSFApiKeyOrderNo            @"orderNo"
+#define     YSFApiKeyDate               @"date"
 
 
 
 #define     YSFApiValueIOS              @"iOS"
 
 typedef enum : NSUInteger {
+    //公用
+    YSFCommandUploadLog    =   163,      //服务端请求上传日志
+
     //访客端
     YSFCommandRequestServiceRequest     =   1,      //请求客服
     YSFCommandRequestServiceResponse    =   2,      //请求客服回包
@@ -125,8 +175,12 @@ typedef enum : NSUInteger {
     YSFCommandSetCommodityInfoRequest   =   121,    //商品信息
     YSFCommandPushMessageRequest        =   133,    //获取推送消息
     YSFCommandPushMessageStatusChangeRequest =   135,    //推送消息状态变更
-    YSFCommandSessionStatusRequest =   501,    //请求会话状态
-    YSFCommandSessionStatusResponse =   502,    //请求会话状态返回
+    YSFCommandSessionStatusRequest      =   501,    //请求会话状态
+    YSFCommandSessionStatusResponse     =   502,    //请求会话状态返回
+    YSFCommandBot                       = 203,      //bot
+    YSFCommandBotSelection              = 202,      //bot
+    YSFCommandQueryOrdersRequest        = 204,      //bot
+    YSFCommandQueryOrdersResponse       = 205,      //bot
 
 
     //客服端
@@ -146,6 +200,7 @@ typedef enum : NSUInteger {
     YSFCommandSessionClosedBySysterm    =   71,     //系统自动关闭会话
     YSFCommandAudioToText               =   136,    //推送语音转文字结果
     YSFCommandOfflineTimeout            =   32,    //离线时间超时
+    YSFCommandNewWorkOrder              =   115,    //有新的工单分配过来
     
 
     //本地自定义消息

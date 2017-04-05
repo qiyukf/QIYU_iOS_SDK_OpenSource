@@ -4,5 +4,6 @@
 @interface YSFSetInfoRequest : NSObject<YSFIMCustomSystemMessageApiProtocol>
 
 @property (nonatomic,strong)    QYUserInfo    *userInfo;
+@property (nonatomic,copy)      NSString    *authToken;
 
 @end

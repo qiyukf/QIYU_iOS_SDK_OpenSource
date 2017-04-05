@@ -18,7 +18,7 @@
 
 - (NSString *)apiPath
 {
-    NSString *apiAddress = [[[QYSDK sharedSDK] serverSetting] apiAddress];
+    NSString *apiAddress = [[YSFServerSetting sharedInstance] apiAddress];
     NSString *urlString = [apiAddress ysf_StringByAppendingApiPath:@"/webapi/user/accesshistory.action"];
     return urlString;
 }

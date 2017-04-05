@@ -25,7 +25,24 @@
 #import "YSFCommodityInfoContentConfig.h"
 #import "YSFCommodityInfoShow.h"
 #import "YSFInviteEvaluationObject.h"
-
+#import "YSFOrderList.h"
+#import "YSFOrderListContentConfig.h"
+#import "YSFBotText.h"
+#import "YSFSelectedGoods.h"
+#import "YSFSelectedGoodsContentConfig.h"
+#import "YSFOrderStatus.h"
+#import "YSFOrderStatusContentConfig.h"
+#import "YSFOrderLogistic.h"
+#import "YSFOrderLogisticContentConfig.h"
+#import "YSFOrderOperation.h"
+#import "YSFOrderDetail.h"
+#import "YSFOrderDetailContentConfig.h"
+#import "YSFRefundDetail.h"
+#import "YSFRefundDetailContentConfig.h"
+#import "YSFActionList.h"
+#import "YSFActionListContentConfig.h"
+#import "YSFActivePage.h"
+#import "YSFActivePageContentConfig.h"
 
 
 @implementation YSFBaseSessionContentConfig
@@ -72,6 +89,38 @@
             if ([customObject.attachment isKindOfClass:[YSFMachineResponse class]]) {
                 config = [[YSFMachineContentConfig alloc] init];
             }
+            if ([customObject.attachment isKindOfClass:[YSFSelectedGoods class]]) {
+                config = [[YSFSelectedGoodsContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFOrderList class]]) {
+                config = [[YSFOrderListContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFOrderDetail class]]) {
+                config = [[YSFOrderDetailContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFOrderList class]]) {
+                config = [[YSFOrderListContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFOrderStatus class]]) {
+                config = [[YSFOrderStatusContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFRefundDetail class]]) {
+                config = [[YSFRefundDetailContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFOrderOperation class]]) {
+                YSFOrderOperation *orderOperation = (YSFOrderOperation *)customObject.attachment;
+                message.text = [orderOperation.template ysf_jsonString:@"label"];
+                config = [[YSFTextContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFOrderLogistic class]]) {
+                config = [[YSFOrderLogisticContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFActionList class]]) {
+                config = [[YSFActionListContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFActivePage class]]) {
+                config = [[YSFActivePageContentConfig alloc] init];
+            }
             else if ([customObject.attachment isKindOfClass:[YSFKFBypassNotification class]]) {
                 config = [[YSFKFBypassContentConfig alloc] init];
             }
@@ -84,6 +133,11 @@
             else if ([customObject.attachment isKindOfClass:[YSFWelcome class]]) {
                 YSFWelcome *welcome = (YSFWelcome *)customObject.attachment;
                 message.text = welcome.welcome;
+                config = [[YSFTextContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFBotText class]]) {
+                YSFBotText *botText = (YSFBotText *)customObject.attachment;
+                message.text = botText.text;
                 config = [[YSFTextContentConfig alloc] init];
             }
             else if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]) {

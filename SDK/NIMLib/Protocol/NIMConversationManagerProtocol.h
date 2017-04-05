@@ -238,6 +238,7 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  */
 - (NSArray*)allRecentSession;
 
+- (void)cleanRecentSession:(YSF_NIMSession *)session;
 
 /**
  *  从服务器上获取一个会话里某条消息之前的若干条的消息

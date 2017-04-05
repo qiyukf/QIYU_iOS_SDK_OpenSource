@@ -31,6 +31,14 @@ typedef void(^YSF_NIMHttpProgressBlock)(CGFloat progress);
  */
 typedef void(^YSF_NIMDownloadCompleteBlock)(NSError *error);
 
+/**
+ *  清理文件完成Block
+ *
+ *  @param error 错误信息,成功时为nil
+ */
+typedef void(^YSF_NIMCleanResourceCompleteBlock)(NSError *error);
+
+
 
 /**
  *  资源管理
@@ -68,6 +76,21 @@ typedef void(^YSF_NIMDownloadCompleteBlock)(NSError *error);
  *  @discussion 如果同一个文件同时上传或者下载(理论上不应该出现这种情况),ResourceManager会进行任务合并,基于这个原则cancel的操作对象是某个文件对应的所有的上传/下载任务
  */
 - (void)cancelTask:(NSString *)filepath;
+
+/**
+ 删除指定文件缓存
+
+ @param filePath 文件路径
+ @param completionBlock 删除文件完成Block
+ */
+- (void)deleteFileByPath:(NSString *)filePath completionBlock:(YSF_NIMCleanResourceCompleteBlock)completionBlock;
+
+/**
+ 清除缓存文件
+
+ @param completionBlock 清理缓存完成Block
+ */
+- (void)cleanResourceCacheWithBlock:(YSF_NIMCleanResourceCompleteBlock)completionBlock;
 
 /**
  *  将 http url 转换为 https url

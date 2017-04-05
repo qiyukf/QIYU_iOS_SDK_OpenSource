@@ -12,36 +12,36 @@
 @implementation YSFKitUtil
 
 + (NSString *)showNick:(NSString*)uid inSession:(YSF_NIMSession*)session{
-    
-    YSF_NIMSessionType sessionType = session.sessionType;
-    NSString *sessionId = session.sessionId;
-    
-    if (sessionType == YSF_NIMSessionTypeYSF)
-    {
-        if (uid && sessionId && [uid isEqualToString:sessionId])
-        {
-            return [[[YSFKit sharedKit] infoByService:uid] showName];
-        }
-        else
-        {
-            return [[[YSFKit sharedKit] infoByCustomer:uid] showName];
-        }
-    }
-    else
-    {
-        NSString *nickname = nil;
-        if (session.sessionType == YSF_NIMSessionTypeTeam)
-        {
-            YSF_NIMTeamMember *member = [[YSF_NIMSDK sharedSDK].teamManager teamMember:uid
-                                                                        inTeam:sessionId];
-            nickname = member.nickname;
-        }
-        if (!nickname.length) {
-            YSFSessionUserInfo *info = [[YSFKit sharedKit] infoByCustomer:uid];
-            nickname = info.showName;
-        }
-        return nickname;
-    }
+    return @"";
+//    YSF_NIMSessionType sessionType = session.sessionType;
+//    NSString *sessionId = session.sessionId;
+//    
+//    if (sessionType == YSF_NIMSessionTypeYSF)
+//    {
+//        if (uid && sessionId && [uid isEqualToString:sessionId])
+//        {
+//            return [[[YSFKit sharedKit] infoByService:uid] showName];
+//        }
+//        else
+//        {
+//            return [[[YSFKit sharedKit] infoByCustomer:uid] showName];
+//        }
+//    }
+//    else
+//    {
+//        NSString *nickname = nil;
+//        if (session.sessionType == YSF_NIMSessionTypeTeam)
+//        {
+//            YSF_NIMTeamMember *member = [[YSF_NIMSDK sharedSDK].teamManager teamMember:uid
+//                                                                        inTeam:sessionId];
+//            nickname = member.nickname;
+//        }
+//        if (!nickname.length) {
+//            YSFSessionUserInfo *info = [[YSFKit sharedKit] infoByCustomer:uid];
+//            nickname = info.showName;
+//        }
+//        return nickname;
+//    }
     
 }
 + (NSString*)showTime:(NSTimeInterval) msglastTime showDetail:(BOOL)showDetail
@@ -75,7 +75,7 @@
     }
     else if(nowDateComponents.year == msgDateComponents.year)//今年，MM/dd hh:mm
     {
-        NSString *weekDay = [YSFKitUtil weekdayStr:msgDateComponents.weekday];
+//        NSString *weekDay = [YSFKitUtil weekdayStr:msgDateComponents.weekday];
         result = [NSString stringWithFormat:@"%02d/%02d %zd:%02d",(int)msgDateComponents.month,(int)msgDateComponents.day,msgDateComponents.hour,(int)msgDateComponents.minute];
     }
     else if((nowDateComponents.year != msgDateComponents.year))//跨年， YY/MM/dd hh:mm

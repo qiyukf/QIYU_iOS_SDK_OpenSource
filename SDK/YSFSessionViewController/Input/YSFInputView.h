@@ -9,6 +9,7 @@
 #import "YSFInputTextView.h"
 #import "YSFInputProtocol.h"
 #import "YSFSessionConfig.h"
+#import "YSFActionBar.h"
 #import <UIKit/UIKit.h>
 
 
@@ -16,6 +17,7 @@
 @class YSFInputEmoticonContainerView;
 @class YSFInputToolBar;
 
+#define YSFActionBarHeight 41.0
 #define YSFTopInputViewHeight 50.0
 #define YSFTopInputViewMaxHeight 82
 #define YSFBottomInputViewHeight 216.0
@@ -54,6 +56,7 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 @property (assign, nonatomic, getter=isRecording) BOOL recording;
 
 @property (strong, nonatomic)  YSFInputToolBar *toolBar;
+@property (strong, nonatomic)  YSFActionBar *actionBar;
 @property (strong, nonatomic)  YSFInputEmoticonContainerView *emoticonContainer;
 @property (strong, nonatomic)  NSString *inputText;
 
@@ -67,6 +70,8 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 - (void)setInputDelegate:(id<YSFInputDelegate>)delegate;
 
 //外部设置
+- (void)setActionInfoArray:(NSArray *)actionInfoArray;
+
 - (void)setInputActionDelegate:(id<YSFInputActionDelegate>)actionDelegate;
 - (void)setInputConfig:(id<YSFSessionConfig>)config;
 

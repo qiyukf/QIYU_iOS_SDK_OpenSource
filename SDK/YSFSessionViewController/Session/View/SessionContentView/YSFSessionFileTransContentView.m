@@ -8,6 +8,8 @@
 
 #import "YSFSessionFileTransContentView.h"
 #import "YSFMessageModel.h"
+#import "UIImage+FileTransfer.h"
+#import "NSString+FileTransfer.h"
 
 
 @interface YSFSessionFileTransContentView()
@@ -18,113 +20,141 @@
 
 @property (nonatomic,strong) UILabel *sizeLabel;
 
-@property (nonatomic,strong) UIProgressView *progressView;
+@property (nonatomic,strong) UILabel *downloadStatusLabel;
 
-@property (nonatomic,strong) UIView *bkgView;
+@property (nonatomic,strong) UIImageView *fileIconView;
+
+@property (nonatomic, assign) BOOL canTapContent;
 
 @end
 
 @implementation YSFSessionFileTransContentView
 
-- (instancetype)initSessionMessageContentView{
+- (instancetype)initSessionMessageContentView
+{
     self = [super initSessionMessageContentView];
     if (self) {
-        self.opaque              = YES;
-        _bkgView                 = [[UIView alloc]initWithFrame:CGRectZero];
-        _bkgView.userInteractionEnabled = NO;
-        _bkgView.backgroundColor = [UIColor whiteColor];
-        [self addSubview:_bkgView];
-        _imageView               = [[UIImageView alloc] initWithFrame:CGRectZero];
-        UIImage * image          = [UIImage ysf_imageInKit:@"icon_file"];
-        _imageView.image         = image;
-        [_imageView sizeToFit];
-        [self addSubview:_imageView];
-        _titleLabel               = [[UILabel alloc] initWithFrame:CGRectZero];
-        _titleLabel.font          = [UIFont systemFontOfSize:15.f];
-        _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
-        [self addSubview:_titleLabel];
-        _sizeLabel           = [[UILabel alloc] initWithFrame:CGRectZero];
-        _sizeLabel.font      = [UIFont systemFontOfSize:13.f];
-        _sizeLabel.textColor = [UIColor lightGrayColor];
-        [self addSubview:_sizeLabel];
-        _progressView = [[UIProgressView alloc]initWithProgressViewStyle:UIProgressViewStyleDefault];
-        _progressView.progress = 0.0f;
-        [self addSubview:_progressView];
+        [self initUI];
     }
     return self;
 }
 
-- (void)refresh:(YSFMessageModel *)data{
-    [super refresh:data];
-    YSF_NIMFileObject *fileObject = (YSF_NIMFileObject *)self.model.message.messageObject;
-    self.titleLabel.text = fileObject.displayName;
-    [self.titleLabel sizeToFit];
-    self.sizeLabel.text = [NSString stringWithFormat:@"%zdKB",fileObject.fileLength/1024];
-    [self.sizeLabel sizeToFit];
-    if (self.model.message.deliveryState == YSF_NIMMessageDeliveryStateDelivering) {
-        self.progressView.hidden   = NO;
-        self.progressView.progress = [[YSF_NIMSDK sharedSDK].chatManager messageTransportProgress:self.model.message];
-    }else{
-        self.progressView.hidden = YES;
-    }
+- (void)initUI
+{
+    self.canTapContent = YES;
+    
+    self.titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    _titleLabel.numberOfLines = 2;
+    _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+    _titleLabel.font = [UIFont systemFontOfSize:16.0f];
+    _titleLabel.textAlignment = NSTextAlignmentLeft;
+    _titleLabel.textColor = YSFRGB(0x222222);
+    [_titleLabel sizeToFit];
+    [self addSubview:_titleLabel];
+    
+    self.sizeLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    _sizeLabel.numberOfLines = 1;
+    _sizeLabel.font = [UIFont systemFontOfSize:12.f];
+    _sizeLabel.textAlignment = NSTextAlignmentLeft;
+    _sizeLabel.textColor = YSFRGB(0x999999);
+    [_sizeLabel sizeToFit];
+    [self addSubview:_sizeLabel];
+    
+    self.downloadStatusLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    _downloadStatusLabel.numberOfLines = 1;
+    _downloadStatusLabel.font = [UIFont systemFontOfSize:11.f];
+    _downloadStatusLabel.textAlignment = NSTextAlignmentLeft;
+    _downloadStatusLabel.textColor = YSFRGB(0x999999);
+    [_downloadStatusLabel sizeToFit];
+    [self addSubview:_downloadStatusLabel];
+    
+    self.fileIconView = [[UIImageView alloc] initWithFrame:CGRectZero];
+    _fileIconView.layer.cornerRadius = 3.f;
+    _fileIconView.contentMode = UIViewContentModeScaleAspectFill;
+    _fileIconView.clipsToBounds = YES;
+    [self addSubview:_fileIconView];
 }
 
-
+- (void)refresh:(YSFMessageModel *)data{
+    [super refresh:data];
+    YSF_NIMFileObject *fileObject = (YSF_NIMFileObject *)data.message.messageObject;
+    _titleLabel.text = fileObject.displayName;
+    [_titleLabel sizeToFit];
+    _sizeLabel.text = [NSString getFileSizeTextWithFileLength:fileObject.fileLength];
+    [_sizeLabel sizeToFit];
+    NSTimeInterval todayMilliSecond = [[NSDate date] timeIntervalSince1970] * 1000;     //服务器端返回毫秒
+    if (fileObject.expire < todayMilliSecond) {
+        if ([[NSFileManager defaultManager] fileExistsAtPath:fileObject.path]) {
+            _downloadStatusLabel.text = @"已下载";
+            _canTapContent = YES;
+        } else {
+            _downloadStatusLabel.text = @"已失效";
+            _canTapContent = NO;
+        }
+    } else {
+        _downloadStatusLabel.text = [[NSFileManager defaultManager] fileExistsAtPath:fileObject.path] ? @"已下载" : @"未下载";
+        _canTapContent = YES;
+    }
+    [_downloadStatusLabel sizeToFit];
+    
+    _fileIconView.image = [UIImage getFileIconWithDefaultIcon:[UIImage ysf_imageInKit:@"icon_file_type_other"] fileName:fileObject.displayName];
+}
 
 - (void)layoutSubviews{
     [super layoutSubviews];
-    UIEdgeInsets contentInsets = self.model.contentViewInsets;
-    CGSize size = self.model.contentSize;
-    CGRect bkgViewFrame = CGRectMake(contentInsets.left, contentInsets.top, size.width, size.height);
-    self.bkgView.frame = bkgViewFrame;
-
-    CGFloat fileTransMessageIconLeft        = 15.f;
-    CGFloat fileTransMessageSizeTitleRight  = 15.f;
-    CGFloat fileTransMessageTitleLeft       = 90.f;
-    CGFloat fileTransMessageTitleTop        = 25.f;
-    CGFloat fileTransMessageSizeTitleBottom = 15.f;
-    CGFloat fileTransMessageProgressTop     = 75.f;
-    CGFloat fileTransMessageProgressLeft    = 90.f;
-    CGFloat fileTransMessageProgressRight   = 20.f;
-
-    self.imageView.ysf_frameLeft          = fileTransMessageIconLeft;
-    self.imageView.ysf_frameCenterY       = self.ysf_frameHeight * .5f;
-
-    if (self.ysf_frameWidth < fileTransMessageIconLeft + self.titleLabel.ysf_frameWidth + fileTransMessageSizeTitleRight) {
-        self.titleLabel.ysf_frameWidth = self.ysf_frameWidth - fileTransMessageTitleLeft - fileTransMessageSizeTitleRight;
-    }
-    self.titleLabel.ysf_frameLeft     = fileTransMessageTitleLeft;
-    self.titleLabel.ysf_frameTop      = fileTransMessageTitleTop;
     
-    self.sizeLabel.ysf_frameRight     = self.ysf_frameWidth - fileTransMessageSizeTitleRight;
-    self.sizeLabel.ysf_frameBottom    = self.ysf_frameHeight - fileTransMessageSizeTitleBottom;
+    self.titleLabel.ysf_frameLeft = 15.f;
+    self.titleLabel.ysf_frameTop  = 12.f;
+    self.titleLabel.ysf_frameWidth = 125.f;
+    self.titleLabel.ysf_frameHeight = 45.f;
     
-    self.progressView.ysf_frameTop    = fileTransMessageProgressTop;
-    self.progressView.ysf_frameWidth  = self.ysf_frameWidth - fileTransMessageProgressLeft - fileTransMessageProgressRight;
-    self.progressView.ysf_frameLeft   = fileTransMessageProgressLeft;
+    self.sizeLabel.ysf_frameLeft = self.titleLabel.ysf_frameLeft;
+    self.sizeLabel.ysf_frameTop = self.titleLabel.ysf_frameBottom + 1;
+    self.sizeLabel.ysf_frameWidth = 56.f;
+    self.sizeLabel.ysf_frameHeight = 16.f;
     
-    CALayer *maskLayer = [CALayer layer];
-    maskLayer.cornerRadius = 13.0;
-    maskLayer.backgroundColor = [UIColor blackColor].CGColor;
-    maskLayer.frame = self.bkgView.bounds;
-    self.bkgView.layer.mask = maskLayer;
+    self.downloadStatusLabel.ysf_frameLeft = self.sizeLabel.ysf_frameRight + 35.f;
+    self.downloadStatusLabel.ysf_frameTop = self.titleLabel.ysf_frameBottom + 1;
+    self.downloadStatusLabel.ysf_frameWidth = 35.f;
+    self.downloadStatusLabel.ysf_frameHeight = 15.f;
+    
+    self.fileIconView.ysf_frameLeft = self.titleLabel.ysf_frameRight + 10;
+    self.fileIconView.ysf_frameTop = self.titleLabel.ysf_frameTop;
+    self.fileIconView.ysf_frameWidth = 60.f;
+    self.fileIconView.ysf_frameHeight = 61.f;
+    
 }
 
 
 - (void)onTouchUpInside:(id)sender
 {
+    if (!_canTapContent) return;
+    
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     event.eventName = YSFKitEventNameTapContent;
     event.message = self.model.message;
     [self.delegate onCatchEvent:event];
 }
 
-- (void)updateProgress:(float)progress
+#pragma mark - Private
+//override
+//文件需要显示白色底
+- (UIImage *)chatNormalBubbleImage
 {
-    if (progress > 1.0) {
-        progress = 1.0;
-    }
-    self.progressView.progress = progress;
+    UIImage *customerNormalImage = [[UIImage ysf_imageInKit:@"icon_sender_filetransfer_normal"] resizableImageWithCapInsets:UIEdgeInsetsMake(25, 10, 10, 10) resizingMode:UIImageResizingModeStretch];
+    UIImage *serviceNormalImage = [[UIImage ysf_imageInKit:@"icon_receiver_filetransfer_normal"] resizableImageWithCapInsets:UIEdgeInsetsMake(25, 10, 10, 10) resizingMode:UIImageResizingModeStretch];
+    
+    return self.model.message.isOutgoingMsg ? customerNormalImage : serviceNormalImage;
+}
+
+//override
+//文件需要显示白色底
+- (UIImage *)chatHighlightedBubbleImage
+{
+    UIImage *customerNormalImage = [[UIImage ysf_imageInKit:@"icon_sender_filetransfer_pressed"] resizableImageWithCapInsets:UIEdgeInsetsMake(25, 10, 10, 10) resizingMode:UIImageResizingModeStretch];
+    UIImage *serviceNormalImage = [[UIImage ysf_imageInKit:@"icon_receiver_filetransfer_pressed"] resizableImageWithCapInsets:UIEdgeInsetsMake(25, 10, 10, 10) resizingMode:UIImageResizingModeStretch];
+    
+    return self.model.message.isOutgoingMsg ? customerNormalImage : serviceNormalImage;
 }
 
 @end

@@ -36,11 +36,11 @@
         //如果老数据foreignId对应的数据和当前的accid 不同，做一次消息数据的迁移...我觉得这是还是很蛋疼的
         if (oldAccid&& ![oldAccid isEqualToString:accid])
         {
-            NIMLogApp(@"migrate from %@ to %@",oldAccid,accid);
+            YSFLogApp(@"migrate from %@ to %@",oldAccid,accid);
             
             [[[YSF_NIMSDK sharedSDK] conversationManager] migrateFrom:oldAccid
                                                        completion:^(NSError *error) {
-                                                           NIMLogApp(@"%@",error);
+                                                           YSFLogApp(@"%@",error);
                                                        }];
         }
         

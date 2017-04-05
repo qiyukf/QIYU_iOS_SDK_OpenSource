@@ -16,6 +16,7 @@
 @interface YSFMessageCell : UITableViewCell
 
 @property (nonatomic, strong) YSFAvatarImageView *headImageView;
+@property (nonatomic, strong) UIImageView *vipLevel;
 @property (nonatomic, strong) UILabel *nameLabel;                                 //姓名（群显示 个人不显示）
 @property (nonatomic, strong) YSFSessionMessageContentView *bubbleView;           //内容区域
 @property (nonatomic, strong) UIActivityIndicatorView *traningActivityIndicator;  //发送loading

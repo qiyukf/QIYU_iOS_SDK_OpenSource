@@ -1,3 +1,4 @@
+
 //
 //  YSFSession.m
 //  YSFSDK
@@ -10,6 +11,8 @@
 #import "NSDictionary+YSFJson.h"
 #import "YSFApiDefines.h"
 #import "YSFShopInfo.h"
+#import "YSFActionBar.h"
+
 
 
 @implementation YSFServiceSession
@@ -58,6 +61,19 @@
     else {
         instance.humanOrMachine         = NO;
     }
+    
+    NSArray *bot    = [dict ysf_jsonArray:YSFApiKeyBot];
+    NSMutableArray *actionInfoArray = [NSMutableArray arrayWithCapacity:bot.count];
+    for (NSDictionary *dict in bot) {
+        YSFActionInfo *actionInfo = [[YSFActionInfo alloc] init];
+        actionInfo.action = [dict ysf_jsonInteger:YSFApiKeyAction];
+        actionInfo.id= [dict ysf_jsonInteger:YSFApiKeyId];
+        actionInfo.label= [dict ysf_jsonString:YSFApiKeyLabel];
+        actionInfo.url= [dict ysf_jsonString:YSFApiKeyUrl];
+        [actionInfoArray addObject:actionInfo];
+    }
+    
+    instance.actionInfoArray = actionInfoArray;
     
     NSDictionary *shopInfoDict = [dict ysf_jsonDict:YSFApiKeyShop];
     if (shopInfoDict) {

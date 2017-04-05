@@ -131,6 +131,8 @@
              completion:^(NSError *error, id returendObject) {
              if (error == nil && [returendObject isKindOfClass:[YSFAccountInfo class]]) {
                  _accountInfo = returendObject;
+                 YSFLogApp(@"createAccount success accid: %@", _accountInfo.accid);
+
                  
                  [self saveAccountInfo];
                  [self login];
@@ -141,7 +143,7 @@
              }
              else
              {
-                 NIMLogErr(@"createAccount failed %@", error);
+                 YSFLogErr(@"createAccount failed %@", error);
                  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                      [self createAccount];
                  });
@@ -155,9 +157,10 @@
 {
     if (_qyUserInfo)
     {
-        NIMLogApp(@"reportUserInfo userId:%@ data:%@", _qyUserInfo.userId, _qyUserInfo.data);
+        YSFLogApp(@"reportUserInfo userId:%@ data:%@", _qyUserInfo.userId, _qyUserInfo.data);
 
         YSFSetInfoRequest *request = [[YSFSetInfoRequest alloc] init];
+        request.authToken = [QYSDK sharedSDK].authToken;
         request.userInfo = _qyUserInfo;
         QYUserInfo *cachedUserInfo = _qyUserInfo;
 
@@ -169,7 +172,7 @@
                         [self cleanCurrentUserInfo];
                         [weakSelf mapForeignId:cachedUserInfo.userId];
                     }
-                    NIMLogApp(@"reportUserInfo error:%@", error);
+                    YSFLogApp(@"reportUserInfo error:%@", error);
                }];
     }
 }
@@ -244,7 +247,7 @@
                                                          error:&error];
         if (error)
         {
-            NIMLogErr(@"save dict %@ failed",dict);
+            YSFLogErr(@"save dict %@ failed",dict);
         }
         
         if (data)
@@ -266,7 +269,7 @@
                                                          error:&error];
         if (error)
         {
-            NIMLogErr(@"save dict %@ failed",array);
+            YSFLogErr(@"save dict %@ failed",array);
         }
         
         if (data)
@@ -442,7 +445,7 @@
 #pragma mark - YSFLoginManagerDelegate
 - (void)onLoginSuccess:(NSString *)accid
 {
-    NIMLogApp(@"on login success %@ vs cache account %@",accid,_accountInfo.accid);
+    YSFLogApp(@"on login success %@ vs cache account %@",accid,_accountInfo.accid);
     if (_accountInfo.accid && accid && [_accountInfo.accid isEqualToString:accid] &&
         !_accountInfo.isEverLogined)
     {
@@ -453,7 +456,7 @@
 
 - (void)onFatalLoginFailed:(NSError *)error
 {
-    NIMLogErr(@"on fatal login error rebuild account ing......%@", error);
+    YSFLogErr(@"on fatal login error rebuild account ing......%@", error);
     [self cleanAccountInfo];
     [self cleanAppSetting];
     [self cleanDeviceId];
@@ -474,7 +477,7 @@
 {
     YSFSessionStatusRequest *request = [YSFSessionStatusRequest new];
     [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
-                                      NIMLogApp(@"requestSessionStatus error:%@", error);
+                                      YSFLogApp(@"requestSessionStatus error:%@", error);
                                   }];
     
 }

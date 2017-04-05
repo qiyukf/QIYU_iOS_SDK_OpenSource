@@ -23,12 +23,12 @@
 #import "QYSDK_Private.h"
 #import "YSFShopInfo.h"
 #import "NSDictionary+YSFJson.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @interface YSFConversationManager ()<YSF_NIMConversationManagerDelegate, YSF_NIMChatManagerDelegate>
 @property (nonatomic,weak)  id<QYConversationManagerDelegate> delegate;
-@property (nonatomic,weak)  id<QYPOPConversationManagerDelegate> popDelegate;
 
-@property (nonatomic, strong) NSMutableArray<QYPOPSessionInfo *> *sessionListArray;
+@property (nonatomic, strong) NSMutableArray<QYSessionInfo *> *sessionListArray;
 @end
 
 @implementation YSFConversationManager
@@ -48,12 +48,7 @@
     [[[YSF_NIMSDK sharedSDK] conversationManager] removeDelegate:self];
 }
 
-- (void)popSetDelegate:(id<QYPOPConversationManagerDelegate>)delegate
-{
-    self.popDelegate = delegate;
-}
-
-- (NSArray<QYPOPSessionInfo *> *)getSessionList
+- (NSArray<QYSessionInfo *> *)getSessionList
 {
 //    if (!self.sessionListArray) {
         [self updateSessionList];
@@ -70,11 +65,24 @@
         NSDictionary *shopInfoDict = [[[[QYSDK sharedSDK] sessionManager] getShopInfo] objectForKey:item.session.sessionId];
         YSFShopInfo *shopInfo = [YSFShopInfo instanceByJson:shopInfoDict];
         
-        QYPOPSessionInfo *sessionInfo = [[QYPOPSessionInfo alloc] init];
+        QYSessionInfo *sessionInfo = [[QYSessionInfo alloc] init];
         sessionInfo.shopId = item.session.sessionId;
         sessionInfo.avatarImageUrlString = shopInfo ? shopInfo.logo : @"";
         sessionInfo.sessionName = shopInfo ? shopInfo.name : @"";
-        sessionInfo.lastMessageText = [self getLastMessageTextWithMessage:item.lastMessage];
+        sessionInfo.lastMessageText = [item.lastMessage getDisplayMessageContent];
+        if (item.lastMessage.messageType == YSF_NIMMessageTypeText) {
+            sessionInfo.lastMessageType = QYMessageTypeText;
+        }
+        else if (item.lastMessage.messageType == YSF_NIMMessageTypeImage) {
+            sessionInfo.lastMessageType = QYMessageTypeImage;
+        }
+        else if (item.lastMessage.messageType == YSF_NIMMessageTypeAudio) {
+            sessionInfo.lastMessageType = QYMessageTypeAudio;
+        }
+        else {
+            sessionInfo.lastMessageType = QYMessageTypeCustom;
+        }
+        
         sessionInfo.unreadCount = item.unreadCount;
         sessionInfo.lastMessageTimeStamp = item.lastMessage.timestamp;
         YSFSessionStateType stateType = [[[[QYSDK sharedSDK] sessionManager].sessionStateType
@@ -95,100 +103,6 @@
     self.sessionListArray = sessionListArray;
 }
 
-- (NSString *)getLastMessageTextWithMessage:(YSF_NIMMessage *)message
-{
-    NSString *text = @"";
-    switch (message.messageType) {
-        case YSF_NIMMessageTypeText:
-            text = message.text;
-            break;
-        case YSF_NIMMessageTypeCustom:
-        {
-            
-            YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)message.messageObject;
-            id<YSF_NIMCustomAttachment> attachment = object.attachment;
-            if ([attachment isMemberOfClass:[YSFNotification class]]) {
-                YSFNotification *notification = attachment;
-                text = [NSString stringWithFormat:@"[%@]", notification.message];
-            }
-            else if ([attachment isMemberOfClass:[YSFWelcome class]]) {
-                YSFWelcome *notification = attachment;
-                text = [NSString stringWithFormat:@"[%@]", notification.welcome];
-            }
-            else if ([attachment isMemberOfClass:[YSFCommodityInfoShow class]])
-            {
-                YSFCommodityInfoShow *commodityInfoShow = attachment;
-                text = [NSString stringWithFormat:@"%@", commodityInfoShow.urlString];
-            } else if ([attachment isMemberOfClass:[YSFInviteEvaluationObject class]])
-            {
-                text = @"感谢您的咨询，请对我们的服务作出评价";
-            } else if ([attachment isMemberOfClass:[YSFEvaluationTipObject class]])
-            {
-                YSFEvaluationTipObject *evaluationTipObject = attachment;
-                text = [NSString stringWithFormat:@"[%@%@]", evaluationTipObject.tipContent, evaluationTipObject.tipResult];
-            } else if ([attachment isMemberOfClass:[YSFStartServiceObject class]])
-            {
-                YSFStartServiceObject *startServiceObject = attachment;
-                text = [NSString stringWithFormat:@"[客服%@为您服务]", startServiceObject.staffName];
-            } else if ([attachment isMemberOfClass:[YSFMachineResponse class]])
-            {
-                YSFMachineResponse *machineResponse = attachment;
-                if (machineResponse.operatorHint) {
-                    text = [NSString stringWithFormat:@"%@", machineResponse.operatorHintDesc];
-                } else {
-                    text = [NSString stringWithFormat:@"%@", machineResponse.answerLabel];
-                    for (NSDictionary *item in machineResponse.answerArray) {
-                        NSString *answerText = item[@"answer"] ? : @"";
-                        text = [text stringByAppendingString:answerText];
-                    }
-                }
-                
-            } else if ([attachment isMemberOfClass:[YSFReportQuestion class]])
-            {
-                YSFReportQuestion *reportQuestion = attachment;
-                text = [NSString stringWithFormat:@"%@", reportQuestion.question];
-            } else if ([attachment isMemberOfClass:[YSFKFBypassNotification class]])
-            {
-                YSFKFBypassNotification *kfBypassNotification = attachment;
-                text = [NSString stringWithFormat:@"[%@:", kfBypassNotification.message];
-                NSInteger index = 0;
-                for (NSDictionary *item in kfBypassNotification.entries) {
-                    NSString *labelText = item[@"label"] ? : @"";
-                    if (index != kfBypassNotification.entries.count - 1) {
-                        text = [text stringByAppendingFormat:@"%@ / ", labelText];
-                    } else {
-                        text = [text stringByAppendingFormat:@"%@]", labelText];
-                    }
-                    index++;
-                }
-            }
-        }
-            break;
-        case YSF_NIMMessageTypeAudio:
-            text = @"[语音]";
-            break;
-        case YSF_NIMMessageTypeImage:
-            text = @"[图片]";
-            break;
-        case YSF_NIMMessageTypeVideo:
-            text = @"[视频]";
-            break;
-        case YSF_NIMMessageTypeLocation:
-            text = @"[位置]";
-            break;
-        case YSF_NIMMessageTypeNotification:{
-            text = @"[通知消息]";
-        }
-        case YSF_NIMMessageTypeFile:
-            text = @"[文件]";
-            break;
-        default:
-            text = @"[未知消息]";
-    }
-    
-    return text;
-}
-
 - (void)deleteRecentSessionByShopId:(NSString *)shopId deleteMessages:(BOOL)isDelete
 {
     if (!shopId) return;
@@ -205,6 +119,45 @@
     return MAX(0, [[[YSF_NIMSDK sharedSDK] conversationManager] allUnreadCount]);
 }
 
+- (void)clearUnreadCount
+{
+    [self clearUnreadCount:@"-1"];
+}
+
+- (void)clearUnreadCount:(NSString *)shopId
+{
+    YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+    [[[YSF_NIMSDK sharedSDK] conversationManager] cleanRecentSession:session];
+}
+
+- (QYMessageInfo *)getLastMessage
+{
+    NSArray *recentSessions = [[[YSF_NIMSDK sharedSDK] conversationManager] allRecentSession];
+    for (YSF_NIMRecentSession *item in recentSessions) {
+        if ([item.session.sessionId isEqualToString:@"-1"]) {
+            QYMessageInfo *messageInfo = [QYMessageInfo new];
+            YSF_NIMMessage *message = item.lastMessage;
+            messageInfo.text = [message getDisplayMessageContent];
+            messageInfo.timeStamp = message.timestamp;
+            if (message.messageType == YSF_NIMMessageTypeText) {
+                messageInfo.type = QYMessageTypeText;
+            }
+            else if (message.messageType == YSF_NIMMessageTypeImage) {
+                messageInfo.type = QYMessageTypeImage;
+            }
+            else if (message.messageType == YSF_NIMMessageTypeAudio) {
+                messageInfo.type = QYMessageTypeAudio;
+            }
+            else {
+                messageInfo.type = QYMessageTypeCustom;
+            }
+            
+            return messageInfo;
+        }
+    }
+    
+    return nil;
+}
 
 #pragma mark - YSF_NIMConversationManagerDelegate
 - (void)didAddRecentSession:(YSF_NIMRecentSession *)recentSession
@@ -240,8 +193,8 @@
 - (void)onSessionListChanged
 {
     [self updateSessionList];
-    if (_popDelegate && [_popDelegate respondsToSelector:@selector(onSessionListChanged)]) {
-        [_popDelegate onSessionListChanged];
+    if (_delegate && [_delegate respondsToSelector:@selector(onSessionListChanged:)]) {
+        [_delegate onSessionListChanged:_sessionListArray];
     }
 }
 
@@ -250,15 +203,27 @@
     for (YSF_NIMMessage *message in messages) {
         NSDictionary *shopInfoDict = [[[[QYSDK sharedSDK] sessionManager] getShopInfo] objectForKey:message.session.sessionId];
         YSFShopInfo *shopInfo = [YSFShopInfo instanceByJson:shopInfoDict];
-        QYPOPMessageInfo *messageInfo = [QYPOPMessageInfo new];
+        QYMessageInfo *messageInfo = [QYMessageInfo new];
         messageInfo.shopId = shopInfo.shopId;
         messageInfo.avatarImageUrlString = shopInfo ? shopInfo.logo : @"";
         messageInfo.sender = shopInfo ? shopInfo.name : @"";
-        messageInfo.text = [self getLastMessageTextWithMessage:message];
+        messageInfo.text = [message getDisplayMessageContent];
         messageInfo.timeStamp = message.timestamp;
+        if (message.messageType == YSF_NIMMessageTypeText) {
+            messageInfo.type = QYMessageTypeText;
+        }
+        else if (message.messageType == YSF_NIMMessageTypeImage) {
+            messageInfo.type = QYMessageTypeImage;
+        }
+        else if (message.messageType == YSF_NIMMessageTypeAudio) {
+            messageInfo.type = QYMessageTypeAudio;
+        }
+        else {
+            messageInfo.type = QYMessageTypeCustom;
+        }
         
-        if (_popDelegate && [_popDelegate respondsToSelector:@selector(onReceiveMessage:)]) {
-            [_popDelegate onReceiveMessage:messageInfo];
+        if (_delegate && [_delegate respondsToSelector:@selector(onReceiveMessage:)]) {
+            [_delegate onReceiveMessage:messageInfo];
         }
     }
 

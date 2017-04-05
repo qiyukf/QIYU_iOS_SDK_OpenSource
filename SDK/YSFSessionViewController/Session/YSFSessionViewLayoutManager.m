@@ -31,7 +31,6 @@ YSFNotification(kKFInputViewFrameChanged);
         _inputView = inputView;
         _inputView.inputDelegate = self;
         _tableView = tableview;
-        _inputView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin;
         _tableView.ysf_frameHeight -= _inputView.ysf_frameHeight;
         _tableView.ysf_frameHeight -= [[QYCustomUIConfig sharedInstance] bottomMargin];
     }
@@ -125,7 +124,6 @@ YSFNotification(kKFInputViewFrameChanged);
             rect.size.height = self.viewRect.size.height - toHeight;
             rect.size.height -= [[QYCustomUIConfig sharedInstance] bottomMargin];
             [_tableView setFrame:rect];
-            [_tableView ysf_scrollToBottom:NO];
         }];
     });
     

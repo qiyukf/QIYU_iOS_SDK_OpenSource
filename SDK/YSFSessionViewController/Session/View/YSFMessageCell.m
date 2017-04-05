@@ -17,7 +17,7 @@
 #import "YSFAttributedLabel.h"
 #import "YSFSessionUnknowContentView.h"
 #import "KFAudioToTextHandler.h"
-
+#import "YSFKit.h"
 
 @interface YSFMessageCell()<YSFPlayAudioUIDelegate,YSFMessageContentViewDelegate>{
     UILongPressGestureRecognizer *_longPressGesture;
@@ -67,6 +67,10 @@
     _headImageView = [[YSFAvatarImageView alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
     [_headImageView addTarget:self action:@selector(onTapAvatar:) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:_headImageView];
+
+    //vipLevel
+    _vipLevel = [[UIImageView alloc] initWithFrame:CGRectMake(36, 30, 40, 40)];
+    [self.contentView addSubview:_vipLevel];
     
     //nicknamel
     _nameLabel = [[UILabel alloc] init];
@@ -101,7 +105,7 @@
 
 - (void)refresh{
     [self addContentViewIfNotExist];
-    
+    _vipLevel.hidden = YES;
     if ([self needShowAvatar])
     {
         NSString *fromYxId = self.model.message.from;
@@ -110,12 +114,18 @@
         if (self.model.message.session.sessionType == YSF_NIMSessionTypeYSF &&
             ![account isEqualToString:fromYxId])        {
             customerOrService = NO;
+            
+            YSFSessionUserInfo *sessionUserInfo = [[YSFKit sharedKit] infoByService:self.model.message];
+            NSString *vipLevel = [NSString stringWithFormat:@"v%ld", (long)sessionUserInfo.vipLevel];
+            _vipLevel.image = [UIImage imageNamed:vipLevel];
+            [_vipLevel sizeToFit];
+            _vipLevel.hidden = NO;
         }
         else
         {
             customerOrService = YES;
         }
-        [_headImageView setAvatarBySession:customerOrService message: self.model.message];
+        [_headImageView setAvatarBySession:customerOrService message:self.model.message];
     }
     
     if([self needShowNickName])

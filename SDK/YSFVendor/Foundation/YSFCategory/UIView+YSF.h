@@ -82,9 +82,6 @@
 /*取消阴影*/
 - (void)ysf_hideShadow;
 
-/*设置阴影*/
-- (void)shadowColor:(UIColor*)color shadowOffset:(CGSize)offset shadowRadius:(CGFloat)radius shadowOpacity:(CGFloat)opacity;
-
 /*设置圆角*/
 - (void)ysf_cornerRadius:(CGFloat)radius borderWidth:(CGFloat)width borderColor:(UIColor *)color;
 

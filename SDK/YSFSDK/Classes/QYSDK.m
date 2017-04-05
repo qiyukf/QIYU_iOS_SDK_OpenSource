@@ -38,9 +38,7 @@
         //路径需要最先进行配置
         _pathManager        = [[YSFPathManager alloc] init];
         [[YSF_NIMSDKConfig sharedConfig] setSdkDir:[_pathManager sdkRootPath]];
-        
-        
-        _serverSetting      = [[YSFServerSetting alloc] init];
+                
         _infoManager        = [[YSFAppInfoManager alloc] init];
         _sessionManager     = [[YSFSessionManager alloc] init];
         
@@ -54,6 +52,9 @@
 - (void)registerAppId:(NSString *)appKey
               appName:(NSString *)appName
 {
+    YSFLogApp(@"appKey: %@ appName: %@", appKey, appName);
+
+    
     [[YSF_NIMSDK sharedSDK] registerWithAppID:YES appKey:appKey
                                   cerName:appName];
     
@@ -67,6 +68,8 @@
 - (void)trackHistory:(NSString *)urlString
       withAttributes:(NSDictionary *)attributes
 {
+    YSFLogApp(@"urlString: %@ attributes: %@", urlString, attributes);
+
     YSFViewHistoryRequest *request = [[YSFViewHistoryRequest alloc] init];
     request.urlString = urlString;
     request.attributes= attributes;
@@ -77,13 +80,21 @@
 
 - (void)setUserInfo:(QYUserInfo *)userInfo
 {
+    YSFLogApp(@"userInfoId: %@  userInfoData: %@", userInfo.userId, userInfo.data);
     ysf_main_async(^{
         [_infoManager setUserInfo:userInfo];
     });
 }
 
+- (void)setAuthToken:(NSString *)authToken
+{
+    _authToken = authToken;
+}
+
 - (void)getPushMessage:(NSString *)messageId
 {
+    YSFLogApp(@"messageId: %@", messageId);
+
     YSFPushMessageRequest *request = [[YSFPushMessageRequest alloc] init];
     request.messageId = messageId;
     [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
@@ -92,16 +103,22 @@
 
 - (void)registerPushMessageNotification:(QYPushMessageBlock)block
 {
+    YSFLogApp(@"");
+
     self.pushMessageBlock = block;
 }
 
 - (void)updateApnsToken:(NSData *)token
 {
+    YSFLogApp(@"");
+
     [[YSF_NIMSDK sharedSDK] updateApnsToken:token];
 }
 
-- (void) logoutNim:(QYCompletionBlock)completion
+- (void)logoutNim:(QYCompletionBlock)completion
 {
+    YSFLogApp(@"begin to logoutNim");
+
     [[[YSF_NIMSDK sharedSDK] loginManager] logout:^(NSError *error) {
         [_sessionManager clear];
         [_infoManager logout];
@@ -109,13 +126,13 @@
         if (completion) {
             completion();
         }
-        NIMLogApp(@"logout end");
+        YSFLogApp(@"logout end");
     }];
 }
 
 - (void)logout:(QYCompletionBlock)completion
 {
-    NIMLogApp(@"begin to logout");
+    YSFLogApp(@"begin to logout");
     
     YSFSetLeaveStatusRequest *request = [[YSFSetLeaveStatusRequest alloc] init];
     [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
@@ -126,17 +143,23 @@
 
 - (QYSessionViewController *)sessionViewController
 {
+    YSFLogApp(@"");
+
     QYSessionViewController *vc = [[QYSessionViewController alloc] init];
     return vc;
 }
 
 - (NSString *)appKey
 {
+    YSFLogApp(@"");
+
     return [[YSF_NIMSDK sharedSDK] appKey];
 }
 
 - (QYConversationManager *)conversationManager
 {
+    YSFLogApp(@"");
+
     if (_sdkConversationManager == nil)
     {
         _sdkConversationManager = [[YSFConversationManager alloc] init];
@@ -146,17 +169,32 @@
 
 - (QYCustomUIConfig *)customUIConfig
 {
+    YSFLogApp(@"");
+
     return [QYCustomUIConfig sharedInstance];
 }
 
 - (QYCustomActionConfig *)customActionConfig
 {
+    YSFLogApp(@"");
+
     return [QYCustomActionConfig sharedInstance];
+}
+
+- (void)cleanResourceCacheWithBlock:(QYCleanResourceCacheCompleteBlock)completeBlock
+{
+    YSFLogApp(@"");
+
+    [[[YSF_NIMSDK sharedSDK] resourceManager] cleanResourceCacheWithBlock:^(NSError *error) {
+        if (completeBlock) {
+            completeBlock(error);
+        }
+    }];
 }
 
 #pragma mark - 内部接口
 
-- (NSString *)nimLog
+- (NSString *)qiyuLogPath
 {
     return [[YSF_NIMSDK sharedSDK] currentLogFilepath];
 }
@@ -164,11 +202,6 @@
 - (NSString *)currentForeignUserId
 {
     return [_infoManager currentForeignUserId];
-}
-
-- (void)setServerSetting:(YSFServerSetting *)serverSetting
-{
-    [_serverSetting update:serverSetting];
 }
 
 - (NSString *)deviceId
