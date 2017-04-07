@@ -45,7 +45,7 @@
 #import "YSFMoreOrderListViewController.h"
 #import "YSFCancelWaitingRequest.h"
 #import "YSFNotification.h"
-#import "CMPopTipView.h"
+#import "YSFPopTipView.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -82,7 +82,7 @@ static long long sessionId;
 @property (nonatomic,strong)    YSFTimer *queryWaitingStatusTimer;
 @property (nonatomic,copy)      NSString *shopId;                       //平台电商店铺Id，不是平台电商不用管
 @property (nonatomic,weak)      id<QYSessionViewDelegate> delegate;     //会话窗口回调
-@property (nonatomic,strong)    CMPopTipView *popTipView;
+@property (nonatomic,strong)    YSFPopTipView *popTipView;
 
 @end
 
@@ -746,7 +746,7 @@ static long long sessionId;
     splitLine.ysf_frameTop = 30;
     [tipView addSubview:splitLine];
     
-    _popTipView = [[CMPopTipView alloc] initWithCustomView:tipView];
+    _popTipView = [[YSFPopTipView alloc] initWithCustomView:tipView];
     _popTipView.backgroundColor = [UIColor whiteColor];
     _popTipView.maskColor = YSFRGBA(0x000000, 0.4);
     _popTipView.borderColor = [UIColor lightGrayColor];

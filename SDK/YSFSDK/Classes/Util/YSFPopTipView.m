@@ -23,15 +23,15 @@
 //  THE SOFTWARE.
 //
 
-#import "CMPopTipView.h"
+#import "YSFPopTipView.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface CMPopTipView ()
+@interface YSFPopTipView ()
 {
 	CGSize					_bubbleSize;
 	CGFloat					_cornerRadius;
 	BOOL					_highlight;
-	PointDirection			_pointDirection;
+	YSFPointDirection			_pointDirection;
 	CGFloat					_pointerSize;
 	CGPoint					_targetPoint;
 	CGFloat					_bubblePaddingX;
@@ -44,11 +44,11 @@
 @end
 
 
-@implementation CMPopTipView
+@implementation YSFPopTipView
 
 - (CGRect)bubbleFrame {
 	CGRect bubbleFrame;
-	if (_pointDirection == PointDirectionUp) {
+	if (_pointDirection == YSFPointDirectionUp) {
 		bubbleFrame = CGRectMake(_sidePadding, _targetPoint.y+_pointerSize, _bubbleSize.width, _bubbleSize.height);
 	}
 	else {
@@ -95,7 +95,7 @@
 
 	CGMutablePathRef bubblePath = CGPathCreateMutable();
 
-	if (_pointDirection == PointDirectionUp) {
+	if (_pointDirection == YSFPointDirectionUp) {
 		CGPathMoveToPoint(bubblePath, NULL, _targetPoint.x+_sidePadding, _targetPoint.y);
 		CGPathAddLineToPoint(bubblePath, NULL, _targetPoint.x+_sidePadding+_pointerSize, _targetPoint.y+_pointerSize);
 
@@ -500,28 +500,28 @@
 
     if (targetRelativeOrigin.y+targetView.bounds.size.height < containerRelativeOrigin.y) {
         pointerY = 0.0;
-        _pointDirection = PointDirectionUp;
+        _pointDirection = YSFPointDirectionUp;
     }
     else if (targetRelativeOrigin.y > containerRelativeOrigin.y+containerView.bounds.size.height) {
         pointerY = containerView.bounds.size.height;
-        _pointDirection = PointDirectionDown;
+        _pointDirection = YSFPointDirectionDown;
     }
     else {
         _pointDirection = _preferredPointDirection;
         CGPoint targetOriginInContainer = [targetView convertPoint:CGPointMake(0.0, 0.0) toView:containerView];
         CGFloat sizeBelow = containerView.bounds.size.height - targetOriginInContainer.y;
-        if (_pointDirection == PointDirectionAny) {
+        if (_pointDirection == YSFPointDirectionAny) {
             if (sizeBelow > targetOriginInContainer.y) {
                 pointerY = targetOriginInContainer.y + targetView.bounds.size.height;
-                _pointDirection = PointDirectionUp;
+                _pointDirection = YSFPointDirectionUp;
             }
             else {
                 pointerY = targetOriginInContainer.y;
-                _pointDirection = PointDirectionDown;
+                _pointDirection = YSFPointDirectionDown;
             }
         }
         else {
-            if (_pointDirection == PointDirectionDown) {
+            if (_pointDirection == YSFPointDirectionDown) {
                 pointerY = targetOriginInContainer.y;
             }
             else {
@@ -550,7 +550,7 @@
 
 	CGFloat fullHeight = _bubbleSize.height + _pointerSize + 10.0;
 	CGFloat y_b;
-	if (_pointDirection == PointDirectionUp) {
+	if (_pointDirection == YSFPointDirectionUp) {
 		y_b = _topMargin + pointerY;
 		_targetPoint = CGPointMake(x_p-x_b, 0);
 	}
@@ -567,17 +567,17 @@
 
 
 	if (animated) {
-        if (self.animation == CMPopTipAnimationFade) {
+        if (self.animation == YSFPopTipAnimationFade) {
             self.alpha = 0;
             self.frame = finalFrame;
         }
-        else if (self.animation == CMPopTipAnimationSlide) {
+        else if (self.animation == YSFPopTipAnimationSlide) {
             self.alpha = 0.0;
             CGRect startFrame = finalFrame;
             startFrame.origin.y += 10;
             self.frame = startFrame;
         }
-		else if (self.animation == CMPopTipAnimationPop) {
+		else if (self.animation == YSFPopTipAnimationPop) {
             self.frame = finalFrame;
             self.alpha = 0.5;
 
@@ -595,12 +595,12 @@
         }
 
 		[self setNeedsDisplay];
-		if (self.animation == CMPopTipAnimationFade) {
+		if (self.animation == YSFPopTipAnimationFade) {
             [UIView animateWithDuration:0.15 animations:^{
                 self.alpha = 1.0;
             }];
         }
-		else if (self.animation == CMPopTipAnimationSlide) {
+		else if (self.animation == YSFPopTipAnimationSlide) {
 			[UIView beginAnimations:nil context:nil];
 			self.alpha = 1.0;
 			self.frame = finalFrame;
@@ -652,7 +652,7 @@
 - (void)dismissAnimated:(BOOL)animated {
 
 	if (animated) {
-        if (self.animation == CMPopTipAnimationFade) {
+        if (self.animation == YSFPopTipAnimationFade) {
             [UIView beginAnimations:nil context:nil];
             self.alpha = 0.0;
             [UIView setAnimationDuration:0.3];
@@ -695,7 +695,7 @@
 }
 
 - (void)notifyDelegatePopTipViewWasDismissedByUser {
-	__strong id<CMPopTipViewDelegate> delegate = self.delegate;
+	__strong id<YSFPopTipViewDelegate> delegate = self.delegate;
 	[delegate popTipViewWasDismissedByUser:self];
 }
 
@@ -760,9 +760,9 @@
         self.has3DStyle = YES;
         self.borderColor = [UIColor blackColor];
         self.hasShadow = YES;
-        self.animation = CMPopTipAnimationSlide;
+        self.animation = YSFPopTipAnimationSlide;
         self.dismissTapAnywhere = NO;
-        self.preferredPointDirection = PointDirectionAny;
+        self.preferredPointDirection = YSFPointDirectionAny;
         self.hasGradientBackground = YES;
         self.cornerRadius = 10.0;
     }
@@ -786,7 +786,7 @@
     }
 }
 
-- (PointDirection) getPointDirection
+- (YSFPointDirection) getPointDirection
 {
   return _pointDirection;
 }

@@ -88,25 +88,25 @@
 
 #import <UIKit/UIKit.h>
 
-typedef NS_ENUM(NSInteger, PointDirection) {
-    PointDirectionAny = 0,
-    PointDirectionUp,
-    PointDirectionDown,
+typedef NS_ENUM(NSInteger, YSFPointDirection) {
+    YSFPointDirectionAny = 0,
+    YSFPointDirectionUp,
+    YSFPointDirectionDown,
 };
 
-typedef NS_ENUM(NSInteger, CMPopTipAnimation) {
-    CMPopTipAnimationSlide = 0,
-    CMPopTipAnimationPop,
-    CMPopTipAnimationFade
+typedef NS_ENUM(NSInteger, YSFPopTipAnimation) {
+    YSFPopTipAnimationSlide = 0,
+    YSFPopTipAnimationPop,
+    YSFPopTipAnimationFade
 };
 
-@protocol CMPopTipViewDelegate;
+@protocol YSFPopTipViewDelegate;
 
-@interface CMPopTipView : UIView
+@interface YSFPopTipView : UIView
 
 @property (nonatomic, strong)			UIColor					*backgroundColor;
 @property (nonatomic, strong)			UIColor					*maskColor;
-@property (nonatomic, weak)				id<CMPopTipViewDelegate>	delegate;
+@property (nonatomic, weak)				id<YSFPopTipViewDelegate>	delegate;
 @property (nonatomic, assign)			BOOL					disableTapToDismiss;
 @property (nonatomic, assign)			BOOL					dismissTapAnywhere;
 @property (nonatomic, strong)			NSString				*title;
@@ -124,9 +124,9 @@ typedef NS_ENUM(NSInteger, CMPopTipAnimation) {
 @property (nonatomic, assign)           CGFloat                 cornerRadius;
 @property (nonatomic, assign)			CGFloat					borderWidth;
 @property (nonatomic, assign)           BOOL                    hasShadow;
-@property (nonatomic, assign)           CMPopTipAnimation       animation;
+@property (nonatomic, assign)           YSFPopTipAnimation       animation;
 @property (nonatomic, assign)           CGFloat                 maxWidth;
-@property (nonatomic, assign)           PointDirection          preferredPointDirection;
+@property (nonatomic, assign)           YSFPointDirection          preferredPointDirection;
 @property (nonatomic, assign)           BOOL                    hasGradientBackground;
 @property (nonatomic, assign)           CGFloat                 sidePadding;
 @property (nonatomic, assign)           CGFloat                 topMargin;
@@ -152,11 +152,11 @@ typedef NS_ENUM(NSInteger, CMPopTipAnimation) {
 - (void)presentPointingAtBarButtonItem:(UIBarButtonItem *)barButtonItem animated:(BOOL)animated;
 - (void)dismissAnimated:(BOOL)animated;
 - (void)autoDismissAnimated:(BOOL)animated atTimeInterval:(NSTimeInterval)timeInterval;
-- (PointDirection) getPointDirection;
+- (YSFPointDirection) getPointDirection;
 
 @end
 
 
-@protocol CMPopTipViewDelegate <NSObject>
-- (void)popTipViewWasDismissedByUser:(CMPopTipView *)popTipView;
+@protocol YSFPopTipViewDelegate <NSObject>
+- (void)popTipViewWasDismissedByUser:(YSFPopTipView *)popTipView;
 @end
