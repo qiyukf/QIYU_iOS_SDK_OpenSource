@@ -24,6 +24,7 @@
 @property (nonatomic,assign)    NSInteger       code;
 @property (nonatomic,assign)    BOOL            humanOrMachine;
 @property (nonatomic,assign)    BOOL            operatorEable;
+@property (nonatomic,copy)      NSString        *inQueeuNotify;
 @property (nonatomic,copy)      NSString        *notExistTip;
 @property (nonatomic,strong)    NSDictionary    *evaluation;
 @property (nonatomic,copy)      NSArray         *actionInfoArray;

@@ -67,6 +67,7 @@
 #define     YSFApiKeyOperatorHintDesc   @"operator_hint_desc"
 #define     YSFApiKeyOperatorEnable     @"operator_enable"
 #define     YSFApiKeyEvaluation         @"evaluation"
+#define     YSFApiKeyInqueueNotify      @"inqueueNotify"
 #define     YSFApiKeyRemarks            @"remarks"
 #define     YSFApiKeyList               @"list"
 #define     YSFApiKeyMessage            @"message"

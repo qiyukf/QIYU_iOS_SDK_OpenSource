@@ -36,6 +36,8 @@
     instance.message                      = [dict ysf_jsonString:@"message"];
     instance.shopId = [dict ysf_jsonString:YSFApiKeyBId];
     instance.showNumber  = [dict ysf_jsonBool:YSFApiKeyShowNum];
+    instance.inQueeuNotify = [dict ysf_jsonString:YSFApiKeyInqueueNotify];
+
     return instance;
 }
 

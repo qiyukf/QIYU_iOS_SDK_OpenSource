@@ -78,7 +78,8 @@
     [[self ysf_viewController].view setNeedsLayout];
 }
 
-- (void)setSessionTipForWaiting:(BOOL)showNumber waitingNumber:(NSInteger)waitingNumber;
+- (void)setSessionTipForWaiting:(BOOL)showNumber waitingNumber:(NSInteger)waitingNumber
+                    inQueeuStr:(NSString *)inQueeuStr
 {
     self.showNumber = showNumber;
     BOOL should_tip = [self shouldTip:YSFSessionTipServicewaiting];
@@ -89,7 +90,7 @@
     _type = YSFSessionTipServicewaiting;
     NSString * tip_str = [NSString stringWithFormat:@"正在排队，您的前面还有%ld个人，请稍等...", (long)waitingNumber];
     if (!_showNumber) {
-        tip_str = @"当前排队人数较多，请耐心等待...";
+        tip_str = inQueeuStr;
     }
     [_tipLabel setText:tip_str];
     [self setHidden:NO];

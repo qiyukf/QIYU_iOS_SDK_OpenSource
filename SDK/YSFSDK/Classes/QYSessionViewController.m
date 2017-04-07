@@ -70,7 +70,9 @@ static long long sessionId;
 @property (nonatomic,strong)    UIButton *evaluation;
 @property (nonatomic,strong)    UIButton *evaluationText;
 @property (nonatomic,strong)    UIButton *closeSession;
+@property (nonatomic,strong)    UIButton *closeSessionText;
 @property (nonatomic,strong)    UIButton *moreButton;
+@property (nonatomic,strong)    UIButton *moreButtonText;
 @property (nonatomic,strong)    UIImageView *sessionListImageView;
 @property (nonatomic,strong)    UIButton *sessionListButton;
 @property (nonatomic,copy)      NSString* emailStr;
@@ -130,7 +132,7 @@ static long long sessionId;
     __weak typeof(self) weakSelf = self;
     [QYCustomActionConfig sharedInstance].showQuitBlock = ^(QYShowQuitWaitingBlock showQuitWaitingBlock) {
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-        if ([sessionManager getSessionStateType:_shopId] != YSFSessionStateTypeWaiting) {
+        if ([sessionManager getSessionStateType:weakSelf.shopId] != YSFSessionStateTypeWaiting) {
             if (showQuitWaitingBlock) {
                 showQuitWaitingBlock(QYQuitTypeNone);
             }
@@ -145,7 +147,7 @@ static long long sessionId;
             }
         }]];
         [alertController addAction:[YSFAlertAction actionWithTitle:@"下次咨询" handler:^(YSFAlertAction * _Nonnull action) {
-            [self sendCloseSessionCustomMessage:YES showQuitWaitingBlock:showQuitWaitingBlock];
+            [weakSelf sendCloseSessionCustomMessage:YES showQuitWaitingBlock:showQuitWaitingBlock];
         }]];
         [alertController addCancelActionWithHandler:^(YSFAlertAction * _Nonnull action) {
             if (showQuitWaitingBlock) {
@@ -153,7 +155,7 @@ static long long sessionId;
             }
         }];
         
-        [alertController showWithSender:nil arrowDirection:UIPopoverArrowDirectionAny controller:self animated:YES completion:nil];
+        [alertController showWithSender:nil arrowDirection:UIPopoverArrowDirectionAny controller:weakSelf animated:YES completion:nil];
     };
     
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
@@ -208,7 +210,7 @@ static long long sessionId;
         [self.view ysf_makeToast:@"退出排队中" duration:2 position:YSFToastPositionCenter];
     }
     else {
-        [self.view ysf_makeToast:@"结束会话中" duration:2 position:YSFToastPositionCenter];
+        [self.view ysf_makeToast:@"退出对话中" duration:2 position:YSFToastPositionCenter];
     }
     
     __weak typeof(self) weakSelf = self;
@@ -218,11 +220,13 @@ static long long sessionId;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error){
         if (error) {
             if (quitWaitingOrCloseSession) {
-                [self.view ysf_makeToast:@"退出排队失败，清稍后再试" duration:2 position:YSFToastPositionCenter];
-                [weakSelf.navigationController popViewControllerAnimated:YES];
+                [self.view ysf_makeToast:@"退出排队失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [weakSelf.navigationController popViewControllerAnimated:YES];
+                });
             }
             else {
-                [self.view ysf_makeToast:@"结束会话失败，清稍后再试" duration:2 position:YSFToastPositionCenter];
+                [self.view ysf_makeToast:@"退出对话失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
             }
         }
         else {
@@ -233,7 +237,7 @@ static long long sessionId;
                 YSFNotification *notification = [[YSFNotification alloc] init];
                 notification.command = YSFCommandNotification;
                 notification.localCommand = YSFCommandSessionWillClose;
-                notification.message = @"您结束了咨询";
+                notification.message = @"您退出了咨询";
                 YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
                 YSF_NIMSession *session = [YSF_NIMSession session:_shopId type:YSF_NIMSessionTypeYSF];
                 [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
@@ -360,7 +364,7 @@ static long long sessionId;
     }
     [_evaluationText addTarget:self action:@selector(onEvaluate:) forControlEvents:UIControlEventTouchUpInside];
 
-    //结束按钮
+    //退出按钮
     if ([[QYSDK sharedSDK] customUIConfig].showCloseSessionEntry) {
         _closeSession = [[UIButton alloc] init];
         _closeSession.imageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -373,13 +377,24 @@ static long long sessionId;
         }
 
         [_closeSession setImage:closeSessionImage forState:UIControlStateNormal];
-        _closeSession.enabled = NO;
         [_closeSession addTarget:self action:@selector(onCloseSession:) forControlEvents:UIControlEventTouchUpInside];
         [rightButtonView addSubview:_closeSession];
         
+        _closeSessionText = [[UIButton alloc] init];
+        [rightButtonView addSubview:_closeSessionText];
+        [_closeSessionText setTitle:@"退出" forState:UIControlStateNormal];
+        QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
+        if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
+            [_closeSessionText setTitleColor:YSFRGB(0x76838f) forState:UIControlStateNormal];
+        }
+        else {
+            [_closeSessionText setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        }
+        _closeSessionText.titleLabel.font = [UIFont systemFontOfSize:14];
+        [_closeSessionText addTarget:self action:@selector(onCloseSession:) forControlEvents:UIControlEventTouchUpInside];
+
         _moreButton = [[UIButton alloc] init];
         _moreButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
-        
         UIImage *moreImage = nil;
         if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
             moreImage = [[UIImage ysf_imageInKit:@"icon_more_black"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
@@ -390,6 +405,18 @@ static long long sessionId;
         [_moreButton setImage:moreImage forState:UIControlStateNormal];
         [_moreButton addTarget:self action:@selector(onMore:) forControlEvents:UIControlEventTouchUpInside];
         [rightButtonView addSubview:_moreButton];
+        
+        _moreButtonText = [[UIButton alloc] init];
+        [rightButtonView addSubview:_moreButtonText];
+        [_moreButtonText setTitle:@"更多" forState:UIControlStateNormal];
+        if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
+            [_moreButtonText setTitleColor:YSFRGB(0x76838f) forState:UIControlStateNormal];
+        }
+        else {
+            [_moreButtonText setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        }
+        _moreButtonText.titleLabel.font = [UIFont systemFontOfSize:14];
+        [_moreButtonText addTarget:self action:@selector(onMore:) forControlEvents:UIControlEventTouchUpInside];
     }
     
     [self initRightCustomButtonStatus];
@@ -454,7 +481,10 @@ static long long sessionId;
     {
         YSFServiceSession *session = [sessionManager getSession:_shopId];
         if (session) {
+            _closeSession.hidden = NO;
             _closeSession.enabled = YES;
+            _closeSessionText.hidden = NO;
+            _closeSessionText.enabled = YES;
             [self changeHumanOrMachineState:session.humanOrMachine operatorEable:session.operatorEable];
             
             if (session.humanOrMachine) {
@@ -482,13 +512,17 @@ static long long sessionId;
         _evaluation.alpha = 0;
         _evaluationText.alpha = 0;
         _closeSession.alpha = 0;
+        _closeSessionText.alpha = 0;
         _moreButton.hidden = NO;
+        _moreButtonText.hidden = NO;
     }
     else {
         _evaluation.alpha = 1;
         _evaluationText.alpha = 1;
         _closeSession.alpha = 1;
+        _closeSessionText.alpha = 1;
         _moreButton.hidden = YES;
+        _moreButtonText.hidden = YES;
     }
     
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
@@ -514,7 +548,9 @@ static long long sessionId;
             _evaluationText.frame = _humanServiceText.frame;
         }
         _closeSession.frame = CGRectMake(40, 0, 50, 20);
-        _moreButton.frame = CGRectMake(40, 0, 40, 40);
+        _closeSessionText.frame = CGRectMake(40, 20, 50, 20);
+        _moreButton.frame = CGRectMake(40, 0, 50, 20);
+        _moreButtonText.frame = CGRectMake(40, 20, 50, 20);
     }
     else {
         if (_evaluation.hidden && _humanService.hidden && (!_closeSession || _closeSession.hidden)) {
@@ -538,7 +574,9 @@ static long long sessionId;
             _evaluationText.frame = _humanServiceText.frame;
         }
         _closeSession.frame = CGRectMake(40, 7, 50, 20);
-        _moreButton.frame = CGRectMake(40, 7, 40, 40);
+        _closeSessionText.frame = CGRectMake(40, 23, 50, 20);
+        _moreButton.frame = CGRectMake(40, 7, 50, 20);
+        _moreButtonText.frame = CGRectMake(40, 23, 50, 20);
     }
 }
 
@@ -588,22 +626,59 @@ static long long sessionId;
 - (void)changeHumanOrMachineState:(BOOL)humanOrMachine operatorEable:(BOOL)operatorEable
 {
     if (!humanOrMachine) {
+        self.sessionInputView.humanOrMachine = NO;
         if (operatorEable) {
             _humanService.hidden = NO;
             _humanServiceText.hidden = NO;
         }
-        self.sessionInputView.humanOrMachine = NO;
+        else {
+            _humanService.hidden = YES;
+            _humanServiceText.hidden = YES;
+        }
         _evaluation.hidden = YES;
         _evaluationText.hidden = YES;
         _closeSession.hidden = YES;
-    } else {
+        _closeSessionText.hidden = YES;
+    }
+    else {
+        self.sessionInputView.humanOrMachine = YES;
         _humanService.hidden = YES;
         _humanServiceText.hidden = YES;
-        self.sessionInputView.humanOrMachine = YES;
         _evaluation.hidden = NO;
         _evaluationText.hidden = NO;
+        _closeSession.enabled = YES;
         _closeSession.hidden = NO;
+        _closeSessionText.enabled = YES;
+        _closeSessionText.hidden = NO;
     }
+    [self setRightButtonViewFrame];
+}
+
+- (void)changeToWaitingState
+{
+    self.sessionInputView.humanOrMachine = YES;
+    
+    _humanService.hidden = YES;
+    _humanServiceText.hidden = YES;
+    _evaluation.hidden = YES;
+    _evaluationText.hidden = YES;
+    _closeSession.enabled = YES;
+    _closeSession.hidden = NO;
+    _closeSessionText.enabled = YES;
+    _closeSessionText.hidden = NO;
+    [self setRightButtonViewFrame];
+}
+
+- (void)changeToNotExsitState
+{
+    self.sessionInputView.humanOrMachine = YES;
+    
+    _humanService.hidden = YES;
+    _humanServiceText.hidden = YES;
+    _evaluation.hidden = YES;
+    _evaluationText.hidden = YES;
+    _closeSession.hidden = YES;
+    _closeSessionText.hidden = YES;
     [self setRightButtonViewFrame];
 }
 
@@ -640,6 +715,10 @@ static long long sessionId;
         _shopEntrance.hidden = YES;
         _shopEntranceText.hidden = YES;
     }
+    
+    _closeSession.hidden = YES;
+    _closeSessionText.hidden = YES;
+
     [self changeEvaluationButtonToInit];
 }
 
@@ -656,16 +735,16 @@ static long long sessionId;
     UIImage *image = [[UIImage ysf_imageInKit:evaluationIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     [_evaluation setImage:image forState:UIControlStateNormal];
 
-    _evaluation.hidden = NO;
-    _evaluation.enabled = NO;
-    _evaluationText.hidden = NO;
-    _evaluationText.enabled = NO;
+    _evaluation.hidden = YES;
+    _evaluationText.hidden = YES;
     [_evaluationText setTitle:@"评价" forState:UIControlStateNormal];
 }
 
 - (void)changeEvaluationButtonToEnable
 {
+    _evaluation.hidden = NO;
     _evaluation.enabled = YES;
+    _evaluationText.hidden = NO;
     _evaluationText.enabled = YES;
     [_evaluationText setTitle:@"评价" forState:UIControlStateNormal];
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
@@ -682,7 +761,9 @@ static long long sessionId;
 
 - (void)changeEvaluationButtonToDone
 {
+    _evaluation.hidden = NO;
     _evaluation.enabled = NO;
+    _evaluationText.hidden = NO;
     _evaluationText.enabled = NO;
     [_evaluationText setTitle:@"已评价" forState:UIControlStateNormal];
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
@@ -709,14 +790,14 @@ static long long sessionId;
     [_popTipView dismissAnimated:YES];
     YSFAlertController * alertController;
     if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:_shopId] == YSFSessionStateTypeWaiting) {
-        alertController = [YSFAlertController alertWithTitle:nil message:@"确定退出排队？"];
+        alertController = [YSFAlertController alertWithTitle:nil message:@"确认退出排队？"];
         [alertController addCancelActionWithHandler:nil];
         [alertController addAction:[YSFAlertAction actionWithTitle:@"确定" handler:^(YSFAlertAction * _Nonnull action) {
             [self sendCloseSessionCustomMessage:YES showQuitWaitingBlock:nil];
         }]];
     }
     else {
-        alertController = [YSFAlertController alertWithTitle:nil message:@"确定结束会话？"];
+        alertController = [YSFAlertController alertWithTitle:nil message:@"确认退出对话？"];
         [alertController addCancelActionWithHandler:nil];
         [alertController addAction:[YSFAlertAction actionWithTitle:@"确定" handler:^(YSFAlertAction * _Nonnull action) {
             [self sendCloseSessionCustomMessage:NO showQuitWaitingBlock:nil];
@@ -748,7 +829,8 @@ static long long sessionId;
     [close setImage:_closeSession.imageView.image forState:UIControlStateNormal];
     [close setTitle:@"退出" forState:UIControlStateNormal];
     close.enabled = _closeSession.enabled;
-    close.imageEdgeInsets = UIEdgeInsetsMake(0, -20, 0, 0);
+    close.imageEdgeInsets = UIEdgeInsetsMake(6, -20, 6, 20);
+    close.titleEdgeInsets = UIEdgeInsetsMake(0, -25, 0, 0);
     [close setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [close addTarget:self action:@selector(onCloseSession:) forControlEvents:UIControlEventTouchUpInside];
     [tipView addSubview:close];
@@ -770,7 +852,7 @@ static long long sessionId;
     _popTipView.dismissTapAnywhere = YES;
     _popTipView.topMargin = 10;
     _popTipView.sidePadding = 10;
-    [_popTipView presentPointingAtView:sender inView:self.view animated:YES];
+    [_popTipView presentPointingAtView:_moreButtonText inView:self.view animated:YES];
 }
 
 - (void)onTapSessionListButton:(id)sender
@@ -2227,11 +2309,13 @@ static long long sessionId;
     
     self.navigationItem.title = [self sessionTitle];
     
-    [self changeHumanOrMachineState:(!session || session.humanOrMachine) operatorEable:session.operatorEable];
     if (error == nil)
     {
-        _closeSession.enabled = YES;
         [_tipView setSessionTip:YSFSessionTipOK];
+        if (session) {
+            [self changeHumanOrMachineState:(session.humanOrMachine) operatorEable:session.operatorEable];
+        }
+        
         if (!session) {
             [self initRightCustomButtonStatus];
         }
@@ -2263,13 +2347,14 @@ static long long sessionId;
     {
         if ([error code] == YSFCodeServiceNotExist)
         {
+            [self changeToNotExsitState];
             [_tipView setSessionTipForNotExist:session.notExistTip];
         }
         else if ([error code] == YSFCodeServiceWaiting)
         {
-            _closeSession.enabled = YES;
+            [self changeToWaitingState];
             [self queryWaitingStatus:shopId];
-            [_tipView setSessionTipForWaiting:session.showNumber waitingNumber:session.before];
+            [_tipView setSessionTipForWaiting:session.showNumber waitingNumber:session.before inQueeuStr:session.inQueeuNotify];
         }
         else
         {
@@ -2278,12 +2363,13 @@ static long long sessionId;
     }
 }
 
-- (void)didReceiveWaitingStatus:(NSError *)error showNumber:(BOOL)showNumber waitingNumber:(NSInteger)waitingNumber shopId:(NSString *)shopId
+- (void)didReceiveWaitingStatus:(NSError *)error waitStatus:(YSFQueryWaitingStatusResponse *)waitStatus shopId:(NSString *)shopId
 {
     if (![_shopId isEqualToString:shopId]) return;
     
     if (error == nil) {
-        [_tipView setSessionTipForWaiting:showNumber waitingNumber:waitingNumber];
+        [_tipView setSessionTipForWaiting:waitStatus.showNumber waitingNumber:waitStatus.waitingNumber
+                               inQueeuStr:waitStatus.inQueeuNotify];
     }
     else {
         //目前不需要处理
@@ -2306,8 +2392,11 @@ static long long sessionId;
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     if ([sessionManager getSession:_shopId] && [sessionManager getSession:_shopId].sessionId == session.sessionId) {
         [self clearSessionState];
+        _closeSession.hidden = NO;
         _closeSession.enabled = NO;
-
+        _closeSessionText.hidden = NO;
+        _closeSessionText.enabled = NO;
+        
         if (_evaluation.enabled == YES) {
             if (!self.presentedViewController) {
                 if (!evaluate) {
@@ -2354,7 +2443,7 @@ static long long sessionId;
         NSError *error = wait_status.code == YSFCodeSuccess ? nil : [NSError errorWithDomain:YSFErrorDomain
                                                                                         code:wait_status.code
                                                                                     userInfo:nil];
-        [self didReceiveWaitingStatus:error showNumber:wait_status.showNumber waitingNumber:wait_status.waitingNumber shopId:shopId];
+        [self didReceiveWaitingStatus:error waitStatus:wait_status shopId:shopId];
         if (wait_status.code != YSFCodeSuccess) {
             [_queryWaitingStatusTimer stop];
         }

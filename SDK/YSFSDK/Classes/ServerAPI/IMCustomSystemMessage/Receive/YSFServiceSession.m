@@ -38,6 +38,7 @@
     instance.code                   = [dict ysf_jsonInteger:YSFApiKeyCode];
     instance.operatorEable          = [dict ysf_jsonInteger:YSFApiKeyOperatorEnable];
     instance.notExistTip            = [dict ysf_jsonString:YSFApiKeyMessage];
+    instance.inQueeuNotify = [dict ysf_jsonString:YSFApiKeyInqueueNotify];
     instance.showNumber  = [dict ysf_jsonBool:YSFApiKeyShowNum];
     
     NSMutableDictionary *evaluationDict = [NSMutableDictionary new];

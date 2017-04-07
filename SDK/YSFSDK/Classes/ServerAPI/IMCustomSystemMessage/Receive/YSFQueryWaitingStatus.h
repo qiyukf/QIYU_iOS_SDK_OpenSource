@@ -21,6 +21,7 @@
 @property (nonatomic,copy)      NSString        *message;
 @property (nonatomic,copy)      NSString        *shopId;
 @property (nonatomic,assign)    BOOL       showNumber;
+@property (nonatomic,copy)      NSString        *inQueeuNotify;
 
 + (YSFQueryWaitingStatusResponse *)dataByJson:(NSDictionary *)dict;
 @end
