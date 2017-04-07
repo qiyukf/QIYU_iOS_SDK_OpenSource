@@ -7,8 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "QYMessageInfo.h"
-#import "QYSessionInfo.h"
+
+@class QYMessageInfo;
+@class QYSessionInfo;
+
 
 /**
  *  会话委托

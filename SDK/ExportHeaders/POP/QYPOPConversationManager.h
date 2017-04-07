@@ -8,11 +8,6 @@
 
 #import "QYConversationManager.h"
 
-/**
- *  平台电商专用
- */
-@class QYPOPSessionInfo;
-@class QYPOPMessageInfo;
 
 /**
  *  会话委托
@@ -29,7 +24,7 @@
  *
  *  @param message 消息信息
  */
-- (void)onReceiveMessage:(QYPOPMessageInfo *)message;
+- (void)onReceiveMessage:(QYMessageInfo *)message;
 
 @end
 
