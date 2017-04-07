@@ -34,8 +34,6 @@ typedef enum : NSUInteger {
 @interface YSFSessionManager : NSObject
 
 @property (nonatomic,weak)  id<YSFSessionProtocol>  delegate;
-@property (nonatomic, strong, readonly)   NSMutableDictionary *sessionStateType;
-@property (nonatomic,strong, readonly)    NSMutableDictionary *sessions;          //当前会话列表
 
 - (void)readData;
 
@@ -57,6 +55,8 @@ typedef enum : NSUInteger {
 
 - (YSFSessionStateType)getSessionStateType:(NSString *)shopId;
 - (YSFServiceSession *)getSession:(NSString *)shopId;
+- (YSFServiceSession *)getSessionInAll:(NSString *)shopId;
+
 - (void)clear;
 - (void)clearByShopId:(NSString *)shopId;
 

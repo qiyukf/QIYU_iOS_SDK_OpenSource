@@ -85,8 +85,7 @@
         
         sessionInfo.unreadCount = item.unreadCount;
         sessionInfo.lastMessageTimeStamp = item.lastMessage.timestamp;
-        YSFSessionStateType stateType = [[[[QYSDK sharedSDK] sessionManager].sessionStateType
-                               ysf_jsonString:sessionInfo.shopId] integerValue];
+        YSFSessionStateType stateType = [[[QYSDK sharedSDK] sessionManager] getSessionStateType:sessionInfo.shopId];
         if (stateType == YSFSessionStateTypeOnline) {
             sessionInfo.status = QYSessionStatusInSession;
         }

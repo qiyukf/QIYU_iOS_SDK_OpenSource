@@ -192,6 +192,11 @@
  */
 @property (nonatomic, strong) UIImage *sessionListEntranceImage;
 
+/**
+ *  是否显示关闭会话入口
+ */
+@property (nonatomic, assign) BOOL showCloseSessionEntry;
+
 @end
 
 @interface QYCustomUIConfig()

@@ -139,7 +139,7 @@ YSFServiceRequestDelegate>
 - (BOOL)serviceOutOfDate:(NSString *)shopId
 {
     BOOL result = YES;
-    if (_sessions[shopId])
+    if ([self getSession:shopId])
     {
         result = NO;
     }
@@ -153,7 +153,7 @@ YSFServiceRequestDelegate>
 - (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId;
 {
     BOOL waitingOrNotExist = false;
-    if (!_sessions[shopId] && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
+    if (![self getSession:shopId] && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
                                || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist)) {
         waitingOrNotExist = true;
     }
@@ -247,16 +247,17 @@ YSFServiceRequestDelegate>
     else {
         [self removeSessionByShopId:shopId];
         if (code == YSFCodeServiceWaiting) {
-            YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
-            YSF_NIMRecentSession *recentSession = [[[YSF_NIMSDK sharedSDK] conversationManager] queryRecentSession:session];
+            YSF_NIMSession *nimSession = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+            YSF_NIMRecentSession *recentSession = [[[YSF_NIMSDK sharedSDK] conversationManager] queryRecentSession:nimSession];
             if (!recentSession) {
                 recentSession = [YSF_NIMRecentSession new];
                 YSF_NIMMessage *message = [YSFMessageMaker msgWithText:@""];
-                message.session = session;
+                message.session = nimSession;
                 recentSession.lastMessage = message;
                 recentSession.session = message.session;
                 [[[YSF_NIMSDK sharedSDK] conversationManager] addRecentSession:recentSession];
             }
+            [self addSession:session shopId:shopId];
             [self setSessionStateType:shopId type:YSFSessionStateTypeWaiting];
         }
         else if (code == YSFCodeServiceNotExist)
@@ -336,7 +337,7 @@ YSFServiceRequestDelegate>
                                                        forSession:session addUnreadCount:YES completion:nil];
     }
     
-    [_delegate didClose:object.evaluate session:_sessions[shopId] shopId:shopId];
+    [_delegate didClose:object.evaluate session:[self getSession:shopId] shopId:shopId];
     [self clearByShopId:shopId];
 }
 
@@ -479,7 +480,20 @@ YSFServiceRequestDelegate>
 - (YSFServiceSession *)getSession:(NSString *)shopId
 {
     if (!shopId) return nil;
-    return _sessions[shopId];
+    YSFServiceSession *session = _sessions[shopId];
+    if (session && session.code == YSFCodeSuccess) {
+        return session;
+    }
+    else {
+        return nil;
+    }
+}
+
+- (YSFServiceSession *)getSessionInAll:(NSString *)shopId
+{
+    if (!shopId) return nil;
+    YSFServiceSession *session = _sessions[shopId];
+    return session;
 }
 
 - (void)addSession:(YSFServiceSession *)session shopId:(NSString *)shopId

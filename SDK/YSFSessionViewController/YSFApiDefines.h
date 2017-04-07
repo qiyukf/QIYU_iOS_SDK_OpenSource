@@ -113,6 +113,7 @@
 #define     YSFApiKeyLevel              @"level"
 #define     YSFApiKeyAuthToken          @"authToken"
 #define     YSFApiKeyMessage            @"message"
+#define     YSFApiKeyShowNum            @"showNum"
 #define     YSFApiKeyAttachment         @"attachment"
 #define     YSFApiKeyExtra              @"extra"
 #define     YSFApiKeyTimestamp          @"timestamp"
@@ -168,6 +169,7 @@ typedef enum : NSUInteger {
     YSFCommandReadSessionRequest        =   9,      //会话已读标记
     YSFCommandWaitingStatusResponse     =   15,     //等待状态回包
     YSFCommandWaitingStatusRequest      =   16,     //查询等待状态
+    YSFCommandCancelWaiting             =   26,     //取消排队
     YSFCommandEvaluationRequest         =   51,     //满意度评价
     YSFCommandSetUserInfoRequest        =   52,     //轻量CRM
     YSFCommandMachine                   =   60,     //机器人问答

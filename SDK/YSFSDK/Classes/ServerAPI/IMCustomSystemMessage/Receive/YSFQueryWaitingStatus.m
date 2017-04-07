@@ -35,6 +35,7 @@
     instance.code                         = [dict ysf_jsonInteger:@"code"];
     instance.message                      = [dict ysf_jsonString:@"message"];
     instance.shopId = [dict ysf_jsonString:YSFApiKeyBId];
+    instance.showNumber  = [dict ysf_jsonBool:YSFApiKeyShowNum];
     return instance;
 }
 

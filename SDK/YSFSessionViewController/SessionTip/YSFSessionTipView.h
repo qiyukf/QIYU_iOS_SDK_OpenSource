@@ -27,7 +27,7 @@ typedef enum : NSUInteger {
 
 - (CGFloat)getTipLabelHeight;
 - (void)setSessionTip:(YSFSessionTipType)type;
-- (void)setSessionTipForWaiting:(NSInteger)waitingNumber;
+- (void)setSessionTipForWaiting:(BOOL)showNumber waitingNumber:(NSInteger)waitingNumber;
 - (void)setSessionTipForNotExist:(NSString *)tip;
 
 @end

@@ -28,6 +28,7 @@
 @property (nonatomic,strong)    NSDictionary    *evaluation;
 @property (nonatomic,copy)      NSArray         *actionInfoArray;
 @property (nonatomic,strong)    YSFShopInfo     *shopInfo;           //平台电商的商铺信息
+@property (nonatomic,assign)    BOOL showNumber;
 
 
 - (BOOL)canOfferService;

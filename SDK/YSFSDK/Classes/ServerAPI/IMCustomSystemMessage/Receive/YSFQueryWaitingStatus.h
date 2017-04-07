@@ -20,6 +20,7 @@
 @property (nonatomic,assign)    NSInteger       code;
 @property (nonatomic,copy)      NSString        *message;
 @property (nonatomic,copy)      NSString        *shopId;
+@property (nonatomic,assign)    BOOL       showNumber;
 
 + (YSFQueryWaitingStatusResponse *)dataByJson:(NSDictionary *)dict;
 @end

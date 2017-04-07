@@ -13,6 +13,7 @@
 @interface YSFSessionTipView ()<YSFAttributedLabelDelegate>
 @property (nonatomic,strong)    YSFAttributedLabel *tipLabel;
 @property (nonatomic,assign)    YSFSessionTipType type;
+@property (nonatomic,assign)    BOOL showNumber;
 @end
 
 @implementation YSFSessionTipView
@@ -30,7 +31,7 @@
         _tipLabel.autoDetectNumber = NO;
         _tipLabel.textAlignment = kCTTextAlignmentCenter;
         _tipLabel.delegate = self;
-        
+        _showNumber = YES;
         [self addSubview:_tipLabel];
         
     }
@@ -77,8 +78,9 @@
     [[self ysf_viewController].view setNeedsLayout];
 }
 
-- (void)setSessionTipForWaiting:(NSInteger)waitingNumber
+- (void)setSessionTipForWaiting:(BOOL)showNumber waitingNumber:(NSInteger)waitingNumber;
 {
+    self.showNumber = showNumber;
     BOOL should_tip = [self shouldTip:YSFSessionTipServicewaiting];
     if (!should_tip) {
         return;
@@ -86,6 +88,9 @@
     
     _type = YSFSessionTipServicewaiting;
     NSString * tip_str = [NSString stringWithFormat:@"正在排队，您的前面还有%ld个人，请稍等...", (long)waitingNumber];
+    if (!_showNumber) {
+        tip_str = @"当前排队人数较多，请耐心等待...";
+    }
     [_tipLabel setText:tip_str];
     [self setHidden:NO];
     [[self ysf_viewController].view setNeedsLayout];
