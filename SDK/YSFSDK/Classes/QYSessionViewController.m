@@ -364,7 +364,14 @@ static long long sessionId;
     if ([[QYSDK sharedSDK] customUIConfig].showCloseSessionEntry) {
         _closeSession = [[UIButton alloc] init];
         _closeSession.imageView.contentMode = UIViewContentModeScaleAspectFit;
-        UIImage *closeSessionImage = [[UIImage ysf_imageInKit:@"icon_close_session"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        UIImage *closeSessionImage = nil;
+        if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
+            closeSessionImage = [[UIImage ysf_imageInKit:@"icon_close_session_black"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        }
+        else {
+            closeSessionImage = [[UIImage ysf_imageInKit:@"icon_close_session_white"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        }
+
         [_closeSession setImage:closeSessionImage forState:UIControlStateNormal];
         _closeSession.enabled = NO;
         [_closeSession addTarget:self action:@selector(onCloseSession:) forControlEvents:UIControlEventTouchUpInside];
@@ -372,7 +379,14 @@ static long long sessionId;
         
         _moreButton = [[UIButton alloc] init];
         _moreButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
-        UIImage *moreImage = [[UIImage ysf_imageInKit:@"icon_toolview_keyboard_normal"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        
+        UIImage *moreImage = nil;
+        if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
+            moreImage = [[UIImage ysf_imageInKit:@"icon_more_black"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        }
+        else {
+            moreImage = [[UIImage ysf_imageInKit:@"icon_more_white"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        }
         [_moreButton setImage:moreImage forState:UIControlStateNormal];
         [_moreButton addTarget:self action:@selector(onMore:) forControlEvents:UIControlEventTouchUpInside];
         [rightButtonView addSubview:_moreButton];
@@ -634,10 +648,10 @@ static long long sessionId;
     QYCustomUIConfig *uiConfig = [QYSDK sharedSDK].customUIConfig;
     NSString *evaluationIcon = nil;
     if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
-        evaluationIcon = @"icon_evaluation_disable_black";
+        evaluationIcon = @"icon_evaluation_black";
     }
     else {
-        evaluationIcon = @"icon_evaluation_disable_white";
+        evaluationIcon = @"icon_evaluation_white";
     }
     UIImage *image = [[UIImage ysf_imageInKit:evaluationIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     [_evaluation setImage:image forState:UIControlStateNormal];
@@ -657,10 +671,10 @@ static long long sessionId;
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
     NSString *evaluationIcon = nil;
     if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
-        evaluationIcon = @"icon_evaluation_enable_black";
+        evaluationIcon = @"icon_evaluation_black";
     }
     else {
-        evaluationIcon = @"icon_evaluation_enable_white";
+        evaluationIcon = @"icon_evaluation_white";
     }
     UIImage *image = [[UIImage ysf_imageInKit:evaluationIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     [_evaluation setImage:image forState:UIControlStateNormal];
@@ -720,9 +734,9 @@ static long long sessionId;
     UIButton *evaluation = [UIButton new];
     evaluation.frame = CGRectMake(0, 0, 120, 30);
     evaluation.titleLabel.font = [UIFont systemFontOfSize:15];
-    UIImage *evaluationImage = [UIImage ysf_imageInKit:@"icon_evaluation_enable_black"];
-    [evaluation setImage:evaluationImage forState:UIControlStateNormal];
-    [evaluation setTitle:@"评价" forState:UIControlStateNormal];
+    [evaluation setImage:_evaluation.imageView.image forState:UIControlStateNormal];
+    [evaluation setTitle:_evaluationText.titleLabel.text forState:UIControlStateNormal];
+    evaluation.enabled = _evaluation.enabled;
     evaluation.imageEdgeInsets = UIEdgeInsetsMake(6, -20, 6, 20);
     evaluation.titleEdgeInsets = UIEdgeInsetsMake(0, -25, 0, 0);
     [evaluation setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
@@ -731,9 +745,9 @@ static long long sessionId;
     UIButton *close = [UIButton new];
     close.frame = CGRectMake(0, 30, 120, 30);
     close.titleLabel.font = [UIFont systemFontOfSize:15];
-    UIImage *closeSessionImage = [UIImage ysf_imageInKit:@"icon_close_session"];
-    [close setImage:closeSessionImage forState:UIControlStateNormal];
-    [close setTitle:@"结束对话" forState:UIControlStateNormal];
+    [close setImage:_closeSession.imageView.image forState:UIControlStateNormal];
+    [close setTitle:@"退出" forState:UIControlStateNormal];
+    close.enabled = _closeSession.enabled;
     close.imageEdgeInsets = UIEdgeInsetsMake(0, -20, 0, 0);
     [close setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [close addTarget:self action:@selector(onCloseSession:) forControlEvents:UIControlEventTouchUpInside];

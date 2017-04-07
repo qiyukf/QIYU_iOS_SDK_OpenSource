@@ -7,6 +7,7 @@
 //
 
 typedef NS_ENUM(NSInteger, QuitType) {
+    QYQuitTypeNone,
     QYQuitTypeContinue,
     QYQuitTypeNext,
     QYQuitTypeCancel,

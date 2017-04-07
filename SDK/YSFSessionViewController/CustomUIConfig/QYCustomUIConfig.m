@@ -64,7 +64,7 @@
     _showEmoticonEntry = YES;
     _autoShowKeyboard = YES;
     
-    _showShopEntrance = YES;
+    _showShopEntrance = NO;
     _shopEntranceImage = nil;
     _shopEntranceText = @"商铺";
     
