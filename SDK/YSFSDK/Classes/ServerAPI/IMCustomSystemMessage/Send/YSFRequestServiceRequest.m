@@ -27,14 +27,13 @@
                                        YSFApiKeyFromType    :   YSFApiValueIOS,
                                        YSFApiKeyFromSubType :   [[UIDevice currentDevice] systemVersion],
                                        YSFApiKeyStaffType   :   @(intOnlyManual),
-                                       YSFApiKeyVersion     :   @"27",
+                                       YSFApiKeyVersion     :   @"28",
                                        YSFApiKeyStaffId     :   @(_staffId),
                                        YSFApiKeyGroupId     :   @(_groupId),
                                        YSFApiKeyEntryId     :   @(_entryId),
                                        YSFApiKeyRobotShuntSwitch : @(intOpenRobotInShuntMode),
                                        YSFApiKeyCommonQuestionTemplateId  :  @(_commonQuestionTemplateId),
                                        YSFApiKeyLevel  :  @(_vipLevel),
-                                       YSFApiKeyAuthToken  :  YSFStrParam(_authToken),
                                        }];
     
     //附带信息
@@ -51,10 +50,6 @@
     NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
     if ([bundleId length]) {
         [params setObject:bundleId forKey:YSFApiKeyFromBundleId];
-    }
-    NSString *foreignId = [[QYSDK sharedSDK] infoManager].currentForeignUserId;
-    if (foreignId) {
-        [params setObject:foreignId forKey:YSFApiKeyForeignid];
     }
     NSString *ip = [[YSF_NIMSDK sharedSDK] currentIp];
     if ([ip length])

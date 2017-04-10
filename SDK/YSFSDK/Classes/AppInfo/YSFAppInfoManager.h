@@ -9,6 +9,7 @@
 #import "YSFAccountInfo.h"
 #import "QYUserInfo.h"
 #import "YSFServiceSession.h"
+#import "QYSDK_Private.h"
 
 #define YSFAppInfoKey       @"app_info"
 #define YSFAppSettingKey    @"app_setting"
@@ -49,7 +50,7 @@
 
 - (NSString *)appDeviceId;
 
-- (void)setUserInfo:(QYUserInfo *)userInfo;
+- (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block;
 
 - (BOOL)isRecevierOrSpeaker;
 

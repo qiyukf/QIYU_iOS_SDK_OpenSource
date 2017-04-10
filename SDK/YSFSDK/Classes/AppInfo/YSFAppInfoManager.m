@@ -11,7 +11,6 @@
 #import "YSFHttpApi.h"
 #import "YSFSetUserInfoRequest.h"
 #import "YSFKeyValueStore.h"
-#import "QYSDK_Private.h"
 #import "YSFLoginManager.h"
 #import "YSFRelationStore.h"
 #import "YSFAppSetting.h"
@@ -19,10 +18,11 @@
 
 
 @interface YSFAppInfoManager ()
-<YSFLoginManagerDelegate,YSF_NIMLoginManagerDelegate>
+<YSFLoginManagerDelegate,YSF_NIMLoginManagerDelegate, YSF_NIMSystemNotificationManagerDelegate>
 @property (nonatomic,strong)    YSFAccountInfo      *accountInfo;
 @property (nonatomic,strong)    YSFAppSetting       *appSetting;
 @property (nonatomic,strong)    QYUserInfo          *qyUserInfo;
+@property (nonatomic,copy)      QYCompletionWithResultBlock completionWithResultBlock;
 @property (nonatomic,copy)      NSString            *currentForeignUserId;
 @property (nonatomic,strong)    YSFKeyValueStore    *store;
 @property (nonatomic,copy)      NSString            *deviceId;
@@ -39,9 +39,9 @@
         _loginManager = [[YSFLoginManager alloc] init];
         _loginManager.delegate = self;
         
-
-        
         [[[YSF_NIMSDK sharedSDK] loginManager] addDelegate:self];
+        [[[YSF_NIMSDK sharedSDK] systemNotificationManager] addDelegate:self];
+
     }
     return self;
 }
@@ -49,6 +49,7 @@
 - (void)dealloc
 {
     [[[YSF_NIMSDK sharedSDK] loginManager] removeDelegate:self];
+    [[[YSF_NIMSDK sharedSDK] systemNotificationManager] removeDelegate:self];
 }
 
 - (NSString *)currentUserId
@@ -91,11 +92,12 @@
     }
 }
 
-- (void)setUserInfo:(QYUserInfo *)userInfo
+- (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block;
 {
     if (userInfo) {
         self.qyUserInfo = userInfo;
         self.currentForeignUserId = userInfo.userId;
+        self.completionWithResultBlock = block;
         [self saveUserInfo];
         [self reportUserInfo];
     }
@@ -480,6 +482,31 @@
                                       YSFLogApp(@"requestSessionStatus error:%@", error);
                                   }];
     
+}
+
+- (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification
+{
+    NSString *content = notification.content;
+    YSFLogApp(@"notification: %@",content);
+    NSDictionary *dict = [content ysf_toDict];
+    if (dict) {
+        NSInteger cmd = [dict ysf_jsonInteger:YSFApiKeyCmd];
+        switch (cmd) {
+            case YSFCommandSetCrmResult:
+            {
+                NSString *foreignId = [dict ysf_jsonString:YSFApiKeyForeignId];
+                NSString *authToken = [dict ysf_jsonString:YSFApiKeyAuthToken];
+                BOOL result = [dict ysf_jsonBool:YSFApiKeyResult];
+                if ([_currentForeignUserId isEqualToString:foreignId]
+                    && [[QYSDK sharedSDK].authToken isEqualToString:authToken]) {
+                    if (_completionWithResultBlock) {
+                        _completionWithResultBlock(result);
+                    }
+                }
+            }
+                break;
+        }
+    }
 }
 
 @end

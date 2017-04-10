@@ -132,14 +132,16 @@
     }
     
     if (attachment.operatorHint && attachment.operatorHintDesc.length > 0) {
-        UIView *splitLine = [UIView new];
-        splitLine.backgroundColor = YSFRGB(0xdbdbdb);
-        splitLine.ysf_frameHeight = 0.5;
-        splitLine.ysf_frameLeft = 5;
-        splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
-        splitLine.ysf_frameTop = offsetY;
-        [_content addSubview:splitLine];
-        
+        if (_content.subviews.count > 0) {
+            UIView *splitLine = [UIView new];
+            splitLine.backgroundColor = YSFRGB(0xdbdbdb);
+            splitLine.ysf_frameHeight = 0.5;
+            splitLine.ysf_frameLeft = 5;
+            splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
+            splitLine.ysf_frameTop = offsetY;
+            [_content addSubview:splitLine];
+        }
+
         YSFAttributedLabel *questionLabel = [self newAttrubutedLabel];
         [questionLabel appendHTMLText:attachment.operatorHintDesc];
         CGSize size = [questionLabel sizeThatFits:CGSizeMake(self.model.contentSize.width, CGFLOAT_MAX)];

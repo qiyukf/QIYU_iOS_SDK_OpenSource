@@ -171,6 +171,7 @@ typedef enum : NSUInteger {
     YSFCommandWaitingStatusResponse     =   15,     //等待状态回包
     YSFCommandWaitingStatusRequest      =   16,     //查询等待状态
     YSFCommandCancelWaiting             =   26,     //取消排队
+    YSFCommandSetCrmResult              =   41,     //设置crm结果
     YSFCommandEvaluationRequest         =   51,     //满意度评价
     YSFCommandSetUserInfoRequest        =   52,     //轻量CRM
     YSFCommandMachine                   =   60,     //机器人问答
@@ -187,23 +188,23 @@ typedef enum : NSUInteger {
 
 
     //客服端
+    YSFCommandNewSession                =   3,      //有新的会话
     YSFCommandCloseServiceResponse      =   7,      //关闭客服
+    YSFCommandKefuLogout                =   10,     //客服登出
     YSFCommandUserSwitchAccount         =   11,     //用户切换账号
     YSFCommandSetOnlineState            =   12,     //设置客服在线状态
-    YSFCommandWeChatMessage             =   20,     //微信消息
-    YSFCommandNewSession                =   3,      //有新的会话
-    YSFCommandWelcome                   =   40,     //欢迎语
-    YSFCommandKefuLogout                =   10,     //客服登出
     YSFCommandUserOffline               =   18,     //客户离线了
+    YSFCommandWeChatMessage             =   20,     //微信消息
+    YSFCommandOfflineTimeout            =   32,    //离线时间超时
+    YSFCommandWelcome                   =   40,     //欢迎语
     YSFCommandReportQuestion            =   63,     //选择问题
-    YSFCommandSessionClose              =   84,     //自定义消息；会话关闭
-    YSFCommandSendLogin                 =   85,     //通知其他端的自己被踢出
-    YSFCommandQueueChanged              =   82,     //排队人数变化
     YSFCommandSessionWillClose          =   70,     //用户没有回复，稍后系统将关闭
     YSFCommandSessionClosedBySysterm    =   71,     //系统自动关闭会话
-    YSFCommandAudioToText               =   136,    //推送语音转文字结果
-    YSFCommandOfflineTimeout            =   32,    //离线时间超时
+    YSFCommandQueueChanged              =   82,     //排队人数变化
+    YSFCommandSessionClose              =   84,     //自定义消息；会话关闭
+    YSFCommandSendLogin                 =   85,     //通知其他端的自己被踢出
     YSFCommandNewWorkOrder              =   115,    //有新的工单分配过来
+    YSFCommandAudioToText               =   136,    //推送语音转文字结果
     
 
     //本地自定义消息

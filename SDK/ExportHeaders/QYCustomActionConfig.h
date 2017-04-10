@@ -6,11 +6,14 @@
 //  Copyright (c) 2017 Netease. All rights reserved.
 //
 
-typedef NS_ENUM(NSInteger, QuitType) {
-    QYQuitTypeNone,
-    QYQuitTypeContinue,
-    QYQuitTypeNext,
-    QYQuitTypeCancel,
+/**
+ *  退出排队结果类型
+ */
+typedef NS_ENUM(NSInteger, QuitWaitingType) {
+    QuitWaitingTypeNone,     //当前不是在排队状态
+    QuitWaitingTypeContinue, //继续排队
+    QuitWaitingTypeQuit,     //退出排队
+    QuitWaitingTypeCancel,   //取消操作
 };
 
 /**
@@ -18,9 +21,21 @@ typedef NS_ENUM(NSInteger, QuitType) {
  */
 typedef void (^QYLinkClickBlock)(NSString *linkAddress);
 
+/**
+ *  bot点击事件回调
+ */
 typedef void (^QYBotClickBlock)(NSString *target, NSString *params);
-typedef void (^QYShowQuitWaitingBlock)(QuitType quitType);
-typedef void (^QYShowQuitBlock)(QYShowQuitWaitingBlock block);
+
+/**
+ *  退出排队回调
+ */
+typedef void (^QYQuitWaitingBlock)(QuitWaitingType quitType);
+
+/**
+ *  是否退出排队回调
+ */
+typedef void (^QYQuitBlock)(QYQuitWaitingBlock block);
+
 
 /**
  *  自定义行为配置类
@@ -39,7 +54,7 @@ typedef void (^QYShowQuitBlock)(QYShowQuitWaitingBlock block);
  */
 @property (nonatomic, copy) QYBotClickBlock botClick;
 
-@property (nonatomic, copy) QYShowQuitBlock showQuitBlock;
+@property (nonatomic, copy) QYQuitBlock showQuitBlock;
 
 /**
  *  设置录制或者播放语音完成以后是否自动deactivate AVAudioSession
@@ -48,8 +63,12 @@ typedef void (^QYShowQuitBlock)(QYShowQuitWaitingBlock block);
  */
 - (void)setDeactivateAudioSessionAfterComplete:(BOOL)deactivate;
 
-- (void)showQuitWaiting:(QYShowQuitWaitingBlock)showQuitWaitingBlock;
-
+/**
+ *  显示退出排队提示
+ *
+ *  @param quitWaitingBlock 选择结果回调
+ */
+- (void)showQuitWaiting:(QYQuitWaitingBlock)quitWaitingBlock;
 
 @end
 

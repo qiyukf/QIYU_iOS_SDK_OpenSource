@@ -130,20 +130,20 @@ static long long sessionId;
     [self makeHandlerAndDataSource];
     
     __weak typeof(self) weakSelf = self;
-    [QYCustomActionConfig sharedInstance].showQuitBlock = ^(QYShowQuitWaitingBlock showQuitWaitingBlock) {
+    [QYCustomActionConfig sharedInstance].showQuitBlock = ^(QYQuitWaitingBlock showQuitWaitingBlock) {
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
         if ([sessionManager getSessionStateType:weakSelf.shopId] != YSFSessionStateTypeWaiting) {
             if (showQuitWaitingBlock) {
-                showQuitWaitingBlock(QYQuitTypeNone);
+                showQuitWaitingBlock(QuitWaitingTypeNone);
             }
             return;
         }
         
-        YSFAlertController * alertController = [YSFAlertController actionSheetWithTitle:@"是否继续咨询在线客服？您可以先去逛逛，排队成功后将提醒您"];
+        YSFAlertController * alertController = [YSFAlertController alertWithTitle:@"" message:@"是否继续咨询在线客服？您可以先去逛逛，排队成功后将提醒您"];
         [alertController addAction:[YSFAlertAction actionWithTitle:@"帮我排队" handler:^(YSFAlertAction * _Nonnull action) {
             [weakSelf.navigationController popViewControllerAnimated:YES];
             if (showQuitWaitingBlock) {
-                showQuitWaitingBlock(QYQuitTypeContinue);
+                showQuitWaitingBlock(QuitWaitingTypeContinue);
             }
         }]];
         [alertController addAction:[YSFAlertAction actionWithTitle:@"下次咨询" handler:^(YSFAlertAction * _Nonnull action) {
@@ -151,7 +151,7 @@ static long long sessionId;
         }]];
         [alertController addCancelActionWithHandler:^(YSFAlertAction * _Nonnull action) {
             if (showQuitWaitingBlock) {
-                showQuitWaitingBlock(QYQuitTypeCancel);
+                showQuitWaitingBlock(QuitWaitingTypeCancel);
             }
         }];
         
@@ -204,7 +204,7 @@ static long long sessionId;
 }
 
 - (void)sendCloseSessionCustomMessage:(BOOL)quitWaitingOrCloseSession
-        showQuitWaitingBlock:(QYShowQuitWaitingBlock)showQuitWaitingBlock
+        showQuitWaitingBlock:(QYQuitWaitingBlock)showQuitWaitingBlock
 {
     if (quitWaitingOrCloseSession) {
         [self.view ysf_makeToast:@"退出排队中" duration:2 position:YSFToastPositionCenter];
@@ -220,13 +220,13 @@ static long long sessionId;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error){
         if (error) {
             if (quitWaitingOrCloseSession) {
-                [self.view ysf_makeToast:@"退出排队失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
+                [weakSelf.view ysf_makeToast:@"退出排队失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                     [weakSelf.navigationController popViewControllerAnimated:YES];
                 });
             }
             else {
-                [self.view ysf_makeToast:@"退出对话失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
+                [weakSelf.view ysf_makeToast:@"退出对话失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
             }
         }
         else {
@@ -243,7 +243,7 @@ static long long sessionId;
                 [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
             }
             if (showQuitWaitingBlock) {
-                showQuitWaitingBlock(QYQuitTypeNext);
+                showQuitWaitingBlock(QuitWaitingTypeQuit);
             }
         }
     }];
@@ -272,13 +272,6 @@ static long long sessionId;
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-    QYShowQuitBlock block = [QYCustomActionConfig sharedInstance].showQuitBlock;
-    if (block) {
-        block(^(QuitType type) {
-            
-        });
-    }
-    
     YSFLogApp(@"");
 
     [super viewWillDisappear:animated];
@@ -313,7 +306,7 @@ static long long sessionId;
     self.navigationItem.title = [self sessionTitle];
     
     //两个按钮的父类view
-    UIView *rightButtonView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 80, 45)];
+    UIView *rightButtonView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 80, 40)];
     
     //人工客服
     _humanService = [[UIButton alloc] init];
@@ -329,7 +322,7 @@ static long long sessionId;
     else {
         [_humanServiceText setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     }
-    _humanServiceText.titleLabel.font = [UIFont systemFontOfSize:14];
+    _humanServiceText.titleLabel.font = [UIFont systemFontOfSize:10];
     [_humanServiceText addTarget:self action:@selector(onHumanChat:) forControlEvents:UIControlEventTouchUpInside];
     //商铺
     _shopEntrance = [[UIButton alloc] init];
@@ -338,7 +331,7 @@ static long long sessionId;
     [rightButtonView addSubview:_shopEntrance];
     _shopEntranceText = [[UIButton alloc] init];
     [rightButtonView addSubview:_shopEntranceText];
-    _shopEntranceText.titleLabel.font = [UIFont systemFontOfSize:14];
+    _shopEntranceText.titleLabel.font = [UIFont systemFontOfSize:10];
     _shopEntranceText.titleLabel.lineBreakMode = NSLineBreakByTruncatingTail;
     _shopEntranceText.titleLabel.textAlignment = NSTextAlignmentCenter;
     if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
@@ -355,7 +348,7 @@ static long long sessionId;
     [_evaluation addTarget:self action:@selector(onEvaluate:) forControlEvents:UIControlEventTouchUpInside];
     _evaluationText = [[UIButton alloc] init];
     [rightButtonView addSubview:_evaluationText];
-    _evaluationText.titleLabel.font = [UIFont systemFontOfSize:14];
+    _evaluationText.titleLabel.font = [UIFont systemFontOfSize:10];
     if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
         [_evaluationText setTitleColor:YSFRGB(0x76838f) forState:UIControlStateNormal];
     }
@@ -390,7 +383,7 @@ static long long sessionId;
         else {
             [_closeSessionText setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         }
-        _closeSessionText.titleLabel.font = [UIFont systemFontOfSize:14];
+        _closeSessionText.titleLabel.font = [UIFont systemFontOfSize:10];
         [_closeSessionText addTarget:self action:@selector(onCloseSession:) forControlEvents:UIControlEventTouchUpInside];
 
         _moreButton = [[UIButton alloc] init];
@@ -415,7 +408,7 @@ static long long sessionId;
         else {
             [_moreButtonText setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         }
-        _moreButtonText.titleLabel.font = [UIFont systemFontOfSize:14];
+        _moreButtonText.titleLabel.font = [UIFont systemFontOfSize:10];
         [_moreButtonText addTarget:self action:@selector(onMore:) forControlEvents:UIControlEventTouchUpInside];
     }
     
@@ -475,7 +468,6 @@ static long long sessionId;
         [self showSessionListEntrance];
     }
     
-    [self setRightButtonViewFrame];
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     if (![sessionManager shouldRequestService:YES shopId:_shopId])
     {
@@ -554,29 +546,29 @@ static long long sessionId;
     }
     else {
         if (_evaluation.hidden && _humanService.hidden && (!_closeSession || _closeSession.hidden)) {
-            _shopEntrance.frame = CGRectMake(40, 7, 50, 20);
-            _shopEntranceText.frame = CGRectMake(50, 23, 30, 20);
+            _shopEntrance.frame = CGRectMake(40, 5, 50, 20);
+            _shopEntranceText.frame = CGRectMake(50, 21, 30, 20);
         }
         else {
-            _shopEntrance.frame = CGRectMake(0, 7, 50, 20);
-            _shopEntranceText.frame = CGRectMake(10, 23, 30, 20);
+            _shopEntrance.frame = CGRectMake(0, 5, 50, 20);
+            _shopEntranceText.frame = CGRectMake(10, 21, 30, 20);
         }
         if (!_closeSession || _closeSession.hidden) {
-            _humanService.frame = CGRectMake(40, 7, 50, 20);
-            _humanServiceText.frame = CGRectMake(40, 23, 50, 20);
+            _humanService.frame = CGRectMake(40, 5, 50, 20);
+            _humanServiceText.frame = CGRectMake(40, 21, 50, 20);
             _evaluation.frame = _humanService.frame;
             _evaluationText.frame = _humanServiceText.frame;
         }
         else {
-            _humanService.frame = CGRectMake(0, 7, 50, 20);
-            _humanServiceText.frame = CGRectMake(0, 23, 50, 20);
+            _humanService.frame = CGRectMake(0, 5, 50, 20);
+            _humanServiceText.frame = CGRectMake(0, 21, 50, 20);
             _evaluation.frame = _humanService.frame;
             _evaluationText.frame = _humanServiceText.frame;
         }
-        _closeSession.frame = CGRectMake(40, 7, 50, 20);
-        _closeSessionText.frame = CGRectMake(40, 23, 50, 20);
-        _moreButton.frame = CGRectMake(40, 7, 50, 20);
-        _moreButtonText.frame = CGRectMake(40, 23, 50, 20);
+        _closeSession.frame = CGRectMake(40, 5, 50, 20);
+        _closeSessionText.frame = CGRectMake(40, 21, 50, 20);
+        _moreButton.frame = CGRectMake(40, 5, 50, 20);
+        _moreButtonText.frame = CGRectMake(40, 21, 50, 20);
     }
 }
 
@@ -720,6 +712,8 @@ static long long sessionId;
     _closeSessionText.hidden = YES;
 
     [self changeEvaluationButtonToInit];
+    
+    [self setRightButtonViewFrame];
 }
 
 - (void)changeEvaluationButtonToInit
@@ -811,26 +805,34 @@ static long long sessionId;
 {
     UIView *tipView = [UIView new];
     tipView.userInteractionEnabled = YES;
-    tipView.frame = CGRectMake(0, 0, 120, 60);
+    tipView.frame = CGRectMake(0, 0, 90, 100);
     UIButton *evaluation = [UIButton new];
-    evaluation.frame = CGRectMake(0, 0, 120, 30);
+    evaluation.frame = CGRectMake(0, 0, 90, 50);
     evaluation.titleLabel.font = [UIFont systemFontOfSize:15];
     [evaluation setImage:_evaluation.imageView.image forState:UIControlStateNormal];
     [evaluation setTitle:_evaluationText.titleLabel.text forState:UIControlStateNormal];
     evaluation.enabled = _evaluation.enabled;
-    evaluation.imageEdgeInsets = UIEdgeInsetsMake(6, -20, 6, 20);
-    evaluation.titleEdgeInsets = UIEdgeInsetsMake(0, -25, 0, 0);
+    if (evaluation.titleLabel.text.length == 3) {
+        tipView.ysf_frameWidth = 104;
+        evaluation.imageEdgeInsets = UIEdgeInsetsMake(0, 9, 0, 0);
+        evaluation.titleEdgeInsets = UIEdgeInsetsMake(0, 19, 0, 0);
+    }
+    else {
+        evaluation.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 5);
+        evaluation.titleEdgeInsets = UIEdgeInsetsMake(0, 5, 0, 0);
+    }
+
     [evaluation setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [evaluation addTarget:self action:@selector(onEvaluate:) forControlEvents:UIControlEventTouchUpInside];
     [tipView addSubview:evaluation];
     UIButton *close = [UIButton new];
-    close.frame = CGRectMake(0, 30, 120, 30);
+    close.frame = CGRectMake(0, 50, 90, 50);
     close.titleLabel.font = [UIFont systemFontOfSize:15];
     [close setImage:_closeSession.imageView.image forState:UIControlStateNormal];
     [close setTitle:@"退出" forState:UIControlStateNormal];
     close.enabled = _closeSession.enabled;
-    close.imageEdgeInsets = UIEdgeInsetsMake(6, -20, 6, 20);
-    close.titleEdgeInsets = UIEdgeInsetsMake(0, -25, 0, 0);
+    close.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 5);
+    close.titleEdgeInsets = UIEdgeInsetsMake(0, 5, 0, 0);
     [close setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [close addTarget:self action:@selector(onCloseSession:) forControlEvents:UIControlEventTouchUpInside];
     [tipView addSubview:close];
@@ -839,7 +841,7 @@ static long long sessionId;
     splitLine.backgroundColor = YSFRGB(0xdbdbdb);
     splitLine.ysf_frameHeight = 0.5;
     splitLine.ysf_frameWidth = tipView.ysf_frameWidth;
-    splitLine.ysf_frameTop = 30;
+    splitLine.ysf_frameTop = 50;
     [tipView addSubview:splitLine];
     
     _popTipView = [[YSFPopTipView alloc] initWithCustomView:tipView];
@@ -2214,7 +2216,6 @@ static long long sessionId;
         request.groupId = _groupId;
         request.staffId = _staffId;
         request.vipLevel = _vipLevel;
-        request.authToken = [QYSDK sharedSDK].authToken;
         request.entryId = _entryId;
         request.commonQuestionTemplateId = _commonQuestionTemplateId;
         request.openRobotInShuntMode = _openRobotInShuntMode;

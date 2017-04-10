@@ -82,13 +82,22 @@
 {
     YSFLogApp(@"userInfoId: %@  userInfoData: %@", userInfo.userId, userInfo.data);
     ysf_main_async(^{
-        [_infoManager setUserInfo:userInfo];
+        [_infoManager setUserInfo:userInfo authTokenVerificationResultBlock:nil];
     });
 }
 
 - (void)setAuthToken:(NSString *)authToken
 {
     _authToken = authToken;
+}
+
+- (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block
+{
+    YSFLogApp(@"userInfoId: %@  userInfoData: %@", userInfo.userId, userInfo.data);
+    
+    ysf_main_async(^{
+        [_infoManager setUserInfo:userInfo authTokenVerificationResultBlock:block];
+    });
 }
 
 - (void)getPushMessage:(NSString *)messageId

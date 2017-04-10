@@ -6,20 +6,35 @@
 //  Copyright (c) 2016 Netease. All rights reserved.
 //
 
-typedef NS_ENUM(NSInteger, QuitType) {
-    QYQuitTypeNone,
-    QYQuitTypeContinue,
-    QYQuitTypeNext,
-    QYQuitTypeCancel,
+/**
+ *  退出排队结果类型
+ */
+typedef NS_ENUM(NSInteger, QuitWaitingType) {
+    QuitWaitingTypeNone,     //当前不是在排队状态
+    QuitWaitingTypeContinue, //继续排队
+    QuitWaitingTypeQuit,     //退出排队
+    QuitWaitingTypeCancel,   //取消操作
 };
 
 /**
  *  提供了所有自定义行为的接口;每个接口对应一个自定义行为的处理，如果设置了，则使用设置的处理，如果不设置，则采用默认处理
  */
 typedef void (^QYLinkClickBlock)(NSString *linkAddress);
+
+/**
+ *  bot点击事件回调
+ */
 typedef void (^QYBotClickBlock)(NSString *target, NSString *params);
-typedef void (^QYShowQuitWaitingBlock)(QuitType quitType);
-typedef void (^QYShowQuitBlock)(QYShowQuitWaitingBlock block);
+
+/**
+ *  退出排队回调
+ */
+typedef void (^QYQuitWaitingBlock)(QuitWaitingType quitType);
+
+/**
+ *  是否退出排队回调
+ */
+typedef void (^QYShowQuitBlock)(QYQuitWaitingBlock block);
 
 
 /**
@@ -48,7 +63,12 @@ typedef void (^QYShowQuitBlock)(QYShowQuitWaitingBlock block);
  */
 - (void)setDeactivateAudioSessionAfterComplete:(BOOL)deactivate;
 
-- (void)showQuitWaiting:(QYShowQuitWaitingBlock)showQuitWaitingBlock;
+/**
+ *  显示退出排队提示
+ *
+ *  @param quitWaitingBlock 选择结果回调
+ */
+- (void)showQuitWaiting:(QYQuitWaitingBlock)quitWaitingBlock;
 
 @end
 

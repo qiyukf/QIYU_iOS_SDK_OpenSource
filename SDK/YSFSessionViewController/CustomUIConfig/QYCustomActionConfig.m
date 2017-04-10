@@ -17,10 +17,10 @@
     [[[YSF_NIMSDK sharedSDK] mediaManager] setDeactivateAudioSessionAfterComplete:deactivate];
 }
 
-- (void)showQuitWaiting:(QYShowQuitWaitingBlock)showQuitWaitingBlock;
+- (void)showQuitWaiting:(QYQuitWaitingBlock)quitWaitingBlock;
 {
     if (_showQuitBlock) {
-        _showQuitBlock(showQuitWaitingBlock);
+        _showQuitBlock(quitWaitingBlock);
     }
 }
 

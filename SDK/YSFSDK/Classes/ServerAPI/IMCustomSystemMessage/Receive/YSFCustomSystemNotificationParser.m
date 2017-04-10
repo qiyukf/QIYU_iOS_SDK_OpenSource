@@ -51,7 +51,7 @@
                 {
                     YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
                     uploadLog.apiAddress = [[YSFServerSetting sharedInstance] apiAddress];
-                    uploadLog.version = @"sdk_3.5.0";
+                    uploadLog.version = @"sdk_3.5.5";
                     uploadLog.type = @"invite";
                     uploadLog.message = YSF_GetMessage(1000000);
                     uploadLog.time = [[NSDate date] timeIntervalSince1970] * 1000;
