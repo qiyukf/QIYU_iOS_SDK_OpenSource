@@ -64,8 +64,6 @@
                     break;
                     
                 default:
-                    assert(false);
-                    YSFLogErr(@"command not supported %zd",cmd);
                     break;
                     
             }
