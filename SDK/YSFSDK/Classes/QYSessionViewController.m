@@ -782,19 +782,20 @@ static long long sessionId;
 - (void)onCloseSession:(id)sender
 {
     [_popTipView dismissAnimated:YES];
+    __weak typeof(self) weakSelf = self;
     YSFAlertController * alertController;
     if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:_shopId] == YSFSessionStateTypeWaiting) {
         alertController = [YSFAlertController alertWithTitle:nil message:@"确认退出排队？"];
         [alertController addCancelActionWithHandler:nil];
         [alertController addAction:[YSFAlertAction actionWithTitle:@"确定" handler:^(YSFAlertAction * _Nonnull action) {
-            [self sendCloseSessionCustomMessage:YES showQuitWaitingBlock:nil];
+            [weakSelf sendCloseSessionCustomMessage:YES showQuitWaitingBlock:nil];
         }]];
     }
     else {
         alertController = [YSFAlertController alertWithTitle:nil message:@"确认退出对话？"];
         [alertController addCancelActionWithHandler:nil];
         [alertController addAction:[YSFAlertAction actionWithTitle:@"确定" handler:^(YSFAlertAction * _Nonnull action) {
-            [self sendCloseSessionCustomMessage:NO showQuitWaitingBlock:nil];
+            [weakSelf sendCloseSessionCustomMessage:NO showQuitWaitingBlock:nil];
         }]];
     }
     
