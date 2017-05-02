@@ -27,7 +27,7 @@
                                        YSFApiKeyFromType    :   YSFApiValueIOS,
                                        YSFApiKeyFromSubType :   [[UIDevice currentDevice] systemVersion],
                                        YSFApiKeyStaffType   :   @(intOnlyManual),
-                                       YSFApiKeyVersion     :   @"28",
+                                       YSFApiKeyVersion     :   @"29",
                                        YSFApiKeyStaffId     :   @(_staffId),
                                        YSFApiKeyGroupId     :   @(_groupId),
                                        YSFApiKeyEntryId     :   @(_entryId),
