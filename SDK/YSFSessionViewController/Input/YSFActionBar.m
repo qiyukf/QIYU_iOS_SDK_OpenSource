@@ -1,4 +1,5 @@
 #import "YSFActionBar.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 
 @implementation YSFActionInfo
 @end
@@ -41,16 +42,16 @@
         button.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
         [button addTarget:self action:@selector(onClickAction:) forControlEvents:UIControlEventTouchUpInside];
         button.titleLabel.font = [UIFont systemFontOfSize:12];
-        button.layer.borderColor = YSFRGB(0x4f82ae).CGColor;
+        button.layer.borderColor = [QYCustomUIConfig sharedInstance].actionButtonBorderColor.CGColor;
         button.layer.cornerRadius = 10;
         button.layer.borderWidth = 0.5;
-        [button setTitleColor:YSFRGB(0x4f82ae) forState:UIControlStateNormal];
+        [button setTitleColor:[QYCustomUIConfig sharedInstance].actionButtonTextColor forState:UIControlStateNormal];
         [button setTitle:obj.label forState:UIControlStateNormal];
         [button sizeToFit];
         button.ysf_frameWidth += 20;
-        button.ysf_frameTop = 11;
+        button.ysf_frameTop = 10;
         button.ysf_frameLeft = right + 10;
-        button.ysf_frameHeight = 20;
+        button.ysf_frameHeight = 22;
         button.tag = idx;
         [_scrollView addSubview:button];
         

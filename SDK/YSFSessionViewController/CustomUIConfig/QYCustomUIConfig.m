@@ -1,4 +1,41 @@
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/POP/QYPOPCustomUIConfig.h"
+
+@interface QYCustomUIConfig()
+
+/**
+ *  聊天窗口右上角商铺入口显示，默认不显示
+ */
+@property (nonatomic, assign)   BOOL showShopEntrance;
+
+/**
+ *  聊天窗口右上角商铺入口icon
+ */
+@property (nonatomic, strong) UIImage *shopEntranceImage;
+
+/**
+ *  聊天窗口右上角商铺入口文本
+ */
+@property (nonatomic, copy) NSString *shopEntranceText;
+
+/**
+ *  聊天窗口右边会话列表入口，默认不显示
+ */
+@property (nonatomic, assign) BOOL showSessionListEntrance;
+
+/**
+ *  会话列表入口在聊天页面的位置，YES代表在右上角，NO代表在左上角，默认在右上角
+ */
+@property (nonatomic, assign) BOOL sessionListEntrancePosition;
+
+/**
+ *  会话列表入口icon
+ */
+@property (nonatomic, strong) UIImage *sessionListEntranceImage;
+
+@end
+
+
 
 @implementation QYCustomUIConfig
 
@@ -22,7 +59,6 @@
 
 - (void)restoreToDefault
 {
-    _sdkOrKf = YES;
     _sessionTipTextColor = YSFRGBA2(0xffc08722);
     _sessionTipTextFontSize = 14;
     _customMessageTextColor = [UIColor whiteColor];
@@ -58,6 +94,8 @@
                                             resizableImageWithCapInsets:UIEdgeInsetsMake(25,10,10,10)
                                             resizingMode:UIImageResizingModeStretch];
     
+    _actionButtonTextColor = YSFRGB(0x4f82ae);
+    _actionButtonBorderColor = YSFRGB(0x4f82ae);
     _rightBarButtonItemColorBlackOrWhite = YES;
     _showAudioEntry = YES;
     _showAudioEntryInRobotMode = YES;
@@ -74,10 +112,9 @@
     
 }
 
-- (void)setSdkOrKf:(BOOL)sdkOrKf
+- (void)setSdkOrKf:(NSNumber *)sdkOrKf
 {
-    _sdkOrKf = sdkOrKf;
-    if (sdkOrKf) {
+    if ([sdkOrKf boolValue]) {
         _customMessageTextColor = [UIColor whiteColor];
         _customMessageHyperLinkColor = [UIColor whiteColor];
         _serviceMessageTextColor = [UIColor blackColor];
