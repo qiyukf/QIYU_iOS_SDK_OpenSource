@@ -9,7 +9,6 @@
 #import "YSFAudioContentConfig.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFAttributedLabel.h"
-#import "QYCustomUIConfig.h"
 #import "NIMSDK.h"
 #import "KFAudioToTextHandler.h"
 #import "YSFApiDefines.h"

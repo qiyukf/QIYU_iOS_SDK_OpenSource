@@ -9,7 +9,7 @@
 #import "YSFKFBypassContentConfig.h"
 #import "YSFMessageModel.h"
 #import "YSFKFBypassNotification.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 #import "YSFAttributedLabel.h"
 #import "YSFApiDefines.h"
 

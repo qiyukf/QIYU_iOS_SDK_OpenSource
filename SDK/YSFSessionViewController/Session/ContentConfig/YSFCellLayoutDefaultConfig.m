@@ -13,7 +13,7 @@
 #import "YSFMessageModel.h"
 #import "YSFDefaultValueMaker.h"
 #import "YSFBaseSessionContentConfig.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 
 @implementation YSFCellLayoutDefaultConfig
 

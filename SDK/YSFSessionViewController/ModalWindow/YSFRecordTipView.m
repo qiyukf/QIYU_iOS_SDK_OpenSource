@@ -1,7 +1,7 @@
 #import "YSFRecordTipView.h"
 #import "YSFTimer.h"
 #import "YSFAttributedLabel.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 
 @interface YSFRecordTipView ()
 {

@@ -7,7 +7,7 @@
 //
 
 #import "YSFTextContentConfig.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 #import "YSFAttributedLabel+YSF.h"
 
 @implementation YSFTextContentConfig

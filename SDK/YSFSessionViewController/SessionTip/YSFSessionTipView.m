@@ -8,7 +8,7 @@
 
 #import "YSFSessionTipView.h"
 #import "YSFAttributedLabel.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 
 @interface YSFSessionTipView ()<YSFAttributedLabelDelegate>
 @property (nonatomic,strong)    YSFAttributedLabel *tipLabel;

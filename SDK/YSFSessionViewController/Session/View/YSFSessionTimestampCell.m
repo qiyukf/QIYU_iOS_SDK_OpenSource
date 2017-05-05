@@ -10,7 +10,7 @@
 #import "YSFCellLayoutConfig.h"
 #import "YSFTimestampModel.h"
 #import "YSFKitUtil.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 
 @interface YSFSessionTimestampCell()
 

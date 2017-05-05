@@ -1,7 +1,7 @@
 #import "YSFSelectedGoodsContentConfig.h"
 #import "YSFMessageModel.h"
 #import "YSFMachineResponse.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 #import "YSFAttributedLabel.h"
 #import "YSFApiDefines.h"
 

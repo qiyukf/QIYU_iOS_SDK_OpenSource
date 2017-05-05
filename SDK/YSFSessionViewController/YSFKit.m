@@ -7,7 +7,7 @@
 //
 
 #import "YSFKit.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 
 @implementation YSFSessionUserInfo
 

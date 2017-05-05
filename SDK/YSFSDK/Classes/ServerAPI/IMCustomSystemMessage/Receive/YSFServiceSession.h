@@ -8,7 +8,7 @@
 
 
 @class YSFShopInfo;
-
+@class YSFActionInfo;
 
 @interface YSFServiceSession : NSObject
 
@@ -27,7 +27,7 @@
 @property (nonatomic,copy)      NSString        *inQueeuNotify;
 @property (nonatomic,copy)      NSString        *notExistTip;
 @property (nonatomic,strong)    NSDictionary    *evaluation;
-@property (nonatomic,copy)      NSArray         *actionInfoArray;
+@property (nonatomic,copy)      NSArray<YSFActionInfo *>         *actionInfoArray;
 @property (nonatomic,strong)    YSFShopInfo     *shopInfo;           //平台电商的商铺信息
 @property (nonatomic,assign)    BOOL showNumber;
 

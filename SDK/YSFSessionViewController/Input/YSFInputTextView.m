@@ -7,7 +7,7 @@
 //
 
 #import "YSFInputTextView.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 
 @implementation YSFInputTextView
 
