@@ -16,7 +16,7 @@
 #import "YSFInputToolBar.h"
 #import "YSFInputTextView.h"
 #import "YSFKeyboardManager.h"
-#import "QYCustomUIConfig.h"
+#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
 
 
 @interface YSFInputView()<UITextViewDelegate,YSFInputEmoticonProtocol, YSFKeyboardObserver>
@@ -60,13 +60,6 @@
         _actionBar = [[YSFActionBar alloc] init];
         _actionBar.hidden = YES;
         _actionBar.ysf_frameHeight = YSFActionBarHeight;
-        __weak typeof(self) weakSelf = self;
-        _actionBar.selectActionCallback = ^(YSFActionInfo *action)
-        {
-            if ([weakSelf.actionDelegate respondsToSelector:@selector(onSendText:)]) {
-                [weakSelf.actionDelegate onSendText:action.label];
-            }
-        };
         [self addSubview:_actionBar];
 
         _toolBar = [[YSFInputToolBar alloc] initWithFrame:CGRectZero];
@@ -86,6 +79,7 @@
         [_toolBar.recordButton setHidden:YES];
         [_toolBar.recordLabel setHidden:YES];
         
+        __weak typeof(self) weakSelf = self;
         [_toolBar.imageButton addTarget:self action:@selector(onTouchImageBtn:) forControlEvents:UIControlEventTouchUpInside];
         _toolBar.inputTextView.pasteImageCallback = ^(UIImage *image) {
             [weakSelf.actionDelegate onPasteImage:image];
@@ -125,7 +119,7 @@
 
 }
 
-- (void)setActionInfoArray:(NSArray *)actionInfoArray
+- (void)setActionInfoArray:(NSArray<YSFActionInfo *> *)actionInfoArray
 {
     if (_actionBar.actionInfoArray.count == 0 && actionInfoArray.count > 0) {
         self.ysf_frameHeight += YSFActionBarHeight;
@@ -137,6 +131,11 @@
     _actionBar.hidden = actionInfoArray.count == 0;
     
     [self willShowBottomHeight:_bottomHeight];
+}
+
+- (void)setActionCallback:(SelectActionCallback)callback
+{
+    _actionBar.selectActionCallback = callback;
 }
 
 - (void)setInputActionDelegate:(id<YSFInputActionDelegate>)actionDelegate

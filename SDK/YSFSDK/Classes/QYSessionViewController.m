@@ -455,6 +455,11 @@ static long long sessionId;
         [_sessionInputView setActionInfoArray:session.actionInfoArray];
     }
     
+    __weak typeof(self) weakSelf = self;
+    [_sessionInputView setActionCallback:^(YSFActionInfo *action) {
+        [weakSelf onSendText:action.label];
+    }];
+    
     _tipView = [[YSFSessionTipView alloc] initWithFrame:CGRectZero];
     _tipView.delegate = self;
     BOOL reachable = [_reachability isReachable];

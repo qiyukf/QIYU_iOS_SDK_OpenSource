@@ -70,7 +70,8 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 - (void)setInputDelegate:(id<YSFInputDelegate>)delegate;
 
 //外部设置
-- (void)setActionInfoArray:(NSArray *)actionInfoArray;
+- (void)setActionInfoArray:(NSArray<YSFActionInfo *> *)actionInfoArray;
+- (void)setActionCallback:(SelectActionCallback)callback;
 
 - (void)setInputActionDelegate:(id<YSFInputActionDelegate>)actionDelegate;
 - (void)setInputConfig:(id<YSFSessionConfig>)config;
