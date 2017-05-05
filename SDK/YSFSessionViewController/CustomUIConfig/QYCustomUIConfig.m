@@ -1,5 +1,5 @@
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
-#import "../../YSFSDK/ExportHeaders/POP/QYPOPCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
+#import "QYPOPCustomUIConfig.h"
 
 @interface QYCustomUIConfig()
 

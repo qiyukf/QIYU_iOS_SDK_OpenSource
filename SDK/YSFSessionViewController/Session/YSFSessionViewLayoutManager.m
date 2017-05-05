@@ -12,7 +12,7 @@
 #import "YSFMessageCellProtocol.h"
 #import "YSFMessageModel.h"
 #import "YSFMessageCell.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 
 YSFNotification(kKFInputViewFrameChanged);
 

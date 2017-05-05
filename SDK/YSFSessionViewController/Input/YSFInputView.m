@@ -16,7 +16,7 @@
 #import "YSFInputToolBar.h"
 #import "YSFInputTextView.h"
 #import "YSFKeyboardManager.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 
 
 @interface YSFInputView()<UITextViewDelegate,YSFInputEmoticonProtocol, YSFKeyboardObserver>

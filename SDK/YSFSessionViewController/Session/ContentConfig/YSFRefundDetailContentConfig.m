@@ -9,7 +9,7 @@
 #import "YSFRefundDetailContentConfig.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFAttributedLabel.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 #import "NIMSDK.h"
 #import "KFAudioToTextHandler.h"
 #import "YSFApiDefines.h"

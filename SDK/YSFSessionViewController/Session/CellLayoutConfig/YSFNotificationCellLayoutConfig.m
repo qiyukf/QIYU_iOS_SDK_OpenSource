@@ -10,7 +10,7 @@
 #import "YSFStartServiceObject.h"
 #import "YSFEvaluationTipObject.h"
 #import "YSFMessageModel.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 #import "YSFNotification.h"
 
 @implementation YSFNotificationCellLayoutConfig

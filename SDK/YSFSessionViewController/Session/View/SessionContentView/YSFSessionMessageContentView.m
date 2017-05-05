@@ -8,7 +8,7 @@
 
 #import "YSFSessionMessageContentView.h"
 #import "YSFMessageModel.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 
 @implementation YSFSessionMessageContentView
 

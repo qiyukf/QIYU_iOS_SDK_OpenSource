@@ -8,7 +8,7 @@
 
 #import "YSFInputToolBar.h"
 #import "YSFInputTextView.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 
 @interface YSFInputToolBar()
 @property (nonatomic,strong) UIView *topSep;

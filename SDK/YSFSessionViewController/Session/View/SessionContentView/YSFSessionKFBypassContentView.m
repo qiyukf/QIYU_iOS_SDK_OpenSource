@@ -8,7 +8,7 @@
 
 #import "YSFSessionKFBypassContentView.h"
 #import "YSFMessageModel.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 #import "YSFKFBypassNotification.h"
 #import "YSFAttributedLabel.h"
 #import "YSFApiDefines.h"

@@ -15,10 +15,8 @@
 @interface UIScrollView (YSFRefresh)
 /** 下拉刷新控件 */
 @property (strong, nonatomic) YSFRefreshHeader *ysf_header;
-@property (strong, nonatomic) YSFRefreshHeader *header YSFRefreshDeprecated("使用ysf_header");
 /** 上拉刷新控件 */
 @property (strong, nonatomic) YSFRefreshFooter *ysf_footer;
-@property (strong, nonatomic) YSFRefreshFooter *footer YSFRefreshDeprecated("使用ysf_footer");
 
 #pragma mark - other
 - (NSInteger)ysf_totalDataCount;

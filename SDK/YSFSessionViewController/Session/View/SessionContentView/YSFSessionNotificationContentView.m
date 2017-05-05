@@ -10,7 +10,7 @@
 #import "YSFMessageModel.h"
 #import "YSFKitUtil.h"
 #import "YSFDefaultValueMaker.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 #import "YSFStartServiceObject.h"
 #import "YSFEvaluationTipObject.h"
 #import "NSMutableAttributedString+YSFVendor.h"

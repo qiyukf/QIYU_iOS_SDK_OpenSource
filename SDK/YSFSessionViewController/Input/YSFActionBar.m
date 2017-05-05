@@ -1,5 +1,5 @@
 #import "YSFActionBar.h"
-#import "../../YSFSDK/ExportHeaders/QYCustomUIConfig.h"
+#import "QYCustomUIConfig.h"
 
 @implementation YSFActionInfo
 @end
