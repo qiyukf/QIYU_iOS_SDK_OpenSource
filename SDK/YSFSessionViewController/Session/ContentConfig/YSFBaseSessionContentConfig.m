@@ -81,8 +81,16 @@
 
 - (id<YSFSessionContentConfig>)configBy:(YSF_NIMMessage *)message
 {
+    id<YSFSessionContentConfig> config = nil;
+    if (_queryCustomContentConifgBlock) {
+        config = _queryCustomContentConifgBlock(message);
+    }
+    if (config) {
+        return config;
+    }
+    
     YSF_NIMMessageType type = message.messageType;
-    id<YSFSessionContentConfig>config = [_dict objectForKey:@(type)];
+    config = [_dict objectForKey:@(type)];
     if (config == nil) {
         if (type == YSF_NIMMessageTypeCustom) {
             YSF_NIMCustomObject *customObject = message.messageObject;
