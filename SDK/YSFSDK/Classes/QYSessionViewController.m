@@ -206,11 +206,12 @@ static long long sessionId;
 - (void)sendCloseSessionCustomMessage:(BOOL)quitWaitingOrCloseSession
         showQuitWaitingBlock:(QYQuitWaitingBlock)showQuitWaitingBlock
 {
+    UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
     if (quitWaitingOrCloseSession) {
-        [self.view ysf_makeToast:@"退出排队中" duration:2 position:YSFToastPositionCenter];
+        [topmostWindow ysf_makeToast:@"退出排队中" duration:2 position:YSFToastPositionCenter];
     }
     else {
-        [self.view ysf_makeToast:@"退出对话中" duration:2 position:YSFToastPositionCenter];
+        [topmostWindow ysf_makeToast:@"退出对话中" duration:2 position:YSFToastPositionCenter];
     }
     
     __weak typeof(self) weakSelf = self;
@@ -219,14 +220,15 @@ static long long sessionId;
     request.sessionId = [sessionManager getSessionInAll:_shopId].sessionId;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error){
         if (error) {
+            UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
             if (quitWaitingOrCloseSession) {
-                [weakSelf.view ysf_makeToast:@"退出排队失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
+                [topmostWindow ysf_makeToast:@"退出排队失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                     [weakSelf.navigationController popViewControllerAnimated:YES];
                 });
             }
             else {
-                [weakSelf.view ysf_makeToast:@"退出对话失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
+                [topmostWindow ysf_makeToast:@"退出对话失败，请稍后再试" duration:2 position:YSFToastPositionCenter];
             }
         }
         else {
@@ -1530,8 +1532,8 @@ static long long sessionId;
                                    else {
                                        messageAudio.isDeliveried = NO;
                                        [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:messageAudio forSession:_session completion:nil];
-                                       
-                                       [weakSelf.navigationController.view ysf_makeToast:@"语音转文字失败" duration:2.0 position:YSFToastPositionCenter];
+                                       UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
+                                       [topmostWindow ysf_makeToast:@"语音转文字失败" duration:2.0 position:YSFToastPositionCenter];
                                    }
                                }];
                       
@@ -1587,7 +1589,8 @@ static long long sessionId;
 
 - (void)tipSendMsgLater
 {
-    [self.navigationController.view ysf_makeToast:@"请等待连接客服成功后，再发送消息" duration:2.0 position:YSFToastPositionCenter];
+    UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
+    [topmostWindow ysf_makeToast:@"请等待连接客服成功后，再发送消息" duration:2.0 position:YSFToastPositionCenter];
 }
 
 - (BOOL)onSendText:(NSString *)text
@@ -1602,7 +1605,8 @@ static long long sessionId;
         text = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     }
     if (text.length == 0) {
-        [self.navigationController.view ysf_makeToast:@"不能发送空白消息" duration:2.0 position:YSFToastPositionCenter];
+        UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
+        [topmostWindow ysf_makeToast:@"不能发送空白消息" duration:2.0 position:YSFToastPositionCenter];
         self.sessionInputView.toolBar.inputTextView.text = @"";
 
         return false;
