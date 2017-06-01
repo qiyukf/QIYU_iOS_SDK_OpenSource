@@ -2060,17 +2060,6 @@ static long long sessionId;
     return YES;
 }
 
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender
-{
-    NSArray *items = [[UIMenuController sharedMenuController] menuItems];
-    for (UIMenuItem *item in items) {
-        if (action == [item action]){
-            return YES;
-        }
-    }
-    return NO;
-}
-
 - (void)changePlayAudioMode:(id)sender
 {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
