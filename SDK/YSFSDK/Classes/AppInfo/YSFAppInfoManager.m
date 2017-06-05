@@ -64,7 +64,8 @@
 
 - (void)checkAppInfo
 {
-    [self readInfo];
+    [self readAccountInfo];
+    [self readUserInfo];
     
     if (![_accountInfo isValid]) {
         [self createAccount];
@@ -210,14 +211,6 @@
     return _store;
 }
 
-- (void)readInfo
-{
-    [self readAccountInfo];
-    [self readAppSetting];
-    [self readUserInfo];
-    [self readCachedText];
-}
-
 - (NSDictionary *)dictByKey:(NSString *)key
 {
     NSDictionary *dict = nil;
@@ -359,7 +352,7 @@
 }
 
 #pragma mark - AppSetting
-- (void)readAppSetting
+- (void)initSessionViewControllerInfo
 {
     NSDictionary *dict = [self dictByKey:YSFAppSettingKey];
     if (dict)
@@ -377,6 +370,8 @@
     }
     
     [self changeNimSDKAudioPlayMode];
+    
+    _cachedText = [[self store] valueByKey:YSFCachedTextKey];
 }
 
 - (void)saveAppSetting
@@ -419,11 +414,6 @@
 }
 
 #pragma mark - CachedText
-- (void)readCachedText
-{
-    _cachedText = [[self store] valueByKey:YSFCachedTextKey];
-}
-
 - (void)setCachedText:(NSString *)cachedText
 {
     if (_cachedText && cachedText && [_cachedText isEqualToString:cachedText])

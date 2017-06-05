@@ -42,6 +42,8 @@
 
 @property (nonatomic, weak) id<YSFAppInfoManagerDelegate> delegate;
 
+- (void)initSessionViewControllerInfo;
+
 - (NSString *)currentUserId;
 
 - (NSString *)currentForeignUserId;

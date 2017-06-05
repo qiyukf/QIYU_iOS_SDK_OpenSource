@@ -303,8 +303,12 @@ static long long sessionId;
 
 - (void)makeUI
 {
-    self.navigationController.interactivePopGestureRecognizer.delaysTouchesBegan = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        [[QYSDK sharedSDK].infoManager initSessionViewControllerInfo];
+    });
 
+    self.navigationController.interactivePopGestureRecognizer.delaysTouchesBegan = NO;
     self.navigationItem.title = [self sessionTitle];
     
     //两个按钮的父类view
