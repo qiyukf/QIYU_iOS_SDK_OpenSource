@@ -25,7 +25,8 @@
     YSF_NIMImageObject * imageObject = [[YSF_NIMImageObject alloc] initWithImage:image];
     imageObject.displayName = [NSString stringWithFormat:@"图片发送于%@",dateString];
     YSF_NIMImageOption *option = [[YSF_NIMImageOption alloc] init];
-    option.compressQuality = 0.8;
+    option.compressQuality = 0.5;
+    imageObject.option = option;
     YSF_NIMMessage *message          = [[YSF_NIMMessage alloc] init];
     message.messageObject        = imageObject;
     message.text = @"发来了一张图片";
