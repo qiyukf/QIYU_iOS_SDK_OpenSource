@@ -1,5 +1,6 @@
 #import "QYCustomUIConfig.h"
 #import "QYPOPCustomUIConfig.h"
+#import "QYCustomUIConfig+Private.h"
 
 @interface QYCustomUIConfig()
 
@@ -32,6 +33,8 @@
  *  会话列表入口icon
  */
 @property (nonatomic, strong) UIImage *sessionListEntranceImage;
+
+@property (nonatomic, assign) CGFloat compressQuality;
 
 @end
 
@@ -110,6 +113,7 @@
     _sessionListEntrancePosition = YES;
     _sessionListEntranceImage = nil;
     
+    _compressQuality = 0.5;
 }
 
 - (void)setSdkOrKf:(NSNumber *)sdkOrKf

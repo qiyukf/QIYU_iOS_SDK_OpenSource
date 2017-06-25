@@ -7,6 +7,7 @@
 //
 
 #import "YSFMessageMaker.h"
+#import "QYCustomUIConfig+Private.h"
 
 @implementation YSFMessageMaker
 
@@ -25,7 +26,7 @@
     YSF_NIMImageObject * imageObject = [[YSF_NIMImageObject alloc] initWithImage:image];
     imageObject.displayName = [NSString stringWithFormat:@"图片发送于%@",dateString];
     YSF_NIMImageOption *option = [[YSF_NIMImageOption alloc] init];
-    option.compressQuality = 0.5;
+    option.compressQuality = [QYCustomUIConfig sharedInstance].compressQuality;
     imageObject.option = option;
     YSF_NIMMessage *message          = [[YSF_NIMMessage alloc] init];
     message.messageObject        = imageObject;
