@@ -17,8 +17,10 @@ typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
 };
 
 @implementation QYSDK (Server)
-- (void)readEnvironmentConfig:(NSNumber *)isTest
+- (void)readEnvironmentConfig:(NSNumber *)isTest useHttps:(NSNumber *)pUseHttps
 {
+    BOOL useHttps = [pUseHttps integerValue];
+    [YSF_NIMSDK sharedSDK].useHttps = useHttps;
     NSString *path = [[NSBundle mainBundle] pathForResource:@"ysf_dev" ofType:@"plist"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:path])
     {
@@ -40,6 +42,12 @@ typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
 //            nimSetting.linkAddress                 = @"link.netease.im:8080";
 //            nimSetting.rsaPublicKeyModule          = @"0081c4bb8bf3ec6941275d4a74af3e4bcd38775caf912eab0fa490e4b33bf6ee0cc85e09f1482d10bfbf9fa7bfc06c2fbfd86565690c0f2c2014f17cd46a482bb4b8b8e56c9a93fec3273d3d71c5d42b91bd474a7b92c936d96ea6889d0d77b4113649f70086c419249d61290484d90c8a38cc503e13f9f37a9cb088436dd131bf";
         }
+        
+        if (!useHttps) {
+            nimSetting.nosLbsAddress      = @"http://wanproxy.127.net/lbs";
+            nimSetting.nosUploadAddress   = @"http://223.252.196.41";
+        }
+        
         [[YSF_NIMSDK sharedSDK] setSetting:nimSetting];
         
         //云商服

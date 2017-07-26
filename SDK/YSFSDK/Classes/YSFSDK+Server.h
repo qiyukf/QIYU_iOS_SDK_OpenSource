@@ -9,5 +9,5 @@
 #import "QYSDK.h"
 
 @interface QYSDK (Server)
-- (void)readEnvironmentConfig:(NSNumber *)isTest;
+- (void)readEnvironmentConfig:(NSNumber *)isTest useHttps:(NSNumber *)useHttps;
 @end
