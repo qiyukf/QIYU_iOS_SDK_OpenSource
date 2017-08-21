@@ -151,4 +151,9 @@
  */
 - (NSString *)sdkRecvFilesPath;
 
+/**
+ *  是否使用https；默认是YES，使用https；如果要使用http，则设置为NO
+ */
+@property (nonatomic, assign) BOOL useHttps;
+
 @end

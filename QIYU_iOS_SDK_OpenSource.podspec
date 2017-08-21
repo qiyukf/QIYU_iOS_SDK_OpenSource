@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
     s.vendored_libraries = '**/libNIMLib.a', '**/libYSFVendor.a', '**/libaacplus.a', '**/libcrypto.a', '**/libevent.a'
     s.resource  = "**/QYResource.bundle"
     s.framework = 'UIKit','CoreText','MobileCoreServices','SystemConfiguration','AVFoundation','CoreTelephony','CoreMedia','AudioToolbox'
-    s.libraries = 'z','stdc++.6.0.9','sqlite3.0'
+    s.libraries = 'z','stdc++.6.0.9','sqlite3.0','xml2'
     s.requires_arc = true
     s.prefix_header_contents = '#import <UIKit/UIKit.h>
                                 #import "YSFMacro.h"
