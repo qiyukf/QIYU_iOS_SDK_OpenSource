@@ -168,6 +168,8 @@ typedef NS_ENUM(NSInteger, YSF_NIMMessageStatus) {
 @property (nonatomic, assign, readonly) BOOL isPushMessageType;
 @property (nonatomic, assign, readonly) long long extSessionId;
 
+@property (nonatomic, assign, readonly) long long sessionIdFromMessageId;
+
 @end
 
 
