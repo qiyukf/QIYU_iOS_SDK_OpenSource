@@ -12,7 +12,7 @@ typedef enum : NSUInteger {
     YSFSessionTipNetworkError,              //网络出错
     YSFSessionTipNetworkOK,                 //网络正常
     YSFSessionTipRequestServiceFailed,      //请求客服失败 (请求未发送成功或者服务器没响应)
-    YSFSessionTipServiceOffline,            //客服不在线
+    YSFSessionTipServiceNotExsit,            //客服不在线
     YSFSessionTipServicewaiting,            //正在排队
 } YSFSessionTipType;
 

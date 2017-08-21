@@ -1,6 +1,5 @@
 #import "YSFSelectedGoodsContentView.h"
 #import "NSDictionary+YSFJson.h"
-#import "YSFAttributedLabel.h"
 #import "UIImageView+YSFWebCache.h"
 #import "YSFMessageModel.h"
 #import "YSFSelectedGoods.h"

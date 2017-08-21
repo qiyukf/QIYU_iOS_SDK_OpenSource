@@ -1,6 +1,5 @@
 #import "YSFOrderListContentView.h"
 #import "NSDictionary+YSFJson.h"
-#import "YSFAttributedLabel.h"
 #import "YSFMessageModel.h"
 #import "UIImageView+YSFWebCache.h"
 

@@ -17,7 +17,7 @@
 #import "YSFMachineResponse.h"
 #import "YSFMachineContentConfig.h"
 #import "YSFNewSession.h"
-#include "YSFSessionClose.h"
+#import "YSFSessionClose.h"
 #import "YSFWelcome.h"
 #import "YSFReportQuestion.h"
 #import "YSFKFBypassContentConfig.h"
@@ -43,7 +43,14 @@
 #import "YSFActionListContentConfig.h"
 #import "YSFActivePage.h"
 #import "YSFActivePageContentConfig.h"
-
+#import "YSFRichTextContentConfig.h"
+#import "YSFRichText.h"
+#import "YSFBotForm.h"
+#import "YSFBotFormContentConfig.h"
+#import "YSFSubmittedBotForm.h"
+#import "YSFSubmittedBotFormContentConfig.h"
+#import "YSFStaticUnion.h"
+#import "YSFStaticUnionContentConfig.h"
 
 @implementation YSFBaseSessionContentConfig
 @end
@@ -97,7 +104,10 @@
             if ([customObject.attachment isKindOfClass:[YSFMachineResponse class]]) {
                 config = [[YSFMachineContentConfig alloc] init];
             }
-            if ([customObject.attachment isKindOfClass:[YSFSelectedGoods class]]) {
+            else if ([customObject.attachment isKindOfClass:[YSFRichText class]]) {
+                config = [[YSFRichTextContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFSelectedGoods class]]) {
                 config = [[YSFSelectedGoodsContentConfig alloc] init];
             }
             else if ([customObject.attachment isKindOfClass:[YSFOrderList class]]) {
@@ -129,6 +139,9 @@
             else if ([customObject.attachment isKindOfClass:[YSFActivePage class]]) {
                 config = [[YSFActivePageContentConfig alloc] init];
             }
+            else if ([customObject.attachment isKindOfClass:[YSFStaticUnion class]]) {
+                config = [[YSFStaticUnionContentConfig alloc] init];
+            }
             else if ([customObject.attachment isKindOfClass:[YSFKFBypassNotification class]]) {
                 config = [[YSFKFBypassContentConfig alloc] init];
             }
@@ -147,6 +160,12 @@
                 YSFBotText *botText = (YSFBotText *)customObject.attachment;
                 message.text = botText.text;
                 config = [[YSFTextContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFBotForm class]]) {
+                config = [[YSFBotFormContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFSubmittedBotForm class]]) {
+                config = [[YSFSubmittedBotFormContentConfig alloc] init];
             }
             else if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]) {
                 YSFReportQuestion *reportQuestion = (YSFReportQuestion *)customObject.attachment;

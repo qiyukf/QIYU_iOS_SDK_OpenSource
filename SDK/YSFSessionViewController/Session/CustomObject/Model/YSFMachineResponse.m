@@ -9,7 +9,13 @@
 #import "YSFMachineResponse.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFApiDefines.h"
+#import "DTCoreText.h"
 
+@interface YSFMachineResponse() <YSFAttributedTextContentViewDelegate>
+
+@property (nonatomic, strong) NSMutableArray<NSString *> *imageUrlStringArray;
+
+@end
 
 @implementation YSFMachineResponse
 
@@ -19,10 +25,11 @@
     
     dict[YSFApiKeyCmd]               = @(_command);
     dict[YSFApiKeyQuestion]          = YSFStrParam(_originalQuestion);
+    dict[YSFApiKeyEvaluation] = @(_evaluation);
     dict[YSFApiKeyAnswerType]        = @(_answerType);
     dict[YSFApiKeyOperatorHint]      = @(_operatorHint);
     dict[YSFApiKeyOperatorHintDesc]  = YSFStrParam(_operatorHintDesc);
-    
+
     if (_answerArray) {
         NSData *arrayData = [NSJSONSerialization dataWithJSONObject:_answerArray
                                                             options:0
@@ -44,6 +51,8 @@
     YSFMachineResponse *instance = [[YSFMachineResponse alloc] init];
     instance.command             = [dict ysf_jsonInteger:YSFApiKeyCmd];
     instance.originalQuestion = [dict ysf_jsonString:YSFApiKeyQuestion];
+    instance.evaluation = [dict ysf_jsonInteger:YSFApiKeyEvaluation];
+
     if (!instance.originalQuestion) {
         instance.originalQuestion = @"";
     }
@@ -69,7 +78,42 @@
         instance.isOneQuestionRelevant = YES;
     }
     
+    instance.imageUrlStringArray = [NSMutableArray new];
+    
+    YSFAttributedTextView *textView = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
+    textView.textDelegate = instance;
+    textView.shouldDrawImages = NO;
+    NSData *data = [instance.answerLabel dataUsingEncoding:NSUTF8StringEncoding];
+    NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
+    textView.attributedString = string;
+    [textView layoutSubviews];
+    
+    
+    if (instance.answerArray.count == 1 && !instance.isOneQuestionRelevant) {
+        NSDictionary *dict = [instance.answerArray objectAtIndex:0];
+        NSString *oneAnswer = [dict objectForKey:YSFApiKeyAnswer];
+        data = [oneAnswer dataUsingEncoding:NSUTF8StringEncoding];
+        string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
+        textView.attributedString = string;
+        [textView layoutSubviews];
+    }
+    
+    data = [instance.operatorHintDesc dataUsingEncoding:NSUTF8StringEncoding];
+    string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
+    textView.attributedString = string;
+    [textView layoutSubviews];
+    
     return instance;
+}
+
+- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView viewForAttachment:(YSFTextAttachment *)attachment frame:(CGRect)frame
+{
+    if ([attachment isKindOfClass:[YSFImageTextAttachment class]])
+    {
+        NSString *urlString = attachment.contentURL.relativeString;
+        [_imageUrlStringArray addObject:urlString];
+    }
+    return nil;
 }
 
 @end

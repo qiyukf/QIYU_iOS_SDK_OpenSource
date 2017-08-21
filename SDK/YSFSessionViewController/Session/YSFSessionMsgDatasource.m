@@ -10,7 +10,10 @@
 #import "UITableView+YSFKit.h"
 #import "YSFMessageModel.h"
 #import "YSFTimestampModel.h"
-
+#import "YSFRichText.h"
+#import "YSFMachineResponse.h"
+#import "YSFStaticUnion.h"
+#import "YSFSubmittedBotForm.h"
 
 
 @implementation YSFSessionMsgDatasource
@@ -181,7 +184,27 @@
     [_modelArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         if ([obj isKindOfClass:[YSFMessageModel class]]) {
             YSFMessageModel* messageModel = obj;
+            BOOL isImage = NO;
             if ([messageModel.message.messageObject isKindOfClass:[YSF_NIMImageObject class]]) {
+                isImage = YES;
+            }
+            else if ([messageModel.message.messageObject isKindOfClass:[YSF_NIMCustomObject class]])
+            {
+                YSF_NIMCustomObject *customObject = (YSF_NIMCustomObject *)messageModel.message.messageObject;
+                if ([customObject.attachment isKindOfClass:[YSFRichText class]] ) {
+                    isImage = YES;
+                }
+                else if ([customObject.attachment isKindOfClass:[YSFMachineResponse class]] ) {
+                    isImage = YES;
+                }
+                else if ([customObject.attachment isKindOfClass:[YSFStaticUnion class]] ) {
+                    isImage = YES;
+                }
+                else if ([customObject.attachment isKindOfClass:[YSFSubmittedBotForm class]] ) {
+                    isImage = YES;
+                }
+            }
+            if (isImage) {
                 [allImageMessage addObject:messageModel.message];
             }
         }

@@ -71,6 +71,13 @@
             [self setHidden:NO];
         }
             break;
+            
+        case YSFSessionTipServiceNotExsit:
+        {
+            [_tipLabel setText:@"当前客服不在线，如需帮助请留言"];
+            [self setHidden:NO];
+        }
+            break;
         default:
             break;
     }
@@ -99,18 +106,10 @@
 
 - (void)setSessionTipForNotExist:(NSString *)tip
 {
-    BOOL should_tip = [self shouldTip:YSFSessionTipServicewaiting];
-    if (!should_tip) {
-        return;
+    [self setSessionTip:YSFSessionTipServiceNotExsit];
+    if (tip.length != 0) {
+        [_tipLabel setText:tip];
     }
-    
-    _type = YSFSessionTipServicewaiting;
-    if (tip.length == 0) {
-        tip = @"当前客服不在线，如需帮助请留言";
-    }
-    [_tipLabel setText:tip];
-    [self setHidden:NO];
-    [[self ysf_viewController].view setNeedsLayout];
 }
 
 - (BOOL)shouldTip:(YSFSessionTipType)type

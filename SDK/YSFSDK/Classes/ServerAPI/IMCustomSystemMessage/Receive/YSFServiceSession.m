@@ -37,7 +37,7 @@
     instance.lastServiceTime        = [NSDate date];
     instance.code                   = [dict ysf_jsonInteger:YSFApiKeyCode];
     instance.operatorEable          = [dict ysf_jsonInteger:YSFApiKeyOperatorEnable];
-    instance.notExistTip            = [dict ysf_jsonString:YSFApiKeyMessage];
+    instance.message            = [dict ysf_jsonString:YSFApiKeyMessage];
     instance.inQueeuNotify = [dict ysf_jsonString:YSFApiKeyInqueueNotify];
     instance.showNumber  = [dict ysf_jsonBool:YSFApiKeyShowNum];
     
@@ -45,17 +45,19 @@
     NSString *evaluation            = [dict ysf_jsonString:YSFApiKeyEvaluation];
     if (evaluation) {
         NSDictionary *dictEvaluation    = [evaluation ysf_toDict];
-        NSArray *arrayEvaluation    = [dictEvaluation ysf_jsonArray:@"list"];
+        NSArray *arrayEvaluation    = [dictEvaluation ysf_jsonArray:YSFApiKeyList];
         for (NSDictionary *dict in arrayEvaluation) {
-            NSString *name = [dict ysf_jsonString:@"name"];
-            NSUInteger value= [dict ysf_jsonUInteger:@"value"];
+            NSString *name = [dict ysf_jsonString:YSFApiKeyName];
+            NSUInteger value= [dict ysf_jsonUInteger:YSFApiKeyValue];
             if (name) {
                 [evaluationDict setValue:@(value) forKey:name];
             }
         }
+        instance.messageInvite = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationMessageInvite];
+        instance.messageThanks = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationMessageThanks];
     }
     instance.evaluation = evaluationDict;
-
+    
     NSInteger staffType             = [dict ysf_jsonInteger:YSFApiKeyStaffType];
     if (staffType == 0) {
         instance.humanOrMachine         = YES;

@@ -69,6 +69,7 @@
         _imageButton.imageEdgeInsets = UIEdgeInsetsMake(7, 7, 7, 7);
         [_imageButton sizeToFit];
         _imageButton.ysf_frameSize = CGSizeMake(_imageButton.ysf_frameWidth + 14, _imageButton.ysf_frameHeight + 14);
+        _imageButton.hidden = ![QYCustomUIConfig sharedInstance].showImageEntry;
         [self addSubview:_imageButton];
         
         _topSep = [[UIView alloc] initWithFrame:CGRectZero];
@@ -99,7 +100,10 @@
     
     if (_humanOrMachine) {
         //中间输入框按钮
-        self.inputTextBkgImage.ysf_frameWidth     = self.ysf_frameWidth - 3*leftSpacing - [self.imageButton ysf_frameWidth] + 14;
+        self.inputTextBkgImage.ysf_frameWidth     = self.ysf_frameWidth - 2*leftSpacing;
+        if (!_imageButton.hidden) {
+            self.inputTextBkgImage.ysf_frameWidth      += -self.imageButton.ysf_frameWidth - leftSpacing + 14;
+        }
         if (!_voiceBtn.hidden) {
             self.inputTextBkgImage.ysf_frameWidth      += -self.voiceBtn.ysf_frameWidth - leftSpacing + 14;
         }
@@ -160,7 +164,10 @@
     if ([QYCustomUIConfig sharedInstance].showEmoticonEntry) {
         self.emoticonBtn.hidden = !humanOrMachine;
     }
-    self.imageButton.hidden = !humanOrMachine;
+    if ([QYCustomUIConfig sharedInstance].showImageEntry) {
+        self.imageButton.hidden = !humanOrMachine;
+    }
+    
     [self setNeedsLayout];
 }
 @end

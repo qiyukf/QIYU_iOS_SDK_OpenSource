@@ -7,7 +7,6 @@
 //
 
 #import "YSFSessionMessageContentView.h"
-@class YSFAttributedLabel;
 
 
 @interface YSFSessionKFBypassContentView : YSFSessionMessageContentView

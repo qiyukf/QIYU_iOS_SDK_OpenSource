@@ -128,19 +128,19 @@ CGRect YSFKit_CGRectWithCenterAndSize(CGPoint center, CGSize size){
     [self ysf_setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:nil];
 }
 
-- (void)ysf_setImageWithURL:(NSURL *)url completed:(YSFWebImageCompletionBlock)completedBlock {
+- (void)ysf_setImageWithURL:(NSURL *)url completed:(YSFInternalCompletionBlock)completedBlock {
     [self ysf_setImageWithURL:url placeholderImage:nil options:0 progress:nil completed:completedBlock];
 }
 
-- (void)ysf_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder completed:(YSFWebImageCompletionBlock)completedBlock {
+- (void)ysf_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder completed:(YSFInternalCompletionBlock)completedBlock {
     [self ysf_setImageWithURL:url placeholderImage:placeholder options:0 progress:nil completed:completedBlock];
 }
 
-- (void)ysf_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(YSFWebImageOptions)options completed:(YSFWebImageCompletionBlock)completedBlock {
+- (void)ysf_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(YSFWebImageOptions)options completed:(YSFInternalCompletionBlock)completedBlock {
     [self ysf_setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:completedBlock];
 }
 
-- (void)ysf_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(YSFWebImageOptions)options progress:(YSFWebImageDownloaderProgressBlock)progressBlock completed:(YSFWebImageCompletionBlock)completedBlock {
+- (void)ysf_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(YSFWebImageOptions)options progress:(YSFWebImageDownloaderProgressBlock)progressBlock completed:(YSFInternalCompletionBlock)completedBlock {
     [self ysf_cancelCurrentImageLoad];
     objc_setAssociatedObject(self, &imageURLKey, url, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     
@@ -152,41 +152,38 @@ CGRect YSFKit_CGRectWithCenterAndSize(CGPoint center, CGSize size){
     
     if (url) {
         __weak __typeof(self)wself = self;
-        id <YSFWebImageOperation> operation = [YSFWebImageManager.sharedManager downloadImageWithURL:url options:options progress:progressBlock completed:^(UIImage *image, NSError *error, YSFImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+        YSFWebImageDownloadToken *operation = [YSFWebImageManager.sharedManager loadImageWithURL:url options:options progress:progressBlock completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, YSFImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
             if (!wself) return;
-            dispatch_main_sync_safe(^{
-                if (!wself) return;
-                if (image && (options & YSFWebImageAvoidAutoSetImage) && completedBlock)
-                {
-                    completedBlock(image, error, cacheType, url);
-                    return;
-                }
-                else if (image) {
-                    wself.image = image;
+            if (image && (options & YSFWebImageAvoidAutoSetImage) && completedBlock)
+            {
+                completedBlock(image, data, error, cacheType, finished, imageURL);
+                return;
+            }
+            else if (image) {
+                wself.image = image;
+                [wself setNeedsLayout];
+            } else {
+                if ((options & YSFWebImageDelayPlaceholder)) {
+                    wself.image = placeholder;
                     [wself setNeedsLayout];
-                } else {
-                    if ((options & YSFWebImageDelayPlaceholder)) {
-                        wself.image = placeholder;
-                        [wself setNeedsLayout];
-                    }
                 }
-                if (completedBlock && finished) {
-                    completedBlock(image, error, cacheType, url);
-                }
-            });
+            }
+            if (completedBlock && finished) {
+                completedBlock(image, data, error, cacheType, finished, imageURL);
+            }
         }];
         [self ysf_setImageLoadOperation:operation forKey:@"UIImageViewImageLoad"];
     } else {
         dispatch_main_async_safe(^{
             NSError *error = [NSError errorWithDomain:YSFWebImageErrorDomain code:-1 userInfo:@{NSLocalizedDescriptionKey : @"Trying to load a nil url"}];
             if (completedBlock) {
-                completedBlock(nil, error, YSFImageCacheTypeNone, url);
+                completedBlock(nil, nil, error, YSFImageCacheTypeNone, NO, nil);
             }
         });
     }
 }
 
-- (void)ysf_setImageWithPreviousCachedImageWithURL:(NSURL *)url andPlaceholderImage:(UIImage *)placeholder options:(YSFWebImageOptions)options progress:(YSFWebImageDownloaderProgressBlock)progressBlock completed:(YSFWebImageCompletionBlock)completedBlock {
+- (void)ysf_setImageWithPreviousCachedImageWithURL:(NSURL *)url andPlaceholderImage:(UIImage *)placeholder options:(YSFWebImageOptions)options progress:(YSFWebImageDownloaderProgressBlock)progressBlock completed:(YSFInternalCompletionBlock)completedBlock {
     NSString *key = [[YSFWebImageManager sharedManager] cacheKeyForURL:url];
     UIImage *lastPreviousCachedImage = [[YSFImageCache sharedImageCache] imageFromDiskCacheForKey:key];
     

@@ -15,9 +15,9 @@
     if ([object isMemberOfClass:[QYCommodityInfo class]])
     {
         QYCommodityInfo *newCommodityInfo = object;
-        if ([_title isEqualToString:newCommodityInfo.title]
-            && [_desc isEqualToString:newCommodityInfo.desc]
-            && [_urlString isEqualToString:newCommodityInfo.urlString]) {
+        if (((!_title && !newCommodityInfo.title) || [_title isEqualToString:newCommodityInfo.title])
+            && ((!_desc && !newCommodityInfo.desc) || [_desc isEqualToString:newCommodityInfo.desc])
+            && ((!_urlString && !newCommodityInfo.urlString) || [_urlString isEqualToString:newCommodityInfo.urlString])) {
             return YES;
         }
     }

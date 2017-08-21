@@ -25,8 +25,10 @@
 @property (nonatomic,assign)    BOOL            humanOrMachine;
 @property (nonatomic,assign)    BOOL            operatorEable;
 @property (nonatomic,copy)      NSString        *inQueeuNotify;
-@property (nonatomic,copy)      NSString        *notExistTip;
-@property (nonatomic,strong)    NSDictionary    *evaluation;
+@property (nonatomic,copy)      NSString        *message;
+@property (nonatomic,copy)      NSDictionary    *evaluation;
+@property (nonatomic,copy)      NSString    *messageInvite;
+@property (nonatomic,copy)      NSString    *messageThanks;
 @property (nonatomic,copy)      NSArray<YSFActionInfo *>         *actionInfoArray;
 @property (nonatomic,strong)    YSFShopInfo     *shopInfo;           //平台电商的商铺信息
 @property (nonatomic,assign)    BOOL showNumber;

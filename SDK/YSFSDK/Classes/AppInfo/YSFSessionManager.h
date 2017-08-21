@@ -14,6 +14,7 @@ typedef enum : NSUInteger {
     YSFSessionStateTypeError,       //离线
     YSFSessionStateTypeOnline,      //正在服务
     YSFSessionStateTypeNotExist,     //客服不在线
+    YSFSessionStateNotExistAndLeaveMessageClosed,     //客服不在线
     YSFSessionStateTypeWaiting,     //正在排队
 } YSFSessionStateType;
 
@@ -34,6 +35,7 @@ typedef enum : NSUInteger {
 @interface YSFSessionManager : NSObject
 
 @property (nonatomic,weak)  id<YSFSessionProtocol>  delegate;
+@property (nonatomic,strong, readonly)    NSMutableDictionary *sessions;          //当前会话列表
 
 - (void)readData;
 

@@ -46,6 +46,8 @@
 #define     YSFApiKeyMessage            @"message"
 #define     YSFApiKeyEvaluation         @"evaluation"
 #define     YSFApiKeyEvaluationData     @"evaluation_data"
+#define     YSFApiKeyEvaluationMessageInvite      @"messageInvite"
+#define     YSFApiKeyEvaluationMessageThanks      @"messageThanks"
 #define     YSFApiKeyStaffType          @"stafftype"
 #define     YSFApiKeyVersion            @"version"
 #define     YSFApiKeyStaffId            @"staffid"
@@ -67,6 +69,8 @@
 #define     YSFApiKeyOperatorHintDesc   @"operator_hint_desc"
 #define     YSFApiKeyOperatorEnable     @"operator_enable"
 #define     YSFApiKeyEvaluation         @"evaluation"
+#define     YSFApiKeyMsgIdClient        @"msgidClient"
+#define     YSFApiKeyMsgIdClient2       @"msgIdClient"
 #define     YSFApiKeyInqueueNotify      @"inqueueNotify"
 #define     YSFApiKeyRemarks            @"remarks"
 #define     YSFApiKeyList               @"list"
@@ -80,6 +84,7 @@
 #define     YSFApiKeyCount              @"count"
 #define     YSFApiLoginCookie           @"login_cookie"
 #define     YSFApiKeyWelcome            @"welcome"
+#define     YSFApiKeyWelcomeRichText    @"welcome_rt"
 #define     YSFApiKeyCloseType          @"closeType"
 #define     YSFApiKeyEvaluate           @"evaluate"
 #define     YSFApiKeyPlatform           @"platform"
@@ -151,6 +156,18 @@
 #define     YSFApiKeyAddress            @"address"
 #define     YSFApiKeyOrderNo            @"orderNo"
 #define     YSFApiKeyDate               @"date"
+#define     YSFApiKeyTrashWords         @"trashWords"
+#define     YSFApiKeyRequired           @"required"
+#define     YSFApiKeyOrderId            @"orderId"
+#define     YSFApiKeyForms              @"forms"
+#define     YSFApiKeyValue              @"value"
+#define     YSFApiKeyUnions             @"unions"
+#define     YSFApiKeyDetail             @"detail"
+#define     YSFApiKeySubmitted          @"submitted"
+#define     YSFApiKeyImageFilePath      @"imageFilePath"
+#define     YSFApiKeySize               @"size"
+
+
 
 
 
@@ -172,17 +189,20 @@ typedef enum : NSUInteger {
     YSFCommandWaitingStatusRequest      =   16,     //查询等待状态
     YSFCommandCancelWaiting             =   26,     //取消排队
     YSFCommandSetCrmResult              =   41,     //设置crm结果
+    YSFCommandEvaluationNotification    =   50,     //主动邀请评价
     YSFCommandEvaluationRequest         =   51,     //满意度评价
     YSFCommandSetUserInfoRequest        =   52,     //轻量CRM
     YSFCommandMachine                   =   60,     //机器人问答
+    YSFCommandEvaluationAnswer          =   64,     //评价答案
+    YSFCommandRichText                  =   65,     //富文本
     YSFCommandKFBypassNotification      =   90,     //客服分流
     YSFCommandSetCommodityInfoRequest   =   121,    //商品信息
     YSFCommandPushMessageRequest        =   133,    //获取推送消息
     YSFCommandPushMessageStatusChangeRequest =   135,    //推送消息状态变更
     YSFCommandSessionStatusRequest      =   501,    //请求会话状态
     YSFCommandSessionStatusResponse     =   502,    //请求会话状态返回
-    YSFCommandBot                       = 203,      //bot
-    YSFCommandBotSelection              = 202,      //bot
+    YSFCommandBotReceive                = 203,      //bot
+    YSFCommandBotSend                   = 202,      //bot
     YSFCommandQueryOrdersRequest        = 204,      //bot
     YSFCommandQueryOrdersResponse       = 205,      //bot
 
@@ -197,6 +217,7 @@ typedef enum : NSUInteger {
     YSFCommandWeChatMessage             =   20,     //微信消息
     YSFCommandOfflineTimeout            =   32,    //离线时间超时
     YSFCommandWelcome                   =   40,     //欢迎语
+    YSFCommandTrashWords                =   42,     //消息匹配到敏感词
     YSFCommandReportQuestion            =   63,     //选择问题
     YSFCommandSessionWillClose          =   70,     //用户没有回复，稍后系统将关闭
     YSFCommandSessionClosedBySysterm    =   71,     //系统自动关闭会话
@@ -223,8 +244,10 @@ typedef enum : NSUInteger {
     YSFCodeServiceNotExist      = 201,      //客服不在线
     YSFCodeServiceWaiting       = 203,      //正在排队
     YSFCodeBundleIdInvalid      = 204,      //bundleid无效
+    YSFCodeServiceNotExistAndLeaveMessageClosed = 205,      //没有客服在线，且留言功能已关闭
     YSFCodeServiceWaitingToStartService = 301,      //排队返回值，从排队状态进入服务状态
-    YSFCodeServiceWaitingToInvalid      = 302,      //排队返回值，错误或者排队失效等
+    YSFCodeServiceWaitingToNotExsit      = 302,      //排队返回值，客服不在线
+    YSFCodeServiceWaitingToNotExsitAndLeaveMessageClosed      = 303,      //排队返回值，客服不在线，留言关闭
 
 } YSFCode;
 

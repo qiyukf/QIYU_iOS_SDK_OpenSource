@@ -19,6 +19,7 @@
 #import "YSFMachineResponse.h"
 #import "YSFReportQuestion.h"
 #import "YSFKFBypassNotification.h"
+#import "YSFRichText.h"
 
 @implementation YSF_NIMMessage (YSF)
 
@@ -40,6 +41,9 @@
     switch (self.messageType) {
         case YSF_NIMMessageTypeText:
             text = self.text;
+            if (![YSF_NIMSDK sharedSDK].sdkOrKf && !self.isOutgoingMsg) {
+                text = [self getTextWithoutTrashWords];
+            }
             if (![YSF_NIMSDK sharedSDK].sdkOrKf && text.length == 0) {
                 text = @"用户进入";
             }
@@ -70,7 +74,7 @@
             NSDictionary *dict = [self.rawAttachContent ysf_toDict];
             if (dict) {
                 NSInteger command = [(NSDictionary *)dict ysf_jsonInteger:YSFApiKeyCmd];
-                if (command == YSFCommandBot || command == YSFCommandBotSelection) {
+                if (command == YSFCommandBotReceive || command == YSFCommandBotSend) {
                     text = @"[查询消息]";
                     break;
                 }
@@ -145,6 +149,13 @@
                     index++;
                 }
             }
+            else if ([attachment isMemberOfClass:[YSFRichText class]])
+            {
+                text = ((YSFRichText *)attachment).displayContent;
+            }
+            else {
+                text = @"[未知消息]";
+            }
         }
             break;
         default:
@@ -153,6 +164,76 @@
     
     return text;
 }
+
+- (NSString *)getTextWithoutTrashWords
+{
+    NSString *text = self.text;
+    NSArray *trashWordsArray = [[self.ext ysf_toDict] ysf_jsonArray:YSFApiKeyTrashWords];
+    trashWordsArray = [trashWordsArray sortedArrayUsingComparator:^NSComparisonResult(NSString *obj1, NSString *obj2) {
+        if (obj1.length > obj2.length) {
+            return NSOrderedAscending;
+        }
+        else if (obj1.length == obj2.length) {
+            return NSOrderedSame;
+        }
+        else {
+            return NSOrderedDescending;
+        }
+    }];
+    for (NSString *transhWords in trashWordsArray) {
+        NSString *replaceStr = @"";
+        for (int i = 0; i < transhWords.length; i++) {
+            replaceStr = [replaceStr stringByAppendingString:@"*"];
+        }
+        text = [text stringByReplacingOccurrencesOfString:transhWords withString:replaceStr];
+    }
+    
+    return text;
+}
+
+- (BOOL)hasTrashWords
+{
+    NSArray *trashWordsArray = [[self.ext ysf_toDict] ysf_jsonArray:YSFApiKeyTrashWords];
+    return trashWordsArray.count > 0;
+}
+
+- (NSString *)getTrashWordsTip
+{
+    NSString *tip = @"";
+    NSString *ext = self.ext;
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf && self.isOutgoingMsg) {
+        NSArray *trashWordsArray = [[ext ysf_toDict] ysf_jsonArray:YSFApiKeyTrashWords];
+        if (trashWordsArray.count > 0) {
+            tip = @"消息包含违禁词“";
+            int totalWords = 10;
+            for (int i = 0; i < trashWordsArray.count; i++) {
+                NSString *trashWords = trashWordsArray[i];
+                totalWords -= trashWords.length;
+                if (totalWords < 0) {
+                    trashWords = [trashWords substringToIndex:(trashWords.length + totalWords)];
+                    trashWords = [trashWords stringByAppendingString:@"..."];
+                }
+                if (i != 0) {
+                    tip = [tip stringByAppendingString:@"，"];
+                }
+                tip = [tip stringByAppendingString:trashWords];
+                if (i == trashWordsArray.count - 1) {
+                    tip = [tip stringByAppendingString:@"”，发送失败"];
+                }
+                
+                if (totalWords <= 0) {
+                    break;
+                }
+            }
+        }
+        
+    }
+        
+    return tip;
+}
+
+
+
 
 @end
 

@@ -24,6 +24,8 @@
 @property (nonatomic, strong) YSFBadgeView *audioPlayedIcon;                      //语音未读红点
 @property (nonatomic,strong) YSFMessageModel *model;
 @property (nonatomic, weak)   id<YSFMessageCellDelegate> messageDelegate;
+@property (nonatomic, strong) UILabel *trashWordsTip;
+@property (nonatomic, strong) UIButton *submitForm;
 
 - (void)refreshData:(YSFMessageModel *)data;
 

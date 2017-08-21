@@ -14,10 +14,11 @@
 #import "YSFKitUtil.h"
 #import "YSFSessionAudioContentView.h"
 #import "YSFDefaultValueMaker.h"
-#import "YSFAttributedLabel.h"
 #import "YSFSessionUnknowContentView.h"
 #import "KFAudioToTextHandler.h"
 #import "YSFKit.h"
+#import "YSFApiDefines.h"
+#import "YSFBotForm.h"
 
 @interface YSFMessageCell()<YSFPlayAudioUIDelegate,YSFMessageContentViewDelegate>{
     UILongPressGestureRecognizer *_longPressGesture;
@@ -33,6 +34,7 @@
         //
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         self.backgroundColor = [UIColor clearColor];
+
         [self makeComponents];
         [self makeGesture];
     }
@@ -48,9 +50,7 @@
 {
     //retyrBtn
     _retryButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_message_cell_error"] forState:UIControlStateNormal];
-    [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_message_cell_error"] forState:UIControlStateHighlighted];
-    [_retryButton setFrame:CGRectMake(0, 0, 25, 25)];
+    [_retryButton setFrame:CGRectMake(0, 0, 18, 18)];
     [_retryButton addTarget:self action:@selector(onRetryMessage:) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:_retryButton];
     
@@ -80,6 +80,25 @@
     [_nameLabel setHidden:YES];
     [self.contentView addSubview:_nameLabel];
     
+    //trashWordsTip
+    _trashWordsTip = [UILabel new];
+    _trashWordsTip.numberOfLines = 0;
+    _trashWordsTip.lineBreakMode = NSLineBreakByCharWrapping;
+    _trashWordsTip.font = [UIFont systemFontOfSize:12.f];
+    _trashWordsTip.backgroundColor = [UIColor clearColor];
+    _trashWordsTip.textColor = YSFRGB(0xe64340);
+    [self.contentView addSubview:_trashWordsTip];
+    
+    _submitForm = [[UIButton alloc] init];
+    [_submitForm addTarget:self action:@selector(onClickAction:) forControlEvents:UIControlEventTouchUpInside];
+    _submitForm.titleLabel.font = [UIFont systemFontOfSize:14];
+    _submitForm.backgroundColor = [UIColor whiteColor];
+    _submitForm.layer.borderColor = YSFRGB(0xd9d9d9).CGColor;
+    _submitForm.layer.cornerRadius = 16.5;
+    _submitForm.layer.borderWidth = 0.5;
+    [_submitForm setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
+    [_submitForm setTitle:@"填写表单" forState:UIControlStateNormal];
+    [self.contentView addSubview:_submitForm];
 }
 
 - (void)makeGesture{
@@ -145,7 +164,53 @@
     }
     [_traningActivityIndicator setHidden:isActivityIndicatorHidden];
     [_retryButton setHidden:[self retryButtonHidden]];
+    _retryButton.userInteractionEnabled = YES;
     [_audioPlayedIcon setHidden:[self unreadHidden]];
+    
+    NSString *ext = self.model.message.ext;
+    _trashWordsTip.hidden = YES;
+    [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_message_cell_error"] forState:UIControlStateNormal];
+
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf && self.model.message.isOutgoingMsg) {
+        NSArray *trashWordsArray = [[ext ysf_toDict] ysf_jsonArray:YSFApiKeyTrashWords];
+        if (trashWordsArray.count > 0) {
+            [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_file_transfer_cancel"] forState:UIControlStateNormal];
+            _retryButton.hidden = NO;
+            _retryButton.userInteractionEnabled = NO;
+            _trashWordsTip.hidden = NO;
+        }
+        _trashWordsTip.text = @"消息包含违禁词“";
+        int totalWords = 10;
+        for (int i = 0; i < trashWordsArray.count; i++) {
+            NSString *trashWords = trashWordsArray[i];
+            totalWords -= trashWords.length;
+            if (totalWords < 0) {
+                trashWords = [trashWords substringToIndex:(trashWords.length + totalWords)];
+                trashWords = [trashWords stringByAppendingString:@"..."];
+            }
+            if (i != 0) {
+                _trashWordsTip.text = [_trashWordsTip.text stringByAppendingString:@"，"];
+            }
+            _trashWordsTip.text = [_trashWordsTip.text stringByAppendingString:trashWords];
+            if (i == trashWordsArray.count - 1) {
+                _trashWordsTip.text = [_trashWordsTip.text stringByAppendingString:@"”，发送失败"];
+            }
+            
+            if (totalWords <= 0) {
+                break;
+            }
+        }
+        
+    }
+    
+    _submitForm.hidden = YES;
+    if (self.model.message.messageType == YSF_NIMMessageTypeCustom) {
+        YSF_NIMCustomObject *customObject = self.model.message.messageObject;
+        if ([customObject.attachment isKindOfClass:[YSFBotForm class]]) {
+            _submitForm.hidden = ((YSFBotForm *)customObject.attachment).submitted;
+        }
+    }
+    
     [self setNeedsLayout];
 }
 
@@ -199,6 +264,15 @@
     [self layoutRetryButton];
     [self layoutAudioPlayedIcon];
     [self layoutActivityIndicator];
+    _trashWordsTip.frame = CGRectMake(0, _bubbleView.ysf_frameBottom + 10,
+                                  self.ysf_frameWidth - 112, 0);
+    [_trashWordsTip sizeToFit];
+    _trashWordsTip.ysf_frameRight = _bubbleView.ysf_frameRight - 5;
+    
+    _submitForm.ysf_frameWidth = 93;
+    _submitForm.ysf_frameTop = _bubbleView.ysf_frameBottom + 10;
+    _submitForm.ysf_frameLeft = _bubbleView.ysf_frameLeft + 5;
+    _submitForm.ysf_frameHeight = 33;
 }
 
 - (void)layoutAvatar
@@ -414,4 +488,11 @@
     }
 }
 
+- (void)onClickAction:(id)sender
+{
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameTapFillInBotForm;
+    event.message = self.model.message;
+    [self onCatchEvent:event];
+}
 @end

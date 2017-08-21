@@ -24,6 +24,7 @@
     dict[YSFApiKeyMessage]      = YSFStrParam(_message);
     dict[YSFApiKeySessionId]    = YSFStrParam(_sessionId);
     dict[YSFApiKeyExchange]     = YSFStrParam(_serviceId);
+    dict[YSFApiKeyStaffType]     = @(!_humanOrMachine);
     
     return dict;
 }
@@ -39,6 +40,8 @@
     instance.message                = [dict ysf_jsonString:YSFApiKeyMessage];
     instance.sessionId              = [dict ysf_jsonString:YSFApiKeySessionId];
     instance.serviceId              = [dict ysf_jsonString:YSFApiKeyExchange];
+    instance.humanOrMachine         = ![dict ysf_jsonInteger:YSFApiKeyStaffType];
+
     return instance;
 }
 @end

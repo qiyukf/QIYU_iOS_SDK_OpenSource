@@ -17,6 +17,7 @@
 #import "YSFUploadLog.h"
 #import "YSFServerSetting.h"
 #import "YSFQueryOrderListResponse.h"
+#import "YSFEvaluationNotification.h"
 
 
 @implementation YSFCustomSystemNotificationParser
@@ -46,6 +47,9 @@
                     break;
                 case YSFCommandQueryOrdersResponse:
                     result = [YSFQueryOrderListResponse dataByJson:dict];
+                    break;
+                case YSFCommandEvaluationNotification:
+                    result = [YSFEvaluationNotification dataByJson:dict];
                     break;
                 case YSFCommandUploadLog:
                 {

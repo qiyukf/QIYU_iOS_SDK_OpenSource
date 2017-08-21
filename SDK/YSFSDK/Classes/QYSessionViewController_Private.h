@@ -79,6 +79,7 @@ YSFSessionTipViewDelegate>
 
 - (void)uiUpdateMessage:(YSF_NIMMessage *)message;
 
-
+- (void)sendCloseSessionCustomMessage:(BOOL)quitWaitingOrCloseSession
+                    completetionBlock:(void (^)(BOOL isSuccess))completetionBlock;
 
 @end

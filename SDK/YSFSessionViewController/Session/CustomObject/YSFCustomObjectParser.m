@@ -31,6 +31,10 @@
 #import "YSFSelectedGoods.h"
 #import "YSFOrderOperation.h"
 #import "YSFActionList.h"
+#import "YSFRichText.h"
+#import "YSFBotForm.h"
+#import "YSFStaticUnion.h"
+#import "YSFSubmittedBotForm.h"
 
 @implementation YSFCustomObjectParser
 - (id<YSF_NIMCustomAttachment>)decodeAttachment:(NSString *)content
@@ -55,12 +59,16 @@
             case YSFCommandSetCommodityInfoRequest:
                 object = [YSFCommodityInfoShow objectByDict:dict];
                 break;
-            case YSFCommandBot:
+            case YSFCommandRichText:
+                object = [YSFRichText objectByDict:dict];
+                break;
+            case YSFCommandBotReceive:
             {
                 NSString *type = [dict ysf_jsonString:@"type"];
                 NSDictionary *tempateDict = [dict ysf_jsonDict:@"template"];
                 NSString *verString =  [tempateDict ysf_jsonString:YSFApiKeyVersion];
-                if (verString.length > 0 && ![verString isEqualToString:@"0.1"]) {
+                CGFloat version = [verString floatValue];
+                if (version > 1) {
                     return object;
                 }
                 
@@ -98,6 +106,14 @@
                         YSFActivePage *activePage = [YSFActivePage objectByDict:tempateDict];
                         object = activePage;
                     }
+                    else if ([templeteId isEqualToString:@"static_union"]) {
+                        YSFStaticUnion *staticUnion = [YSFStaticUnion objectByDict:tempateDict];
+                        object = staticUnion;
+                    }
+                    else if ([templeteId isEqualToString:@"bot_form"]) {
+                        YSFBotForm *botForm = [YSFBotForm objectByDict:tempateDict];
+                        object = botForm;
+                    }
                     else if ([templeteId isEqualToString:@"error_msg"]) {
                         YSFMachineResponse *response = [YSFMachineResponse new];
                         response.command = YSFCommandMachine;
@@ -114,7 +130,7 @@
 
             }
                 break;
-            case YSFCommandBotSelection:
+            case YSFCommandBotSend:
             {
                 NSDictionary *tempateDict = [dict ysf_jsonDict:@"template"];
                 NSString *templeteId = [tempateDict ysf_jsonString:@"id"];
@@ -123,6 +139,9 @@
                 }
                 else if ([templeteId isEqualToString:@"qiyu_template_goods"]) {
                     object = [YSFSelectedGoods objectByDict:dict];
+                }
+                else if ([templeteId isEqualToString:@"qiyu_template_botForm"]) {
+                    object = [YSFSubmittedBotForm objectByDict:dict];
                 }
                 else {
                     assert(false);
@@ -141,7 +160,17 @@
             }
                 break;
             case YSFCommandWelcome:
-                object = [YSFWelcome objectByDict:dict];
+            {
+                NSString *welcome = [dict ysf_jsonString:YSFApiKeyWelcomeRichText];
+                if (!welcome) {
+                    welcome = [dict ysf_jsonString:YSFApiKeyWelcome];
+                }
+                if (!welcome) {
+                    welcome = @"";
+                }
+                YSFRichText *richText = [YSFRichText objectByParams:YSFCommandRichText content:welcome];
+                object = richText;
+            }
                 break;
             case YSFCommandSessionClose:
             {

@@ -8,5 +8,8 @@
 
 @interface YSF_NIMMessage (YSF)
 - (NSString *)getDisplayMessageContent;//重设message显示
+- (NSString *)getTextWithoutTrashWords;
+- (BOOL)hasTrashWords;
+- (NSString *)getTrashWordsTip;
 @end
 

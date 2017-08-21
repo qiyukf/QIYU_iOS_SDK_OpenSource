@@ -21,6 +21,7 @@
 #import "YSFConversationManager.h"
 #import "YSFSessionStatusResponse.h"
 #import "YSFQueryWaitingStatus.h"
+#import "YSFEvaluationNotification.h"
 
 @interface YSFSessionManager ()
 <YSF_NIMSystemNotificationManagerDelegate,
@@ -154,7 +155,8 @@ YSFServiceRequestDelegate>
 {
     BOOL waitingOrNotExist = false;
     if (![self getSession:shopId] && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
-                               || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist)) {
+                               || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist
+                               || [self getSessionStateType:shopId] == YSFSessionStateNotExistAndLeaveMessageClosed)) {
         waitingOrNotExist = true;
     }
     YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
@@ -264,6 +266,10 @@ YSFServiceRequestDelegate>
         {
             [self setSessionStateType:shopId type:YSFSessionStateTypeNotExist];
         }
+        else if (code == YSFCodeServiceNotExistAndLeaveMessageClosed)
+        {
+            [self setSessionStateType:shopId type:YSFSessionStateNotExistAndLeaveMessageClosed];
+        }
         else {
             [self setSessionStateType:shopId type:YSFSessionStateTypeError];
         }
@@ -293,7 +299,16 @@ YSFServiceRequestDelegate>
     }
     [shopDict setObject:[[NSNumber alloc]initWithLongLong:session.sessionId] forKey:YSFCurrentSessionId];
     [shopDict setObject:@"0" forKey:YSFSessionTimes];
-    [shopDict setObject:session.evaluation forKey:YSFEvaluationData];
+    if (session.evaluation) {
+        [shopDict setObject:session.evaluation forKey:YSFEvaluationData];
+    }
+    if (session.messageInvite) {
+        [shopDict setObject:session.messageInvite forKey:YSFApiKeyEvaluationMessageInvite];
+    }
+    if (session.messageThanks) {
+        [shopDict setObject:session.messageThanks forKey:YSFApiKeyEvaluationMessageThanks];
+    }
+
     if (session.humanOrMachine) {
         [shopDict setObject:@(2) forKey:YSFSessionStatus];
     }
@@ -325,20 +340,26 @@ YSFServiceRequestDelegate>
 - (void)onCloseSession:(YSFCloseServiceNotification *)object shopId:(NSString *)shopId
 {
     if (object.evaluate) {
-        YSFInviteEvaluationObject *inviteEvaluation = [[YSFInviteEvaluationObject alloc] init];
-        inviteEvaluation.command = YSFCommandInviteEvaluation;
-        inviteEvaluation.sessionId = object.sessionId;
-        NSDictionary *dict = [self getEvaluationInfoByShopId:shopId];
-        NSDictionary *evaluationData = [dict objectForKey:YSFEvaluationData];
-        inviteEvaluation.evaluationDict = evaluationData;
-        YSF_NIMMessage *currentInviteEvaluationMessage = [YSFMessageMaker msgWithCustom:inviteEvaluation];
-        YSF_NIMSession *session  =[YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
-        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:currentInviteEvaluationMessage
-                                                       forSession:session addUnreadCount:YES completion:nil];
+        [self addEvaluationMessage:object.sessionId shopId:shopId];
     }
     
     [_delegate didClose:object.evaluate session:[self getSession:shopId] shopId:shopId];
     [self clearByShopId:shopId];
+}
+
+- (void)addEvaluationMessage:(long long)sessionId shopId:(NSString *)shopId
+{
+    YSFInviteEvaluationObject *inviteEvaluation = [[YSFInviteEvaluationObject alloc] init];
+    inviteEvaluation.command = YSFCommandInviteEvaluation;
+    inviteEvaluation.sessionId = sessionId;
+    NSDictionary *dict = [self getEvaluationInfoByShopId:shopId];
+    inviteEvaluation.evaluationDict = [dict objectForKey:YSFEvaluationData];
+    inviteEvaluation.evaluationMessageInvite = [dict objectForKey:YSFApiKeyEvaluationMessageInvite];
+    inviteEvaluation.evaluationMessageThanks = [dict objectForKey:YSFApiKeyEvaluationMessageThanks];
+    YSF_NIMMessage *currentInviteEvaluationMessage = [YSFMessageMaker msgWithCustom:inviteEvaluation];
+    YSF_NIMSession *session  =[YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+    [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:currentInviteEvaluationMessage
+                                                   forSession:session addUnreadCount:YES completion:nil];
 }
 
 - (void)onServiceRequestTimeout:(NSString *)shopId
@@ -414,14 +435,17 @@ YSFServiceRequestDelegate>
     else if ([object isKindOfClass:[YSFSessionStatusResponse class]])
     {
         [((YSFSessionStatusResponse *)object).shopSessionStatus enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            if ([obj integerValue] == 200) {
+            if ([obj integerValue] == YSFCodeSuccess) {
                 [self setSessionStateType:key type:YSFSessionStateTypeOnline];
             }
-            else if ([obj integerValue] == 203) {
+            else if ([obj integerValue] == YSFCodeServiceWaiting) {
                 [self setSessionStateType:key type:YSFSessionStateTypeWaiting];
             }
-            else if ([obj integerValue] == 201) {
+            else if ([obj integerValue] == YSFCodeServiceNotExist) {
                 [self setSessionStateType:key type:YSFSessionStateTypeNotExist];
+            }
+            else if ([obj integerValue] == YSFCodeServiceNotExistAndLeaveMessageClosed) {
+                [self setSessionStateType:key type:YSFSessionStateNotExistAndLeaveMessageClosed];
             }
         }];
         [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
@@ -430,13 +454,22 @@ YSFServiceRequestDelegate>
     {
         YSFQueryWaitingStatusResponse *wait_status = object;
         if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:shopId] == YSFSessionStateTypeWaiting
-            && wait_status.code == YSFCodeServiceWaitingToInvalid) {
-            [self setSessionStateType:shopId type:YSFSessionStateTypeNotExist];
-        
+            && (wait_status.code == YSFCodeServiceWaitingToNotExsit
+                || wait_status.code == YSFCodeServiceWaitingToNotExsitAndLeaveMessageClosed)) {
             YSFServiceSession *session = [YSFServiceSession new];
-            session.code = YSFCodeServiceNotExist;
-            session.notExistTip = wait_status.message;
-            NSError *error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
+            NSError *error = nil;
+            session.message = wait_status.message;
+            if (wait_status.code == YSFCodeServiceWaitingToNotExsit) {
+                [self setSessionStateType:shopId type:YSFSessionStateTypeNotExist];
+                session.code = YSFCodeServiceNotExist;
+                error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
+            }
+            else if (wait_status.code == YSFCodeServiceWaitingToNotExsitAndLeaveMessageClosed) {
+                [self setSessionStateType:shopId type:YSFSessionStateNotExistAndLeaveMessageClosed];
+                session.code = YSFCodeServiceNotExistAndLeaveMessageClosed;
+                error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
+            }
+
             if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)])
             {
                 [_delegate didReceiveSessionError:error session:session shopId:shopId];
@@ -444,6 +477,10 @@ YSFServiceRequestDelegate>
             
             [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
         }
+    }
+    else if ([object isKindOfClass:[YSFEvaluationNotification class]])
+    {
+        [self addEvaluationMessage:((YSFEvaluationNotification *)object).sessionId shopId:shopId];
     }
 }
 

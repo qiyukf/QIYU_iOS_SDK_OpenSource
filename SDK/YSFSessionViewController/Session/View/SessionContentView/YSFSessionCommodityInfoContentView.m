@@ -91,7 +91,7 @@
         NSString *urlString = [attachment.pictureUrlString ysf_trim];
         NSURL *imageUrl = [NSURL URLWithString:urlString];
         [self setUserAgent];
-        [[YSFWebImageManager sharedManager] downloadImageWithURL:imageUrl options:YSFWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, YSFImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+        [[YSFWebImageManager sharedManager] loadImageWithURL:imageUrl options:YSFWebImageRetryFailed progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, YSFImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
             if (!error && finished) {
                 self.productImageView.image = image;
                 [self setNeedsLayout];

@@ -11,6 +11,8 @@
 #import "QYCustomUIConfig.h"
 #import "YSFAttributedLabel.h"
 #import "YSFAttributedLabel+YSF.h"
+#import "YSFApiDefines.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @interface YSFSessionTextContentView()<YSFAttributedLabelDelegate>
 
@@ -51,6 +53,10 @@
     _textLabel.font = [UIFont systemFontOfSize:fontSize];
     
     NSString *text = self.model.message.text;
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf && !self.model.message.isOutgoingMsg && !uiConfig.showTransWords) {
+        text = [self.model.message getTextWithoutTrashWords];
+    }
+
     if (self.model.message.isPushMessageType) {
         [_textLabel ysf_setText:@""];
         [_textLabel appendHTMLText:text];

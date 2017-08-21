@@ -7,6 +7,14 @@
 //
 
 
+typedef enum : NSUInteger {
+    YSFEvaluationSelectionTypeInvisible = 0,
+    YSFEvaluationSelectionTypeVisible,
+    YSFEvaluationSelectionTypeYes,
+    YSFEvaluationSelectionTypeNo,
+} YSFEvaluationSelectionType;
+
+
 @interface YSFMachineResponse : NSObject<YSF_NIMCustomAttachment>
 
 @property (nonatomic,copy)  NSString    *rawStringForCopy;
@@ -20,6 +28,9 @@
 @property (nonatomic,copy)  NSString    *operatorHintDesc;
 
 @property (nonatomic,assign) BOOL isOneQuestionRelevant;
+@property (nonatomic,assign) YSFEvaluationSelectionType evaluation;
+@property (nonatomic, strong, readonly) NSMutableArray<NSString *> *imageUrlStringArray;
+@property (nonatomic,assign)  BOOL    shouldShow;
 
 + (instancetype)objectByDict:(NSDictionary *)dict;
 

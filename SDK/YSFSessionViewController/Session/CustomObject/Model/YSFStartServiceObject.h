@@ -24,5 +24,7 @@
 
 @property (nonatomic,copy)      NSString    *serviceId;
 
+@property (nonatomic,assign)    BOOL            humanOrMachine;
+
 + (YSFStartServiceObject *)objectByDict:(NSDictionary *)dict;
 @end

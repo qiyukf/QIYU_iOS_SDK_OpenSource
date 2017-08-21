@@ -9,6 +9,9 @@
 #import "YSFTextContentConfig.h"
 #import "QYCustomUIConfig.h"
 #import "YSFAttributedLabel+YSF.h"
+#import "YSFMessageModel.h"
+#import "YSFApiDefines.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @implementation YSFTextContentConfig
 - (CGSize)contentSize:(CGFloat)cellWidth
@@ -18,6 +21,10 @@
     CGFloat fontSize = self.message.isOutgoingMsg ? uiConfig.customMessageTextFontSize : uiConfig.serviceMessageTextFontSize;
     label.font = [UIFont systemFontOfSize:fontSize];
     NSString *text = self.message.text;
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf && !self.message.isOutgoingMsg && !uiConfig.showTransWords) {
+        text = [self.message getTextWithoutTrashWords];
+    }
+
     if (self.message.isPushMessageType) {
         [label ysf_setText:@""];
         [label appendHTMLText:text];
@@ -27,9 +34,7 @@
     }
     
     CGFloat msgBubbleMaxWidth    = (cellWidth - 112);
-    CGFloat bubbleLeftToContent  = 14;
-    CGFloat contentRightToBubble = 14;
-    CGFloat msgContentMaxWidth = (msgBubbleMaxWidth - contentRightToBubble - bubbleLeftToContent);
+    CGFloat msgContentMaxWidth = msgBubbleMaxWidth - self.contentViewInsets.left - self.contentViewInsets.right;
     CGSize size = [label sizeThatFits:CGSizeMake(msgContentMaxWidth, CGFLOAT_MAX)];
     if (size.height < 26) {
         size.height = 26;

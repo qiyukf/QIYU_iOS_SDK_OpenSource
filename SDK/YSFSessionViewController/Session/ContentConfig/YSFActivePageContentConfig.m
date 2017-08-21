@@ -8,7 +8,6 @@
 
 #import "YSFActivePageContentConfig.h"
 #import "NSDictionary+YSFJson.h"
-#import "YSFAttributedLabel.h"
 #import "NIMSDK.h"
 #import "KFAudioToTextHandler.h"
 #import "YSFApiDefines.h"
@@ -18,6 +17,7 @@
 @implementation YSFActivePageContentConfig
 - (CGSize)contentSize:(CGFloat)cellWidth
 {
+    CGFloat msgContentMaxWidth    = (cellWidth - 112);
     CGFloat height = 0;
     height += 90;
     height += 13;
@@ -28,7 +28,7 @@
     content.font = [UIFont systemFontOfSize:15];
     content.numberOfLines = 0;
     content.text = activePage.content;
-    content.ysf_frameWidth = cellWidth - 112 - 33;
+    content.ysf_frameWidth = msgContentMaxWidth - 33;
     [content sizeToFit];
     height += content.ysf_frameHeight;
     height += 13;
@@ -36,7 +36,7 @@
     height += 34;
     height += 13;
     
-    return CGSizeMake(250, height);
+    return CGSizeMake(msgContentMaxWidth, height);
 }
 
 - (NSString *)cellContent

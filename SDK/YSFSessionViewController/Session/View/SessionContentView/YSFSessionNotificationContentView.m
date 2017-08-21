@@ -44,10 +44,11 @@
         else if ([object.attachment isKindOfClass:[YSFEvaluationTipObject class]]) {
             YSFEvaluationTipObject *attachment = (YSFEvaluationTipObject *)object.attachment;
             _label.text = attachment.tipContent;
-            NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc]initWithString:attachment.tipResult];
+            NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:attachment.tipResult];
             [attributedstring ysf_setFont:[UIFont boldSystemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
             [attributedstring ysf_setTextColor:[[QYCustomUIConfig sharedInstance] tipMessageTextColor]];
             [_label appendAttributedText:attributedstring];
+            [_label appendText:@"。非常感谢！"];
         }
         else if ([object.attachment isKindOfClass:[YSFNotification class]]) {
             _label.text = [model.layoutConfig formatedMessage:model];
@@ -59,8 +60,7 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    CGFloat padding = [YSFDefaultValueMaker sharedMaker].maxTipPadding;
-    self.label.ysf_frameSize = [self.label sizeThatFits:CGSizeMake(self.ysf_frameWidth - 2 * padding, CGFLOAT_MAX)];
+    self.label.ysf_frameSize = [self.label sizeThatFits:CGSizeMake(self.ysf_frameWidth - 112 - 20, CGFLOAT_MAX)];
     self.label.ysf_frameCenterX = self.ysf_frameWidth * .5f;
     self.label.ysf_frameCenterY = self.ysf_frameHeight * .5f;
     self.bubbleImageView.frame = CGRectInset(self.label.frame, -8, 0);

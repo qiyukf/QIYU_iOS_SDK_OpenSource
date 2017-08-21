@@ -1,6 +1,5 @@
 #import "YSFOrderStatusContentView.h"
 #import "NSDictionary+YSFJson.h"
-#import "YSFAttributedLabel.h"
 #import "YSFMessageModel.h"
 #import "YSFOrderStatus.h"
 

@@ -18,6 +18,7 @@
 #import "YSFSetLeaveStatusRequest.h"
 #import "YSFCustomObjectParser.h"
 #import "YSFPushMessageRequest.h"
+#import "YSFCancelWaitingRequest.h"
 
 @implementation QYSDK
 
@@ -142,6 +143,14 @@
 - (void)logout:(QYCompletionBlock)completion
 {
     YSFLogApp(@"begin to logout");
+    
+    YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
+    [sessionManager.sessions enumerateKeysAndObjectsUsingBlock:^(NSString *_Nonnull shopId, YSFServiceSession *_Nonnull session, BOOL * _Nonnull stop) {
+        YSFCancelWaitingRequest *cancelWaitingRequest = [YSFCancelWaitingRequest new];
+        cancelWaitingRequest.sessionId = session.sessionId;
+        [YSFIMCustomSystemMessageApi sendMessage:cancelWaitingRequest shopId:shopId completion:^(NSError *error){
+        }];
+    }];
     
     YSFSetLeaveStatusRequest *request = [[YSFSetLeaveStatusRequest alloc] init];
     [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {

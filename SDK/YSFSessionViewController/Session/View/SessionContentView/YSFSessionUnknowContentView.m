@@ -35,14 +35,24 @@
     [self.label setText:text];
     [self.label sizeToFit];
     
-    if (!self.model.message.isOutgoingMsg) {
-        self.label.backgroundColor = [UIColor clearColor];
-        self.label.textColor = [UIColor blackColor];
-    }else{
-        self.label.backgroundColor = [UIColor clearColor];
-        self.label.textColor = [UIColor whiteColor];
+    if ([YSF_NIMSDK sharedSDK].sdkOrKf) {
+        if (!self.model.message.isOutgoingMsg) {
+            self.label.backgroundColor = [UIColor clearColor];
+            self.label.textColor = [UIColor blackColor];
+        }else{
+            self.label.backgroundColor = [UIColor clearColor];
+            self.label.textColor = [UIColor whiteColor];
+        }
     }
-    
+    else {
+        if (!self.model.message.isOutgoingMsg) {
+            self.label.backgroundColor = [UIColor clearColor];
+            self.label.textColor = [UIColor whiteColor];
+        }else{
+            self.label.backgroundColor = [UIColor clearColor];
+            self.label.textColor = [UIColor blackColor];
+        }
+    }
 }
 
 

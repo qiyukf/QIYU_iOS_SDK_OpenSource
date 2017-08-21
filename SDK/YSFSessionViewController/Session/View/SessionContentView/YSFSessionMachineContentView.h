@@ -7,10 +7,11 @@
 //
 
 #import "YSFSessionMessageContentView.h"
-@class YSFAttributedLabel;
 
 
 @interface YSFSessionMachineContentView : YSFSessionMessageContentView
+
+@property (nonatomic, strong, readonly) NSArray<UIImageView *> *imageViewsArray;
 
 
 @end

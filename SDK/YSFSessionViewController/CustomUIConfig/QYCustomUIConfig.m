@@ -103,6 +103,7 @@
     _showAudioEntry = YES;
     _showAudioEntryInRobotMode = YES;
     _showEmoticonEntry = YES;
+    _showImageEntry = YES;
     _autoShowKeyboard = YES;
     
     _showShopEntrance = NO;
@@ -114,22 +115,15 @@
     _sessionListEntranceImage = nil;
     
     _compressQuality = 0.5;
+    _showTransWords = NO;
 }
 
-- (void)setSdkOrKf:(NSNumber *)sdkOrKf
+- (void)setToKf
 {
-    if ([sdkOrKf boolValue]) {
-        _customMessageTextColor = [UIColor whiteColor];
-        _customMessageHyperLinkColor = [UIColor whiteColor];
-        _serviceMessageTextColor = [UIColor blackColor];
-        _serviceMessageHyperLinkColor = YSFRGBA2(0xff4e97d9);
-    }
-    else {
-        _customMessageTextColor = [UIColor blackColor];
-        _customMessageHyperLinkColor = YSFRGBA2(0xff4e97d9);
-        _serviceMessageTextColor = [UIColor whiteColor];
-        _serviceMessageHyperLinkColor = [UIColor whiteColor];
-    }
+    _customMessageTextColor = [UIColor blackColor];
+    _customMessageHyperLinkColor = YSFRGBA2(0xff4e97d9);
+    _serviceMessageTextColor = [UIColor whiteColor];
+    _serviceMessageHyperLinkColor = [UIColor whiteColor];
 }
 
 @end

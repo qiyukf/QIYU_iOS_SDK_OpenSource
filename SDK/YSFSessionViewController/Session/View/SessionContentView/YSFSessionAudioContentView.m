@@ -10,7 +10,6 @@
 #import "YSFMessageModel.h"
 #import "QYCustomUIConfig.h"
 #import "NSDictionary+YSFJson.h"
-#import "YSFAttributedLabel.h"
 #import "KFAudioToTextHandler.h"
 #import "YSFApiDefines.h"
 

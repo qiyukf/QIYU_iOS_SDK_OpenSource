@@ -25,7 +25,7 @@
     if (self) {
         self.opaque = YES;
         _imageView  = [[UIImageView alloc] initWithFrame:CGRectZero];
-        _imageView.backgroundColor = [UIColor blackColor];
+        _imageView.backgroundColor = YSFRGB(0xf8f8f8);
         [self addSubview:_imageView];
         _progressView = [[YSFLoadProgressView alloc] initWithFrame:CGRectMake(0, 0, 44, 44)];
         _progressView.maxProgress = 1.0f;
