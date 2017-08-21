@@ -9,5 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface NSArray (NIM)
+- (NSString *)ysf_toUTF8String;
 - (NSArray *)ysf_https;
 @end

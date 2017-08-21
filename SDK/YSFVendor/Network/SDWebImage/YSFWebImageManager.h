@@ -41,7 +41,7 @@ typedef NS_OPTIONS(NSUInteger, YSFWebImageOptions) {
      * This option helps deal with images changing behind the same request URL, e.g. Facebook graph api profile pics.
      * If a cached image is refreshed, the completion block is called once with the cached image and again with the final image.
      *
-     * Use this flag only if you can't make your URLs static with embeded cache busting parameter.
+     * Use this flag only if you can't make your URLs static with embedded cache busting parameter.
      */
     YSFWebImageRefreshCached = 1 << 4,
 
@@ -58,15 +58,14 @@ typedef NS_OPTIONS(NSUInteger, YSFWebImageOptions) {
     YSFWebImageHandleCookies = 1 << 6,
 
     /**
-     * Enable to allow untrusted SSL ceriticates.
+     * Enable to allow untrusted SSL certificates.
      * Useful for testing purposes. Use with caution in production.
      */
     YSFWebImageAllowInvalidSSLCertificates = 1 << 7,
 
     /**
-     * By default, image are loaded in the order they were queued. This flag move them to
-     * the front of the queue and is loaded immediately instead of waiting for the current queue to be loaded (which 
-     * could take a while).
+     * By default, images are loaded in the order in which they were queued. This flag moves them to
+     * the front of the queue.
      */
     YSFWebImageHighPriority = 1 << 8,
     
@@ -88,14 +87,21 @@ typedef NS_OPTIONS(NSUInteger, YSFWebImageOptions) {
      * have the hand before setting the image (apply a filter or add it with cross-fade animation for instance)
      * Use this flag if you want to manually set the image in the completion when success
      */
-    YSFWebImageAvoidAutoSetImage = 1 << 11
+    YSFWebImageAvoidAutoSetImage = 1 << 11,
+    
+    /**
+     * By default, images are decoded respecting their original size. On iOS, this flag will scale down the
+     * images to a size compatible with the constrained memory of devices.
+     * If `YSFWebImageProgressiveDownload` flag is set the scale down is deactivated.
+     */
+    YSFWebImageScaleDownLargeImages = 1 << 12
 };
 
-typedef void(^YSFWebImageCompletionBlock)(UIImage *image, NSError *error, YSFImageCacheType cacheType, NSURL *imageURL);
+typedef void(^YSFExternalCompletionBlock)(UIImage * _Nullable image, NSError * _Nullable error, YSFImageCacheType cacheType, NSURL * _Nullable imageURL);
 
-typedef void(^YSFWebImageCompletionWithFinishedBlock)(UIImage *image, NSError *error, YSFImageCacheType cacheType, BOOL finished, NSURL *imageURL);
+typedef void(^YSFInternalCompletionBlock)(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, YSFImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL);
 
-typedef NSString *(^YSFWebImageCacheKeyFilterBlock)(NSURL *url);
+typedef NSString * _Nullable (^YSFWebImageCacheKeyFilterBlock)(NSURL * _Nullable url);
 
 
 @class YSFWebImageManager;
@@ -112,7 +118,7 @@ typedef NSString *(^YSFWebImageCacheKeyFilterBlock)(NSURL *url);
  *
  * @return Return NO to prevent the downloading of the image on cache misses. If not implemented, YES is implied.
  */
-- (BOOL)imageManager:(YSFWebImageManager *)imageManager shouldDownloadImageForURL:(NSURL *)imageURL;
+- (BOOL)imageManager:(nonnull YSFWebImageManager *)imageManager shouldDownloadImageForURL:(nullable NSURL *)imageURL;
 
 /**
  * Allows to transform the image immediately after it has been downloaded and just before to cache it on disk and memory.
@@ -124,7 +130,7 @@ typedef NSString *(^YSFWebImageCacheKeyFilterBlock)(NSURL *url);
  *
  * @return The transformed image object.
  */
-- (UIImage *)imageManager:(YSFWebImageManager *)imageManager transformDownloadedImage:(UIImage *)image withURL:(NSURL *)imageURL;
+- (nullable UIImage *)imageManager:(nonnull YSFWebImageManager *)imageManager transformDownloadedImage:(nullable UIImage *)image withURL:(nullable NSURL *)imageURL;
 
 @end
 
@@ -139,23 +145,23 @@ typedef NSString *(^YSFWebImageCacheKeyFilterBlock)(NSURL *url);
  * @code
 
 YSFWebImageManager *manager = [YSFWebImageManager sharedManager];
-[manager downloadImageWithURL:imageURL
-                      options:0
-                     progress:nil
-                    completed:^(UIImage *image, NSError *error, YSFImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                        if (image) {
-                            // do something with image
-                        }
-                    }];
+[manager loadImageWithURL:imageURL
+                  options:0
+                 progress:nil
+                completed:^(UIImage *image, NSError *error, YSFImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                    if (image) {
+                        // do something with image
+                    }
+                }];
 
  * @endcode
  */
 @interface YSFWebImageManager : NSObject
 
-@property (weak, nonatomic) id <YSFWebImageManagerDelegate> delegate;
+@property (weak, nonatomic, nullable) id <YSFWebImageManagerDelegate> delegate;
 
-@property (strong, nonatomic, readonly) YSFImageCache *imageCache;
-@property (strong, nonatomic, readonly) YSFWebImageDownloader *imageDownloader;
+@property (strong, nonatomic, readonly, nullable) YSFImageCache *imageCache;
+@property (strong, nonatomic, readonly, nullable) YSFWebImageDownloader *imageDownloader;
 
 /**
  * The cache filter is a block used each time YSFWebImageManager need to convert an URL into a cache key. This can
@@ -173,14 +179,20 @@ YSFWebImageManager *manager = [YSFWebImageManager sharedManager];
 
  * @endcode
  */
-@property (nonatomic, copy) YSFWebImageCacheKeyFilterBlock cacheKeyFilter;
+@property (nonatomic, copy, nullable) YSFWebImageCacheKeyFilterBlock cacheKeyFilter;
 
 /**
  * Returns global YSFWebImageManager instance.
  *
  * @return YSFWebImageManager shared instance
  */
-+ (YSFWebImageManager *)sharedManager;
++ (nonnull instancetype)sharedManager;
+
+/**
+ * Allows to specify instance of cache and image downloader used with image manager.
+ * @return new instance of `YSFWebImageManager` with specified cache and downloader.
+ */
+- (nonnull instancetype)initWithCache:(nonnull YSFImageCache *)cache downloader:(nonnull YSFWebImageDownloader *)downloader NS_DESIGNATED_INITIALIZER;
 
 /**
  * Downloads the image at the given URL if not present in cache or return the cached version otherwise.
@@ -188,26 +200,29 @@ YSFWebImageManager *manager = [YSFWebImageManager sharedManager];
  * @param url            The URL to the image
  * @param options        A mask to specify options to use for this request
  * @param progressBlock  A block called while image is downloading
+ *                       @note the progress block is executed on a background queue
  * @param completedBlock A block called when operation has been completed.
  *
  *   This parameter is required.
  * 
- *   This block has no return value and takes the requested UIImage as first parameter.
- *   In case of error the image parameter is nil and the second parameter may contain an NSError.
+ *   This block has no return value and takes the requested UIImage as first parameter and the NSData representation as second parameter.
+ *   In case of error the image parameter is nil and the third parameter may contain an NSError.
  *
- *   The third parameter is an `YSFImageCacheType` enum indicating if the image was retrived from the local cache
+ *   The forth parameter is an `SDImageCacheType` enum indicating if the image was retrieved from the local cache
  *   or from the memory cache or from the network.
  *
- *   The last parameter is set to NO when the YSFWebImageProgressiveDownload option is used and the image is 
- *   downloading. This block is thus called repetidly with a partial image. When image is fully downloaded, the
+ *   The fith parameter is set to NO when the YSFWebImageProgressiveDownload option is used and the image is
+ *   downloading. This block is thus called repeatedly with a partial image. When image is fully downloaded, the
  *   block is called a last time with the full image and the last parameter set to YES.
+ *
+ *   The last parameter is the original image URL
  *
  * @return Returns an NSObject conforming to YSFWebImageOperation. Should be an instance of YSFWebImageDownloaderOperation
  */
-- (id <YSFWebImageOperation>)downloadImageWithURL:(NSURL *)url
-                                         options:(YSFWebImageOptions)options
-                                        progress:(YSFWebImageDownloaderProgressBlock)progressBlock
-                                       completed:(YSFWebImageCompletionWithFinishedBlock)completedBlock;
+- (nullable id <YSFWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                              options:(YSFWebImageOptions)options
+                                             progress:(nullable YSFWebImageDownloaderProgressBlock)progressBlock
+                                            completed:(nullable YSFInternalCompletionBlock)completedBlock;
 
 /**
  * Saves image to cache for given URL
@@ -217,10 +232,10 @@ YSFWebImageManager *manager = [YSFWebImageManager sharedManager];
  *
  */
 
-- (void)saveImageToCache:(UIImage *)image forURL:(NSURL *)url;
+- (void)saveImageToCache:(nullable UIImage *)image forURL:(nullable NSURL *)url;
 
 /**
- * Cancel all current opreations
+ * Cancel all current operations
  */
 - (void)cancelAll;
 
@@ -230,24 +245,6 @@ YSFWebImageManager *manager = [YSFWebImageManager sharedManager];
 - (BOOL)isRunning;
 
 /**
- *  Check if image has already been cached
- *
- *  @param url image url
- *
- *  @return if the image was already cached
- */
-- (BOOL)cachedImageExistsForURL:(NSURL *)url;
-
-/**
- *  Check if image has already been cached on disk only
- *
- *  @param url image url
- *
- *  @return if the image was already cached (disk only)
- */
-- (BOOL)diskImageExistsForURL:(NSURL *)url;
-
-/**
  *  Async check if image has already been cached
  *
  *  @param url              image url
@@ -255,8 +252,8 @@ YSFWebImageManager *manager = [YSFWebImageManager sharedManager];
  *  
  *  @note the completion block is always executed on the main queue
  */
-- (void)cachedImageExistsForURL:(NSURL *)url
-                     completion:(YSFWebImageCheckCacheCompletionBlock)completionBlock;
+- (void)cachedImageExistsForURL:(nullable NSURL *)url
+                     completion:(nullable YSFWebImageCheckCacheCompletionBlock)completionBlock;
 
 /**
  *  Async check if image has already been cached on disk only
@@ -266,19 +263,13 @@ YSFWebImageManager *manager = [YSFWebImageManager sharedManager];
  *
  *  @note the completion block is always executed on the main queue
  */
-- (void)diskImageExistsForURL:(NSURL *)url
-                   completion:(YSFWebImageCheckCacheCompletionBlock)completionBlock;
+- (void)diskImageExistsForURL:(nullable NSURL *)url
+                   completion:(nullable YSFWebImageCheckCacheCompletionBlock)completionBlock;
 
 
 /**
  *Return the cache key for a given URL
  */
-- (NSString *)cacheKeyForURL:(NSURL *)url;
+- (nullable NSString *)cacheKeyForURL:(nullable NSURL *)url;
 
 @end
-
-
-#pragma mark - Deprecated
-
-typedef void(^YSFWebImageCompletedBlock)(UIImage *image, NSError *error, YSFImageCacheType cacheType) __deprecated_msg("Block type deprecated. Use `SDWebImageCompletionBlock`");
-typedef void(^YSFWebImageCompletedWithFinishedBlock)(UIImage *image, NSError *error, YSFImageCacheType cacheType, BOOL finished) __deprecated_msg("Block type deprecated. Use `SDWebImageCompletionWithFinishedBlock`");

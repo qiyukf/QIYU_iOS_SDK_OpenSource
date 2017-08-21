@@ -10,34 +10,61 @@
 #import "YSFWebImageDownloader.h"
 #import "YSFWebImageOperation.h"
 
-extern NSString *const YSFWebImageDownloadStartNotification;
-extern NSString *const YSFWebImageDownloadReceiveResponseNotification;
-extern NSString *const YSFWebImageDownloadStopNotification;
-extern NSString *const YSFWebImageDownloadFinishNotification;
+extern NSString * _Nonnull const YSFWebImageDownloadStartNotification;
+extern NSString * _Nonnull const YSFWebImageDownloadReceiveResponseNotification;
+extern NSString * _Nonnull const YSFWebImageDownloadStopNotification;
+extern NSString * _Nonnull const YSFWebImageDownloadFinishNotification;
 
-@interface YSFWebImageDownloaderOperation : NSOperation <YSFWebImageOperation>
+
 
 /**
- * The request used by the operation's connection.
+ Describes a downloader operation. If one wants to use a custom downloader op, it needs to inherit from `NSOperation` and conform to this protocol
  */
-@property (strong, nonatomic, readonly) NSURLRequest *request;
+@protocol YSFWebImageDownloaderOperationInterface<NSObject>
+
+- (nonnull instancetype)initWithRequest:(nullable NSURLRequest *)request
+                              inSession:(nullable NSURLSession *)session
+                                options:(YSFWebImageDownloaderOptions)options;
+
+- (nullable id)addHandlersForProgress:(nullable YSFWebImageDownloaderProgressBlock)progressBlock
+                            completed:(nullable YSFWebImageDownloaderCompletedBlock)completedBlock;
+
+- (BOOL)shouldDecompressImages;
+- (void)setShouldDecompressImages:(BOOL)value;
+
+- (nullable NSURLCredential *)credential;
+- (void)setCredential:(nullable NSURLCredential *)value;
+
+@end
+
+
+@interface YSFWebImageDownloaderOperation : NSOperation <YSFWebImageDownloaderOperationInterface, YSFWebImageOperation, NSURLSessionTaskDelegate, NSURLSessionDataDelegate>
+
+/**
+ * The request used by the operation's task.
+ */
+@property (strong, nonatomic, readonly, nullable) NSURLRequest *request;
+
+/**
+ * The operation's task
+ */
+@property (strong, nonatomic, readonly, nullable) NSURLSessionTask *dataTask;
 
 
 @property (assign, nonatomic) BOOL shouldDecompressImages;
 
 /**
- * Whether the URL connection should consult the credential storage for authenticating the connection. `YES` by default.
- *
- * This is the value that is returned in the `NSURLConnectionDelegate` method `-connectionShouldUseCredentialStorage:`.
+ *  Was used to determine whether the URL connection should consult the credential storage for authenticating the connection.
+ *  @deprecated Not used for a couple of versions
  */
-@property (nonatomic, assign) BOOL shouldUseCredentialStorage;
+@property (nonatomic, assign) BOOL shouldUseCredentialStorage __deprecated_msg("Property deprecated. Does nothing. Kept only for backwards compatibility");
 
 /**
  * The credential used for authentication challenges in `-connection:didReceiveAuthenticationChallenge:`.
  *
  * This will be overridden by any shared credentials that exist for the username or password of the request URL, if present.
  */
-@property (nonatomic, strong) NSURLCredential *credential;
+@property (nonatomic, strong, nullable) NSURLCredential *credential;
 
 /**
  * The YSFWebImageDownloaderOptions for the receiver.
@@ -52,7 +79,7 @@ extern NSString *const YSFWebImageDownloadFinishNotification;
 /**
  * The response returned by the operation's connection.
  */
-@property (strong, nonatomic) NSURLResponse *response;
+@property (strong, nonatomic, nullable) NSURLResponse *response;
 
 /**
  *  Initializes a `YSFWebImageDownloaderOperation` object
@@ -60,19 +87,36 @@ extern NSString *const YSFWebImageDownloadFinishNotification;
  *  @see YSFWebImageDownloaderOperation
  *
  *  @param request        the URL request
+ *  @param session        the URL session in which this operation will run
  *  @param options        downloader options
- *  @param progressBlock  the block executed when a new chunk of data arrives. 
- *                        @note the progress block is executed on a background queue
- *  @param completedBlock the block executed when the download is done. 
- *                        @note the completed block is executed on the main queue for success. If errors are found, there is a chance the block will be executed on a background queue
- *  @param cancelBlock    the block executed if the download (operation) is cancelled
  *
  *  @return the initialized instance
  */
-- (id)initWithRequest:(NSURLRequest *)request
-              options:(YSFWebImageDownloaderOptions)options
-             progress:(YSFWebImageDownloaderProgressBlock)progressBlock
-            completed:(YSFWebImageDownloaderCompletedBlock)completedBlock
-            cancelled:(YSFWebImageNoParamsBlock)cancelBlock;
+- (nonnull instancetype)initWithRequest:(nullable NSURLRequest *)request
+                              inSession:(nullable NSURLSession *)session
+                                options:(YSFWebImageDownloaderOptions)options NS_DESIGNATED_INITIALIZER;
+
+/**
+ *  Adds handlers for progress and completion. Returns a tokent that can be passed to -cancel: to cancel this set of
+ *  callbacks.
+ *
+ *  @param progressBlock  the block executed when a new chunk of data arrives.
+ *                        @note the progress block is executed on a background queue
+ *  @param completedBlock the block executed when the download is done.
+ *                        @note the completed block is executed on the main queue for success. If errors are found, there is a chance the block will be executed on a background queue
+ *
+ *  @return the token to use to cancel this set of handlers
+ */
+- (nullable id)addHandlersForProgress:(nullable YSFWebImageDownloaderProgressBlock)progressBlock
+                            completed:(nullable YSFWebImageDownloaderCompletedBlock)completedBlock;
+
+/**
+ *  Cancels a set of callbacks. Once all callbacks are canceled, the operation is cancelled.
+ *
+ *  @param token the token representing a set of callbacks to cancel
+ *
+ *  @return YES if the operation was stopped because this was the last token to be canceled. NO otherwise.
+ */
+- (BOOL)cancel:(nullable id)token;
 
 @end

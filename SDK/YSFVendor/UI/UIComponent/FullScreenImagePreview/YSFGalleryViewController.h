@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "YSFPresentViewController.h"
 
-typedef UIView * (^QueryMessageContentViewCallback)(id messageId);
+@class YSFGalleryItem;
+typedef UIView * (^QueryMessageContentViewCallback)(YSFGalleryItem *item);
 
 
 @interface YSFGalleryItem : NSObject
@@ -17,7 +18,8 @@ typedef UIView * (^QueryMessageContentViewCallback)(id messageId);
 @property (nonatomic,copy)  NSString    *thumbPath;
 @property (nonatomic,copy)  NSString    *imageURL;
 @property (nonatomic,copy)  NSString    *name;
-@property (nonatomic,weak)  id  messageId;
+@property (nonatomic,weak)  id  message;
+@property (nonatomic,assign)  NSUInteger  indexAtMesaage;
 
 @end
 

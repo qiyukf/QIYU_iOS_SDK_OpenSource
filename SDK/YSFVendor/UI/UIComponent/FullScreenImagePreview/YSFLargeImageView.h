@@ -1,4 +1,6 @@
 #import <UIKit/UIKit.h>
+#import "FLAnimatedImageView.h"
+
 @class YSFLargeImageView;
 
 #define kYSFLargeImageGapWidth 16.0f
@@ -13,7 +15,7 @@
 @interface YSFLargeImageView : UIView <UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
 @property (strong, nonatomic) UIScrollView *imageScrollView;
-@property (strong, nonatomic) UIImageView *imageView;
+@property (strong, nonatomic) YSFAnimatedImageView *imageView;
 @property (assign, nonatomic) BOOL easyClose; //下滑退出 默认NO
 @property (weak, nonatomic) id<YSFLargeImageViewDelegate> delegate;
 @property (assign, nonatomic) NSInteger gapWidth; // 图片预览时的间隔

@@ -1,20 +1,33 @@
-//
-// Created by Fabrice Aneche on 06/01/14.
-// Copyright (c) 2014 Dailymotion. All rights reserved.
-//
+/*
+ * This file is part of the YSFWebImage package.
+ * (c) Olivier Poitrey <rs@dailymotion.com>
+ * (c) Fabrice Aneche
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 #import <Foundation/Foundation.h>
+#import "YSFWebImageCompat.h"
 
-@interface NSData (YSFImageContentType)
+typedef NS_ENUM(NSInteger, YSFImageFormat) {
+    YSFImageFormatUndefined = -1,
+    YSFImageFormatJPEG = 0,
+    YSFImageFormatPNG,
+    YSFImageFormatGIF,
+    YSFImageFormatTIFF,
+    YSFImageFormatWebP
+};
+
+@interface NSData (ImageContentType)
 
 /**
- *  Compute the content type for an image data
+ *  Return image format
  *
- *  @param data the input data
+ *  @param data the input image data
  *
- *  @return the content type as string (i.e. image/jpeg, image/gif)
+ *  @return the image format as `SDImageFormat` (enum)
  */
-+ (NSString *)ysf_contentTypeForImageData:(NSData *)data;
++ (YSFImageFormat)ysf_imageFormatForImageData:(nullable NSData *)data;
 
 @end
-
