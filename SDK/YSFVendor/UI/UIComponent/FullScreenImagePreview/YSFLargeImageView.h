@@ -1,5 +1,5 @@
 #import <UIKit/UIKit.h>
-#import "FLAnimatedImageView.h"
+#import "YSFAnimatedImageView.h"
 
 @class YSFLargeImageView;
 

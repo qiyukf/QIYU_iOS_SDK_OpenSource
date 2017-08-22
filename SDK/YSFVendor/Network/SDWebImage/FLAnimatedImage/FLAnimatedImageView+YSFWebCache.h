@@ -13,7 +13,7 @@
 #if __has_include(<FLAnimatedImage/FLAnimatedImage.h>)
 #import <FLAnimatedImage/FLAnimatedImage.h>
 #else
-#import "FLAnimatedImageView.h"
+#import "YSFAnimatedImageView.h"
 #endif
 
 #import "YSFWebImageManager.h"
