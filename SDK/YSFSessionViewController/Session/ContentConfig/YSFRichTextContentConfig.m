@@ -12,7 +12,7 @@
 #import "KFAudioToTextHandler.h"
 #import "YSFApiDefines.h"
 #import "YSFActionList.h"
-#import "DTCoreText.h"
+#import "YSFCoreText.h"
 #import "YSFInputEmoticonManager.h"
 #import "YSFInputEmoticonParser.h"
 #import "YSFRichText.h"

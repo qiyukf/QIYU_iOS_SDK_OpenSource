@@ -2,7 +2,7 @@
 #import "YSFRichText.h"
 #import "YSFApiDefines.h"
 #import "NSDictionary+YSFJson.h"
-#import "DTCoreText.h"
+#import "YSFCoreText.h"
 
 @interface YSFRichText() <YSFAttributedTextContentViewDelegate>
 

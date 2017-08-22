@@ -9,7 +9,7 @@
 #import "YSFMachineResponse.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFApiDefines.h"
-#import "DTCoreText.h"
+#import "YSFCoreText.h"
 
 @interface YSFMachineResponse() <YSFAttributedTextContentViewDelegate>
 

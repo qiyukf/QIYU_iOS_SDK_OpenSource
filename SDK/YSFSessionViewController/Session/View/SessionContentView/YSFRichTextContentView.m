@@ -2,7 +2,7 @@
 #import "NSDictionary+YSFJson.h"
 #import "YSFMessageModel.h"
 #import "UIImageView+YSFWebCache.h"
-#import "DTCoreText.h"
+#import "YSFCoreText.h"
 #import "YSFInputEmoticonManager.h"
 #import "YSFInputEmoticonParser.h"
 #import "YSFRichText.h"

@@ -12,7 +12,7 @@
 #import "YSFMachineResponse.h"
 #import "YSFAttributedLabel.h"
 #import "YSFApiDefines.h"
-#import "DTCoreText.h"
+#import "YSFCoreText.h"
 #import "UIImageView+YSFWebCache.h"
 #import "YSFInputEmoticonManager.h"
 #import "YSFInputEmoticonParser.h"
