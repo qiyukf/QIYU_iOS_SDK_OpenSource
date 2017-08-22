@@ -164,7 +164,7 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
     
     if (index < 0)
     {
-        assert(0);
+        //assert(0);
         index = 0;
     }
     NSInteger begin = index * YSF_NIMMaxItemCountInPage;

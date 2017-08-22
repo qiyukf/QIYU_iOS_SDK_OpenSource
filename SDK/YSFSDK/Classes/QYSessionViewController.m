@@ -1859,7 +1859,7 @@ static long long sessionId;
 
     
     if (!handled) {
-        assert(0);
+        //assert(0);
     }
 }
 
@@ -2089,7 +2089,7 @@ static long long sessionId;
         [self presentViewController:vc animated:YES completion:nil];
     }
     else {
-        assert(false);
+        //assert(false);
     }
 }
 
