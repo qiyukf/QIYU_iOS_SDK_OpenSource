@@ -121,11 +121,11 @@
                         object = response;
                     }
                     else {
-                        assert(false);
+                        //assert(false);
                     }
                 }
                 else {
-                    assert(false);
+                    //assert(false);
                 }
 
             }
@@ -144,7 +144,7 @@
                     object = [YSFSubmittedBotForm objectByDict:dict];
                 }
                 else {
-                    assert(false);
+                    //assert(false);
                 }
             }
                 break;
@@ -201,7 +201,7 @@
                 object = [YSFReportQuestion objectByDict:dict];
                 break;
             default:
-                assert(false);
+                //assert(false);
                 YSFLogErr(@"%zd not supported",command);
 
                 break;

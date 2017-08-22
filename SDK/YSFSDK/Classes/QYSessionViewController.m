@@ -1288,7 +1288,7 @@ static long long sessionId;
         [self layoutConfig:model];
         CGSize size = model.contentSize;
         
-        assert(!CGSizeEqualToSize(size, CGSizeZero));
+        //assert(!CGSizeEqualToSize(size, CGSizeZero));
         
         UIEdgeInsets contentViewInsets = model.contentViewInsets;
         UIEdgeInsets bubbleViewInsets  = model.bubbleViewInsets;
@@ -1300,7 +1300,7 @@ static long long sessionId;
     }
     else
     {
-        assert(false);
+        //assert(false);
     }
     return cellHeight;
 }
@@ -1995,7 +1995,7 @@ static long long sessionId;
     }
     
     if (!handled) {
-        assert(0);
+        //assert(0);
     }
 }
 
@@ -2351,7 +2351,7 @@ static long long sessionId;
         [self presentViewController:vc animated:YES completion:nil];
     }
     else {
-        assert(false);
+        //assert(false);
     }
 }
 
