@@ -22,6 +22,7 @@
 @property (nonatomic, copy) NSString *urlString;
 //备注
 @property (nonatomic, copy) NSString *note;
+@property (nonatomic, copy) NSString *userData;
 //发送时是否显示
 @property (nonatomic, assign) BOOL show;
 

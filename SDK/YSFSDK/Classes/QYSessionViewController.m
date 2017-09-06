@@ -686,6 +686,9 @@ static long long sessionId;
 
 - (void)changeHumanOrMachineState:(BOOL)humanOrMachine operatorEable:(BOOL)operatorEable
 {
+    if (_changeHumanOrRobotBlock) {
+        _changeHumanOrRobotBlock(humanOrMachine);
+    }
     if (!humanOrMachine) {
         self.sessionInputView.humanOrMachine = NO;
         if (operatorEable) {
@@ -2516,6 +2519,7 @@ static long long sessionId;
             commodityInfoShow.urlString         = commodityInfo.urlString;
             commodityInfoShow.note              = commodityInfo.note;
             commodityInfoShow.show              = commodityInfo.show;
+            commodityInfoShow.userData          = commodityInfo.userData;
             
             YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:commodityInfoShow];
             [self sendMessage:commodityInfoMessage];

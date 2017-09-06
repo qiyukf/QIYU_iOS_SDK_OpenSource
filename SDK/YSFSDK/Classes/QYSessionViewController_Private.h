@@ -30,6 +30,7 @@
 #import "YSFRecordTipView.h"
 
 @class YSFReachability;
+typedef void (^ChangeHumanOrRobotBlock)(BOOL humanOrRobot);
 
 
 @interface QYSessionViewController ()
@@ -60,6 +61,7 @@ YSFSessionTipViewDelegate>
 @property (nonatomic,strong)                YSFRecordTipView *recordTipView;
 @property (nonatomic,strong)                YSFReachability *reachability;
 @property (nonatomic,strong)                YSFCustomLeftBarView *leftBarView;
+@property (nonatomic,copy)                  ChangeHumanOrRobotBlock changeHumanOrRobotBlock;
 
 
 - (NSArray *)menusItems:(YSF_NIMMessage *)message;

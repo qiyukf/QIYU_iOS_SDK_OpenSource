@@ -98,6 +98,7 @@
 #define     YSFApiKeyPicture            @"picture"
 #define     YSFApiKeyUrl                @"url"
 #define     YSFApiKeyNote               @"note"
+#define     YSFApiKeyUserData           @"userData"
 #define     YSFApiKeyShow               @"show"
 #define     YSFApiKeyMsgId              @"msgId"
 #define     YSFApiKeyText               @"text"

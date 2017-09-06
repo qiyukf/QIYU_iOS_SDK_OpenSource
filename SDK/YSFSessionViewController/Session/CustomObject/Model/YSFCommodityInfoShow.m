@@ -22,6 +22,7 @@
     dict[YSFApiKeyPicture]  = YSFStrParam(_pictureUrlString);
     dict[YSFApiKeyUrl]      = YSFStrParam(_urlString);
     dict[YSFApiKeyNote]     = YSFStrParam(_note);
+    dict[YSFApiKeyUserData]     = YSFStrParam(_userData);
     dict[YSFApiKeyShow]     = @(_show);
     
     return dict;
@@ -36,6 +37,7 @@
     instance.pictureUrlString    = [dict ysf_jsonString:YSFApiKeyPicture];
     instance.urlString           = [dict ysf_jsonString:YSFApiKeyUrl];
     instance.note                = [dict ysf_jsonString:YSFApiKeyNote];
+    instance.userData            = [dict ysf_jsonString:YSFApiKeyUserData];
     instance.show                = [dict ysf_jsonBool:YSFApiKeyShow];
     
     return instance;
