@@ -167,8 +167,16 @@
 #define     YSFApiKeySubmitted          @"submitted"
 #define     YSFApiKeyImageFilePath      @"imageFilePath"
 #define     YSFApiKeySize               @"size"
-
-
+#define     YSFApiKeyRow                @"row"
+#define     YSFApiKeyColumn             @"column"
+#define     YSFApiKeyColor              @"color"
+#define     YSFApiKeyAlign              @"align"
+#define     YSFApiKeyFlag               @"flag"
+#define     YSFApiKeyThumbnail          @"thumbnail"
+#define     YSFApiKeyDetail             @"detail"
+#define     YSFApiKeyLeft               @"left"
+#define     YSFApiKeyRight              @"right"
+#define     YSFApiKeyExt                @"ext"
 
 
 
@@ -183,7 +191,7 @@ typedef enum : NSUInteger {
     YSFCommandRequestServiceResponse    =   2,      //请求客服回包
     YSFCommandAddUserInfoRequest        =   4,      //添加用户信息
     YSFCommandSetLeaveStatusRequest     =   5,      //用户离开当前会话
-    YSFCommandCloseServiceRequest       =   6,      //关闭客服请求
+    YSFCommandCloseSessionNotification  =   6,      //结束会话
     YSFCommandHeatbeatPacketRequest     =   8,      //客服心跳协议
     YSFCommandReadSessionRequest        =   9,      //会话已读标记
     YSFCommandWaitingStatusResponse     =   15,     //等待状态回包
@@ -204,12 +212,13 @@ typedef enum : NSUInteger {
     YSFCommandSessionStatusResponse     =   502,    //请求会话状态返回
     YSFCommandBotReceive                = 203,      //bot
     YSFCommandBotSend                   = 202,      //bot
-    YSFCommandQueryOrdersRequest        = 204,      //bot
-    YSFCommandQueryOrdersResponse       = 205,      //bot
+    YSFCommandBotQueryRequest        = 204,      //bot
+    YSFCommandBotQueryResponse       = 205,      //bot
 
 
     //客服端
     YSFCommandNewSession                =   3,      //有新的会话
+    YSFCommandCloseServiceResquest      =   6,      //结束会话
     YSFCommandCloseServiceResponse      =   7,      //关闭客服
     YSFCommandKefuLogout                =   10,     //客服登出
     YSFCommandUserSwitchAccount         =   11,     //用户切换账号

@@ -1165,6 +1165,9 @@ static long long sessionId;
     else {
         contentInset.top = _tipView.ysf_frameBottom;
     }
+    if (YSFIOS11) {
+        contentInset.top -= self.navigationController.navigationBar.ysf_frameBottom;
+    }
     contentInset.bottom = 0;
     _tableView.contentInset = contentInset;
     _tableView.scrollIndicatorInsets = contentInset;
@@ -1246,6 +1249,7 @@ static long long sessionId;
     UITableViewCell *cell = nil;
     id model = [[_sessionDatasource modelArray] objectAtIndex:indexPath.row];
     if ([model isKindOfClass:[YSFMessageModel class]]) {
+        [self initModelLayoutConfig:model];
         cell = [YSFMessageCellMaker cellInTable:tableView
                                  forMessageMode:model];
         [(YSFMessageCell *)cell setMessageDelegate:self];
@@ -1553,7 +1557,7 @@ static long long sessionId;
 
 #pragma mark - Private
 
-- (void)layoutConfig:(YSFMessageModel *)model{
+- (void)initModelLayoutConfig:(YSFMessageModel *)model{
     if (model.layoutConfig == nil) {
         id<YSFCellLayoutConfig> layoutConfig;
         if ([self.sessionConfig respondsToSelector:@selector(layoutConfigWithMessage:)]) {
@@ -1564,6 +1568,10 @@ static long long sessionId;
         }
         model.layoutConfig = layoutConfig;
     }
+}
+
+- (void)layoutConfig:(YSFMessageModel *)model{
+    [self initModelLayoutConfig:model];
     [model calculateContent:self.tableView.ysf_frameWidth];
 }
 
@@ -1707,18 +1715,11 @@ static long long sessionId;
 
 - (void)onTextChanged:(id)sender{}
 
-- (void)tipSendMsgLater
-{
-    UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
-    [topmostWindow ysf_makeToast:@"请等待连接客服成功后，再发送消息" duration:2.0 position:YSFToastPositionCenter];
-}
-
 - (BOOL)onSendText:(NSString *)text
 {
-    BOOL shouldSend = [self requestServiceIfNeeded:NO onlyManual:NO];
+    BOOL shouldSend = [self requestServiceWithTip];
     if (!shouldSend) {
-        [self tipSendMsgLater];
-        return false;
+        return NO;
     }
     
     if (text) {
@@ -1751,9 +1752,8 @@ static long long sessionId;
 
 - (void)onStartRecording
 {
-    BOOL shouldSend = [self requestServiceIfNeeded:NO onlyManual:NO];
+    BOOL shouldSend = [self requestServiceWithTip];
     if (!shouldSend) {
-        [self tipSendMsgLater];
         return;
     }
     
@@ -1945,9 +1945,12 @@ static long long sessionId;
         YSFMoreOrderListViewController *vc = [YSFMoreOrderListViewController new];
         vc.modalPresentationStyle = UIModalPresentationCustom;
         vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-        vc.orderList = orderList;
+        vc.titleString = orderList.label;
+        vc.action = orderList.action;
+        vc.originalData = orderList.shops;
+
         __weak typeof(self) weakSelf = self;
-        vc.tapGoodsCallback = ^(YSFGoods *goods)
+        vc.tapItemCallback = ^(YSFGoods *goods)
         {
             YSFSelectedGoods *selectedGoods = [[YSFSelectedGoods alloc] init];
             selectedGoods.command = YSFCommandBotSend;
@@ -1956,29 +1959,21 @@ static long long sessionId;
             selectedGoods.goods = goods;
             YSF_NIMMessage *selectedGoodsMessage = [YSFMessageMaker msgWithCustom:selectedGoods];
             [weakSelf sendMessage:selectedGoodsMessage];
+            
+            return YES;
         };
         [self presentViewController:vc animated:YES completion:nil];
         
         handled = YES;
     }
-    else if ([eventName isEqualToString:YSFKitEventNameTapBot]){
-        YSFAction *action = event.data;
+    else if ([eventName isEqualToString:YSFKitEventNameTapMoreFlight]){
+        YSFFlightList *flightList = event.data;
+        [self popUpMoreListNav:flightList];
         
-        if ([action.type isEqualToString:@"url"]) {
-            QYBotClickBlock block = [QYCustomActionConfig sharedInstance].botClick;
-            if (block) {
-                block(action.target, action.params);
-            }
-        }
-        else {
-            YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
-            orderOperation.command = YSFCommandBotSend;
-            orderOperation.target = action.target;
-            orderOperation.params = action.params;
-            orderOperation.template = @{@"id":@"qiyu_template_text", @"label":action.validOperation};
-            YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
-            [self sendMessage:orderOperationMessage];
-        }
+        handled = YES;
+    }
+    else if ([eventName isEqualToString:YSFKitEventNameTapBot]){
+        [self onTapBotAction:event.data];
 
         handled = YES;
     }
@@ -1999,6 +1994,83 @@ static long long sessionId;
     
     if (!handled) {
         //assert(0);
+    }
+}
+
+- (void)popUpMoreListNav:(YSFFlightList *)flightList
+{
+    YSFMoreOrderListViewController *vc = [YSFMoreOrderListViewController new];
+    vc.showTop = NO;
+    vc.modalPresentationStyle = UIModalPresentationCustom;
+    vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+    
+    if (flightList.detail == nil) {
+        vc.navigationItem.title = flightList.action.title;
+        vc.action = flightList.action;
+        vc.originalData = flightList.fieldItems;
+    }
+    else {
+        vc.navigationItem.title = flightList.detail.label;
+        vc.originalData = flightList.detail.flightDetailItems;
+    }
+    __weak typeof(self) weakSelf = self;
+    __weak typeof(nav) weakNav = nav;
+    vc.tapItemCallback = ^(YSFAction *action)
+    {
+        if ([action.type isEqualToString:@"url"]
+            || [action.type isEqualToString:@"block"]) {
+            [weakSelf onTapBotAction:action];
+        }
+        else {
+            YSFMoreOrderListViewController *vc2 = [YSFMoreOrderListViewController new];
+            vc2.action = action;
+            [weakNav pushViewController:vc2 animated:YES];
+            return NO;
+        }
+        
+        return YES;
+        
+    };
+    
+    vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"返回"
+                                                                           style:UIBarButtonItemStyleBordered target:self action:@selector(onBack:)];
+    [self presentViewController:nav animated:YES completion:nil];
+}
+
+- (void)onBack:(id)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)onTapBotAction:(YSFAction *)action
+{
+    if ([action.type isEqualToString:@"url"]) {
+        QYBotClickBlock block = [QYCustomActionConfig sharedInstance].botClick;
+        if (block) {
+            block(action.target, action.params);
+        }
+    }
+    else if ([action.type isEqualToString:@"float"]) {
+        YSFMoreOrderListViewController *vc = [YSFMoreOrderListViewController new];
+        vc.modalPresentationStyle = UIModalPresentationCustom;
+        vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
+        vc.action = action;
+        [self presentViewController:vc animated:YES completion:nil];
+    }
+    else if ([action.type isEqualToString:@"popup"]) {
+        YSFFlightList *flightList = [YSFFlightList new];
+        flightList.action = action;
+        [self popUpMoreListNav:flightList];
+    }
+    else {
+        YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
+        orderOperation.command = YSFCommandBotSend;
+        orderOperation.target = action.target;
+        orderOperation.params = action.params;
+        orderOperation.template = @{@"id":@"qiyu_template_text", @"label":action.validOperation};
+        YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
+        [self sendMessage:orderOperationMessage];
     }
 }
 
@@ -2519,7 +2591,7 @@ static long long sessionId;
             commodityInfoShow.urlString         = commodityInfo.urlString;
             commodityInfoShow.note              = commodityInfo.note;
             commodityInfoShow.show              = commodityInfo.show;
-            commodityInfoShow.userData          = commodityInfo.userData;
+            commodityInfoShow.ext          = commodityInfo.ext;
             
             YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:commodityInfoShow];
             [self sendMessage:commodityInfoMessage];
@@ -2756,12 +2828,28 @@ static long long sessionId;
     [_sessionInputView setRecordPhase:AudioRecordPhaseEnd];
 }
 
+- (BOOL)requestServiceWithTip
+{
+    BOOL shouldSend = ![self isLastMessageKFBypassNotificationAndEnable];
+    if (!shouldSend) {
+        UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
+        [topmostWindow ysf_makeToast:@"为了给您提供更专业的服务，请您选择要咨询的内容类型" duration:2.0 position:YSFToastPositionCenter];
+        return NO;
+    }
+    
+    shouldSend = [self requestServiceIfNeeded:NO onlyManual:NO];
+    if (!shouldSend) {
+        UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
+        [topmostWindow ysf_makeToast:@"请等待连接客服成功后，再发送消息" duration:2.0 position:YSFToastPositionCenter];
+    }
+    return shouldSend;
+}
+
 #pragma mark - 相册
 - (void)OnMediaPicturePressed
 {
-    BOOL shouldSend = [self requestServiceIfNeeded:NO onlyManual:NO];
+    BOOL shouldSend = [self requestServiceWithTip];
     if (!shouldSend) {
-        [self tipSendMsgLater];
         return;
     }
     

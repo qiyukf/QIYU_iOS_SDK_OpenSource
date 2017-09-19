@@ -27,19 +27,26 @@
     YSFRichText *instance = [[YSFRichText alloc] init];
     instance.command             = [dict ysf_jsonInteger:YSFApiKeyCmd];
     instance.content               = [dict ysf_jsonString:YSFApiKeyContent];
-    instance.imageUrlStringArray = [NSMutableArray new];
-    
-    YSFAttributedTextView *textView = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
-    textView.textDelegate = instance;
-    textView.shouldDrawImages = NO;
-
-    NSData *data = [instance.content dataUsingEncoding:NSUTF8StringEncoding];
-    NSAttributedString *attributeString = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
-    textView.attributedString = attributeString;
-    instance.displayContent = attributeString.string;
-    [textView layoutSubviews];
     
     return instance;
+}
+
+- (NSMutableArray<NSString *> *)imageUrlStringArray
+{
+    if (_imageUrlStringArray == nil) {
+        self.imageUrlStringArray = [NSMutableArray new];
+        YSFAttributedTextView *textView = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
+        textView.textDelegate = self;
+        textView.shouldDrawImages = NO;
+        
+        NSData *data = [self.content dataUsingEncoding:NSUTF8StringEncoding];
+        NSAttributedString *attributeString = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
+        textView.attributedString = attributeString;
+        self.displayContent = attributeString.string;
+        [textView layoutSubviews];
+    }
+    
+    return _imageUrlStringArray;
 }
 
 + (YSFRichText *)objectByParams:(NSInteger)cmd content:(NSString *)content
@@ -47,17 +54,6 @@
     YSFRichText *instance = [[YSFRichText alloc] init];
     instance.command             = cmd;
     instance.content               = content;
-    instance.imageUrlStringArray = [NSMutableArray new];
-    
-    YSFAttributedTextView *textView = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
-    textView.textDelegate = instance;
-    textView.shouldDrawImages = NO;
-    
-    NSData *data = [instance.content dataUsingEncoding:NSUTF8StringEncoding];
-    NSAttributedString *attributeString = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
-    textView.attributedString = attributeString;
-    instance.displayContent = attributeString.string;
-    [textView layoutSubviews];
     
     return instance;
 }

@@ -40,12 +40,6 @@
     [_imageViewsArray removeAllObjects];
     [_content ysf_removeAllSubviews];
     
-    UILabel * content;
-    content = [UILabel new];
-    [_content addSubview:content];
-    content.font = [UIFont systemFontOfSize:16];
-    content.numberOfLines = 0;
-    
     CGFloat offsetY = 0;
     
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)data.message.messageObject;
@@ -55,6 +49,12 @@
         
         if ([item.type isEqualToString:@"text"]) {
             offsetY += 13;
+            
+            UILabel * content;
+            content = [UILabel new];
+            [_content addSubview:content];
+            content.font = [UIFont systemFontOfSize:16];
+            content.numberOfLines = 0;
             content.text = item.label;
             content.frame = CGRectMake(18, offsetY,
                                        self.model.contentSize.width - 33, 0);

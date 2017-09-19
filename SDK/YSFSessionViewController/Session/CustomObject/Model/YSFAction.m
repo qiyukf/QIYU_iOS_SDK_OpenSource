@@ -16,6 +16,7 @@
     if (!action.target) {
         action.target = action.url;
     }
+    action.title = [dict ysf_jsonString:YSFApiKeyTitle];
     action.validOperation = [dict ysf_jsonString:YSFApiKeyValidOperation];
     NSString *pName = [dict ysf_jsonString:YSFApiKeyPName];
     NSString *label = [dict ysf_jsonString:YSFApiKeyLabel];

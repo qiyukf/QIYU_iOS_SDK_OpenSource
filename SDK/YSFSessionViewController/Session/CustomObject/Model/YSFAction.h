@@ -7,6 +7,7 @@
 @property (nonatomic,copy)    NSString *params;
 @property (nonatomic,copy)    NSString *target;
 @property (nonatomic,copy)    NSString *validOperation;
+@property (nonatomic,copy)    NSString *title;
 
 + (instancetype)objectByDict:(NSDictionary *)dict;
 

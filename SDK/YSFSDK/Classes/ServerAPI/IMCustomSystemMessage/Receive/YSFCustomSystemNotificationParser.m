@@ -16,8 +16,9 @@
 #import "YSFSessionStatusResponse.h"
 #import "YSFUploadLog.h"
 #import "YSFServerSetting.h"
-#import "YSFQueryOrderListResponse.h"
+#import "YSFBotQueryResponse.h"
 #import "YSFEvaluationNotification.h"
+#import "YSFSessionWillCloseNotification.h"
 
 
 @implementation YSFCustomSystemNotificationParser
@@ -33,7 +34,7 @@
                 case YSFCommandRequestServiceResponse:
                     result = [YSFServiceSession dataByJson:dict];
                     break;
-                case YSFCommandCloseServiceRequest:
+                case YSFCommandCloseSessionNotification:
                     result = [YSFCloseServiceNotification dataByJson:dict];
                     break;
                 case YSFCommandWaitingStatusResponse:
@@ -45,11 +46,14 @@
                 case YSFCommandSessionStatusResponse:
                     result = [YSFSessionStatusResponse dataByJson:dict];
                     break;
-                case YSFCommandQueryOrdersResponse:
-                    result = [YSFQueryOrderListResponse dataByJson:dict];
+                case YSFCommandBotQueryResponse:
+                    result = [YSFBotQueryResponse dataByJson:dict];
                     break;
                 case YSFCommandEvaluationNotification:
                     result = [YSFEvaluationNotification dataByJson:dict];
+                    break;
+                case YSFCommandSessionWillClose:
+                    result = [YSFSessionWillCloseNotification dataByJson:dict];
                     break;
                 case YSFCommandUploadLog:
                 {

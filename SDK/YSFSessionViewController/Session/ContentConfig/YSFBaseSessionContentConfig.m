@@ -51,6 +51,10 @@
 #import "YSFSubmittedBotFormContentConfig.h"
 #import "YSFStaticUnion.h"
 #import "YSFStaticUnionContentConfig.h"
+#import "YSFFlightList.h"
+#import "YSFFlightListContentConfig.h"
+#import "YSFFlightDetail.h"
+
 
 @implementation YSFBaseSessionContentConfig
 @end
@@ -163,6 +167,9 @@
             }
             else if ([customObject.attachment isKindOfClass:[YSFBotForm class]]) {
                 config = [[YSFBotFormContentConfig alloc] init];
+            }
+            else if ([customObject.attachment isKindOfClass:[YSFFlightList class]]) {
+                config = [[YSFFlightListContentConfig alloc] init];
             }
             else if ([customObject.attachment isKindOfClass:[YSFSubmittedBotForm class]]) {
                 config = [[YSFSubmittedBotFormContentConfig alloc] init];

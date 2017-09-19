@@ -78,32 +78,38 @@
         instance.isOneQuestionRelevant = YES;
     }
     
-    instance.imageUrlStringArray = [NSMutableArray new];
-    
-    YSFAttributedTextView *textView = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
-    textView.textDelegate = instance;
-    textView.shouldDrawImages = NO;
-    NSData *data = [instance.answerLabel dataUsingEncoding:NSUTF8StringEncoding];
-    NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
-    textView.attributedString = string;
-    [textView layoutSubviews];
-    
-    
-    if (instance.answerArray.count == 1 && !instance.isOneQuestionRelevant) {
-        NSDictionary *dict = [instance.answerArray objectAtIndex:0];
-        NSString *oneAnswer = [dict objectForKey:YSFApiKeyAnswer];
-        data = [oneAnswer dataUsingEncoding:NSUTF8StringEncoding];
+    return instance;
+}
+
+- (NSMutableArray<NSString *> *)imageUrlStringArray
+{
+    if (_imageUrlStringArray == nil) {
+        self.imageUrlStringArray = [NSMutableArray new];
+        
+        YSFAttributedTextView *textView = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
+        textView.textDelegate = self;
+        textView.shouldDrawImages = NO;
+        NSData *data = [self.answerLabel dataUsingEncoding:NSUTF8StringEncoding];
+        NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
+        textView.attributedString = string;
+        [textView layoutSubviews];
+        
+        if (self.answerArray.count == 1 && !self.isOneQuestionRelevant) {
+            NSDictionary *dict = [self.answerArray objectAtIndex:0];
+            NSString *oneAnswer = [dict objectForKey:YSFApiKeyAnswer];
+            data = [oneAnswer dataUsingEncoding:NSUTF8StringEncoding];
+            string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
+            textView.attributedString = string;
+            [textView layoutSubviews];
+        }
+        
+        data = [self.operatorHintDesc dataUsingEncoding:NSUTF8StringEncoding];
         string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
         textView.attributedString = string;
         [textView layoutSubviews];
     }
     
-    data = [instance.operatorHintDesc dataUsingEncoding:NSUTF8StringEncoding];
-    string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
-    textView.attributedString = string;
-    [textView layoutSubviews];
-    
-    return instance;
+    return _imageUrlStringArray;
 }
 
 - (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView viewForAttachment:(YSFTextAttachment *)attachment frame:(CGRect)frame

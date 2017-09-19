@@ -35,6 +35,8 @@
 #import "YSFBotForm.h"
 #import "YSFStaticUnion.h"
 #import "YSFSubmittedBotForm.h"
+#import "YSFFlightList.h"
+#import "YSFFlightDetail.h"
 
 @implementation YSFCustomObjectParser
 - (id<YSF_NIMCustomAttachment>)decodeAttachment:(NSString *)content
@@ -113,6 +115,16 @@
                     else if ([templeteId isEqualToString:@"bot_form"]) {
                         YSFBotForm *botForm = [YSFBotForm objectByDict:tempateDict];
                         object = botForm;
+                    }
+                    else if ([templeteId isEqualToString:@"card_layout"]) {
+                        YSFFlightList *fightList = [YSFFlightList objectByDict:tempateDict];
+                        object = fightList;
+                    }
+                    else if ([templeteId isEqualToString:@"detail_view"]) {
+                        YSFFlightThumbnailAndDetail *fightDetail = [YSFFlightThumbnailAndDetail objectByDict:tempateDict];
+                        YSFFlightList *fightList = [YSFFlightList objectByFlightThumbnail:fightDetail.thumbnail];
+                        fightList.detail = fightDetail.detail;
+                        object = fightList;
                     }
                     else if ([templeteId isEqualToString:@"error_msg"]) {
                         YSFMachineResponse *response = [YSFMachineResponse new];

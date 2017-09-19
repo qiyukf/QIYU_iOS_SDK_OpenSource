@@ -22,6 +22,8 @@
 #import "YSFSessionStatusResponse.h"
 #import "YSFQueryWaitingStatus.h"
 #import "YSFEvaluationNotification.h"
+#import "YSFNotification.h"
+#import "YSFSessionWillCloseNotification.h"
 
 @interface YSFSessionManager ()
 <YSF_NIMSystemNotificationManagerDelegate,
@@ -343,6 +345,17 @@ YSFServiceRequestDelegate>
         [self addEvaluationMessage:object.sessionId shopId:shopId];
     }
     
+    //2017年8月28日  策划说先不做
+//    if (object.message.length > 0) {
+//        YSFNotification *notification = [[YSFNotification alloc] init];
+//        notification.command = YSFCommandNotification;
+//        notification.localCommand = YSFCommandSessionWillClose;
+//        notification.message = object.message;
+//        YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
+//        YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+//        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
+//    }
+    
     [_delegate didClose:object.evaluate session:[self getSession:shopId] shopId:shopId];
     [self clearByShopId:shopId];
 }
@@ -481,6 +494,17 @@ YSFServiceRequestDelegate>
     else if ([object isKindOfClass:[YSFEvaluationNotification class]])
     {
         [self addEvaluationMessage:((YSFEvaluationNotification *)object).sessionId shopId:shopId];
+    }
+    else if ([object isKindOfClass:[YSFSessionWillCloseNotification class]])
+    {
+        YSFNotification *notification = [[YSFNotification alloc] init];
+        notification.command = YSFCommandNotification;
+        notification.localCommand = YSFCommandSessionWillClose;
+        notification.message = ((YSFCloseServiceNotification *)object).message;
+        YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
+        YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
+        
     }
 }
 

@@ -37,6 +37,9 @@
     if ([_commodityInfo.note length]) {
         [params setObject:_commodityInfo.note forKey:YSFApiKeyNote];
     }
+    if ([_commodityInfo.ext length]) {
+        [params setObject:_commodityInfo.ext forKey:YSFApiKeyExt];
+    }
 
     return params;
 }

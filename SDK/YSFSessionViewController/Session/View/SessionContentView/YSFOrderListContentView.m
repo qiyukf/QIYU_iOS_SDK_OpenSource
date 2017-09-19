@@ -3,23 +3,10 @@
 #import "YSFMessageModel.h"
 #import "UIImageView+YSFWebCache.h"
 
-@interface YSFGoodsView : UIButton
 
-@property (nonatomic, strong) YSFGoods *goods;
-
+@implementation YSFCellView
 @end
 
-@implementation YSFGoodsView
-@end
-
-@interface YSFActionView : UIButton
-
-@property (nonatomic, strong) YSFOrderList *orderList;
-
-@end
-
-@implementation YSFActionView
-@end
 
 
 @interface YSFOrderListContentView()
@@ -39,7 +26,87 @@
     return self;
 }
 
-- (UIView *)createShopCell:(CGFloat)width shop:(YSFShop *)shop
+
+
+- (void)refresh:(YSFMessageModel *)data{
+    [super refresh:data];
+
+    [_content ysf_removeAllSubviews];
+    
+    __block CGFloat offsetY = self.model.contentViewInsets.top;
+    YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)data.message.messageObject;
+    YSFOrderList *orderList = (YSFOrderList *)object.attachment;
+    UILabel *label = [UILabel new];
+    label.font = [UIFont systemFontOfSize:16.f];
+    label.text = orderList.label;
+    label.frame = CGRectMake(18, offsetY + 13,
+                                   self.model.contentSize.width - 28, 25);
+    
+    [self addSubview:label];
+    
+    offsetY += 44;
+    
+    [orderList.shops enumerateObjectsUsingBlock:^(YSFShop *shop, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (idx > 0) {
+            offsetY += 10;
+        }
+        
+        UIView *shopCell = [shop createCell:self.ysf_frameWidth - 5 eventHander:self];
+        shopCell.ysf_frameLeft = 5;
+        shopCell.ysf_frameTop = offsetY;
+        [_content addSubview:shopCell];
+        
+        offsetY += shopCell.ysf_frameHeight;
+    }];
+    
+    YSFCellView *button = [YSFCellView new];
+    button.itemData = orderList;
+    [button setTitle:orderList.action.validOperation forState:UIControlStateNormal];
+    [button setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
+    button.titleLabel.font = [UIFont systemFontOfSize:15.f];
+    button.ysf_frameLeft = 5;
+    button.ysf_frameWidth = self.ysf_frameWidth - 5;
+    button.ysf_frameTop = offsetY;
+    button.ysf_frameHeight = 40;
+    [_content addSubview:button];
+    [button addTarget:self action:@selector(onClickMore:) forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)onClickItem:(YSFCellView *)goodsView
+{
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameTapGoods;
+    event.message = self.model.message;
+    event.data = goodsView.itemData;
+    [self.delegate onCatchEvent:event];
+}
+
+- (void)onClickMore:(YSFCellView *)actionView
+{
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameTapMoreOrders;
+    event.message = self.model.message;
+    event.data = actionView.itemData;
+    [self.delegate onCatchEvent:event];
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
+        _content.ysf_frameLeft = -5;
+    }
+    _content.ysf_frameWidth = self.ysf_frameWidth;
+    _content.ysf_frameHeight = self.ysf_frameHeight;
+}
+
+@end
+
+
+
+@implementation YSFShop(YSF)
+
+- (UIView *)createCell:(CGFloat)width eventHander:(id)eventHander
 {
     UIView *cell = [UIView new];
     cell.userInteractionEnabled = YES;
@@ -49,8 +116,8 @@
     UIView *splitLine = [UIView new];
     splitLine.backgroundColor = YSFRGB(0xdbdbdb);
     splitLine.ysf_frameHeight = 0.5;
-    splitLine.ysf_frameLeft = 5;
-    splitLine.ysf_frameWidth = width - 5;
+    splitLine.ysf_frameLeft = 0;
+    splitLine.ysf_frameWidth = width;
     splitLine.ysf_frameTop = offsetY;
     [cell addSubview:splitLine];
     
@@ -63,7 +130,7 @@
     
     UILabel *shopName = [[UILabel alloc] initWithFrame:CGRectZero];
     shopName.font = [UIFont systemFontOfSize:13.f];
-    shopName.text = shop.s_name;
+    shopName.text = self.s_name;
     shopName.textColor = YSFRGB(0x666666);
     shopName.frame = CGRectMake(18 + 24, offsetY + 14,
                                 100, 16);
@@ -71,7 +138,7 @@
     
     UILabel *shopStatus = [[UILabel alloc] initWithFrame:CGRectZero];
     shopStatus.font = [UIFont systemFontOfSize:14.f];
-    shopStatus.text = shop.s_status;
+    shopStatus.text = self.s_status;
     shopStatus.textColor = YSFRGB(0xff611b);
     shopStatus.frame = CGRectMake(0, offsetY + 14,
                                   0, 0);
@@ -81,15 +148,15 @@
     
     offsetY += 40;
     
-    [shop.goods enumerateObjectsUsingBlock:^(YSFGoods *goods, NSUInteger idx, BOOL * _Nonnull stop) {
-        YSFGoodsView *goodView = [YSFGoodsView new];
+    [self.goods enumerateObjectsUsingBlock:^(YSFGoods *goods, NSUInteger idx, BOOL * _Nonnull stop) {
+        YSFCellView *goodView = [YSFCellView new];
         goodView.ysf_frameTop = offsetY;
         goodView.ysf_frameHeight = 80;
-        goodView.ysf_frameLeft = 5;
-        goodView.ysf_frameWidth = width - 5;
-        goodView.goods = goods;
+        goodView.ysf_frameLeft = 0;
+        goodView.ysf_frameWidth = width;
+        goodView.itemData = goods;
         [cell addSubview:goodView];
-        [goodView addTarget:self action:@selector(onClickGoods:) forControlEvents:UIControlEventTouchUpInside];
+        [goodView addTarget:eventHander action:@selector(onClickItem:) forControlEvents:UIControlEventTouchUpInside];
         
         UIView *splitLine2 = [UIView new];
         splitLine2.backgroundColor = YSFRGB(0xdbdbdb);
@@ -112,7 +179,7 @@
         if (url) {
             [imageView ysf_setImageWithURL:url];
         }
-    
+        
         UILabel *price = [UILabel new];
         price.font = [UIFont systemFontOfSize:14.f];
         price.text = goods.p_price;
@@ -178,85 +245,15 @@
     UIView *splitLine3 = [UIView new];
     splitLine3.backgroundColor = YSFRGB(0xdbdbdb);
     splitLine3.ysf_frameHeight = 0.5;
-    splitLine3.ysf_frameLeft = 5;
-    splitLine3.ysf_frameWidth = width - 5;
+    splitLine3.ysf_frameLeft = 0;
+    splitLine3.ysf_frameWidth = width;
     splitLine3.ysf_frameTop = offsetY;
     [cell addSubview:splitLine3];
     
+    cell.ysf_frameWidth = width;
     cell.ysf_frameHeight = offsetY;
     return cell;
 }
 
-- (void)refresh:(YSFMessageModel *)data{
-    [super refresh:data];
-
-    [_content ysf_removeAllSubviews];
-    
-    __block CGFloat offsetY = self.model.contentViewInsets.top;
-    YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)data.message.messageObject;
-    YSFOrderList *orderList = (YSFOrderList *)object.attachment;
-    UILabel *label = [UILabel new];
-    label.font = [UIFont systemFontOfSize:16.f];
-    label.text = orderList.label;
-    label.frame = CGRectMake(18, offsetY + 13,
-                                   self.model.contentSize.width - 28, 25);
-    
-    [self addSubview:label];
-    
-    offsetY += 44;
-    
-    [orderList.shops enumerateObjectsUsingBlock:^(YSFShop *shop, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (idx > 0) {
-            offsetY += 10;
-        }
-        
-        UIView *shopCell = [self createShopCell:self.ysf_frameWidth shop:shop];
-        shopCell.ysf_frameTop = offsetY;
-        shopCell.ysf_frameWidth = self.ysf_frameWidth;
-        [_content addSubview:shopCell];
-        
-        offsetY += shopCell.ysf_frameHeight;
-    }];
-    
-    YSFActionView *button = [YSFActionView new];
-    button.orderList = orderList;
-    [button setTitle:orderList.action.validOperation forState:UIControlStateNormal];
-    [button setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
-    button.titleLabel.font = [UIFont systemFontOfSize:15.f];
-    button.ysf_frameLeft = 5;
-    button.ysf_frameWidth = self.ysf_frameWidth - 5;
-    button.ysf_frameTop = offsetY;
-    button.ysf_frameHeight = 40;
-    [_content addSubview:button];
-    [button addTarget:self action:@selector(onClickMore:) forControlEvents:UIControlEventTouchUpInside];
-}
-
-- (void)onClickGoods:(YSFGoodsView *)goodsView
-{
-    YSFKitEvent *event = [[YSFKitEvent alloc] init];
-    event.eventName = YSFKitEventNameTapGoods;
-    event.message = self.model.message;
-    event.data = goodsView.goods;
-    [self.delegate onCatchEvent:event];
-}
-
-- (void)onClickMore:(YSFActionView *)actionView
-{
-    YSFKitEvent *event = [[YSFKitEvent alloc] init];
-    event.eventName = YSFKitEventNameTapMoreOrders;
-    event.message = self.model.message;
-    event.data = actionView.orderList;
-    [self.delegate onCatchEvent:event];
-}
-
-- (void)layoutSubviews{
-    [super layoutSubviews];
-    
-    if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
-        _content.ysf_frameLeft = -5;
-    }
-    _content.ysf_frameWidth = self.ysf_frameWidth;
-    _content.ysf_frameHeight = self.ysf_frameHeight;
-}
 
 @end
