@@ -51,6 +51,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
 #define YSFIOS8_2          ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 8.2)
 #define YSFIOS7            ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 7.0)
 #define YSFIOS7_1          ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 7.1)
+#define YSFIOS11           ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 11.0)
 
 #define YSFUIScreenScale  ([[UIScreen mainScreen] scale])
 #define YSFIsLandscape   (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))

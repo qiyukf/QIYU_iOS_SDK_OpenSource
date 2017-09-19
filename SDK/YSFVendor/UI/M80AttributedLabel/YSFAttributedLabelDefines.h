@@ -30,6 +30,5 @@ typedef NSArray *(^YSFCustomDetectLinkBlock)(NSString *text);
 #define YSFMinAsyncDetectLinkLength 50
 
 #define YSFIOS7 ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 7.0)
-#define YSFIOS11 ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 11.0)
 
 #endif
