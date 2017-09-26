@@ -30,7 +30,9 @@ Pod::Spec.new do |s|
                                 #import "NSDictionary+YSF.h"
                                 #import "NIMSDK.h"
                                 #import "UILayoutKit.h"'
-
+    s.xcconfig = {
+        "GCC_PREPROCESSOR_DEFINITIONS" => 'NDEBUG=1'
+    }
     s.subspec 'NIMLib' do |ss|
         ss.public_header_files = '**/NIMLib/**/*.h'
         ss.source_files = "**/NIMLib/**/*.{h}"
