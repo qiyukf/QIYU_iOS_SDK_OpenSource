@@ -102,6 +102,8 @@
 
 -(void)makeMainView
 {
+    CGFloat offsetY = 0;
+    CGFloat height = self.view.bounds.size.height;
     if (_showTop) {
         UIView *title = [UIView new];
         title.backgroundColor = [UIColor whiteColor];
@@ -133,18 +135,17 @@
         splitLine.ysf_frameLeft = 0;
         splitLine.ysf_frameWidth = YSFUIScreenWidth;
         [title addSubview:splitLine];
-    }
     
-    CGFloat offsetY = 0;
-    CGFloat height = self.view.bounds.size.height;
-    if (_showTop) {
-        offsetY = 99.5;
-        height -= 100;
+        offsetY = title.ysf_frameBottom - 0.5;
+        height -= title.ysf_frameBottom;
     }
     _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, offsetY, YSFUIScreenWidth, height) style:UITableViewStyleGrouped];
     _tableView.allowsSelection = NO;
     _tableView.delegate = self;
     _tableView.dataSource = self;
+    _tableView.estimatedRowHeight = 0;
+    _tableView.estimatedSectionHeaderHeight = 0;
+    _tableView.estimatedSectionFooterHeight = 0;
     _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [_tableView registerClass:[YSFItemCell class] forCellReuseIdentifier:kYSFOrderCell];
     

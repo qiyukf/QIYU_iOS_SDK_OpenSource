@@ -33,5 +33,4 @@
 
 + (NSInteger)sampleRateForFile:(NSString *)filepath;
 
-
 @end
