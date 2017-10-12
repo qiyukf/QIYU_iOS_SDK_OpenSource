@@ -42,7 +42,7 @@
     label.frame = CGRectMake(18, offsetY + 13,
                                    self.model.contentSize.width - 28, 25);
     
-    [self addSubview:label];
+    [_content addSubview:label];
     
     offsetY += 44;
     
@@ -185,6 +185,9 @@
         price.text = goods.p_price;
         price.ysf_frameTop = 10;
         [price sizeToFit];
+        if (price.ysf_frameWidth > 100) {
+            price.ysf_frameWidth = 100;
+        }
         price.ysf_frameRight = goodView.ysf_frameWidth - 10;
         [goodView addSubview:price];
         
@@ -194,6 +197,9 @@
         number.text = goods.p_count;
         number.ysf_frameTop = 32;
         [number sizeToFit];
+        if (number.ysf_frameWidth > 100) {
+            number.ysf_frameWidth = 100;
+        }
         number.ysf_frameRight = goodView.ysf_frameWidth - 10;
         [goodView addSubview:number];
         
@@ -236,6 +242,9 @@
         status.ysf_frameTop = 52;
         status.ysf_frameHeight = 40;
         [status sizeToFit];
+        if (status.ysf_frameWidth > 100) {
+            status.ysf_frameWidth = 100;
+        }
         status.ysf_frameRight = goodView.ysf_frameWidth - 10;
         [goodView addSubview:status];
         

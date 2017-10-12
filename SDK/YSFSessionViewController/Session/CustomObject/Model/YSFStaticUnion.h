@@ -8,6 +8,7 @@
 @property (nonatomic,copy)    NSString *imageUrl;
 @property (nonatomic,copy)    NSString *target;
 @property (nonatomic,copy)    NSString *linkType;
+@property (nonatomic,copy)    NSString *params;
 
 @end
 

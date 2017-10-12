@@ -465,6 +465,9 @@ YSFServiceRequestDelegate>
     }
     else if ([object isKindOfClass:[YSFQueryWaitingStatusResponse class]])
     {
+        if ([self getSessionStateType:shopId] == YSFSessionStateTypeOnline) {
+            return;
+        }
         YSFQueryWaitingStatusResponse *wait_status = object;
         if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:shopId] == YSFSessionStateTypeWaiting
             && (wait_status.code == YSFCodeServiceWaitingToNotExsit

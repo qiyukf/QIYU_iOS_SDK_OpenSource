@@ -37,6 +37,7 @@
         {
             item.label = [detail ysf_jsonString:YSFApiKeyLabel];
             item.target = [detail ysf_jsonString:YSFApiKeyTarget];
+            item.params = [detail ysf_jsonString:YSFApiKeyParams];
             item.linkType = [detail ysf_jsonString:YSFApiKeyType];
         }
         [tmpLinkItems addObject:item];

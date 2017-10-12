@@ -144,6 +144,7 @@
             
             YSFAction *action = [YSFAction new];
             action.target = item.target;
+            action.params = item.params;
             action.validOperation = item.label;
             action.type = item.linkType;
             actionButton.action = action;

@@ -83,6 +83,9 @@
     
     _price.ysf_frameTop = 10;
     [_price sizeToFit];
+    if (_price.ysf_frameWidth > 100) {
+        _price.ysf_frameWidth = 100;
+    }
     _price.ysf_frameRight = self.ysf_frameWidth - 15;
     if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
         _price.ysf_frameLeft += 5;
@@ -90,6 +93,9 @@
     
     _number.ysf_frameTop = 32;
     [_number sizeToFit];
+    if (_number.ysf_frameWidth > 100) {
+        _number.ysf_frameWidth = 100;
+    }
     _number.ysf_frameRight = self.ysf_frameWidth - 15;
     if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
         _number.ysf_frameLeft += 5;
@@ -117,6 +123,9 @@
     
     _status.ysf_frameTop = 52;
     [_status sizeToFit];
+    if (_status.ysf_frameWidth > 100) {
+        _status.ysf_frameWidth = 100;
+    }
     _status.ysf_frameRight = self.ysf_frameWidth - 15;
     if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
         _status.ysf_frameLeft += 5;
