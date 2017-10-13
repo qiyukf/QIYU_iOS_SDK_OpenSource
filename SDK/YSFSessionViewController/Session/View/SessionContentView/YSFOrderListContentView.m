@@ -225,16 +225,6 @@
         }
         [goodView addSubview:goodName];
         
-        UILabel *stock = [UILabel new];
-        stock.font = [UIFont systemFontOfSize:14.f];
-        stock.numberOfLines = 0;
-        stock.text = goods.p_stock;
-        stock.ysf_frameTop = 40;
-        stock.ysf_frameLeft = 80;
-        stock.ysf_frameWidth = 100;
-        stock.ysf_frameHeight = 40;
-        [goodView addSubview:stock];
-        
         UILabel *status = [UILabel new];
         status.font = [UIFont systemFontOfSize:14.f];
         status.numberOfLines = 0;
@@ -248,6 +238,20 @@
         status.ysf_frameRight = goodView.ysf_frameWidth - 10;
         [goodView addSubview:status];
         
+        UILabel *stock = [UILabel new];
+        stock.font = [UIFont systemFontOfSize:14.f];
+        stock.numberOfLines = 0;
+        stock.text = goods.p_stock;
+        stock.ysf_frameTop = 40;
+        stock.ysf_frameLeft = 80;
+        stock.ysf_frameHeight = 40;
+        stock.ysf_frameWidth = goodView.ysf_frameWidth - 80 - 10 - 15;
+        stock.ysf_frameWidth -= status.ysf_frameWidth;
+        if (stock.ysf_frameWidth < 0) {
+            stock.ysf_frameWidth = 0;
+        }
+        [goodView addSubview:stock];
+
         offsetY += 80;
     }];
     

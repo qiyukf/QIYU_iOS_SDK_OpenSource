@@ -73,14 +73,6 @@
         _imageView.ysf_frameLeft += 5;
     }
     
-    _stock.ysf_frameTop = 40;
-    _stock.ysf_frameLeft = 80;
-    _stock.ysf_frameWidth = 100;
-    _stock.ysf_frameHeight = 40;
-    if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
-        _stock.ysf_frameLeft += 5;
-    }
-    
     _price.ysf_frameTop = 10;
     [_price sizeToFit];
     if (_price.ysf_frameWidth > 100) {
@@ -129,6 +121,18 @@
     _status.ysf_frameRight = self.ysf_frameWidth - 15;
     if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
         _status.ysf_frameLeft += 5;
+    }
+    
+    _stock.ysf_frameTop = 40;
+    _stock.ysf_frameLeft = 80;
+    _stock.ysf_frameHeight = 40;
+    _stock.ysf_frameWidth = self.ysf_frameWidth - 80 - 10 - 15;
+    _stock.ysf_frameWidth -= _status.ysf_frameWidth;
+    if (_stock.ysf_frameWidth < 0) {
+        _stock.ysf_frameWidth = 0;
+    }
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
+        _stock.ysf_frameLeft += 5;
     }
 }
 
