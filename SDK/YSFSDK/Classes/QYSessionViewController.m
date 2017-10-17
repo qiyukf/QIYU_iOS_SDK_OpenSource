@@ -1153,6 +1153,9 @@ static long long sessionId;
     self.sessionInputView.ysf_frameWidth = self.view.ysf_frameWidth;
     self.sessionInputView.ysf_frameBottom = self.view.ysf_frameHeight;
     self.sessionInputView.ysf_frameBottom -= [[QYCustomUIConfig sharedInstance] bottomMargin];
+    if (YSFIOS11) {
+        _tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
     
     [_tipView setNeedsLayout];
     _tipView.ysf_frameLeft        = _tableView.ysf_frameLeft;
@@ -1171,9 +1174,7 @@ static long long sessionId;
     else {
         contentInset.top = _tipView.ysf_frameBottom;
     }
-    if (YSFIOS11 && self.navigationController.navigationBar.translucent) {
-        contentInset.top -= self.navigationController.navigationBar.ysf_frameBottom;
-    }
+
     contentInset.bottom = 0;
     _tableView.contentInset = contentInset;
     _tableView.scrollIndicatorInsets = contentInset;
