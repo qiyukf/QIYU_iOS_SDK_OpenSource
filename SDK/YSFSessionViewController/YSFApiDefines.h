@@ -120,6 +120,7 @@
 #define     YSFApiKeyLevel              @"level"
 #define     YSFApiKeyAuthToken          @"authToken"
 #define     YSFApiKeyMessage            @"message"
+#define     YSFApiKeyCloseReason        @"close_reason"
 #define     YSFApiKeyShowNum            @"showNum"
 #define     YSFApiKeyAttachment         @"attachment"
 #define     YSFApiKeyExtra              @"extra"

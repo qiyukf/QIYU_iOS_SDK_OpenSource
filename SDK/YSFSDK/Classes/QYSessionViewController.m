@@ -1154,6 +1154,7 @@ static long long sessionId;
     self.sessionInputView.ysf_frameBottom = self.view.ysf_frameHeight;
     self.sessionInputView.ysf_frameBottom -= [[QYCustomUIConfig sharedInstance] bottomMargin];
     if (YSFIOS11) {
+        self.sessionInputView.ysf_frameBottom -= self.view.safeAreaInsets.bottom;
         _tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     }
     
@@ -1188,6 +1189,12 @@ static long long sessionId;
         if ([QYCustomUIConfig sharedInstance].autoShowKeyboard && g_inputType != InputTypeAudio) {
             [self.sessionInputView.toolBar.inputTextView becomeFirstResponder];
         }
+        
+        CGFloat safeAreaBottom = 0;
+        if (YSFIOS11) {
+            safeAreaBottom = self.view.safeAreaInsets.bottom;
+        }
+        _tableView.ysf_frameHeight -= safeAreaBottom;
     }
 }
 //最后一条消息是否是访客分流信息并且能够点击

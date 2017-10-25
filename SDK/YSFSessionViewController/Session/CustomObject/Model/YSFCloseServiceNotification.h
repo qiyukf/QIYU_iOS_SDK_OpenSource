@@ -11,6 +11,7 @@
 @property (nonatomic,assign)  long long    sessionId;
 @property (nonatomic,assign)  BOOL evaluate;
 @property (nonatomic,copy)    NSString *message;
+@property (nonatomic,assign)    NSInteger closeReason;
 
 + (instancetype)dataByJson:(NSDictionary *)dict;
 

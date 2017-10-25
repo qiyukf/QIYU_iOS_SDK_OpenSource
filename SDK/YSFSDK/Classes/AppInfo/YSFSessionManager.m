@@ -345,7 +345,7 @@ YSFServiceRequestDelegate>
         [self addEvaluationMessage:object.sessionId shopId:shopId];
     }
     
-    if (object.message.length > 0) {
+    if (object.closeReason == 2 && object.message.length > 0) {
         YSFNotification *notification = [[YSFNotification alloc] init];
         notification.command = YSFCommandNotification;
         notification.localCommand = YSFCommandSessionWillClose;

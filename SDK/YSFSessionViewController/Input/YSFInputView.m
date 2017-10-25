@@ -346,6 +346,9 @@
     }else{
         CGFloat bottomHeight = toFrame.size.height;
         bottomHeight -= [[QYCustomUIConfig sharedInstance] bottomMargin];
+        if (YSFIOS11) {
+            bottomHeight -= self.ysf_viewController.view.safeAreaInsets.bottom;
+        }
         [self willShowBottomHeight:bottomHeight];
     }
 }
@@ -548,6 +551,7 @@
     }
     else
     {
+        [_emoticonContainer setHidden:YES];
         self.inputType = InputTypeText;
         _inputBottomViewHeight = 0;
         [self.toolBar.inputTextView becomeFirstResponder];
@@ -569,6 +573,7 @@
 - (void)inputBottomViewHeightToZero
 {
     if (_inputType != InputTypeAudio) {
+        [_emoticonContainer setHidden:YES];
         _inputBottomViewHeight = 0.0;
         _inputType = InputTypeText;
         [self endTextEditWithInputBottomViewHeight:0];
