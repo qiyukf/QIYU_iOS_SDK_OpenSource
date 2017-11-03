@@ -117,6 +117,7 @@
     
     _compressQuality = 0.5;
     _showTransWords = NO;
+    _showEvaluationEntry = YES;
 }
 
 - (void)setToKf
