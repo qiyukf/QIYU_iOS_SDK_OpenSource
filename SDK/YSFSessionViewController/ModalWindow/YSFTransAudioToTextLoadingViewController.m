@@ -22,29 +22,26 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    ULKScrollView *scrollView = [ULKScrollView new];
-    scrollView.backgroundColor = [UIColor whiteColor];
-    self.view = scrollView;
-    ULKFrameLayout *mainLayout = [ULKFrameLayout new];
-    mainLayout.ulk_padding = UIEdgeInsetsMake(20, 20, 20, 20);
-    [scrollView addSubview:mainLayout];
+    self.view.backgroundColor = [UIColor whiteColor];
     _displayResult = [UIButton new];
+    _displayResult.ysf_frameLeft = 20;
+    _displayResult.ysf_frameTop = 120;
+    _displayResult.ysf_frameWidth = self.view.ysf_frameWidth - 40;
+    _displayResult.ysf_frameHeight = self.view.ysf_frameHeight - 240;
     [_displayResult setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [_displayResult setTitle:@"正在转换..." forState:UIControlStateNormal];
-    _displayResult.ulk_layoutGravity = ULKGravityCenter;
-    
-    [mainLayout addSubview:_displayResult];
+    [self.view addSubview:_displayResult];
     
     _cancel = [UIButton new];
-    _cancel.ulk_layoutWidth = 120;
-    _cancel.ulk_layoutHeight = 50;
+    _cancel.ysf_frameWidth = 120;
+    _cancel.ysf_frameHeight = 50;
     [_cancel ysf_cornerRadius:25 borderWidth:1 borderColor:[UIColor blackColor]];
     [_cancel setTitle:@"取消" forState:UIControlStateNormal];
     [_cancel setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    _cancel.ulk_layoutGravity = ULKGravityCenterHorizontal|ULKGravityBottom;
-    _cancel.ulk_layoutMargin = UIEdgeInsetsMake(0, 0, 50, 0);
+    _cancel.ysf_frameLeft = (self.view.ysf_frameWidth - _cancel.ysf_frameWidth) / 2;
+    _cancel.ysf_frameBottom = self.view.ysf_frameHeight - 50;
     [_cancel addTarget:self action:@selector(onCancelClick:) forControlEvents:UIControlEventTouchUpInside];
-    [mainLayout addSubview:_cancel];
+    [self.view addSubview:_cancel];
     
     __weak typeof(self) weakSelf = self;
     YSF_NIMAudioObject *audioObject =  (YSF_NIMAudioObject *)_message.messageObject;
@@ -62,7 +59,6 @@
 
         self.displayResult.titleLabel.numberOfLines = 0;
         [self.displayResult setTitle:text forState:UIControlStateNormal];
-        [self.displayResult.superview ulk_clearMeasuredDimensionSize];
         [self.displayResult.superview setNeedsLayout];
     }
     else {
@@ -121,7 +117,6 @@
           
           if (error) {
               [weakSelf.displayResult setImage:[UIImage ysf_imageInKit:@"icon_message_cell_error"] forState:UIControlStateNormal];
-              weakSelf.displayResult.ulk_layoutWidth = 200;
               weakSelf.displayResult.imageEdgeInsets = UIEdgeInsetsMake(0, -7, 0, 0);
               weakSelf.displayResult.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 0);
               [weakSelf.displayResult setTitle:@"转换失败" forState:UIControlStateNormal];
@@ -134,10 +129,7 @@
               [weakSelf.displayResult setTitle:text forState:UIControlStateNormal];
           }
         
-        
-        [weakSelf.displayResult ulk_clearMeasuredDimensionSize];
         [weakSelf.displayResult setNeedsLayout];
-        [weakSelf.displayResult.superview ulk_clearMeasuredDimensionSize];
         [weakSelf.displayResult.superview setNeedsLayout];
     }];
 }

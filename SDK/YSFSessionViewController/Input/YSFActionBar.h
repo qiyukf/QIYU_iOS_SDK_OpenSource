@@ -1,5 +1,3 @@
-#import "UILayoutKit.h"
-
 typedef NS_ENUM(NSInteger, QYActionType) {
     QYActionTypeSend,
     QYActionTypeOpenUrl,

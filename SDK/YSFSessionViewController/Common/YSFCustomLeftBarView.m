@@ -42,7 +42,7 @@
 
 - (void)layoutSubviews{
     [super layoutSubviews];
-    self.backImage.ysf_frameTop = 7;
+    self.backImage.ysf_frameTop = 4.5;
     self.badgeView.ysf_frameTop = 4;
 }
 @end

@@ -1,6 +1,5 @@
-#import "QYCustomUIConfig.h"
-#import "QYPOPCustomUIConfig.h"
 #import "QYCustomUIConfig+Private.h"
+#import "QYPOPCustomUIConfig.h"
 
 @interface QYCustomUIConfig()
 
@@ -35,6 +34,8 @@
 @property (nonatomic, strong) UIImage *sessionListEntranceImage;
 
 @property (nonatomic, assign) CGFloat compressQuality;
+
+@property (nonatomic, assign) BOOL showEvaluationEntry;
 
 @end
 

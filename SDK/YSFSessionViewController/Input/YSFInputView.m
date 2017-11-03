@@ -346,7 +346,7 @@
     }else{
         CGFloat bottomHeight = toFrame.size.height;
         bottomHeight -= [[QYCustomUIConfig sharedInstance] bottomMargin];
-        if (YSFIOS11) {
+        if (@available(iOS 11, *)) {
             bottomHeight -= self.ysf_viewController.view.safeAreaInsets.bottom;
         }
         [self willShowBottomHeight:bottomHeight];

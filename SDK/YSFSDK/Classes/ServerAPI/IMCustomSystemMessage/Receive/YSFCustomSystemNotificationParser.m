@@ -19,7 +19,7 @@
 #import "YSFBotQueryResponse.h"
 #import "YSFEvaluationNotification.h"
 #import "YSFSessionWillCloseNotification.h"
-
+#import "YSFSystemConfig.h"
 
 @implementation YSFCustomSystemNotificationParser
 
@@ -54,6 +54,9 @@
                     break;
                 case YSFCommandSessionWillClose:
                     result = [YSFSessionWillCloseNotification dataByJson:dict];
+                    break;
+                case YSFCommandSystemConfig:
+                    result = [[YSFSystemConfig sharedInstance] setNewConfig:dict];
                     break;
                 case YSFCommandUploadLog:
                 {

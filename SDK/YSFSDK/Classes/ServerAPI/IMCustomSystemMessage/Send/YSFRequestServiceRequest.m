@@ -30,6 +30,7 @@
                                        YSFApiKeyVersion     :   @"34",
                                        YSFApiKeyStaffId     :   @(_staffId),
                                        YSFApiKeyGroupId     :   @(_groupId),
+                                       YSFApiKeyRobotId     :   @(_robotId),
                                        YSFApiKeyEntryId     :   @(_entryId),
                                        YSFApiKeyRobotShuntSwitch : @(intOpenRobotInShuntMode),
                                        YSFApiKeyCommonQuestionTemplateId  :  @(_commonQuestionTemplateId),

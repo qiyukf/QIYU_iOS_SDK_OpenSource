@@ -123,7 +123,7 @@ YSFNotification(kKFInputViewFrameChanged);
             rect.origin.y = 0;
             rect.size.height = self.viewRect.size.height - toHeight;
             rect.size.height -= [[QYCustomUIConfig sharedInstance] bottomMargin];
-            if (YSFIOS11) {
+            if (@available(iOS 11, *)) {
                 rect.size.height -= _tableView.ysf_viewController.view.safeAreaInsets.bottom;
             }
             [_tableView setFrame:rect];

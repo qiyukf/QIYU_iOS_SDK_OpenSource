@@ -16,7 +16,7 @@
 #import "YSFGalleryViewController.h"
 #import "YSFImageConfirmedViewController.h"
 #import "YSFWebViewController.h"
-#import "QYCustomUIConfig.h"
+#import "QYCustomUIConfig+Private.h"
 #import "QYPOPSDK.h"
 #import "YSFEvaluationViewController.h"
 #import "YSFEvaluationRequest.h"
@@ -57,6 +57,8 @@
 #import "YSFStaticUnionContentView.h"
 #import "YSFSubmittedBotForm.h"
 #import "YSFSubmittedBotFormContentView.h"
+#import "YSFSystemConfig.h"
+#import "YSFSendInputtingMessageRequest.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -95,6 +97,8 @@ static long long sessionId;
 @property (nonatomic,copy)      NSString *shopId;                       //平台电商店铺Id，不是平台电商不用管
 @property (nonatomic,weak)      id<QYSessionViewDelegate> delegate;     //会话窗口回调
 @property (nonatomic,strong)    YSFPopTipView *popTipView;
+@property (nonatomic,strong)    YSFTimer *inputtingMessage;
+@property (nonatomic,copy)      NSString *lastMessageContent;
 
 @end
 
@@ -118,6 +122,7 @@ static long long sessionId;
         _hasRequested = NO;
         _openRobotInShuntMode = NO;
         _queryWaitingStatusTimer = [[YSFTimer alloc]init];
+        _inputtingMessage = [[YSFTimer alloc]init];
     }
     return self;
 }
@@ -182,7 +187,8 @@ static long long sessionId;
     }
     
     if ((_staffId != 0 && [sessionManager getSession:_shopId].realStaffId != _staffId)
-        || (_groupId != 0 && [sessionManager getSession:_shopId].groupId != _groupId)) {
+        || (_groupId != 0 && [sessionManager getSession:_shopId].groupId != _groupId)
+        || (_robotId != 0 && [sessionManager getSession:_shopId].realStaffId != -_robotId)) {
         shouldRequestService = YES;
         [sessionManager clearByShopId:_shopId];
     }
@@ -194,6 +200,9 @@ static long long sessionId;
         NSInteger status = [[dict objectForKey:YSFSessionStatus] integerValue];
         if (status == 2) {
             _evaluation.enabled = YES;
+            if (_changeEvaluationEnabledBlock) {
+                _changeEvaluationEnabledBlock(YES);
+            }
             _evaluationText.enabled = YES;
         }
     }
@@ -406,20 +415,23 @@ static long long sessionId;
     }
     [_shopEntranceText setTitle:[QYCustomUIConfig sharedInstance].shopEntranceText forState:UIControlStateNormal];
     [_shopEntranceText addTarget:self action:@selector(onShopEntranceTap:) forControlEvents:UIControlEventTouchUpInside];
-    //评价
-    _evaluation = [[UIButton alloc] init];
-    [rightButtonView addSubview:_evaluation];
-    [_evaluation addTarget:self action:@selector(onEvaluate:) forControlEvents:UIControlEventTouchUpInside];
-    _evaluationText = [[UIButton alloc] init];
-    [rightButtonView addSubview:_evaluationText];
-    _evaluationText.titleLabel.font = [UIFont systemFontOfSize:10];
-    if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
-        [_evaluationText setTitleColor:YSFRGB(0x76838f) forState:UIControlStateNormal];
+    
+    if ([QYCustomUIConfig sharedInstance].showEvaluationEntry) {
+        //评价
+        _evaluation = [[UIButton alloc] init];
+        [rightButtonView addSubview:_evaluation];
+        [_evaluation addTarget:self action:@selector(onEvaluate:) forControlEvents:UIControlEventTouchUpInside];
+        _evaluationText = [[UIButton alloc] init];
+        [rightButtonView addSubview:_evaluationText];
+        _evaluationText.titleLabel.font = [UIFont systemFontOfSize:10];
+        if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
+            [_evaluationText setTitleColor:YSFRGB(0x76838f) forState:UIControlStateNormal];
+        }
+        else {
+            [_evaluationText setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        }
+        [_evaluationText addTarget:self action:@selector(onEvaluate:) forControlEvents:UIControlEventTouchUpInside];
     }
-    else {
-        [_evaluationText setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    }
-    [_evaluationText addTarget:self action:@selector(onEvaluate:) forControlEvents:UIControlEventTouchUpInside];
 
     //退出按钮
     if ([[QYSDK sharedSDK] customUIConfig].showCloseSessionEntry) {
@@ -832,6 +844,9 @@ static long long sessionId;
 {
     _evaluation.hidden = NO;
     _evaluation.enabled = YES;
+    if (_changeEvaluationEnabledBlock) {
+        _changeEvaluationEnabledBlock(YES);
+    }
     _evaluationText.hidden = NO;
     _evaluationText.enabled = YES;
     [_evaluationText setTitle:@"评价" forState:UIControlStateNormal];
@@ -851,6 +866,9 @@ static long long sessionId;
 {
     _evaluation.hidden = NO;
     _evaluation.enabled = NO;
+    if (_changeEvaluationEnabledBlock) {
+        _changeEvaluationEnabledBlock(NO);
+    }
     _evaluationText.hidden = NO;
     _evaluationText.enabled = NO;
     [_evaluationText setTitle:@"已评价" forState:UIControlStateNormal];
@@ -966,12 +984,85 @@ static long long sessionId;
     [_popTipView dismissAnimated:YES];
     NSDictionary *dict = [[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId];
     NSNumber *sessionId = [dict objectForKey:YSFCurrentSessionId];
-    NSDictionary *evaluationData = [dict objectForKey:YSFEvaluationData];
     NSString *evaluationMessageInvite = [dict ysf_jsonString:YSFApiKeyEvaluationMessageInvite];
     NSString *evaluationMessageThanks = [dict ysf_jsonString:YSFApiKeyEvaluationMessageThanks];
+    NSDictionary *evaluationData = [dict objectForKey:YSFEvaluationData];
 
     [self showEvaluationViewController:nil sessionId:sessionId.longLongValue evaluationData:evaluationData
      evaluationMessageInvite:evaluationMessageInvite evaluationMessageThanks:evaluationMessageThanks];
+}
+
+- (void)showEvaluationResult:(BOOL)done evaluationText:(NSString *)evaluationText remarks:(NSString *)remarks
+             evaluationMessageInvite:(NSString *)evaluationMessageInvite evaluationMessageThanks:(NSString *)evaluationMessageThanks
+              updatedMessage:(YSF_NIMMessage *)updatedMessage
+{
+    [_sessionInputView addKeyboardObserver];
+    
+    if (!done) {
+        return;
+    }
+    
+    NSMutableDictionary *shopDict = [[[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId] mutableCopy];
+    if (shopDict) {
+        [shopDict setObject:@(3) forKey:YSFSessionStatus];
+        [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
+    }
+    
+    YSFEvaluationTipObject *customMachine = [[YSFEvaluationTipObject alloc] init];
+    customMachine.command = YSFCommandEvaluationTip;
+    if (evaluationMessageThanks.length > 0) {
+        customMachine.tipContent = evaluationMessageThanks;
+    }
+    else {
+        customMachine.tipContent = @"您对我们的服务评价为";
+    }
+    customMachine.tipContent = [customMachine.tipContent stringByAppendingString:@"： "];
+    customMachine.tipResult = evaluationText;
+    
+    NSNumber *current_sessionId = [shopDict objectForKey:YSFCurrentSessionId];
+    if (current_sessionId.longLongValue == sessionId) {
+        [self changeEvaluationButtonToDone];
+        
+        if (shopDict) {
+            [shopDict setObject:@"-1" forKey:YSFSessionTimes];
+            [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:self.shopId];
+        }
+    }
+    
+    long long currentInviteEvaluationSessionId = 0;
+    if (_currentInviteEvaluationMessage) {
+        YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)_currentInviteEvaluationMessage.messageObject;
+        YSFInviteEvaluationObject * evaluationObject = (YSFInviteEvaluationObject *)object.attachment;
+        currentInviteEvaluationSessionId = evaluationObject.sessionId;
+    }
+    
+    if (updatedMessage || (_currentInviteEvaluationMessage && currentInviteEvaluationSessionId == sessionId)) {
+        YSF_NIMMessage *tmpUpdatedMessage = nil;
+        if (updatedMessage) {
+            tmpUpdatedMessage = updatedMessage;
+        }
+        else {
+            tmpUpdatedMessage = self.currentInviteEvaluationMessage;
+        }
+        YSF_NIMCustomObject *customObject = [[YSF_NIMCustomObject alloc] init];
+        customObject.attachment = customMachine;
+        tmpUpdatedMessage.messageObject = customObject;
+        [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:tmpUpdatedMessage forSession:_session completion:nil];
+        if (tmpUpdatedMessage == _currentInviteEvaluationMessage) {
+            self.currentInviteEvaluationMessage = nil;
+        }
+    }
+    else {
+        YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:customMachine];
+        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage
+                                                       forSession:_session addUnreadCount:NO completion:nil];
+    }
+}
+
+- (void)evaluationViewControlerWillAppear
+{
+    [self.view endEditing:YES];
+    [_sessionInputView removeKeyboardObserver];
 }
 
 - (void)showEvaluationViewController:(YSF_NIMMessage *)updatedMessage sessionId:(long long)sessionId evaluationData:(NSDictionary *)evaluationData evaluationMessageInvite:(NSString *)evaluationMessageInvite
@@ -981,78 +1072,12 @@ static long long sessionId;
         return;
     }
     
+    [self evaluationViewControlerWillAppear];
+    
     __weak typeof(self) weakSelf = self;
-    EvaluationCallback evaluationCallback = ^(BOOL done, NSUInteger evaluationScore, NSString *evaluationText, NSString *remarks){
-        [_sessionInputView addKeyboardObserver];
-    
-        if (!done) {
-            return;
-        }
-        
-        NSMutableDictionary *shopDict = [[[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId] mutableCopy];
-        if (shopDict) {
-            [shopDict setObject:@(3) forKey:YSFSessionStatus];
-            [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
-        }
-
-        YSFEvaluationTipObject *customMachine = [[YSFEvaluationTipObject alloc] init];
-        customMachine.command = YSFCommandEvaluationTip;
-        if (evaluationMessageThanks.length > 0) {
-            customMachine.tipContent = evaluationMessageThanks;
-        }
-        else {
-            customMachine.tipContent = @"您对我们的服务评价为";
-        }
-        customMachine.tipContent = [customMachine.tipContent stringByAppendingString:@"： "];
-        customMachine.tipResult = evaluationText;
-        
-        NSNumber *current_sessionId = [shopDict objectForKey:YSFCurrentSessionId];
-        if (current_sessionId.longLongValue == sessionId) {
-            [weakSelf changeEvaluationButtonToDone];
-            
-            if (shopDict) {
-                [shopDict setObject:@"-1" forKey:YSFSessionTimes];
-                [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
-            }
-        }
-
-        long long currentInviteEvaluationSessionId = 0;
-        if (_currentInviteEvaluationMessage) {
-            YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)_currentInviteEvaluationMessage.messageObject;
-            YSFInviteEvaluationObject * evaluationObject = (YSFInviteEvaluationObject *)object.attachment;
-            currentInviteEvaluationSessionId = evaluationObject.sessionId;
-        }
-        
-        if (updatedMessage || (_currentInviteEvaluationMessage && currentInviteEvaluationSessionId == sessionId)) {
-            YSF_NIMMessage *tmpUpdatedMessage = nil;
-            if (updatedMessage) {
-                tmpUpdatedMessage = updatedMessage;
-            }
-            else {
-                tmpUpdatedMessage = _currentInviteEvaluationMessage;
-            }
-            YSF_NIMCustomObject *customObject = [[YSF_NIMCustomObject alloc] init];
-            customObject.attachment = customMachine;
-            tmpUpdatedMessage.messageObject = customObject;
-            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:tmpUpdatedMessage forSession:_session completion:nil];
-//            [self uiUpdateMessage:tmpUpdatedMessage];
-            
-            if (tmpUpdatedMessage == _currentInviteEvaluationMessage) {
-                _currentInviteEvaluationMessage = nil;
-            }
-        }
-        else {
-            YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:customMachine];
-            [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage
-                                                           forSession:_session addUnreadCount:NO completion:nil];
-        }
-
+    EvaluationCallback evaluationCallback = ^(BOOL done, NSString *evaluationText, NSString *remarks){
+        [weakSelf showEvaluationResult:done evaluationText:evaluationText remarks:remarks evaluationMessageInvite:evaluationMessageInvite evaluationMessageThanks:evaluationMessageThanks updatedMessage:updatedMessage];
     };
-
-
-    [self.view endEditing:YES];
-    [_sessionInputView removeKeyboardObserver];
-    
     YSFEvaluationViewController *vc = [[YSFEvaluationViewController alloc] initWithEvaluationDict:evaluationData shopId:_shopId sessionId:sessionId evaluationCallback:evaluationCallback];
     vc.modalPresentationStyle = UIModalPresentationCustom;
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
@@ -1153,7 +1178,7 @@ static long long sessionId;
     self.sessionInputView.ysf_frameWidth = self.view.ysf_frameWidth;
     self.sessionInputView.ysf_frameBottom = self.view.ysf_frameHeight;
     self.sessionInputView.ysf_frameBottom -= [[QYCustomUIConfig sharedInstance] bottomMargin];
-    if (YSFIOS11) {
+    if (@available(iOS 11, *)) {
         self.sessionInputView.ysf_frameBottom -= self.view.safeAreaInsets.bottom;
         _tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     }
@@ -1191,7 +1216,7 @@ static long long sessionId;
         }
         
         CGFloat safeAreaBottom = 0;
-        if (YSFIOS11) {
+        if (@available(iOS 11, *)) {
             safeAreaBottom = self.view.safeAreaInsets.bottom;
         }
         _tableView.ysf_frameHeight -= safeAreaBottom;
@@ -1722,7 +1747,37 @@ static long long sessionId;
 #pragma mark - NIMInputActionDelegate
 - (void)onTapMediaItem:(YSFMediaItem *)item{}
 
-- (void)onTextChanged:(id)sender{}
+- (void)SendInputtingMessage:(BOOL)delaySend
+{
+    YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getSession:_shopId];
+    BOOL switchOpen = [[YSFSystemConfig sharedInstance] switchOpen];
+    CGFloat sendingRate = [[YSFSystemConfig sharedInstance] sendingRate];
+    __weak typeof(self) weakSelf = self;
+    
+    if (((session && session.humanOrMachine && switchOpen && _inputtingMessage.isStopped) || delaySend) && weakSelf.lastMessageContent) {
+        YSFSendInputtingMessageRequest *request = [[YSFSendInputtingMessageRequest alloc] init];
+        request.sendingRate = sendingRate;
+        request.sessionId = session.sessionId;
+        request.content = weakSelf.lastMessageContent;
+        request.endTime = [[NSDate date] timeIntervalSince1970];
+        [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {}];
+        weakSelf.lastMessageContent = nil;
+        
+        if (delaySend) {
+            return;
+        }
+        
+        [_inputtingMessage start:dispatch_get_main_queue() interval:sendingRate repeats:NO block:^{
+            [weakSelf SendInputtingMessage:YES];
+        }];
+    }
+}
+
+- (void)onTextChanged:(id)sender
+{
+    self.lastMessageContent = _sessionInputView.toolBar.inputTextView.text;
+   [self SendInputtingMessage:NO];
+}
 
 - (BOOL)onSendText:(NSString *)text
 {
@@ -2559,12 +2614,16 @@ static long long sessionId;
     {
         self.hasRequested = YES;
         _evaluation.enabled = NO;
+        if (_changeEvaluationEnabledBlock) {
+            _changeEvaluationEnabledBlock(NO);
+        }
         _evaluationText.enabled = NO;
         YSFRequestServiceRequest *request = [[YSFRequestServiceRequest alloc] init];
         request.source = _source;
         request.onlyManual = onlyManual;
         request.groupId = _groupId;
         request.staffId = _staffId;
+        request.robotId = _robotId;
         request.vipLevel = _vipLevel;
         request.entryId = _entryId;
         request.commonQuestionTemplateId = _commonQuestionTemplateId;
@@ -3017,9 +3076,25 @@ static long long sessionId;
     }
     
 }
-- (void)pickImageCanceled {
+- (void)pickImageCanceled
+{
     
 }
 
+- (void)sendEvaluationRequest:(long long)sessionId score:(NSUInteger)score remarks:(NSString *)remarks
+                       tagIds:(NSArray *)tagIds
+                       callback:(void (^)(NSError *error))callback
+{
+    YSFEvaluationRequest *request = [[YSFEvaluationRequest alloc] init];
+    request.score = score;
+    request.remarks = remarks;
+    request.tagIds = tagIds;
+    request.sessionId = sessionId;
+    [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error) {
+        if (callback) {
+            callback(error);
+        }
+    }];
+}
 
 @end

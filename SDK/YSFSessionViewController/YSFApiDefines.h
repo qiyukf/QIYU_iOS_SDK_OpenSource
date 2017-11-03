@@ -73,6 +73,7 @@
 #define     YSFApiKeyMsgIdClient2       @"msgIdClient"
 #define     YSFApiKeyInqueueNotify      @"inqueueNotify"
 #define     YSFApiKeyRemarks            @"remarks"
+#define     YSFApiKeyTagIds             @"tagIds"
 #define     YSFApiKeyList               @"list"
 #define     YSFApiKeyMessage            @"message"
 #define     YSFApiKeyOriginalQuestion   @"original_question"
@@ -178,6 +179,11 @@
 #define     YSFApiKeyLeft               @"left"
 #define     YSFApiKeyRight              @"right"
 #define     YSFApiKeyExt                @"ext"
+#define     YSFApiKeyEndTime            @"endTime"
+#define     YSFApiKeySendingRate        @"sendingRate"
+#define     YSFApiKeyConfig             @"config"
+#define     YSFApiKeySwitch             @"switch"
+#define     YSFApiKeyRobotId            @"robotId"
 
 
 
@@ -202,6 +208,8 @@ typedef enum : NSUInteger {
     YSFCommandEvaluationNotification    =   50,     //主动邀请评价
     YSFCommandEvaluationRequest         =   51,     //满意度评价
     YSFCommandSetUserInfoRequest        =   52,     //轻量CRM
+    YSFCommandSystemConfig              =   57,     //系统配置
+    YSFCommandSendInputtingMessageRequest = 58,       //发送正在输入的消息
     YSFCommandMachine                   =   60,     //机器人问答
     YSFCommandEvaluationAnswer          =   64,     //评价答案
     YSFCommandRichText                  =   65,     //富文本
@@ -213,8 +221,8 @@ typedef enum : NSUInteger {
     YSFCommandSessionStatusResponse     =   502,    //请求会话状态返回
     YSFCommandBotReceive                = 203,      //bot
     YSFCommandBotSend                   = 202,      //bot
-    YSFCommandBotQueryRequest        = 204,      //bot
-    YSFCommandBotQueryResponse       = 205,      //bot
+    YSFCommandBotQueryRequest           = 204,      //bot
+    YSFCommandBotQueryResponse          = 205,      //bot
 
 
     //客服端

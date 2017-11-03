@@ -16,6 +16,7 @@
 @property (nonatomic,strong)        QYSource    *source;
 @property (nonatomic,assign)        long long   staffId;
 @property (nonatomic,assign)        long long   groupId;
+@property (nonatomic,assign)        long long   robotId;
 @property (nonatomic,assign)        long long   entryId;
 @property (nonatomic,assign)        long long commonQuestionTemplateId;
 @property (nonatomic,assign)        BOOL   openRobotInShuntMode;

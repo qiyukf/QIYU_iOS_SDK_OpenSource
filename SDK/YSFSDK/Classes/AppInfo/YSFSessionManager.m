@@ -24,6 +24,7 @@
 #import "YSFEvaluationNotification.h"
 #import "YSFNotification.h"
 #import "YSFSessionWillCloseNotification.h"
+#import "YSFSystemConfig.h"
 
 @interface YSFSessionManager ()
 <YSF_NIMSystemNotificationManagerDelegate,
@@ -437,6 +438,7 @@ YSFServiceRequestDelegate>
     }
     else if ([object isKindOfClass:[YSFCloseServiceNotification class]])
     {
+        [YSFSystemConfig sharedInstance].switchOpen = YES;
         [self onCloseSession:(YSFCloseServiceNotification *)object shopId:shopId];
         [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
     }
