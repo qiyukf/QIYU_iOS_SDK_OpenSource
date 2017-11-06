@@ -983,13 +983,13 @@ static long long sessionId;
 
     [_popTipView dismissAnimated:YES];
     NSDictionary *dict = [[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId];
-    NSNumber *sessionId = [dict objectForKey:YSFCurrentSessionId];
+    long long sessionId = ((NSNumber *)[dict objectForKey:YSFCurrentSessionId]).longLongValue;
     NSString *evaluationMessageInvite = [dict ysf_jsonString:YSFApiKeyEvaluationMessageInvite];
     NSString *evaluationMessageThanks = [dict ysf_jsonString:YSFApiKeyEvaluationMessageThanks];
     NSDictionary *evaluationData = [dict objectForKey:YSFEvaluationData];
 
-    [self showEvaluationViewController:nil sessionId:sessionId.longLongValue evaluationData:evaluationData
-     evaluationMessageInvite:evaluationMessageInvite evaluationMessageThanks:evaluationMessageThanks];
+    [self showEvaluationViewController:nil sessionId:sessionId evaluationData:evaluationData
+               evaluationMessageInvite:evaluationMessageInvite evaluationMessageThanks:evaluationMessageThanks];
 }
 
 - (void)showEvaluationResult:(BOOL)done evaluationText:(NSString *)evaluationText remarks:(NSString *)remarks
@@ -1986,8 +1986,13 @@ static long long sessionId;
         YSF_NIMCustomObject *customObject = event.message.messageObject;
         YSFInviteEvaluationObject *object = customObject.attachment;
 
-        [self showEvaluationViewController:event.message sessionId:object.sessionId evaluationData:object.evaluationDict
-          evaluationMessageInvite:object.evaluationMessageInvite evaluationMessageThanks:object.evaluationMessageThanks];
+        if (_onEvaluateBlock) {
+            _onEvaluateBlock(object.sessionId, object.evaluationMessageInvite, object.evaluationMessageThanks);
+        }
+        else {
+            [self showEvaluationViewController:event.message sessionId:object.sessionId evaluationData:object.evaluationDict
+                       evaluationMessageInvite:object.evaluationMessageInvite evaluationMessageThanks:object.evaluationMessageThanks];
+        }
 
         handled = YES;
     }

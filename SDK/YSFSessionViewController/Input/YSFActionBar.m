@@ -31,7 +31,10 @@
     _splitLine.backgroundColor = YSFRGB(0xd8d8d8);
     [self addSubview:_splitLine];
     
-    _scrollView = [UIScrollView new];
+    if (!_scrollView) {
+        _scrollView = [UIScrollView new];
+    }
+    [_scrollView ysf_removeAllSubviews];
     _scrollView.showsHorizontalScrollIndicator = NO;
     [self addSubview:_scrollView];
 

@@ -19,5 +19,6 @@ typedef void (^SelectActionCallback)(YSFActionInfo *action);
 
 @property (nonatomic, copy) SelectActionCallback selectActionCallback;
 @property (nonatomic, strong) NSArray *actionInfoArray;
+@property (nonatomic,strong,readonly)    UIScrollView *scrollView;
 
 @end
