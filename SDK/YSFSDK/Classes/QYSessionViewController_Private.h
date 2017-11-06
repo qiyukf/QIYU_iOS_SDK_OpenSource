@@ -32,7 +32,7 @@
 @class YSFReachability;
 typedef void (^ChangeHumanOrRobotBlock)(BOOL humanOrRobot);
 typedef void (^ChangeEvaluationEnabledBlock)(BOOL evaluationEnabled);
-typedef void (^OnEvaluateBlock)(long long sessionId, NSString *evaluationMessageInvite, NSString *evaluationMessageThanks);
+typedef void (^OnEvaluateBlock)(long long sessionId, NSString *evaluationMessageThanks);
 
 
 @interface QYSessionViewController ()
