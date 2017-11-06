@@ -89,6 +89,6 @@ YSFSessionTipViewDelegate>
                     completetionBlock:(void (^)(BOOL isSuccess))completetionBlock;
 
 - (void)sendEvaluationRequest:(long long)sessionId score:(NSUInteger)score remarks:(NSString *)remarks
-                       tagIds:(NSArray *)tagIds callback:(void (^)(NSError *error))callback
+                       tagIds:(NSArray *)tagIds callback:(void (^)(NSError *error))callback;
 
 @end
