@@ -991,8 +991,8 @@ static long long sessionId;
                evaluationMessageThanks:evaluationMessageThanks];
 }
 
-- (void)showEvaluationResult:(BOOL)done evaluationText:(NSString *)evaluationText remarks:(NSString *)remarks
-              evaluationMessageThanks:(NSString *)evaluationMessageThanks updatedMessage:(YSF_NIMMessage *)updatedMessage
+- (void)showEvaluationResult:(BOOL)done evaluationMessageThanks:(NSString *)evaluationMessageThanks
+              evaluationText:(NSString *)evaluationText updatedMessage:(YSF_NIMMessage *)updatedMessage
 {
     [_sessionInputView addKeyboardObserver];
     
@@ -1073,8 +1073,8 @@ static long long sessionId;
     [self evaluationViewControlerWillAppear];
     
     __weak typeof(self) weakSelf = self;
-    EvaluationCallback evaluationCallback = ^(BOOL done, NSString *evaluationText, NSString *remarks){
-        [weakSelf showEvaluationResult:done evaluationText:evaluationText remarks:remarks evaluationMessageThanks:evaluationMessageThanks updatedMessage:updatedMessage];
+    EvaluationCallback evaluationCallback = ^(BOOL done, NSString *evaluationText){
+        [weakSelf showEvaluationResult:done evaluationMessageThanks:evaluationMessageThanks evaluationText:evaluationText updatedMessage:updatedMessage];
     };
     YSFEvaluationViewController *vc = [[YSFEvaluationViewController alloc] initWithEvaluationDict:evaluationData shopId:_shopId sessionId:sessionId evaluationCallback:evaluationCallback];
     vc.modalPresentationStyle = UIModalPresentationCustom;
@@ -1758,7 +1758,7 @@ static long long sessionId;
         request.sessionId = session.sessionId;
         request.content = weakSelf.lastMessageContent;
         request.endTime = [[NSDate date] timeIntervalSince1970];
-        [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {}];
+        [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error) {}];
         weakSelf.lastMessageContent = nil;
         
         if (delaySend) {
@@ -1774,7 +1774,7 @@ static long long sessionId;
 - (void)onTextChanged:(id)sender
 {
     self.lastMessageContent = _sessionInputView.toolBar.inputTextView.text;
-   [self SendInputtingMessage:NO];
+    [self SendInputtingMessage:NO];
 }
 
 - (BOOL)onSendText:(NSString *)text
@@ -1796,6 +1796,8 @@ static long long sessionId;
     }
     YSF_NIMMessage *message = [YSFMessageMaker msgWithText:text];
     [self sendMessage:message];
+    
+    self.lastMessageContent = nil;
     return YES;
 }
 

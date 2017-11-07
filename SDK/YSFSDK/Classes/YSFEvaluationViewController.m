@@ -261,7 +261,7 @@
 - (void)closeHandle
 {
     [self dismissViewControllerAnimated:YES completion:^{
-        _evaluationCallback(NO, @"", @"");
+        _evaluationCallback(NO, @"");
     }];
 }
 
@@ -343,7 +343,7 @@
         }
         else {
             [weakSelf dismissViewControllerAnimated:YES completion:^{
-                weakSelf.evaluationCallback(YES, selectString, _textView.text);
+                weakSelf.evaluationCallback(YES, selectString);
             }];
         }
     }];

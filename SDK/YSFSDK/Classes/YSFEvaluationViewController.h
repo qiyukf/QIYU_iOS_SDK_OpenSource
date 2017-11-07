@@ -1,5 +1,5 @@
 
-typedef void (^EvaluationCallback)(BOOL done, NSString *evaluationText, NSString *remarks);
+typedef void (^EvaluationCallback)(BOOL done, NSString *evaluationText);
 
 @interface EvaluationData : NSObject
 
