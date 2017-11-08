@@ -19,6 +19,7 @@
     dict[YSFApiKeyCmd]          = @(_command);
     dict[YSFApiKeyTipContent]      = YSFStrParam(_tipContent);
     dict[YSFApiKeyTipResult]      = YSFStrParam(_tipResult);
+    dict[YSFApiKeyKaolaTipResult]      = YSFStrParam(_kaolaTipContent);
 
     return dict;
 }
@@ -29,6 +30,7 @@
     instance.command                = [dict ysf_jsonInteger:YSFApiKeyCmd];
     instance.tipContent             = YSFStrParam([dict ysf_jsonString:YSFApiKeyTipContent]);
     instance.tipResult             = YSFStrParam([dict ysf_jsonString:YSFApiKeyTipResult]);
+    instance.kaolaTipContent             = YSFStrParam([dict ysf_jsonString:YSFApiKeyKaolaTipResult]);
 
     return instance;
 }

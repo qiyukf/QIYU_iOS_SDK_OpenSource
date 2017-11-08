@@ -12,6 +12,7 @@
 #import "YSFMessageModel.h"
 #import "QYCustomUIConfig.h"
 #import "YSFNotification.h"
+#import "YSFAttributedLabel.h"
 
 @implementation YSFNotificationCellLayoutConfig
 
@@ -74,7 +75,17 @@
     }
     else if ([object.attachment isKindOfClass:[YSFEvaluationTipObject class]]) {
         YSFEvaluationTipObject *attachment = (YSFEvaluationTipObject *)object.attachment;
-        return attachment.tipContent;
+        NSString *text = nil;
+        if (attachment.kaolaTipContent.length > 0 ) {
+            text = attachment.kaolaTipContent;
+        }
+        else {
+            text = attachment.tipContent;
+            [text stringByAppendingString:attachment.tipResult];
+            [text stringByAppendingString:@"。非常感谢！"];
+        }
+        
+        return text;
     }
     else if ([object.attachment isKindOfClass:[YSFNotification class]]) {
         YSFNotification *attachment = (YSFNotification *)object.attachment;

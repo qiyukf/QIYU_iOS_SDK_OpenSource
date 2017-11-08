@@ -991,12 +991,13 @@ static long long sessionId;
                evaluationMessageThanks:evaluationMessageThanks];
 }
 
-- (void)showEvaluationResult:(BOOL)done evaluationMessageThanks:(NSString *)evaluationMessageThanks
-              evaluationText:(NSString *)evaluationText updatedMessage:(YSF_NIMMessage *)updatedMessage
+- (void)showEvaluationResult:(BOOL)needShow kaolaTipContent:(NSString *)kaolaTipContent
+                 evaluationMessageThanks:(NSString *)evaluationMessageThanks evaluationText:(NSString *)evaluationText
+                      updatedMessage:(YSF_NIMMessage *)updatedMessage
 {
     [_sessionInputView addKeyboardObserver];
     
-    if (!done) {
+    if (!needShow) {
         return;
     }
     
@@ -1008,6 +1009,7 @@ static long long sessionId;
     
     YSFEvaluationTipObject *customMachine = [[YSFEvaluationTipObject alloc] init];
     customMachine.command = YSFCommandEvaluationTip;
+    customMachine.kaolaTipContent = kaolaTipContent;
     if (evaluationMessageThanks.length > 0) {
         customMachine.tipContent = evaluationMessageThanks;
     }
@@ -1074,7 +1076,7 @@ static long long sessionId;
     
     __weak typeof(self) weakSelf = self;
     EvaluationCallback evaluationCallback = ^(BOOL done, NSString *evaluationText){
-        [weakSelf showEvaluationResult:done evaluationMessageThanks:evaluationMessageThanks evaluationText:evaluationText updatedMessage:updatedMessage];
+        [weakSelf showEvaluationResult:done kaolaTipContent:@"" evaluationMessageThanks:evaluationMessageThanks evaluationText:evaluationText updatedMessage:updatedMessage];
     };
     YSFEvaluationViewController *vc = [[YSFEvaluationViewController alloc] initWithEvaluationDict:evaluationData shopId:_shopId sessionId:sessionId evaluationCallback:evaluationCallback];
     vc.modalPresentationStyle = UIModalPresentationCustom;
@@ -1987,7 +1989,7 @@ static long long sessionId;
         YSFInviteEvaluationObject *object = customObject.attachment;
 
         if (_onEvaluateBlock) {
-            _onEvaluateBlock(object.sessionId, object.evaluationMessageThanks);
+            _onEvaluateBlock(object.sessionId, event.message);
         }
         else {
             [self showEvaluationViewController:event.message sessionId:object.sessionId evaluationData:object.evaluationDict

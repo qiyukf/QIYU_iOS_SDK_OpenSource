@@ -11,6 +11,7 @@
 @property (nonatomic,assign)    NSInteger   command;
 @property (nonatomic,copy)      NSString    *tipContent;
 @property (nonatomic,copy)      NSString    *tipResult;
+@property (nonatomic,copy)      NSString    *kaolaTipContent;
 
 + (YSFEvaluationTipObject *)objectByDict:(NSDictionary *)dict;
 @end

@@ -43,12 +43,17 @@
         }
         else if ([object.attachment isKindOfClass:[YSFEvaluationTipObject class]]) {
             YSFEvaluationTipObject *attachment = (YSFEvaluationTipObject *)object.attachment;
-            _label.text = attachment.tipContent;
-            NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:attachment.tipResult];
-            [attributedstring ysf_setFont:[UIFont boldSystemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
-            [attributedstring ysf_setTextColor:[[QYCustomUIConfig sharedInstance] tipMessageTextColor]];
-            [_label appendAttributedText:attributedstring];
-            [_label appendText:@"。非常感谢！"];
+            if (attachment.kaolaTipContent.length > 0 ) {
+                _label.text = attachment.kaolaTipContent;
+            }
+            else {
+                _label.text = attachment.tipContent;
+                NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:attachment.tipResult];
+                [attributedstring ysf_setFont:[UIFont boldSystemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
+                [attributedstring ysf_setTextColor:[[QYCustomUIConfig sharedInstance] tipMessageTextColor]];
+                [_label appendAttributedText:attributedstring];
+                [_label appendText:@"。非常感谢！"];
+            }
         }
         else if ([object.attachment isKindOfClass:[YSFNotification class]]) {
             _label.text = [model.layoutConfig formatedMessage:model];

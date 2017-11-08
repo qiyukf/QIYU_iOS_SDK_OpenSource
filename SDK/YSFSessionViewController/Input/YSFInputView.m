@@ -482,11 +482,13 @@
                     self.inputType = InputTypeAudio;
                     if ([self.toolBar.inputTextView isFirstResponder]) {
                         _inputBottomViewHeight = 0;
+                        [_emoticonContainer setHidden:YES];
                         [self.toolBar.inputTextView resignFirstResponder];
                     }
                     else if (_inputBottomViewHeight > 0)
                     {
                         _inputBottomViewHeight = 0;
+                        [_emoticonContainer setHidden:YES];
                         [self willShowBottomHeight:_inputBottomViewHeight];
                     }
                     [self inputTextViewChangeHeight:YSFTopInputViewHeight];;
@@ -765,7 +767,9 @@
         [self.actionDelegate OnMediaPicturePressed];
         self.inputType = InputTypeText;
         _inputBottomViewHeight = 0;
+        [_emoticonContainer setHidden:YES];
         [self endTextEditWithInputBottomViewHeight:0];
+        [self updateAllButtonImages];
     }
 }
 

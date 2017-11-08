@@ -81,6 +81,7 @@
 #define     YSFApiKeyAnswer             @"answer"
 #define     YSFApiKeyTipContent         @"tip_content"
 #define     YSFApiKeyTipResult          @"tip_result"
+#define     YSFApiKeyKaolaTipResult     @"kaola_tip_content"
 #define     YSFApiKeyStatus             @"status"
 #define     YSFApiKeyCount              @"count"
 #define     YSFApiLoginCookie           @"login_cookie"

@@ -9,9 +9,11 @@
 #import "YSFSessionTipView.h"
 #import "YSFAttributedLabel.h"
 #import "QYCustomUIConfig.h"
+#import "YSFTipDetailViewController.h"
 
 @interface YSFSessionTipView ()<YSFAttributedLabelDelegate>
 @property (nonatomic,strong)    YSFAttributedLabel *tipLabel;
+@property (nonatomic,strong)    UIButton *rightArraw;
 @property (nonatomic,assign)    YSFSessionTipType type;
 @property (nonatomic,assign)    BOOL showNumber;
 @end
@@ -29,13 +31,42 @@
         [_tipLabel setText:@"网络连接失败，请稍后再试"];
         _tipLabel.autoDetectLinks = NO;
         _tipLabel.autoDetectNumber = NO;
+        _tipLabel.numberOfLines = 2;
+        _tipLabel.lineBreakMode = kCTLineBreakByTruncatingTail;
         _tipLabel.textAlignment = kCTTextAlignmentCenter;
         _tipLabel.delegate = self;
-        _showNumber = YES;
         [self addSubview:_tipLabel];
+
+        _rightArraw = [[UIButton alloc] initWithFrame:CGRectZero];
+        [_rightArraw setImage:[UIImage ysf_imageInKit:@"icon_right_arrow"] forState:UIControlStateNormal];
+        [self addSubview:_rightArraw];
         
+        _showNumber = YES;
+        
+        
+        UITapGestureRecognizer *singleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onSingleTap:)];
+        singleTapRecognizer.numberOfTapsRequired = 1;
+        singleTapRecognizer.numberOfTouchesRequired = 1;
+        singleTapRecognizer.cancelsTouchesInView = NO;
+        singleTapRecognizer.delaysTouchesEnded = NO;
+        [self addGestureRecognizer:singleTapRecognizer];
     }
     return self;
+}
+
+- (void)onSingleTap:(UITapGestureRecognizer *)recognizer
+{
+    YSFTipDetailViewController *vc = [[YSFTipDetailViewController alloc] initWithDetailText:_tipLabel.attributedString.string];
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+    [self.ysf_viewController presentViewController:nav animated:YES completion:nil];
+    
+    vc.navigationItem.title = @"详情";
+    vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStyleBordered target:self action:@selector(onBack:)];
+}
+
+- (void)onBack:(id)sender
+{
+    [self.ysf_viewController dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)setSessionTip:(YSFSessionTipType)type
@@ -136,15 +167,24 @@
 {
     [super layoutSubviews];
     
-    _tipLabel.ysf_frameWidth = self.ysf_frameWidth;
+    _tipLabel.ysf_frameWidth = self.ysf_frameWidth - 40;
     _tipLabel.ysf_frameHeight = [self getTipLabelHeight];
-    _tipLabel.ysf_frameCenterY = self.ysf_frameHeight / 2 + 1;
-    _tipLabel.ysf_frameLeft = 0;
+    _tipLabel.ysf_frameLeft = 10;
+    _tipLabel.ysf_frameCenterY = self.ysf_frameHeight / 2 + 3;
+
+    [_rightArraw sizeToFit];
+    _rightArraw.ysf_frameLeft = self.ysf_frameWidth - 20;
+    _rightArraw.ysf_frameCenterY = self.ysf_frameHeight / 2 + 1;
 }
 
 - (CGFloat)getTipLabelHeight
 {
-    return [_tipLabel sizeThatFits:CGSizeMake(YSFUIScreenWidth, CGFLOAT_MAX)].height;
+    CGFloat height = [_tipLabel sizeThatFits:CGSizeMake(_tipLabel.ysf_frameWidth, CGFLOAT_MAX)].height;
+    if (height > 44) {
+        height = 44;
+    }
+    
+    return height;
 }
 
 - (void)ysfAttributedLabel:(YSFAttributedLabel *)label clickedOnLink:(id)linkData
