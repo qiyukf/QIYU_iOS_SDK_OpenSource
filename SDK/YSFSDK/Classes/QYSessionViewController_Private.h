@@ -88,9 +88,12 @@ YSFSessionTipViewDelegate>
 - (void)sendCloseSessionCustomMessage:(BOOL)quitWaitingOrCloseSession
                     completetionBlock:(void (^)(BOOL isSuccess))completetionBlock;
 
-- (void)showEvaluationResult:(BOOL)done evaluationMessageThanks:(NSString *)evaluationMessageThanks
-              evaluationText:(NSString *)evaluationText updatedMessage:(YSF_NIMMessage *)updatedMessage;
+- (void)evaluationViewControlerWillAppear;
+
 - (void)sendEvaluationRequest:(long long)sessionId score:(NSUInteger)score remarks:(NSString *)remarks
                        tagIds:(NSArray *)tagIds callback:(void (^)(NSError *error))callback;
+
+- (void)showEvaluationResult:(BOOL)done evaluationMessageThanks:(NSString *)evaluationMessageThanks
+              evaluationText:(NSString *)evaluationText updatedMessage:(YSF_NIMMessage *)updatedMessage;
 
 @end
