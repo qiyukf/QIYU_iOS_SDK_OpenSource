@@ -88,6 +88,8 @@ YSFSessionTipViewDelegate>
 - (void)sendCloseSessionCustomMessage:(BOOL)quitWaitingOrCloseSession
                     completetionBlock:(void (^)(BOOL isSuccess))completetionBlock;
 
+- (void)evaluationViewControlerWillAppear;
+
 - (void)showEvaluationResult:(BOOL)needShow kaolaTipContent:(NSString *)kaolaTipContent
      evaluationMessageThanks:(NSString *)evaluationMessageThanks evaluationText:(NSString *)evaluationText
               updatedMessage:(YSF_NIMMessage *)updatedMessage;
