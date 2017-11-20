@@ -79,7 +79,9 @@
     if ([attachment isKindOfClass:[YSFImageTextAttachment class]])
     {
         NSString *urlString = attachment.contentURL.relativeString;
-        [_imageUrlStringArray addObject:urlString];
+        if (urlString.length) {
+            [_imageUrlStringArray addObject:urlString];
+        }
     }
     return nil;
 }

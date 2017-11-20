@@ -31,7 +31,9 @@
         else if ([type isEqualToString:@"image"])
         {
             item.imageUrl = [detail ysf_jsonString:YSFApiKeyUrl];
-            [staticUnion.imageUrlStringArray addObject:item.imageUrl];
+            if (item.imageUrl.length) {
+                [staticUnion.imageUrlStringArray addObject:item.imageUrl];
+            }
         }
         else if ([type isEqualToString:@"link"])
         {
