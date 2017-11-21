@@ -67,10 +67,11 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 //手动布局view起始Y坐标
 #define YSFViewStartOffsetY (YSFIOS7? (YSFIsLandscape ? 52:64):0)
-#define YSFNormalNavigationbarHeight       64.0f
-#define YSFTabBarHeight     50.0f
-#define YSFNavigationBarHeight  (([[UIApplication sharedApplication] statusBarFrame].size.height)>20 ? 84 :64)
-#define YSFStatusBarHeight (([[UIApplication sharedApplication] statusBarFrame].size.height)>20 ? 40 :20)
+#define YSFStatusBarHeight ([[UIApplication sharedApplication] statusBarFrame].size.height)
+#define YSFNormalNavigationbarHeight       (([[UIApplication sharedApplication] statusBarFrame].size.height)>20 ? 88 :64)
+#define YSFNavigationBarHeight  (([[UIApplication sharedApplication] statusBarFrame].size.height)>20 ? 88 :64)
+#define YSFTopHeight    (YSFNormalNavigationbarHeight)
+#define YSFTabBarHeight     (([[UIApplication sharedApplication] statusBarFrame].size.height)>20 ? 83:49)
 
 #define YSFPixel (1.0/[[UIScreen mainScreen] scale])
 #define YSFScreenAdapterScale   ([UIScreen mainScreen].bounds.size.width / 375.0)

@@ -23,7 +23,7 @@
 
 @implementation YSFCustomSystemNotificationParser
 
-+ (id)parse:(NSString *)content
++ (id)parse:(NSString *)content shopId:(NSString *)shopId
 {
     id result = nil;
     if (content) {
@@ -56,7 +56,7 @@
                     result = [YSFSessionWillCloseNotification dataByJson:dict];
                     break;
                 case YSFCommandSystemConfig:
-                    result = [[YSFSystemConfig sharedInstance] setNewConfig:dict];
+                    result = [[YSFSystemConfig sharedInstance:shopId] setNewConfig:dict];
                     break;
                 case YSFCommandUploadLog:
                 {

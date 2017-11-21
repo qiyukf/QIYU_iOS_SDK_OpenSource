@@ -2,7 +2,7 @@
 
 @interface YSFSystemConfig : NSObject
 
-+ (instancetype)sharedInstance;
++ (instancetype)sharedInstance:(NSString *)shopId;
 
 @property (nonatomic,assign)      BOOL switchOpen;
 @property (nonatomic,assign)      CGFloat sendingRate;

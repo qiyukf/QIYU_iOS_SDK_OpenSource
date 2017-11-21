@@ -162,8 +162,14 @@
         splitLine2.backgroundColor = YSFRGB(0xdbdbdb);
         splitLine2.ysf_frameTop = 0;
         splitLine2.ysf_frameHeight = 0.5;
-        splitLine2.ysf_frameLeft = 0;
-        splitLine2.ysf_frameWidth = goodView.ysf_frameWidth;
+        if (idx == 0) {
+            splitLine2.ysf_frameLeft = 0;
+            splitLine2.ysf_frameWidth = goodView.ysf_frameWidth;
+        }
+        else {
+            splitLine2.ysf_frameLeft = 10;
+            splitLine2.ysf_frameWidth = goodView.ysf_frameWidth - 20;
+        }
         [goodView addSubview:splitLine2];
         
         UIImageView *imageView = [UIImageView new];
@@ -227,6 +233,7 @@
         
         UILabel *status = [UILabel new];
         status.font = [UIFont systemFontOfSize:14.f];
+        status.textColor = YSFRGBA2(0xffa3afb7);
         status.numberOfLines = 0;
         status.text = goods.p_status;
         status.ysf_frameTop = 52;
@@ -240,6 +247,7 @@
         
         UILabel *stock = [UILabel new];
         stock.font = [UIFont systemFontOfSize:14.f];
+        stock.textColor = YSFRGBA2(0xffa3afb7);
         stock.numberOfLines = 0;
         stock.text = goods.p_stock;
         stock.ysf_frameTop = 40;

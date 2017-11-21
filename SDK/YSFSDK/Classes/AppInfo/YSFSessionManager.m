@@ -430,7 +430,7 @@ YSFServiceRequestDelegate>
         shopId = @"-1";
     }
 
-    id object =  [YSFCustomSystemNotificationParser parse:content];
+    id object =  [YSFCustomSystemNotificationParser parse:content shopId:shopId];
     if ([object isKindOfClass:[YSFServiceSession class]])
     {
         [self onGetNewServiceSession:object shopId:shopId];
@@ -438,7 +438,7 @@ YSFServiceRequestDelegate>
     }
     else if ([object isKindOfClass:[YSFCloseServiceNotification class]])
     {
-        [YSFSystemConfig sharedInstance].switchOpen = YES;
+        [YSFSystemConfig sharedInstance:shopId].switchOpen = YES;
         [self onCloseSession:(YSFCloseServiceNotification *)object shopId:shopId];
         [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
     }

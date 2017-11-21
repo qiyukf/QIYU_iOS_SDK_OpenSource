@@ -6,6 +6,7 @@
 
 @interface YSFSelectedGoodsContentView()
 
+@property (nonatomic,strong) UIView *backgroundView;
 @property (nonatomic,strong) UIImageView * imageView;
 @property (nonatomic,strong) UILabel * goodName;
 @property (nonatomic,strong) UILabel * stock;
@@ -20,6 +21,10 @@
 - (instancetype)initSessionMessageContentView{
     self = [super initSessionMessageContentView];
     if (self) {
+
+        _backgroundView = [UIView new];
+        _backgroundView.backgroundColor = [UIColor whiteColor];
+        [self addSubview:_backgroundView];
         
         _imageView = [UIImageView new];
         [self addSubview:_imageView];
@@ -65,6 +70,10 @@
 
 - (void)layoutSubviews
 {
+    _backgroundView.ysf_frameLeft = 2;
+    _backgroundView.ysf_frameWidth = self.ysf_frameWidth - 9;
+    _backgroundView.ysf_frameTop = 2;
+    _backgroundView.ysf_frameHeight = self.ysf_frameHeight - 4;
     _imageView.ysf_frameTop = 10;
     _imageView.ysf_frameLeft = 10;
     _imageView.ysf_frameWidth = 60;

@@ -28,6 +28,10 @@
     return [_accid length] && [_token length] && [_bid length];
 }
 
+- (BOOL)isPop
+{
+    return ![_bid isEqualToString:@"-1"];
+}
 
 - (NSDictionary *)toDict
 {

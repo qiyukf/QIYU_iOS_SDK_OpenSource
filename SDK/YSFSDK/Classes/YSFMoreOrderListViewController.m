@@ -185,7 +185,7 @@
         shopId = @"-1";
     }
     
-    id object =  [YSFCustomSystemNotificationParser parse:content];
+    id object =  [YSFCustomSystemNotificationParser parse:content shopId:shopId];
     if ([object isKindOfClass:[YSFBotQueryResponse class]])
     {
         YSFBotQueryResponse *response = (YSFBotQueryResponse *)object;

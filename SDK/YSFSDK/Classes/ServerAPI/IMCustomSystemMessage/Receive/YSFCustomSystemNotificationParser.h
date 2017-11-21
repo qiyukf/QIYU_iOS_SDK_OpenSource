@@ -9,7 +9,7 @@
 
 @interface YSFCustomSystemNotificationParser : NSObject
 
-+ (id)parse:(NSString *)content;
++ (id)parse:(NSString *)content shopId:(NSString *)shopId;
 
 @end
 

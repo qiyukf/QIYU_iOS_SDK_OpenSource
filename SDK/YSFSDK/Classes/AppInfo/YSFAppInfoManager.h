@@ -16,7 +16,7 @@
 #define YSFCurrentForeignUserIdKey @"current_foreign_userid"
 #define YSFCurrentUserInfoKey @"current_user_info"
 #define YSFDeviceInfoKey    @"device_info"
-#define YSFCachedTextKey    @"cached_text"
+#define YSFCachedTextKey    @"cached_text_2.0"
 #define YSFStaffIdIconUrl   @"staffid_iconrul"
 #define YSFShopInfoKey      @"shopInfo"
 #define YSFUnreadPushMessageSessionId @"unreadPushMessageSessionId"
@@ -36,7 +36,9 @@
 
 
 @interface YSFAppInfoManager : NSObject
-@property (nonatomic,strong)    NSString *cachedText;
+
+- (NSString *)cachedText:(NSString *)shopId;
+- (void)setCachedText:(NSString *)cachedText shopId:(NSString *)shopId;
 
 @property (nonatomic,strong,readonly)    YSFAccountInfo *accountInfo;
 

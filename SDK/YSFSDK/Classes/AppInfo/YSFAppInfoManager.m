@@ -28,6 +28,8 @@
 @property (nonatomic,copy)      NSString            *deviceId;
 @property (nonatomic,strong)    YSFLoginManager     *loginManager;
 @property (nonatomic,strong)    YSFRelationStore    *relationStore;
+@property (nonatomic,strong)    NSMutableDictionary *cachedTextDict;
+
 @end
 
 @implementation YSFAppInfoManager
@@ -371,7 +373,10 @@
     
     [self changeNimSDKAudioPlayMode];
     
-    _cachedText = [[self store] valueByKey:YSFCachedTextKey];
+    _cachedTextDict = [[[self store] dictByKey:YSFCachedTextKey] mutableCopy];
+    if (!_cachedTextDict) {
+        _cachedTextDict = [NSMutableDictionary new];
+    }
 }
 
 - (void)saveAppSetting
@@ -414,16 +419,22 @@
 }
 
 #pragma mark - CachedText
-- (void)setCachedText:(NSString *)cachedText
+- (NSString *)cachedText:(NSString *)shopId
 {
-    if (_cachedText && cachedText && [_cachedText isEqualToString:cachedText])
-    {
-        return;
+    NSString *catchText = @"";
+    if (shopId) {
+        catchText = _cachedTextDict[shopId];
     }
-    if (_cachedText != cachedText)
+    
+    return catchText;
+}
+
+- (void)setCachedText:(NSString *)cachedText shopId:(NSString *)shopId
+{
+    if (cachedText && ![_cachedTextDict[shopId] isEqualToString:cachedText])
     {
-        _cachedText = cachedText;
-        [[self store] saveValue:_cachedText forKey:YSFCachedTextKey];
+        _cachedTextDict[shopId] = cachedText;
+        [[self store] saveDict:_cachedTextDict forKey:YSFCachedTextKey];
     }
 }
 
@@ -467,11 +478,12 @@
 
 - (void)requestSessionStatus
 {
-    YSFSessionStatusRequest *request = [YSFSessionStatusRequest new];
-    [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
-                                      YSFLogApp(@"requestSessionStatus error:%@", error);
-                                  }];
-    
+    if ([[[QYSDK sharedSDK] infoManager].accountInfo isPop]) {
+        YSFSessionStatusRequest *request = [YSFSessionStatusRequest new];
+        [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
+            YSFLogApp(@"requestSessionStatus error:%@", error);
+        }];
+    }
 }
 
 - (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification

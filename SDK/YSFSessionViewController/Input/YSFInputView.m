@@ -785,13 +785,19 @@
 {
     _actionBar.ysf_frameTop = 0;
     _actionBar.ysf_frameWidth = self.ysf_frameWidth;
+    if (@available(iOS 11, *)) {
+        _toolBar.ysf_frameLeft = self.safeAreaInsets.left;
+    }
+    _toolBar.ysf_frameWidth = self.ysf_frameWidth;
+    if (@available(iOS 11, *)) {
+        _toolBar.ysf_frameWidth -= self.safeAreaInsets.left + self.safeAreaInsets.right;
+    }
     if (_actionBar.hidden == NO) {
         _toolBar.ysf_frameTop = _actionBar.ysf_frameHeight;
     }
     else {
         _toolBar.ysf_frameTop = 0;
     }
-    _toolBar.ysf_frameWidth = self.ysf_frameWidth;
 }
 
 @end

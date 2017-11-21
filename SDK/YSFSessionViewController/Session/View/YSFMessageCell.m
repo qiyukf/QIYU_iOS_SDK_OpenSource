@@ -404,6 +404,9 @@
 - (CGRect)avatarViewRect
 {
     CGFloat cellWidth = self.bounds.size.width;
+    if (@available(iOS 11, *)) {
+        cellWidth -= self.safeAreaInsets.left + self.safeAreaInsets.right;
+    }
     CGFloat cellPaddingToProtrait = 8.f;
     CGFloat protraitImageWidth    = 40;//头像宽
     CGFloat selfProtraitOriginX   = (cellWidth - cellPaddingToProtrait - protraitImageWidth);
