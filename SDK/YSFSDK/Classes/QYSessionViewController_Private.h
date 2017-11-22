@@ -35,6 +35,14 @@ typedef void (^ChangeEvaluationEnabledBlock)(BOOL evaluationEnabled);
 typedef void (^OnEvaluateBlock)(long long sessionId, YSF_NIMMessage *updatedMessage);
 
 
+@interface YSFKaolaTagInfo : NSObject
+
+@property (nonatomic,assign)                long long id;
+@property (nonatomic,copy)                NSString *name;
+
+@end
+
+
 @interface QYSessionViewController ()
 <UITableViewDataSource,
 UITableViewDelegate,
@@ -95,6 +103,6 @@ YSFSessionTipViewDelegate>
               updatedMessage:(YSF_NIMMessage *)updatedMessage;
 
 - (void)sendEvaluationRequest:(long long)sessionId score:(NSUInteger)score remarks:(NSString *)remarks
-                       tagIds:(NSArray *)tagIds callback:(void (^)(NSError *error))callback;
+                       tagIds:(NSArray<YSFKaolaTagInfo *> *)tagInfos callback:(void (^)(NSError *error))callback;
 
 @end

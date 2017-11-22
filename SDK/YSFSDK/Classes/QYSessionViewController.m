@@ -72,6 +72,10 @@ NIMInputType g_inputType = InputTypeText;
 QYCommodityInfo *g_commodityInfo = nil;
 static long long sessionId;
 
+
+@implementation YSFKaolaTagInfo
+@end
+
 @interface QYSessionViewController()
 <UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, YSF_NIMSystemNotificationManagerDelegate, YSFAppInfoManagerDelegate>
 @property (nonatomic,assign)    NTESImagePickerMode      mode;
@@ -714,8 +718,8 @@ static long long sessionId;
         _humanServiceText.hidden = YES;
         if ([QYCustomUIConfig sharedInstance].showEvaluationEntry) {
             _evaluation.hidden = NO;
+            _evaluationText.hidden = NO;
         }
-        _evaluationText.hidden = NO;
         _closeSession.enabled = YES;
         _closeSession.hidden = NO;
         _closeSessionText.enabled = YES;
@@ -835,12 +839,12 @@ static long long sessionId;
 {
     if ([QYCustomUIConfig sharedInstance].showEvaluationEntry) {
         _evaluation.hidden = NO;
+        _evaluationText.hidden = NO;
     }
     _evaluation.enabled = YES;
     if (_changeEvaluationEnabledBlock) {
         _changeEvaluationEnabledBlock(YES);
     }
-    _evaluationText.hidden = NO;
     _evaluationText.enabled = YES;
     [_evaluationText setTitle:@"评价" forState:UIControlStateNormal];
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
@@ -859,12 +863,12 @@ static long long sessionId;
 {
     if ([QYCustomUIConfig sharedInstance].showEvaluationEntry) {
         _evaluation.hidden = NO;
+        _evaluationText.hidden = NO;
     }
     _evaluation.enabled = NO;
     if (_changeEvaluationEnabledBlock) {
         _changeEvaluationEnabledBlock(NO);
     }
-    _evaluationText.hidden = NO;
     _evaluationText.enabled = NO;
     [_evaluationText setTitle:@"已评价" forState:UIControlStateNormal];
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
@@ -3122,12 +3126,12 @@ static long long sessionId;
 }
 
 - (void)sendEvaluationRequest:(long long)sessionId score:(NSUInteger)score remarks:(NSString *)remarks
-                       tagIds:(NSArray *)tagIds callback:(void (^)(NSError *error))callback
+                       tagIds:(NSArray<YSFKaolaTagInfo *> *)tagInfos callback:(void (^)(NSError *error))callback
 {
     YSFEvaluationRequest *request = [[YSFEvaluationRequest alloc] init];
     request.score = score;
     request.remarks = remarks;
-    request.tagIds = tagIds;
+    request.tagInfos = tagInfos;
     request.sessionId = sessionId;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error) {
         if (callback) {

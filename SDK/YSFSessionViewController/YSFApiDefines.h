@@ -73,7 +73,7 @@
 #define     YSFApiKeyMsgIdClient2       @"msgIdClient"
 #define     YSFApiKeyInqueueNotify      @"inqueueNotify"
 #define     YSFApiKeyRemarks            @"remarks"
-#define     YSFApiKeyTagIds             @"tagIds"
+#define     YSFApiKeyTagList            @"tagList"
 #define     YSFApiKeyList               @"list"
 #define     YSFApiKeyMessage            @"message"
 #define     YSFApiKeyOriginalQuestion   @"original_question"
