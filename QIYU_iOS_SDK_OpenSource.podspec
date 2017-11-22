@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
                                 #import "UIImage+YSF.h"
                                 #import "NSString+YSF.h"
                                 #import "NSDictionary+YSF.h"
-                                #import "NIMSDK.h"
+                                #import "NIMSDK.h"'
     s.xcconfig = {
         "GCC_PREPROCESSOR_DEFINITIONS" => 'NDEBUG=1'
     }
