@@ -106,7 +106,11 @@
             else if ([attachment isMemberOfClass:[YSFEvaluationTipObject class]])
             {
                 YSFEvaluationTipObject *evaluationTipObject = attachment;
-                text = [NSString stringWithFormat:@"[%@%@]", evaluationTipObject.tipContent, evaluationTipObject.tipResult];
+                if (evaluationTipObject.kaolaTipContent.length) {
+                    text = evaluationTipObject.kaolaTipContent;
+                } else {
+                    text = [NSString stringWithFormat:@"[%@%@]", evaluationTipObject.tipContent, evaluationTipObject.tipResult];
+                }
             }
             else if ([attachment isMemberOfClass:[YSFStartServiceObject class]])
             {
