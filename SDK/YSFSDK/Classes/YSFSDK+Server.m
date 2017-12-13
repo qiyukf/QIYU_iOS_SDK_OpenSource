@@ -58,7 +58,7 @@ typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
         }
         else if ([isTest integerValue] == YSFUseServerSettingPre)
         {
-            [YSFServerSetting sharedInstance].apiAddress = @"http://ysf.date/";
+            [YSFServerSetting sharedInstance].apiAddress = @"http://ysf.date:8181/";
         }
     }
 }
