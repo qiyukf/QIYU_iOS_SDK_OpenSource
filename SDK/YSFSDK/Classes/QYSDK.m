@@ -227,7 +227,7 @@
     return [_infoManager appDeviceId];
 }
 
-- (void)cleanMessageCache
++ (void)cleanMessageCache
 {
     [[[YSF_NIMSDK sharedSDK] conversationManager] deleteAllMessages:YES];
 }

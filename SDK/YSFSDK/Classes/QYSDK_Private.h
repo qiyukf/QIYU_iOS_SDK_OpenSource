@@ -29,7 +29,7 @@
 
 @property (nonatomic,copy)    NSString   *authToken;
 
-- (void)cleanMessageCache;
++ (void)cleanMessageCache;
 
 - (NSString *)deviceId;
 
