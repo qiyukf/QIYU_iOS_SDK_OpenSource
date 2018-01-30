@@ -126,7 +126,7 @@
 
 - (NSInteger)indexAtModelArray:(YSFMessageModel *)model
 {
-    __block NSInteger index = -1;
+    __block NSInteger index = NSNotFound;
     if (![_msgIdDict objectForKey:model.message.messageId]) {
         return index;
     }

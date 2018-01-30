@@ -2632,15 +2632,18 @@ static long long sessionId;
     [self.layoutManager deleteCellAtIndexs:indexs];
 }
 
-- (void)uiUpdateMessage:(YSF_NIMMessage *)message{
+- (void)uiUpdateMessage:(YSF_NIMMessage *)message
+{
     YSFMessageModel *model = [self makeModel:message];
-    model.layoutConfig = nil;
-    [model cleanCache];
-    model = [self makeModel:message];
     NSInteger index = [self.sessionDatasource indexAtModelArray:model];
-    [self.sessionDatasource.modelArray replaceObjectAtIndex:index withObject:model];
-    [self.layoutManager updateCellAtIndex:index model:model];
-    [_tableView reloadData];
+    if (index != NSNotFound) {
+        model.layoutConfig = nil;
+        [model cleanCache];
+        model = [self makeModel:message];
+        [self.sessionDatasource.modelArray replaceObjectAtIndex:index withObject:model];
+        [self.layoutManager updateCellAtIndex:index model:model];
+        [_tableView reloadData];
+    }
 }
 
 
