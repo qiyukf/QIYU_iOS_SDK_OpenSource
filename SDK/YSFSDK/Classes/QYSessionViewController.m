@@ -2636,7 +2636,7 @@ static long long sessionId;
 {
     YSFMessageModel *model = [self makeModel:message];
     NSInteger index = [self.sessionDatasource indexAtModelArray:model];
-    if (index != NSNotFound) {
+    if (index > -1) {
         model.layoutConfig = nil;
         [model cleanCache];
         model = [self makeModel:message];
