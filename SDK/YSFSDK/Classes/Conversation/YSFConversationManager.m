@@ -63,6 +63,9 @@
     NSMutableArray *sessionListArray = [NSMutableArray arrayWithCapacity:recentSessions.count];
     for (YSF_NIMRecentSession *item in recentSessions) {
         NSDictionary *shopInfoDict = [[[[QYSDK sharedSDK] sessionManager] getShopInfo] objectForKey:item.session.sessionId];
+        if (!shopInfoDict) {
+            shopInfoDict = [[item.lastMessage.ext ysf_toDict] ysf_jsonDict:YSFApiKeyShop];
+        }
         YSFShopInfo *shopInfo = [YSFShopInfo instanceByJson:shopInfoDict];
         
         QYSessionInfo *sessionInfo = [[QYSessionInfo alloc] init];
@@ -201,6 +204,9 @@
 {
     for (YSF_NIMMessage *message in messages) {
         NSDictionary *shopInfoDict = [[[[QYSDK sharedSDK] sessionManager] getShopInfo] objectForKey:message.session.sessionId];
+        if (!shopInfoDict) {
+            shopInfoDict = [[message.ext ysf_toDict] ysf_jsonDict:YSFApiKeyShop];
+        }
         YSFShopInfo *shopInfo = [YSFShopInfo instanceByJson:shopInfoDict];
         QYMessageInfo *messageInfo = [QYMessageInfo new];
         messageInfo.shopId = shopInfo.shopId;
