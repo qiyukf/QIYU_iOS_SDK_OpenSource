@@ -27,7 +27,7 @@
                                        YSFApiKeyFromType    :   YSFApiValueIOS,
                                        YSFApiKeyFromSubType :   [[UIDevice currentDevice] systemVersion],
                                        YSFApiKeyStaffType   :   @(intOnlyManual),
-                                       YSFApiKeyVersion     :   @"35",
+                                       YSFApiKeyVersion     :   [[QYSDK sharedSDK].infoManager version],
                                        YSFApiKeyStaffId     :   @(_staffId),
                                        YSFApiKeyGroupId     :   @(_groupId),
                                        YSFApiKeyRobotId     :   @(_robotId),

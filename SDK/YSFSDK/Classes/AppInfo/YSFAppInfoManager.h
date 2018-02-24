@@ -37,6 +37,7 @@
 
 @interface YSFAppInfoManager : NSObject
 
+- (NSString *)version;
 - (NSString *)cachedText:(NSString *)shopId;
 - (void)setCachedText:(NSString *)cachedText shopId:(NSString *)shopId;
 

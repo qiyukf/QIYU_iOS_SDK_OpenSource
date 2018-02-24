@@ -15,7 +15,8 @@
 #import "YSFRelationStore.h"
 #import "YSFAppSetting.h"
 #import "YSFSessionStatusRequest.h"
-
+#import "NSArray+YSF.h"
+#import "QYSDK_Private.h"
 
 @interface YSFAppInfoManager ()
 <YSFLoginManagerDelegate,YSF_NIMLoginManagerDelegate, YSF_NIMSystemNotificationManagerDelegate>
@@ -163,10 +164,20 @@
     if (_qyUserInfo)
     {
         YSFLogApp(@"reportUserInfo userId:%@ data:%@", _qyUserInfo.userId, _qyUserInfo.data);
-
+        QYUserInfo *newUserInfo = [QYUserInfo new];
+        newUserInfo.userId = _qyUserInfo.userId;
+        NSMutableArray *array = [[_qyUserInfo.data ysf_toArray] mutableCopy];
+        if (array) {
+            NSString *version = [NSString stringWithFormat:@"{\"key\":\"sdk_version\", \"value\":\"%@\", \"hidden\":true}",
+                                  [[QYSDK sharedSDK].infoManager version]];
+            NSDictionary *versionDict = [version ysf_toDict];
+            [array addObject:versionDict];
+            newUserInfo.data = [array ysf_toUTF8String];
+        }
+        
         YSFSetInfoRequest *request = [[YSFSetInfoRequest alloc] init];
         request.authToken = [QYSDK sharedSDK].authToken;
-        request.userInfo = _qyUserInfo;
+        request.userInfo = newUserInfo;
         QYUserInfo *cachedUserInfo = _qyUserInfo;
 
         __weak typeof(self) weakSelf = self;
@@ -416,6 +427,11 @@
         _deviceId = nil;
         [[self store] removeObjectByID:YSFDeviceInfoKey];
     }
+}
+
+- (NSString *)version
+{
+    return @"35";
 }
 
 #pragma mark - CachedText
