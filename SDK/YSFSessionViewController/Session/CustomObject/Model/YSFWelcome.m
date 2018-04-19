@@ -5,6 +5,13 @@
 
 @implementation YSFWelcome
 
+- (NSString *)thumbText
+{
+    NSString *text = [NSString stringWithFormat:@"[%@]", _welcome];
+    
+    return text;
+}
+
 - (NSDictionary *)encodeAttachment
 {
     NSMutableDictionary *dict   = [NSMutableDictionary dictionary];

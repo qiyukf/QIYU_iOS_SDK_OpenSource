@@ -7,7 +7,6 @@
 //
 
 #import "QYPOPSessionViewController.h"
-#import "YSFSessionConfig.h"
 #import "YSFInputProtocol.h"
 #import "YSFMessageCellProtocol.h"
 #import "YSFSessionMsgDatasource.h"
@@ -19,15 +18,15 @@
 #import "YSFKitUtil.h"
 #import "YSFCustomLeftBarView.h"
 #import "YSFBadgeView.h"
-#import "UITableView+YSFKit.h"
+#import "UIScrollView+YSFKit.h"
 #import "YSFMessageMaker.h"
 #import "YSFDefaultValueMaker.h"
 #import "YSFTimestampModel.h"
 #import "YSFMessageCellMaker.h"
-#import "YSFSessionConfigImp.h"
 #import "QYSDK_Private.h"
 #import "YSFSessionTipView.h"
 #import "YSFRecordTipView.h"
+#import "YSFEvaluationReasonView.h"
 
 @class YSFReachability;
 typedef void (^ChangeHumanOrRobotBlock)(BOOL humanOrRobot);
@@ -66,7 +65,6 @@ YSFSessionTipViewDelegate>
 @property (nonatomic,strong)                YSFSessionMsgDatasource *sessionDatasource;
 @property (nonatomic,strong)                YSF_NIMMessage *messageForMenu;
 @property (nonatomic,strong,readonly)       YSF_NIMSession *session;
-@property (nonatomic,strong)                YSFSessionConfigImp *configImp;
 @property (nonatomic,strong)                YSFSessionTipView *tipView;
 @property (nonatomic,strong)                YSFRecordTipView *recordTipView;
 @property (nonatomic,strong)                YSFReachability *reachability;
@@ -74,11 +72,10 @@ YSFSessionTipViewDelegate>
 @property (nonatomic,copy)                  ChangeHumanOrRobotBlock changeHumanOrRobotBlock;
 @property (nonatomic,copy)                  ChangeEvaluationEnabledBlock changeEvaluationEnabledBlock;
 @property (nonatomic,copy)                  OnEvaluateBlock onEvaluateBlock;
+@property (nonatomic,strong)                YSFEvaluationReasonView *evaluationResonView;
 
 
 - (NSArray *)menusItems:(YSF_NIMMessage *)message;
-
-- (id<YSFSessionConfig>)sessionConfig;
 
 - (void)sendMessage:(YSF_NIMMessage *)message;
 
@@ -98,8 +95,10 @@ YSFSessionTipViewDelegate>
 
 - (void)evaluationViewControlerWillAppear;
 
-- (void)showEvaluationResult:(BOOL)needShow kaolaTipContent:(NSString *)kaolaTipContent
-     evaluationMessageThanks:(NSString *)evaluationMessageThanks evaluationText:(NSString *)evaluationText
+- (void)showEvaluationResult:(BOOL)needShow sessionId:(long long)sessionId
+             kaolaTipContent:(NSString *)kaolaTipContent
+     evaluationMessageThanks:(NSString *)evaluationMessageThanks
+              evaluationText:(NSString *)evaluationText
               updatedMessage:(YSF_NIMMessage *)updatedMessage;
 
 - (void)sendEvaluationRequest:(long long)sessionId score:(NSUInteger)score remarks:(NSString *)remarks

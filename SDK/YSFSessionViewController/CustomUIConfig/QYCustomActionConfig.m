@@ -1,4 +1,12 @@
-#import "QYCustomActionConfig.h"
+#import "QYCustomActionConfig+Private.h"
+
+
+@interface QYCustomActionConfig()
+
+@property (nonatomic, copy) QYShowQuitBlock showQuitBlock;
+
+@end
+
 
 @implementation QYCustomActionConfig
 

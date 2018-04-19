@@ -20,11 +20,6 @@
 
 @end
 
-@interface YSFActionView : UIButton
-
-@property (nonatomic, strong) YSFOrderList *orderList;
-
-@end
 
 @interface YSFItemCell : UITableViewCell
 
@@ -92,7 +87,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.view.backgroundColor = YSFRGBA(0x000000, 0.18);
+    self.view.backgroundColor = YSFRGBA(0x000000, 0.7);
     if (_originalData) {
         [_tableDataSource addObjectsFromArray:_originalData];
     }
@@ -102,6 +97,17 @@
 
 -(void)makeMainView
 {
+    UIView *blank = [UIView new];
+    blank.ysf_frameWidth = YSFUIScreenWidth;
+    blank.ysf_frameHeight = 80;
+    [self.view addSubview:blank];
+    UITapGestureRecognizer *singleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onSingleTap:)];
+    singleTapRecognizer.numberOfTapsRequired = 1;
+    singleTapRecognizer.numberOfTouchesRequired = 1;
+    singleTapRecognizer.cancelsTouchesInView = NO;
+    singleTapRecognizer.delaysTouchesEnded = NO;
+    [blank addGestureRecognizer:singleTapRecognizer];
+    
     CGFloat offsetY = 0;
     CGFloat height = self.view.bounds.size.height;
     if (_showTop) {
@@ -167,6 +173,11 @@
         [_tableView.ysf_footer beginRefreshing];
     }
     [self.view addSubview:_tableView];
+}
+
+-(void)onSingleTap:(UITapGestureRecognizer *)recognizer
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)onClose

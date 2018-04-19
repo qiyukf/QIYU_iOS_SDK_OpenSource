@@ -7,6 +7,7 @@
 {
     YSFEvaluationNotification * response = [YSFEvaluationNotification new];
     response.sessionId = [dict ysf_jsonLongLong:YSFApiKeySessionId];
+    response.evaluationAutoPopup = [dict ysf_jsonBool:YSFApiEvaluationAutoPopup];
 
     return response;
 }

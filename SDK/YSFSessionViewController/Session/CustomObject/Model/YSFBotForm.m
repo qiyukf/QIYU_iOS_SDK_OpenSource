@@ -1,5 +1,6 @@
 #import "YSFBotForm.h"
 #import "NSDictionary+YSFJson.h"
+#import "YSFBotFormContentConfig.h"
 
 @implementation YSFBotFormCell
 
@@ -59,6 +60,16 @@
 
 
 @implementation YSFBotForm
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFBotFormContentConfig *)contentConfig
+{
+    return [YSFBotFormContentConfig new];
+}
 
 - (NSDictionary *)encodeAttachment
 {

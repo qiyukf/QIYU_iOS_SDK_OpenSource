@@ -9,8 +9,19 @@
 #import "YSFCommodityInfoShow.h"
 #import "YSFApiDefines.h"
 #import "NSDictionary+YSFJson.h"
+#import "YSFCommodityInfoContentConfig.h"
 
 @implementation YSFCommodityInfoShow
+
+- (NSString *)thumbText
+{
+    return @"发送了一条消息";
+}
+
+- (YSFCommodityInfoContentConfig *)contentConfig
+{
+    return [YSFCommodityInfoContentConfig new];
+}
 
 - (NSDictionary *)encodeAttachment
 {
@@ -23,8 +34,9 @@
     dict[YSFApiKeyUrl]      = YSFStrParam(_urlString);
     dict[YSFApiKeyNote]     = YSFStrParam(_note);
     dict[YSFApiKeyExt]     = YSFStrParam(_ext);
-    dict[YSFApiKeyShow]     = @(_show);
-    
+    dict[YSFApiKeyShow]     = _show ? @(1) : @(0);
+    dict[YSFApiKeyAuto]     = _bAuto ? @(1) : @(0);
+
     return dict;
 }
 
@@ -39,7 +51,8 @@
     instance.note                = [dict ysf_jsonString:YSFApiKeyNote];
     instance.ext            = [dict ysf_jsonString:YSFApiKeyExt];
     instance.show                = [dict ysf_jsonBool:YSFApiKeyShow];
-    
+    instance.bAuto                = [dict ysf_jsonBool:YSFApiKeyAuto];
+
     return instance;
 }
 

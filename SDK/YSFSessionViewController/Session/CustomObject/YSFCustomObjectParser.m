@@ -164,10 +164,18 @@
             //移动工作台
             case YSFCommandNewSession:
             {
+                NSString *text = nil;
+                NSInteger old_session_type = [dict ysf_jsonInteger:@"old_session_type"];
+                if (old_session_type == 4) {
+                    NSString *realname = [[[dict ysf_jsonString:@"oldStaffInfo"] ysf_toDict] ysf_jsonString:@"realname"];
+                    text = [NSString stringWithFormat:@"已收到来自%@转接的会话", realname];
+                } else {
+                    text = @"用户进入";
+                }
                 YSFNotification *notification = [YSFNotification new];
                 notification.command = YSFCommandNotification;
                 notification.localCommand = YSFCommandNewSession;
-                notification.message = @"用户进入";
+                notification.message = text;
                 object = notification;
             }
                 break;

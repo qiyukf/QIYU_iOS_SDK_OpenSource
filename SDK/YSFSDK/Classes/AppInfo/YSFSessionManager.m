@@ -25,6 +25,9 @@
 #import "YSFNotification.h"
 #import "YSFSessionWillCloseNotification.h"
 #import "YSFSystemConfig.h"
+#import "YSFTrashWords.h"
+#import "NSArray+YSF.h"
+#import "YSFLongMessage.h"
 
 @interface YSFSessionManager ()
 <YSF_NIMSystemNotificationManagerDelegate,
@@ -38,6 +41,7 @@ YSFServiceRequestDelegate>
 @property (nonatomic,strong)    NSMutableDictionary *shopInfo;
 @property (nonatomic,strong)    NSMutableDictionary *evaluationInfo;
 @property (nonatomic,strong)    NSMutableArray *unreadPushMessageSessionId;
+@property (nonatomic,strong)    NSMutableDictionary *longMessageDict;
 
 @end
 
@@ -55,6 +59,7 @@ YSFServiceRequestDelegate>
         [[[YSF_NIMSDK sharedSDK] chatManager] addDelegate:self];
         _sessionStateType = [NSMutableDictionary new];
         _sessions = [NSMutableDictionary new];
+        _longMessageDict = [NSMutableDictionary new];
     }
     return self;
 }
@@ -292,6 +297,9 @@ YSFServiceRequestDelegate>
 
 - (void)updateEvaluationDataStatusWithSession:(YSFServiceSession *)session shopId:(NSString *)shopId
 {
+    if (!session.humanOrMachine) {
+        return;
+    }
     NSMutableDictionary *evalueDict = [[[[QYSDK sharedSDK] infoManager] dictByKey:YSFEvalution] mutableCopy];
     if (!evalueDict) {
         evalueDict = [[NSMutableDictionary alloc] init];
@@ -343,7 +351,7 @@ YSFServiceRequestDelegate>
 - (void)onCloseSession:(YSFCloseServiceNotification *)object shopId:(NSString *)shopId
 {
     if (object.evaluate) {
-        [self addEvaluationMessage:object.sessionId shopId:shopId];
+        [self addEvaluationMessage:object.sessionId evaluationAutoPopup:object.evaluationAutoPopup shopId:shopId];
     }
     
     if (object.closeReason == 2 && object.message.length > 0) {
@@ -360,7 +368,7 @@ YSFServiceRequestDelegate>
     [self clearByShopId:shopId];
 }
 
-- (void)addEvaluationMessage:(long long)sessionId shopId:(NSString *)shopId
+- (void)addEvaluationMessage:(long long)sessionId evaluationAutoPopup:(BOOL)evaluationAutoPopup shopId:(NSString *)shopId
 {
     YSFInviteEvaluationObject *inviteEvaluation = [[YSFInviteEvaluationObject alloc] init];
     inviteEvaluation.command = YSFCommandInviteEvaluation;
@@ -369,10 +377,30 @@ YSFServiceRequestDelegate>
     inviteEvaluation.evaluationDict = [dict objectForKey:YSFEvaluationData];
     inviteEvaluation.evaluationMessageInvite = [dict objectForKey:YSFApiKeyEvaluationMessageInvite];
     inviteEvaluation.evaluationMessageThanks = [dict objectForKey:YSFApiKeyEvaluationMessageThanks];
+
     YSF_NIMMessage *currentInviteEvaluationMessage = [YSFMessageMaker msgWithCustom:inviteEvaluation];
     YSF_NIMSession *session  =[YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
     [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:currentInviteEvaluationMessage
                                                    forSession:session addUnreadCount:YES completion:nil];
+    
+    NSMutableDictionary *evalueDict = [[[[QYSDK sharedSDK] infoManager] dictByKey:YSFEvalution] mutableCopy];
+    if (!evalueDict) {
+        evalueDict = [[NSMutableDictionary alloc] init];
+    }
+    NSMutableDictionary *shopDict = [[evalueDict objectForKey:shopId] mutableCopy];
+    if (!shopDict) {
+        shopDict = [[NSMutableDictionary alloc] init];
+    }
+    NSNumber *autoPopup  = [shopDict objectForKey:YSFApiEvaluationAutoPopup];
+    if (![autoPopup boolValue]) {
+        [shopDict setObject:@(evaluationAutoPopup) forKey:YSFApiEvaluationAutoPopup];
+        [shopDict setObject:currentInviteEvaluationMessage.messageId forKey:YSFApiEvaluationAutoPopupMessageID];
+        [shopDict setObject:@(inviteEvaluation.sessionId) forKey:YSFApiEvaluationAutoPopupSessionId];
+        [shopDict setObject:inviteEvaluation.evaluationMessageThanks forKey:YSFApiEvaluationAutoPopupEvaluationMessageThanks];
+        [shopDict setObject:inviteEvaluation.evaluationDict forKey:YSFApiEvaluationAutoPopupEvaluationData];
+
+        [self setEvaluationInfo:shopDict shopId:shopId];
+    }
 }
 
 - (void)onServiceRequestTimeout:(NSString *)shopId
@@ -429,6 +457,7 @@ YSFServiceRequestDelegate>
     if (!shopId) {
         shopId = @"-1";
     }
+    YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
 
     id object =  [YSFCustomSystemNotificationParser parse:content shopId:shopId];
     if ([object isKindOfClass:[YSFServiceSession class]])
@@ -497,7 +526,8 @@ YSFServiceRequestDelegate>
     }
     else if ([object isKindOfClass:[YSFEvaluationNotification class]])
     {
-        [self addEvaluationMessage:((YSFEvaluationNotification *)object).sessionId shopId:shopId];
+        [self addEvaluationMessage:((YSFEvaluationNotification *)object).sessionId
+               evaluationAutoPopup:((YSFEvaluationNotification *)object).evaluationAutoPopup shopId:shopId];
     }
     else if ([object isKindOfClass:[YSFSessionWillCloseNotification class]])
     {
@@ -509,6 +539,66 @@ YSFServiceRequestDelegate>
         YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
         [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
         
+    }
+    else if ([object isKindOfClass:[YSFTrashWords class]])
+    {
+        YSFTrashWords *transWords = (YSFTrashWords *)object;
+        if (transWords.msgIdClient && transWords.trashWords) {
+            YSF_QYKFMessage * message = (YSF_QYKFMessage *)[[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:transWords.msgIdClient forSession:session];
+            message.ext = [@{ YSFApiKeyTrashWords : [transWords.trashWords ysf_toUTF8String],
+                              YSFApiKeyAuditResult : @(transWords.auditResultType)
+                              } ysf_toUTF8String];
+            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:session completion:nil];
+        }
+        else {
+            assert(false);
+        }
+    }
+    else if ([object isKindOfClass:[YSFLongMessage class]])
+    {
+        YSFLongMessage *longMessage = (YSFLongMessage *)object;
+        NSMutableArray *array = _longMessageDict[longMessage.splitId];
+        if (!array) {
+            array = [[NSMutableArray alloc] initWithCapacity:longMessage.splitCount];
+            for (int i = 0; i < longMessage.splitCount; i++) {
+                [array addObject:[NSNull null]];
+            }
+            _longMessageDict[longMessage.splitId] = array;
+        }
+        array[longMessage.splitIndex] = longMessage;
+        BOOL isCompleted = YES;
+        for (NSNull *message in array) {
+            if (message == [NSNull null]) {
+                isCompleted = NO;
+                break;
+            }
+        }
+        if (isCompleted) {
+            NSString *content = @"";
+            for (YSFLongMessage *message in array) {
+                content = [content stringByAppendingString:message.splitContent];
+            }
+            NSData *data = [[NSData alloc] initWithBase64EncodedString:content options:NSDataBase64DecodingIgnoreUnknownCharacters];
+            NSString *messageContent = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+            
+            if (longMessage.msgType == YSFLongMessageTypeCustomMessage) {
+                YSF_NIMCustomObject *customObject = [[YSF_NIMCustomObject alloc] init];
+                [customObject decodeWithContent:messageContent];
+                YSF_NIMMessage *customMessage = [[YSF_NIMMessage alloc] init];
+                customMessage.messageObject = customObject;
+                customMessage.messageId = longMessage.msgId;
+                customMessage.messageType = YSF_NIMMessageTypeCustom;
+                customMessage.rawAttachContent = messageContent;
+                [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage
+                                                               forSession:session addUnreadCount:NO completion:nil];
+            }
+            else if (longMessage.msgType == YSFLongMessageTypeSystemNotification) {
+                YSF_NIMCustomSystemNotification *notification = [YSF_NIMCustomSystemNotification new];
+                notification.content = messageContent;
+                notification.sender = notification.sender;
+                [[[YSF_NIMSDK sharedSDK] systemNotificationManager] onReceiveCustomSystemNotification:notification];
+            }
+        }
     }
 }
 

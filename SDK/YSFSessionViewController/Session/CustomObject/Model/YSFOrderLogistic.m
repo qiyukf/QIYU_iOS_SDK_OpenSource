@@ -1,5 +1,6 @@
 #import "YSFOrderLogistic.h"
 #import "NSDictionary+YSFJson.h"
+#import "YSFOrderLogisticContentConfig.h"
 
 @implementation YSFOrderLogisticNode
 
@@ -8,6 +9,16 @@
 
 
 @implementation YSFOrderLogistic
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFOrderLogisticContentConfig *)contentConfig
+{
+    return [YSFOrderLogisticContentConfig new];
+}
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {

@@ -12,6 +12,14 @@
 
 
 @implementation YSFStartServiceObject
+
+- (NSString *)thumbText
+{
+    NSString *text = [NSString stringWithFormat:@"[客服%@为您服务]", _staffName];
+    
+    return text;
+}
+
 - (NSDictionary *)encodeAttachment
 {
     NSMutableDictionary *dict   = [NSMutableDictionary dictionary];

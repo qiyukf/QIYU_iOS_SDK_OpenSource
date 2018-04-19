@@ -7,7 +7,7 @@
 //
 
 #import "YSFTextContentConfig.h"
-#import "QYCustomUIConfig.h"
+#import "QYCustomUIConfig+Private.h"
 #import "YSFAttributedLabel+YSF.h"
 #import "YSFMessageModel.h"
 #import "YSFApiDefines.h"

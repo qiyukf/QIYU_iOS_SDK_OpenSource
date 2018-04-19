@@ -12,6 +12,19 @@
 
 
 @implementation YSFEvaluationTipObject
+
+- (NSString *)thumbText
+{
+    NSString *text = @"";
+    if (_kaolaTipContent.length) {
+        text = _kaolaTipContent;
+    } else {
+        text = [NSString stringWithFormat:@"[%@%@]", _tipContent, _tipResult];
+    }
+    
+    return text;
+}
+
 - (NSDictionary *)encodeAttachment
 {
     NSMutableDictionary *dict   = [NSMutableDictionary dictionary];

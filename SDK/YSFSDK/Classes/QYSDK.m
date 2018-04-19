@@ -10,7 +10,6 @@
 #import "QYSessionViewController_Private.h"
 #import "YSFKit.h"
 #import "YSFHttpApi.h"
-#import "YSFViewHistoryRequest.h"
 #import "YSFConversationManager.h"
 #import "NIMSDKConfig.h"
 #import "QYCustomUIConfig.h"
@@ -19,6 +18,8 @@
 #import "YSFCustomObjectParser.h"
 #import "YSFPushMessageRequest.h"
 #import "YSFCancelWaitingRequest.h"
+#import "NIMDataTracker.h"
+#import "YSFDARequest.h"
 
 @implementation QYSDK
 
@@ -50,6 +51,25 @@
     return self;
 }
 
+- (NSString *)serverAddress
+{
+    NSString *serverAddress = @"";
+    if (_serverSetting == YSFUseServerSettingTest)
+    {
+        serverAddress = @"ysf.space";
+    }
+    else if (_serverSetting == YSFUseServerSettingPre)
+    {
+        serverAddress = @"qiyukf.netease.com";
+    }
+    else if (_serverSetting == YSFUseServerSettingOnline)
+    {
+        serverAddress = @"qiyukf.com";
+    }
+    
+    return serverAddress;
+}
+
 - (void)registerAppId:(NSString *)appKey
               appName:(NSString *)appName
 {
@@ -59,25 +79,39 @@
     [[YSF_NIMSDK sharedSDK] registerWithAppID:YES appKey:appKey
                                   cerName:appName];
     
+    YSF_NIMDataTrackerOption *trackerOption = [YSF_NIMDataTrackerOption new];
+    trackerOption.name      = @"qy";
+    trackerOption.version   = @"3.13.0";
+    trackerOption.appKey    = appKey;
+    [[YSF_NIMDataTracker shared] start:trackerOption];
+    
     [_pathManager setup:appKey];
     [_infoManager checkAppInfo];
     
     [_sessionManager readData];
 }
 
-
-- (void)trackHistory:(NSString *)urlString
-      withAttributes:(NSDictionary *)attributes
+- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key
 {
-    YSFLogApp(@"urlString: %@ attributes: %@", urlString, attributes);
+    YSFLogApp(@"trackHistory title:%@ enterOrOut:%@", title, enterOrOut);
 
-    YSFViewHistoryRequest *request = [[YSFViewHistoryRequest alloc] init];
-    request.urlString = urlString;
-    request.attributes= attributes;
-    
-    [YSFHttpApi get:request
-         completion:nil];
+    ysf_main_async(^{
+        [_infoManager trackHistory:title enterOrOut:enterOrOut key:key];
+    });
 }
+
+//- (void)trackHistory:(NSString *)urlString
+//      withAttributes:(NSDictionary *)attributes
+//{
+//    YSFLogApp(@"urlString: %@ attributes: %@", urlString, attributes);
+//
+//    YSFViewHistoryRequest *request = [[YSFViewHistoryRequest alloc] init];
+//    request.urlString = urlString;
+//    request.attributes= attributes;
+//
+//    [YSFHttpApi get:request
+//         completion:nil];
+//}
 
 - (void)setUserInfo:(QYUserInfo *)userInfo
 {

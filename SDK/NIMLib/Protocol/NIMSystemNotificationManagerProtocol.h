@@ -113,6 +113,8 @@ typedef void(^YSF_NIMSystemNotificationHandler)(NSError *error);
                      toSession:(YSF_NIMSession *)session
                     completion:(YSF_NIMSystemNotificationHandler)completion;
 
+- (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification;
+
 /**
  *  添加系统消息通知委托
  *

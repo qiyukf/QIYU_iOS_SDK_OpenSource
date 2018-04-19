@@ -19,6 +19,7 @@
 #import "YSFKit.h"
 #import "YSFApiDefines.h"
 #import "YSFBotForm.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @interface YSFMessageCell()<YSFPlayAudioUIDelegate,YSFMessageContentViewDelegate>{
     UILongPressGestureRecognizer *_longPressGesture;
@@ -167,41 +168,16 @@
     _retryButton.userInteractionEnabled = YES;
     [_audioPlayedIcon setHidden:[self unreadHidden]];
     
-    NSString *ext = self.model.message.ext;
     _trashWordsTip.hidden = YES;
     [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_message_cell_error"] forState:UIControlStateNormal];
 
-    if (![YSF_NIMSDK sharedSDK].sdkOrKf && self.model.message.isOutgoingMsg) {
-        NSArray *trashWordsArray = [[ext ysf_toDict] ysf_jsonArray:YSFApiKeyTrashWords];
-        if (trashWordsArray.count > 0) {
-            [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_file_transfer_cancel"] forState:UIControlStateNormal];
-            _retryButton.hidden = NO;
-            _retryButton.userInteractionEnabled = NO;
-            _trashWordsTip.hidden = NO;
-        }
-        _trashWordsTip.text = @"消息包含违禁词“";
-        int totalWords = 10;
-        for (int i = 0; i < trashWordsArray.count; i++) {
-            NSString *trashWords = trashWordsArray[i];
-            totalWords -= trashWords.length;
-            if (totalWords < 0) {
-                trashWords = [trashWords substringToIndex:(trashWords.length + totalWords)];
-                trashWords = [trashWords stringByAppendingString:@"..."];
-            }
-            if (i != 0) {
-                _trashWordsTip.text = [_trashWordsTip.text stringByAppendingString:@"，"];
-            }
-            _trashWordsTip.text = [_trashWordsTip.text stringByAppendingString:trashWords];
-            if (i == trashWordsArray.count - 1) {
-                _trashWordsTip.text = [_trashWordsTip.text stringByAppendingString:@"”，发送失败"];
-            }
-            
-            if (totalWords <= 0) {
-                break;
-            }
-        }
-        
+    if (self.model.message.isOutgoingMsg && [self.model.message hasTrashWords]) {
+        [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_file_transfer_cancel"] forState:UIControlStateNormal];
+        _retryButton.hidden = NO;
+        _retryButton.userInteractionEnabled = NO;
+        _trashWordsTip.hidden = NO;
     }
+    _trashWordsTip.text = [self.model.message getTrashWordsTip];
     
     _submitForm.hidden = YES;
     if (self.model.message.messageType == YSF_NIMMessageTypeCustom) {

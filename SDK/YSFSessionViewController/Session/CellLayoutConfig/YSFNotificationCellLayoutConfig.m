@@ -61,7 +61,10 @@
 - (NSString *)formatedMessage:(YSFMessageModel *)model
 {
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)model.message.messageObject;
-    if ([object.attachment isKindOfClass:[YSFStartServiceObject class]]) {
+    if (model.message.messageType == YSF_NIMMessageTypeTip) {
+        return model.message.text;
+    }
+    else if ([object.attachment isKindOfClass:[YSFStartServiceObject class]]) {
         YSFStartServiceObject *attachment = (YSFStartServiceObject *)object.attachment;
         NSString *group = @"";
         if (attachment.message.length > 0 && attachment.humanOrMachine) {

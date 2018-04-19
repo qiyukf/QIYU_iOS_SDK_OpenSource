@@ -1,8 +1,8 @@
-
+#import "YSFCustomAttachment.h"
 
 @class YSFShopInfo;
 
-@interface YSFKFBypassNotification : NSObject<YSF_NIMCustomAttachment>
+@interface YSFKFBypassNotification : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,copy)      NSString    *rawStringForCopy;
 

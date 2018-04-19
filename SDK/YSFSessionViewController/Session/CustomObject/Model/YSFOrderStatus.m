@@ -1,9 +1,19 @@
 #import "YSFOrderStatus.h"
 #import "NSDictionary+YSFJson.h"
-
+#import "YSFOrderStatusContentConfig.h"
 
 
 @implementation YSFOrderStatus
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFOrderStatusContentConfig *)contentConfig
+{
+    return [YSFOrderStatusContentConfig new];
+}
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {

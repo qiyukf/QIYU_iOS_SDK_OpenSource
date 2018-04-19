@@ -28,15 +28,10 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
     YSFPageView             *_pageView;
 }
 
+
 @end
 
 @implementation YSFInputMoreContainerView
-
-- (void)setConfig:(id<YSFSessionConfig>)config
-{
-    _config = config;
-    [self genMediaButtons];
-}
 
 
 - (void)genMediaButtons
@@ -44,33 +39,33 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
     NSMutableArray *mediaButtons = [NSMutableArray array];
     NSMutableArray *mediaItems = [NSMutableArray array];
     
-    if (self.config && [self.config respondsToSelector:@selector(mediaItems)]) {
-        NSArray *items = [self.config mediaItems];
-        
-        [items enumerateObjectsUsingBlock:^(YSFMediaItem *item, NSUInteger idx, BOOL *stop) {
-            
-            BOOL shouldHidden = NO;
-            if ([self.config respondsToSelector:@selector(shouldHideItem:)]) {
-                shouldHidden = [self.config shouldHideItem:item];
-            }
-            
-            if (!shouldHidden) {
-                
-                [mediaItems addObject:item];
-                
-                UIButton *btn = [[UIButton alloc] init];
-                [btn setImage:item.normalImage forState:UIControlStateNormal];
-                [btn setImage:item.selectedImage forState:UIControlStateHighlighted];
-                [btn setTitle:item.title forState:UIControlStateNormal];
-                [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-                [btn setTitleEdgeInsets:UIEdgeInsetsMake(76, -72, 0, 0)];
-                [btn.titleLabel setFont:[UIFont systemFontOfSize:14.0]];
-                btn.tag = item.tag;
-                [mediaButtons addObject:btn];
-
-            }
-        }];
-    }
+//    if (self.config && [self.config respondsToSelector:@selector(mediaItems)]) {
+//        NSArray *items = [self.config mediaItems];
+//
+//        [items enumerateObjectsUsingBlock:^(YSFMediaItem *item, NSUInteger idx, BOOL *stop) {
+//
+//            BOOL shouldHidden = NO;
+//            if ([self.config respondsToSelector:@selector(shouldHideItem:)]) {
+//                shouldHidden = [self.config shouldHideItem:item];
+//            }
+//
+//            if (!shouldHidden) {
+//
+//                [mediaItems addObject:item];
+//
+//                UIButton *btn = [[UIButton alloc] init];
+//                [btn setImage:item.normalImage forState:UIControlStateNormal];
+//                [btn setImage:item.selectedImage forState:UIControlStateHighlighted];
+//                [btn setTitle:item.title forState:UIControlStateNormal];
+//                [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+//                [btn setTitleEdgeInsets:UIEdgeInsetsMake(76, -72, 0, 0)];
+//                [btn.titleLabel setFont:[UIFont systemFontOfSize:14.0]];
+//                btn.tag = item.tag;
+//                [mediaButtons addObject:btn];
+//
+//            }
+//        }];
+//    }
     
     _mediaButtons = mediaButtons;
     _mediaItems = mediaItems;

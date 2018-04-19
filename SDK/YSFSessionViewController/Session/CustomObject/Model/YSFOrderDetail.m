@@ -1,10 +1,20 @@
 #import "YSFOrderDetail.h"
 #import "NSDictionary+YSFJson.h"
-
+#import "YSFOrderDetailContentConfig.h"
 
 
 
 @implementation YSFOrderDetail
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFOrderDetailContentConfig *)contentConfig
+{
+    return [YSFOrderDetailContentConfig new];
+}
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {

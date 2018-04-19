@@ -3,7 +3,7 @@
 #import "YSFApiDefines.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFCoreText.h"
-
+#import "YSFFlightListContentConfig.h"
 
 
 
@@ -12,6 +12,15 @@
 
 @implementation YSFFlightList
 
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFFlightListContentConfig *)contentConfig
+{
+    return [YSFFlightListContentConfig new];
+}
 
 +(YSFFlightList *)objectByDict:(NSDictionary *)dict
 {

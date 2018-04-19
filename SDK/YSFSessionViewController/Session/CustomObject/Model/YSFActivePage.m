@@ -1,8 +1,18 @@
 #import "YSFActivePage.h"
 #import "NSDictionary+YSFJson.h"
-
+#import "YSFActivePageContentConfig.h"
 
 @implementation YSFActivePage
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFActivePageContentConfig *)contentConfig
+{
+    return [YSFActivePageContentConfig new];
+}
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {

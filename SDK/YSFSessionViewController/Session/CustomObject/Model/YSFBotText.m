@@ -5,6 +5,11 @@
 
 @implementation YSFBotText
 
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
 + (instancetype)objectByDict:(NSDictionary *)dict
 {
     YSFBotText *instance = [YSFBotText new];

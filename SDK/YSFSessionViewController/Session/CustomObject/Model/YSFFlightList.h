@@ -1,5 +1,6 @@
 #import "YSFAction.h"
 #import "YSFFlightDetail.h"
+#import "YSFCustomAttachment.h"
 
 typedef NS_ENUM(NSInteger, YSFBotFlagType) {
     QYMessageTypeBold = 1 << 0,
@@ -14,7 +15,7 @@ typedef NS_ENUM(NSInteger, YSFBotFlagType) {
 
 
 
-@interface YSFFlightList : NSObject<YSF_NIMCustomAttachment>
+@interface YSFFlightList : NSObject<YSFCustomAttachment>
 
 //命令
 @property (nonatomic, assign) NSInteger command;

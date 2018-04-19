@@ -12,6 +12,7 @@
 @property (nonatomic,assign)  BOOL evaluate;
 @property (nonatomic,copy)    NSString *message;
 @property (nonatomic,assign)    NSInteger closeReason;
+@property (nonatomic,assign)    BOOL evaluationAutoPopup;
 
 + (instancetype)dataByJson:(NSDictionary *)dict;
 

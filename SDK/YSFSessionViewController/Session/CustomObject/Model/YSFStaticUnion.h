@@ -1,5 +1,6 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFAction.h"
+#import "YSFCustomAttachment.h"
 
 @interface YSFLinkItem : NSObject
 
@@ -13,7 +14,7 @@
 @end
 
 
-@interface YSFStaticUnion : NSObject<YSF_NIMCustomAttachment>
+@interface YSFStaticUnion : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,strong)  NSArray<YSFLinkItem *> *linkItems;
 @property (nonatomic, strong, readonly) NSMutableArray<NSString *> *imageUrlStringArray;

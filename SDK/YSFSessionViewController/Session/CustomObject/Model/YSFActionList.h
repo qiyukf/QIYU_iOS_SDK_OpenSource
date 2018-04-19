@@ -1,8 +1,9 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFAction.h"
+#import "YSFCustomAttachment.h"
 
 
-@interface YSFActionList : NSObject<YSF_NIMCustomAttachment>
+@interface YSFActionList : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,copy)    NSString *label;
 @property (nonatomic,strong)  NSArray<YSFAction *> *actionArray;

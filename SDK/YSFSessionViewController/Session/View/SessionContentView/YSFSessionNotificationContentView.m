@@ -38,7 +38,10 @@
     id<YSFCellLayoutConfig> config = model.layoutConfig;
     if ([config respondsToSelector:@selector(formatedMessage:)]) {
         YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)model.message.messageObject;
-        if ([object.attachment isKindOfClass:[YSFStartServiceObject class]]) {
+        if (model.message.messageType == YSF_NIMMessageTypeTip) {
+            _label.text = [model.layoutConfig formatedMessage:model];
+        }
+        else if ([object.attachment isKindOfClass:[YSFStartServiceObject class]]) {
             _label.text = [model.layoutConfig formatedMessage:model];
         }
         else if ([object.attachment isKindOfClass:[YSFEvaluationTipObject class]]) {

@@ -5,6 +5,13 @@
 
 @implementation YSFNotification
 
+- (NSString *)thumbText
+{
+    NSString *text = [NSString stringWithFormat:@"[%@]", _message];
+    
+    return text;
+}
+
 - (NSDictionary *)encodeAttachment
 {
     NSMutableDictionary *dict   = [NSMutableDictionary dictionary];

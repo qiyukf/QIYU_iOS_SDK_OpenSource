@@ -141,160 +141,160 @@
 + (NSString *)notificationMessage:(YSF_NIMMessage *)message{
     YSF_NIMNotificationObject *object = message.messageObject;
     switch (object.notificationType) {
-        case YSF_NIMNotificationTypeTeam:{
-            return [YSFKitUtil teamNotificationFormatedMessage:message];
-        }
-        case YSF_NIMNotificationTypeNetCall:{
-            return [YSFKitUtil netcallNotificationFormatedMessage:message];
-        }
+//        case YSF_NIMNotificationTypeTeam:{
+//            return [YSFKitUtil teamNotificationFormatedMessage:message];
+//        }
+//        case YSF_NIMNotificationTypeNetCall:{
+//            return [YSFKitUtil netcallNotificationFormatedMessage:message];
+//        }
         default:
             return @"";
     }
 }
 
 
-+ (NSString*)teamNotificationFormatedMessage:(YSF_NIMMessage *)message{
-    NSString *formatedMessage = @"";
-    YSF_NIMNotificationObject *object = message.messageObject;
-    if (object.notificationType == YSF_NIMNotificationTypeTeam)
-    {
-        YSF_NIMTeamNotificationContent *content = (YSF_NIMTeamNotificationContent*)object.content;
-        NSString *currentAccount = [[YSF_NIMSDK sharedSDK].loginManager currentAccount];
-        NSString *source;
-        if ([content.sourceID isEqualToString:currentAccount]) {
-            source = @"你";
-        }else{
-            source = [YSFKitUtil showNick:content.sourceID inSession:message.session];
-        }
-        NSMutableArray *targets = [[NSMutableArray alloc] init];
-        for (NSString *item in content.targetIDs) {
-            if ([item isEqualToString:currentAccount]) {
-                [targets addObject:@"你"];
-            }else{
-                NSString *targetShowName = [YSFKitUtil showNick:item inSession:message.session];
-                [targets addObject:targetShowName];
-            }
-        }
-        NSString *targetText = [targets count] > 1 ? [targets componentsJoinedByString:@","] : [targets firstObject];
-        switch (content.operationType) {
-            case YSF_NIMTeamOperationTypeInvite:{
-                NSString *str = [NSString stringWithFormat:@"%@邀请%@",source,targets.firstObject];
-                if (targets.count>1) {
-                    str = [str stringByAppendingFormat:@"等%zd人",targets.count];
-                }
-                str = [str stringByAppendingFormat:@"进入了群聊"];
-                formatedMessage = str;
-            }
-                break;
-            case YSF_NIMTeamOperationTypeDismiss:
-                formatedMessage = [NSString stringWithFormat:@"%@解散了群聊",source];
-                break;
-            case YSF_NIMTeamOperationTypeKick:{
-                NSString *str = [NSString stringWithFormat:@"%@将%@",source,targets.firstObject];
-                if (targets.count>1) {
-                    str = [str stringByAppendingFormat:@"等%zd人",targets.count];
-                }
-                str = [str stringByAppendingFormat:@"移出了群聊"];
-                formatedMessage = str;
-            }
-                break;
-            case YSF_NIMTeamOperationTypeUpdate:
-            {
-                id attachment = [content attachment];
-                if ([attachment isKindOfClass:[YSF_NIMUpdateTeamInfoAttachment class]]) {
-                    YSF_NIMUpdateTeamInfoAttachment *teamAttachment = (YSF_NIMUpdateTeamInfoAttachment *)attachment;
-                    //如果只是单个项目项被修改则显示具体的修改项
-                    if ([teamAttachment.values count] == 1) {
-                        YSF_NIMTeamUpdateTag tag = [[[teamAttachment.values allKeys] firstObject] integerValue];
-                        switch (tag) {
-                            case YSF_NIMTeamUpdateTagName:
-                                formatedMessage = [NSString stringWithFormat:@"%@更新了群名称",source];
-                                break;
-                            case YSF_NIMTeamUpdateTagIntro:
-                                formatedMessage = [NSString stringWithFormat:@"%@更新了群介绍",source];
-                                break;
-                            case YSF_NIMTeamUpdateTagAnouncement:
-                                formatedMessage = [NSString stringWithFormat:@"%@更新了群公告",source];
-                                break;
-                            case YSF_NIMTeamUpdateTagJoinMode:
-                                formatedMessage = [NSString stringWithFormat:@"%@更新了群验证方式",source];
-                                break;
-                            default:
-                                break;
-                                
-                        }
-                    }
-                }
-                if (formatedMessage == nil){
-                    formatedMessage = [NSString stringWithFormat:@"%@更新了群信息",source];
-                }
-            }
-                break;
-            case YSF_NIMTeamOperationTypeLeave:
-                formatedMessage = [NSString stringWithFormat:@"%@离开了群聊",source];
-                break;
-            case YSF_NIMTeamOperationTypeApplyPass:{
-                if ([source isEqualToString:targetText]) {
-                    //说明是以不需要验证的方式进入
-                    formatedMessage = [NSString stringWithFormat:@"%@进入了群聊",source];
-                }else{
-                    formatedMessage = [NSString stringWithFormat:@"%@通过了%@的入群申请",source,targetText];
-                }
-            }
-                break;
-            case YSF_NIMTeamOperationTypeTransferOwner:
-                formatedMessage = [NSString stringWithFormat:@"%@转移了群主身份给%@",source,targetText];
-                break;
-            case YSF_NIMTeamOperationTypeAddManager:
-                formatedMessage = [NSString stringWithFormat:@"%@被群主添加为群管理员",targetText];
-                break;
-            case YSF_NIMTeamOperationTypeRemoveManager:
-                formatedMessage = [NSString stringWithFormat:@"%@被群主撤销了群管理员身份",targetText];
-                break;
-            case YSF_NIMTeamOperationTypeAcceptInvitation:
-                formatedMessage = [NSString stringWithFormat:@"%@接受%@的邀请进群",source,targetText];
-                break;
-            default:
-                break;
-        }
-        
-    }
-    if (!formatedMessage.length) {
-        formatedMessage = [NSString stringWithFormat:@"未知系统信息"];
-    }
-    return formatedMessage;
-}
+//+ (NSString*)teamNotificationFormatedMessage:(YSF_NIMMessage *)message{
+//    NSString *formatedMessage = @"";
+//    YSF_NIMNotificationObject *object = message.messageObject;
+//    if (object.notificationType == YSF_NIMNotificationTypeTeam)
+//    {
+//        YSF_NIMTeamNotificationContent *content = (YSF_NIMTeamNotificationContent*)object.content;
+//        NSString *currentAccount = [[YSF_NIMSDK sharedSDK].loginManager currentAccount];
+//        NSString *source;
+//        if ([content.sourceID isEqualToString:currentAccount]) {
+//            source = @"你";
+//        }else{
+//            source = [YSFKitUtil showNick:content.sourceID inSession:message.session];
+//        }
+//        NSMutableArray *targets = [[NSMutableArray alloc] init];
+//        for (NSString *item in content.targetIDs) {
+//            if ([item isEqualToString:currentAccount]) {
+//                [targets addObject:@"你"];
+//            }else{
+//                NSString *targetShowName = [YSFKitUtil showNick:item inSession:message.session];
+//                [targets addObject:targetShowName];
+//            }
+//        }
+//        NSString *targetText = [targets count] > 1 ? [targets componentsJoinedByString:@","] : [targets firstObject];
+//        switch (content.operationType) {
+//            case YSF_NIMTeamOperationTypeInvite:{
+//                NSString *str = [NSString stringWithFormat:@"%@邀请%@",source,targets.firstObject];
+//                if (targets.count>1) {
+//                    str = [str stringByAppendingFormat:@"等%zd人",targets.count];
+//                }
+//                str = [str stringByAppendingFormat:@"进入了群聊"];
+//                formatedMessage = str;
+//            }
+//                break;
+//            case YSF_NIMTeamOperationTypeDismiss:
+//                formatedMessage = [NSString stringWithFormat:@"%@解散了群聊",source];
+//                break;
+//            case YSF_NIMTeamOperationTypeKick:{
+//                NSString *str = [NSString stringWithFormat:@"%@将%@",source,targets.firstObject];
+//                if (targets.count>1) {
+//                    str = [str stringByAppendingFormat:@"等%zd人",targets.count];
+//                }
+//                str = [str stringByAppendingFormat:@"移出了群聊"];
+//                formatedMessage = str;
+//            }
+//                break;
+//            case YSF_NIMTeamOperationTypeUpdate:
+//            {
+//                id attachment = [content attachment];
+//                if ([attachment isKindOfClass:[YSF_NIMUpdateTeamInfoAttachment class]]) {
+//                    YSF_NIMUpdateTeamInfoAttachment *teamAttachment = (YSF_NIMUpdateTeamInfoAttachment *)attachment;
+//                    //如果只是单个项目项被修改则显示具体的修改项
+//                    if ([teamAttachment.values count] == 1) {
+//                        YSF_NIMTeamUpdateTag tag = [[[teamAttachment.values allKeys] firstObject] integerValue];
+//                        switch (tag) {
+//                            case YSF_NIMTeamUpdateTagName:
+//                                formatedMessage = [NSString stringWithFormat:@"%@更新了群名称",source];
+//                                break;
+//                            case YSF_NIMTeamUpdateTagIntro:
+//                                formatedMessage = [NSString stringWithFormat:@"%@更新了群介绍",source];
+//                                break;
+//                            case YSF_NIMTeamUpdateTagAnouncement:
+//                                formatedMessage = [NSString stringWithFormat:@"%@更新了群公告",source];
+//                                break;
+//                            case YSF_NIMTeamUpdateTagJoinMode:
+//                                formatedMessage = [NSString stringWithFormat:@"%@更新了群验证方式",source];
+//                                break;
+//                            default:
+//                                break;
+//
+//                        }
+//                    }
+//                }
+//                if (formatedMessage == nil){
+//                    formatedMessage = [NSString stringWithFormat:@"%@更新了群信息",source];
+//                }
+//            }
+//                break;
+//            case YSF_NIMTeamOperationTypeLeave:
+//                formatedMessage = [NSString stringWithFormat:@"%@离开了群聊",source];
+//                break;
+//            case YSF_NIMTeamOperationTypeApplyPass:{
+//                if ([source isEqualToString:targetText]) {
+//                    //说明是以不需要验证的方式进入
+//                    formatedMessage = [NSString stringWithFormat:@"%@进入了群聊",source];
+//                }else{
+//                    formatedMessage = [NSString stringWithFormat:@"%@通过了%@的入群申请",source,targetText];
+//                }
+//            }
+//                break;
+//            case YSF_NIMTeamOperationTypeTransferOwner:
+//                formatedMessage = [NSString stringWithFormat:@"%@转移了群主身份给%@",source,targetText];
+//                break;
+//            case YSF_NIMTeamOperationTypeAddManager:
+//                formatedMessage = [NSString stringWithFormat:@"%@被群主添加为群管理员",targetText];
+//                break;
+//            case YSF_NIMTeamOperationTypeRemoveManager:
+//                formatedMessage = [NSString stringWithFormat:@"%@被群主撤销了群管理员身份",targetText];
+//                break;
+//            case YSF_NIMTeamOperationTypeAcceptInvitation:
+//                formatedMessage = [NSString stringWithFormat:@"%@接受%@的邀请进群",source,targetText];
+//                break;
+//            default:
+//                break;
+//        }
+//
+//    }
+//    if (!formatedMessage.length) {
+//        formatedMessage = [NSString stringWithFormat:@"未知系统信息"];
+//    }
+//    return formatedMessage;
+//}
 
 
-+ (NSString *)netcallNotificationFormatedMessage:(YSF_NIMMessage *)message{
-    YSF_NIMNotificationObject *object = message.messageObject;
-    YSF_NIMNetCallNotificationContent *content = (YSF_NIMNetCallNotificationContent *)object.content;
-    NSString *text = @"";
-    NSString *currentAccount = [[YSF_NIMSDK sharedSDK].loginManager currentAccount];
-    switch (content.eventType) {
-        case YSF_NIMNetCallEventTypeMiss:{
-            text = @"未接听";
-            break;
-        }
-        case YSF_NIMNetCallEventTypeBill:{
-            text =  ([object.message.from isEqualToString:currentAccount])? @"通话拨打时长 " : @"通话接听时长 ";
-            NSTimeInterval duration = content.duration;
-            NSString *durationDesc = [NSString stringWithFormat:@"%02d:%02d",(int)duration/60,(int)duration%60];
-            text = [text stringByAppendingString:durationDesc];
-            break;
-        }
-        case YSF_NIMNetCallEventTypeReject:{
-            text = ([object.message.from isEqualToString:currentAccount])? @"对方正忙" : @"已拒绝";
-            break;
-        }
-        case YSF_NIMNetCallEventTypeNoResponse:{
-            text = @"未接通，已取消";
-            break;
-        }
-        default:
-            break;
-    }
-    return text;
-}
+//+ (NSString *)netcallNotificationFormatedMessage:(YSF_NIMMessage *)message{
+//    YSF_NIMNotificationObject *object = message.messageObject;
+//    YSF_NIMNetCallNotificationContent *content = (YSF_NIMNetCallNotificationContent *)object.content;
+//    NSString *text = @"";
+//    NSString *currentAccount = [[YSF_NIMSDK sharedSDK].loginManager currentAccount];
+//    switch (content.eventType) {
+//        case YSF_NIMNetCallEventTypeMiss:{
+//            text = @"未接听";
+//            break;
+//        }
+//        case YSF_NIMNetCallEventTypeBill:{
+//            text =  ([object.message.from isEqualToString:currentAccount])? @"通话拨打时长 " : @"通话接听时长 ";
+//            NSTimeInterval duration = content.duration;
+//            NSString *durationDesc = [NSString stringWithFormat:@"%02d:%02d",(int)duration/60,(int)duration%60];
+//            text = [text stringByAppendingString:durationDesc];
+//            break;
+//        }
+//        case YSF_NIMNetCallEventTypeReject:{
+//            text = ([object.message.from isEqualToString:currentAccount])? @"对方正忙" : @"已拒绝";
+//            break;
+//        }
+//        case YSF_NIMNetCallEventTypeNoResponse:{
+//            text = @"未接通，已取消";
+//            break;
+//        }
+//        default:
+//            break;
+//    }
+//    return text;
+//}
 
 @end

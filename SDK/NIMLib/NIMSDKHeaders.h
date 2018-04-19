@@ -29,8 +29,8 @@
 /**
  *  群相关定义
  */
-#import "NIMTeam.h"
-#import "NIMTeamMember.h"
+//#import "NIMTeam.h"
+//#import "NIMTeamMember.h"
 
 /**
  *  消息定义
@@ -51,7 +51,7 @@
 /**
  *  实时会话选项定义
  */
-#import "NIMRTSOption.h"
+//#import "NIMRTSOption.h"
 
 /**
  *  各个对外接口协议定义
@@ -61,17 +61,24 @@
 #import "NIMConversationManagerProtocol.h"
 #import "NIMMediaManagerProtocol.h"
 #import "NIMUserManagerProtocol.h"
-#import "NIMTeamManagerProtocol.h"
+//#import "NIMTeamManagerProtocol.h"
 #import "NIMSystemNotificationManagerProtocol.h"
 #import "NIMApnsManagerProtocol.h"
 #import "NIMResourceManagerProtocol.h"
-#import "NIMNetCallManagerProtocol.h"
-#import "NIMRTSManagerProtocol.h"
+//#import "NIMNetCallManagerProtocol.h"
+//#import "NIMRTSManagerProtocol.h"
 
 #import "NIMSDKConfig.h"
 #import "NIMServerSetting.h"
 #import "QYKFGetSessionInfoById.h"
 
 #import "NIMLogger.h"
+
+
+/**
+ * 数据库操作相关
+ */
+#import "YSFQuickReplyDB.h"
+#import "YSFQuickReply.h"
 
 #endif

@@ -69,6 +69,9 @@
 #define     YSFApiKeyOperatorHintDesc   @"operator_hint_desc"
 #define     YSFApiKeyOperatorEnable     @"operator_enable"
 #define     YSFApiKeyEvaluation         @"evaluation"
+#define     YSFApiKeyEvaluationContent  @"evaluation_content"
+#define     YSFApiKeyEvaluationReason   @"evaluation_reason"
+#define     YSFApiKeyEvaluationGuide    @"evaluation_guide"
 #define     YSFApiKeyMsgIdClient        @"msgidClient"
 #define     YSFApiKeyMsgIdClient2       @"msgIdClient"
 #define     YSFApiKeyInqueueNotify      @"inqueueNotify"
@@ -102,6 +105,7 @@
 #define     YSFApiKeyNote               @"note"
 #define     YSFApiKeyUserData           @"userData"
 #define     YSFApiKeyShow               @"show"
+#define     YSFApiKeyAuto               @"auto"
 #define     YSFApiKeyMsgId              @"msgId"
 #define     YSFApiKeyText               @"text"
 #define     YSFApiKeyMessageId          @"msgId"
@@ -124,6 +128,8 @@
 #define     YSFApiKeyMessage            @"message"
 #define     YSFApiKeyCloseReason        @"close_reason"
 #define     YSFApiKeyShowNum            @"showNum"
+#define     YSFApiKeyRobotInQueue       @"robotInQueue"
+#define     YSFApiKeyRobotSessionId     @"robotSessionId"
 #define     YSFApiKeyAttachment         @"attachment"
 #define     YSFApiKeyExtra              @"extra"
 #define     YSFApiKeyTimestamp          @"timestamp"
@@ -161,6 +167,7 @@
 #define     YSFApiKeyOrderNo            @"orderNo"
 #define     YSFApiKeyDate               @"date"
 #define     YSFApiKeyTrashWords         @"trashWords"
+#define     YSFApiKeyAuditResult        @"auditResult"
 #define     YSFApiKeyRequired           @"required"
 #define     YSFApiKeyOrderId            @"orderId"
 #define     YSFApiKeyForms              @"forms"
@@ -185,6 +192,16 @@
 #define     YSFApiKeyConfig             @"config"
 #define     YSFApiKeySwitch             @"switch"
 #define     YSFApiKeyRobotId            @"robotId"
+#define     YSFApiKeyTransferId         @"transferid"
+#define     YSFApiEvaluationAutoPopup   @"evaluation_auto_popup"
+#define     YSFApiTagList               @"tagList"
+#define     YSFApiKeyMsgType            @"msg_type"
+#define     YSFApiKeyMsgId2              @"msg_id"
+#define     YSFApiKeySplitId            @"split_id"
+#define     YSFApiKeySplitCount         @"split_count"
+#define     YSFApiKeySplitIndex         @"split_index"
+#define     YSFApiKeySplitContent       @"split_content"
+#define     YSFApiKeyTrack              @"track"
 
 
 
@@ -214,6 +231,7 @@ typedef enum : NSUInteger {
     YSFCommandMachine                   =   60,     //机器人问答
     YSFCommandEvaluationAnswer          =   64,     //评价答案
     YSFCommandRichText                  =   65,     //富文本
+    YSFCommandEvaluationReason          =   66,     //评价原因，差评原因
     YSFCommandKFBypassNotification      =   90,     //客服分流
     YSFCommandSetCommodityInfoRequest   =   121,    //商品信息
     YSFCommandPushMessageRequest        =   133,    //获取推送消息
@@ -237,15 +255,23 @@ typedef enum : NSUInteger {
     YSFCommandWeChatMessage             =   20,     //微信消息
     YSFCommandOfflineTimeout            =   32,    //离线时间超时
     YSFCommandWelcome                   =   40,     //欢迎语
-    YSFCommandTrashWords                =   42,     //消息匹配到敏感词
+    YSFCommandTrashWords                =   42,     //消息匹配到敏感词、反垃圾
     YSFCommandReportQuestion            =   63,     //选择问题
     YSFCommandSessionWillClose          =   70,     //用户没有回复，稍后系统将关闭
     YSFCommandSessionClosedBySysterm    =   71,     //系统自动关闭会话
     YSFCommandQueueChanged              =   82,     //排队人数变化
     YSFCommandSessionClose              =   84,     //自定义消息；会话关闭
     YSFCommandSendLogin                 =   85,     //通知其他端的自己被踢出
+    YSFCommandSessionTransferReq        =   91,     //客服申请会话转接
+    YSFCommandSessionTransferConfirm    =   92,     //通知会话转接接收者进行确认
+    YSFCommandSessionTransferResultReq  =   93,     //会话转接接收者返回确认结果
+    YSFCommandSessionTransferResultRes  =   94,     //通知客服转接结果 接收者确认接收时，如果用户离线，需要同时通知发送者和接收者
+    YSFCommandSessionTransferOK         =   95,     //通知用户会话已经转接
+    YSFCommandSessionTransferCanceled   =   96,     //通知接收者转接已被取消
     YSFCommandNewWorkOrder              =   115,    //有新的工单分配过来
     YSFCommandAudioToText               =   136,    //推送语音转文字结果
+    YSFCommandLongMessage               =   405,    //超长消息
+    YSFCommandWorkOrderGroupChanged     =   601,    //组内未受理工单工单所在组已被改变
     
 
     //本地自定义消息

@@ -1,7 +1,8 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFAction.h"
+#import "YSFCustomAttachment.h"
 
-@interface YSFActivePage : NSObject<YSF_NIMCustomAttachment>
+@interface YSFActivePage : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,copy)    NSString *img;
 @property (nonatomic,copy)    NSString *content;

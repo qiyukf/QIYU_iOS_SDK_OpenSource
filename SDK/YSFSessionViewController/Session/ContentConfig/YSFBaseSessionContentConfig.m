@@ -24,7 +24,6 @@
 #import "YSFKFBypassNotification.h"
 #import "YSFCommodityInfoContentConfig.h"
 #import "YSFCommodityInfoShow.h"
-#import "YSFInviteEvaluationObject.h"
 #import "YSFOrderList.h"
 #import "YSFOrderListContentConfig.h"
 #import "YSFBotText.h"
@@ -54,6 +53,7 @@
 #import "YSFFlightList.h"
 #import "YSFFlightListContentConfig.h"
 #import "YSFFlightDetail.h"
+#import "YSFCustomAttachment.h"
 
 
 @implementation YSFBaseSessionContentConfig
@@ -105,49 +105,10 @@
     if (config == nil) {
         if (type == YSF_NIMMessageTypeCustom) {
             YSF_NIMCustomObject *customObject = message.messageObject;
-            if ([customObject.attachment isKindOfClass:[YSFMachineResponse class]]) {
-                config = [[YSFMachineContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFRichText class]]) {
-                config = [[YSFRichTextContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFSelectedGoods class]]) {
-                config = [[YSFSelectedGoodsContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFOrderList class]]) {
-                config = [[YSFOrderListContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFOrderDetail class]]) {
-                config = [[YSFOrderDetailContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFOrderList class]]) {
-                config = [[YSFOrderListContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFOrderStatus class]]) {
-                config = [[YSFOrderStatusContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFRefundDetail class]]) {
-                config = [[YSFRefundDetailContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFOrderOperation class]]) {
+            if ([customObject.attachment isKindOfClass:[YSFOrderOperation class]]) {
                 YSFOrderOperation *orderOperation = (YSFOrderOperation *)customObject.attachment;
                 message.text = [orderOperation.template ysf_jsonString:@"label"];
                 config = [[YSFTextContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFOrderLogistic class]]) {
-                config = [[YSFOrderLogisticContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFActionList class]]) {
-                config = [[YSFActionListContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFActivePage class]]) {
-                config = [[YSFActivePageContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFStaticUnion class]]) {
-                config = [[YSFStaticUnionContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFKFBypassNotification class]]) {
-                config = [[YSFKFBypassContentConfig alloc] init];
             }
             else if ([customObject.attachment isKindOfClass:[YSFNewSession class]]) {
                 config = [[YSFTextContentConfig alloc] init];
@@ -165,22 +126,14 @@
                 message.text = botText.text;
                 config = [[YSFTextContentConfig alloc] init];
             }
-            else if ([customObject.attachment isKindOfClass:[YSFBotForm class]]) {
-                config = [[YSFBotFormContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFFlightList class]]) {
-                config = [[YSFFlightListContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFSubmittedBotForm class]]) {
-                config = [[YSFSubmittedBotFormContentConfig alloc] init];
-            }
             else if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]) {
                 YSFReportQuestion *reportQuestion = (YSFReportQuestion *)customObject.attachment;
                 message.text = reportQuestion.question;
                 config = [[YSFTextContentConfig alloc] init];
             }
-            else if ([customObject.attachment isKindOfClass:[YSFCommodityInfoShow class]]){
-                config = [[YSFCommodityInfoContentConfig alloc] init];
+            
+            if (!config && [customObject.attachment respondsToSelector:@selector(contentConfig)]) {
+                config = [(id<YSFCustomAttachment>)(customObject.attachment) contentConfig];
             }
         }
     }

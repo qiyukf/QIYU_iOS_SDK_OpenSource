@@ -2,9 +2,33 @@
 #import "NSDictionary+YSFJson.h"
 #import "YSFApiDefines.h"
 #import "YSFShopInfo.h"
+#import "YSFKFBypassContentConfig.h"
 
 
 @implementation YSFKFBypassNotification
+
+- (NSString *)thumbText
+{
+    NSString *text = [NSString stringWithFormat:@"[%@:", _message];
+    NSInteger index = 0;
+    for (NSDictionary *item in _entries) {
+        NSString *labelText = item[@"label"] ? : @"";
+        if (index != _entries.count - 1) {
+            text = [text stringByAppendingFormat:@"%@ / ", labelText];
+        }
+        else {
+            text = [text stringByAppendingFormat:@"%@]", labelText];
+        }
+        index++;
+    }
+    
+    return text;
+}
+
+- (YSFKFBypassContentConfig *)contentConfig
+{
+    return [YSFKFBypassContentConfig new];
+}
 
 + (instancetype)dataByJson:(NSDictionary *)dict
 {

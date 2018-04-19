@@ -121,18 +121,10 @@
     splitLine.ysf_frameTop = offsetY;
     [cell addSubview:splitLine];
     
-    UIImageView *shopIcon = [[UIImageView alloc] initWithFrame:CGRectZero];
-    shopIcon.frame = CGRectMake(18, offsetY + 14,
-                                0, 0);
-    shopIcon.image = [UIImage ysf_imageInKit:@"icon_shop"];
-    [shopIcon sizeToFit];
-    [cell addSubview:shopIcon];
-    
     UILabel *shopName = [[UILabel alloc] initWithFrame:CGRectZero];
     shopName.font = [UIFont systemFontOfSize:13.f];
     shopName.text = self.s_name;
-    shopName.textColor = YSFRGB(0x666666);
-    shopName.frame = CGRectMake(18 + 24, offsetY + 14,
+    shopName.frame = CGRectMake(13, offsetY + 14,
                                 100, 16);
     [cell addSubview:shopName];
     
@@ -187,7 +179,7 @@
         }
         
         UILabel *price = [UILabel new];
-        price.font = [UIFont systemFontOfSize:14.f];
+        price.font = [UIFont boldSystemFontOfSize:14.f];
         price.text = goods.p_price;
         price.ysf_frameTop = 10;
         [price sizeToFit];
@@ -199,6 +191,7 @@
         
         UILabel *number = [UILabel new];
         number.font = [UIFont systemFontOfSize:14.f];
+        number.textColor = YSFRGBA2(0xffa3afb7);
         number.numberOfLines = 0;
         number.text = goods.p_count;
         number.ysf_frameTop = 32;

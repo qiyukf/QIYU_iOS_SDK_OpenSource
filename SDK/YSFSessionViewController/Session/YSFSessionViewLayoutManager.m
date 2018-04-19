@@ -8,13 +8,14 @@
 
 #import "YSFSessionViewLayoutManager.h"
 #import "YSFInputView.h"
-#import "UITableView+YSFKit.h"
+#import "UIScrollView+YSFKit.h"
 #import "YSFMessageCellProtocol.h"
 #import "YSFMessageModel.h"
 #import "YSFMessageCell.h"
 #import "QYCustomUIConfig.h"
 
 YSFNotification(kKFInputViewFrameChanged);
+YSFNotification(kKFInputViewInputTypeChanged);
 
 @interface YSFSessionViewLayoutManager()<YSFInputDelegate>
 
@@ -118,18 +119,30 @@ YSFNotification(kKFInputViewFrameChanged);
 
     //[_tableView setUserInteractionEnabled:!show];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [UIView animateWithDuration:0.3 animations:^{
-            CGRect rect = [_tableView frame];
-            rect.origin.y = 0;
-            rect.size.height = self.viewRect.size.height - toHeight;
-            rect.size.height -= [[QYCustomUIConfig sharedInstance] bottomMargin];
+        CGRect orginRect = [_tableView frame];
+        CGRect rect = orginRect;
+        rect.origin.y = 0;
+        rect.size.height = self.viewRect.size.height - toHeight;
+        CGFloat bottomMargin = [[QYCustomUIConfig sharedInstance] bottomMargin];
+        if (bottomMargin > 0) {
+            rect.size.height -= bottomMargin;
+        } else {
             if (@available(iOS 11, *)) {
                 rect.size.height -= _tableView.ysf_viewController.view.safeAreaInsets.bottom;
             }
-            [_tableView setFrame:rect];
-        }];
+        }
+        if (!CGRectEqualToRect(orginRect, rect)) {
+            [UIView animateWithDuration:0.3 animations:^{
+                [_tableView setFrame:rect];
+            }];
+            [_tableView ysf_scrollToBottom:YES];
+        }
     });
     
+}
+
+- (void)changeInputTypeTo:(NIMInputType)type {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kKFInputViewInputTypeChanged object:@(type)];
 }
 
 

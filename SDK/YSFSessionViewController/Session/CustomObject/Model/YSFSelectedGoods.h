@@ -1,7 +1,8 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFOrderList.h"
+#import "YSFCustomAttachment.h"
 
-@interface YSFSelectedGoods : NSObject<YSF_NIMCustomAttachment>
+@interface YSFSelectedGoods : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,assign)    NSInteger   command;
 @property (nonatomic,copy)    NSString   *target;

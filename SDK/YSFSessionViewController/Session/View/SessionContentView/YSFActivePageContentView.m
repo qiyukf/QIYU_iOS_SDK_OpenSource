@@ -3,21 +3,15 @@
 #import "YSFMessageModel.h"
 #import "YSFActivePage.h"
 #import "UIImageView+YSFWebCache.h"
+#import "UIControl+BlocksKit.h"
 
-@interface YSFActionView5 : UIButton
 
-@property (nonatomic, strong) YSFAction *action;
-
-@end
-
-@implementation YSFActionView5
-@end
 
 @interface YSFActivePageContentView()
 
 @property (nonatomic,strong) UIImageView * imageView;
 @property (nonatomic,strong) UILabel * content;
-@property (nonatomic,strong) YSFActionView5 *actionButton;
+@property (nonatomic,strong) UIButton *actionButton;
 
 @end
 
@@ -32,7 +26,7 @@
         [self addSubview:_content];
         _content.font = [UIFont systemFontOfSize:15];
         _content.numberOfLines = 0;
-        _actionButton = [YSFActionView5 new];
+        _actionButton = [UIButton new];
         [self addSubview:_actionButton];
     }
     return self;
@@ -76,7 +70,6 @@
     offsetY += _content.ysf_frameHeight;
     offsetY += 13;
     
-    _actionButton.action = activePage.action;
     _actionButton.layer.borderWidth = 0.5;
     _actionButton.titleLabel.font = [UIFont systemFontOfSize:15];
     _actionButton.layer.borderColor = YSFRGB(0x5092E1).CGColor;
@@ -85,7 +78,10 @@
     [_actionButton setTitle:activePage.action.validOperation forState:UIControlStateNormal];
     _actionButton.frame = CGRectMake(18, offsetY,
                                 self.model.contentSize.width - 33, 34);
-    [_actionButton addTarget:self action:@selector(onClickAction:) forControlEvents:UIControlEventTouchUpInside];
+    __weak typeof(self) weakSelf = self;
+    [_actionButton ysf_addEventHandler:^(id  _Nonnull sender) {
+        [weakSelf onClickAction:activePage.action];
+    } forControlEvents:UIControlEventTouchUpInside];
     if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
         _actionButton.ysf_frameLeft -= 5;
     }
@@ -96,12 +92,12 @@
 }
 
 
-- (void)onClickAction:(YSFActionView5 *)actionView
+- (void)onClickAction:(YSFAction *)action
 {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     event.eventName = YSFKitEventNameTapBot;
     event.message = self.model.message;
-    event.data = actionView.action;
+    event.data = action;
     [self.delegate onCatchEvent:event];
 }
 

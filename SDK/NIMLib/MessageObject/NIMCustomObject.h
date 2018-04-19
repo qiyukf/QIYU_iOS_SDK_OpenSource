@@ -44,6 +44,10 @@
  *  自定义消息对象附件协议
  */
 @protocol YSF_NIMCustomAttachment <NSObject>
+
+@required
+- (NSString *)thumbText;
+
 @optional
 
 /**

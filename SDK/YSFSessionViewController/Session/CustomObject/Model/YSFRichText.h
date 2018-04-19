@@ -1,6 +1,6 @@
+#import "YSFCustomAttachment.h"
 
-
-@interface YSFRichText : NSObject<YSF_NIMCustomAttachment>
+@interface YSFRichText : NSObject<YSFCustomAttachment>
 
 //命令
 @property (nonatomic, assign) NSInteger command;

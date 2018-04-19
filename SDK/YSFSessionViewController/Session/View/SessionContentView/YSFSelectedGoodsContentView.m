@@ -36,19 +36,22 @@
         
         _stock = [UILabel new];
         _stock.font = [UIFont systemFontOfSize:14.f];
+        _stock.textColor = YSFRGBA2(0xffa3afb7);
         _stock.numberOfLines = 0;
         [self addSubview:_stock];
         
         _price = [UILabel new];
-        _price.font = [UIFont systemFontOfSize:14.f];
+        _price.font = [UIFont boldSystemFontOfSize:14.f];
         [self addSubview:_price];
         
         _number = [UILabel new];
         _number.font = [UIFont systemFontOfSize:14.f];
+        _number.textColor = YSFRGBA2(0xffa3afb7);
         [self addSubview:_number];
         
         _status = [UILabel new];
         _status.font = [UIFont systemFontOfSize:14.f];
+        _status.textColor = YSFRGBA2(0xffa3afb7);
         [self addSubview:_status];
     }
     return self;
@@ -74,6 +77,9 @@
     _backgroundView.ysf_frameWidth = self.ysf_frameWidth - 9;
     _backgroundView.ysf_frameTop = 2;
     _backgroundView.ysf_frameHeight = self.ysf_frameHeight - 4;
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
+        _backgroundView.ysf_frameLeft += 5;
+    }
     _imageView.ysf_frameTop = 10;
     _imageView.ysf_frameLeft = 10;
     _imageView.ysf_frameWidth = 60;

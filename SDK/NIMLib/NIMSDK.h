@@ -109,13 +109,13 @@
 /**
  *  群组管理类,负责群组的操作:创建,拉人,踢人,同步等
  */
-@property (nonatomic,strong,readonly)   id<YSF_NIMTeamManager>    teamManager;
+//@property (nonatomic,strong,readonly)   id<YSF_NIMTeamManager>    teamManager;
 
 
 /**
  *  好友管理类
  */
-@property (nonatomic,strong,readonly)   id<YSF_NIMUserManager>      userManager;
+//@property (nonatomic,strong,readonly)   id<YSF_NIMUserManager>      userManager;
 
 /**
  *  系统通知管理类

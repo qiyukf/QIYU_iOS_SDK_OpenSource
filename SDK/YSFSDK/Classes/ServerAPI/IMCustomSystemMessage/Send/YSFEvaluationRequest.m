@@ -22,11 +22,15 @@
     
     if (_tagInfos) {
         NSMutableArray *tagInfoArray = [NSMutableArray new];
-        for (YSFKaolaTagInfo *tagInfo in _tagInfos) {
-            NSDictionary *tagInfoDict =  @{ YSFApiKeyId : @(tagInfo.id),
-                                            YSFApiKeyName : YSFStrParam(tagInfo.name),
-                                            };
-            [tagInfoArray addObject:tagInfoDict];
+        for (id tagInfo in _tagInfos) {
+            if ([[tagInfo class] isKindOfClass:[YSFKaolaTagInfo class]]) {
+                NSDictionary *tagInfoDict =  @{ YSFApiKeyId : @(((YSFKaolaTagInfo *)tagInfo).id),
+                                                YSFApiKeyName : YSFStrParam(((YSFKaolaTagInfo *)tagInfo).name),
+                                                };
+                [tagInfoArray addObject:tagInfoDict];
+            } else {
+                [tagInfoArray addObject:tagInfo];
+            }
         }
         [infos setObject:[tagInfoArray ysf_toUTF8String] forKey:YSFApiKeyTagList];
     }

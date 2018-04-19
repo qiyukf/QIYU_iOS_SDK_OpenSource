@@ -17,9 +17,18 @@
 @property (nonatomic, strong) YSF_NIMMessage *message;
 
 /**
+ *  YSF_NIMMessage封装成NIMMessageModel的方法
+ *
+ *  @param  message 消息体
+ *
+ *  @return NIMMessageModel实例
+ */
+- (instancetype)initWithMessage:(YSF_NIMMessage*)message;
+
+/**
  *  消息对应的布局配置
  */
-@property (nonatomic,strong) id<YSFCellLayoutConfig> layoutConfig;
+@property (nonatomic,strong,readonly) id<YSFCellLayoutConfig> layoutConfig;
 
 
 @property (nonatomic, readonly) CGSize     contentSize;
@@ -41,16 +50,7 @@
 
 - (void)reCalculateContent:(CGFloat)width;
 
-
-/**
- *  YSF_NIMMessage封装成NIMMessageModel的方法
- *
- *  @param  message 消息体
- *
- *  @return NIMMessageModel实例
- */
-- (instancetype)initWithMessage:(YSF_NIMMessage*)message;
-
+- (void)cleanLayoutConfig;
 - (void)cleanCache;
 
 @end

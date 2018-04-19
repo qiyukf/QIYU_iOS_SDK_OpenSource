@@ -16,7 +16,19 @@
 @class YSFConversationManager;
 @class QYCustomUIConfig;
 
+typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
+    YSFUseServerSettingOnline,
+    YSFUseServerSettingTest,
+    YSFUseServerSettingPre,
+    YSFUseServerSettingTest2,
+};
+
 @interface QYSDK ()
+
+@property (nonatomic,assign)    YSFUseServerSetting   serverSetting;
+
+@property (nonatomic,copy,readonly)    NSString   *serverAddress;
+
 @property (nonatomic,strong)    YSFAppInfoManager   *infoManager;
 
 @property (nonatomic,strong)    YSFSessionManager   *sessionManager;

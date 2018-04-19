@@ -1,14 +1,7 @@
-//
-//  YSFProductInfoShow.h
-//  YSFSessionViewController
-//
-//  Created by JackyYu on 16/5/25.
-//  Copyright © 2016年 Netease. All rights reserved.
-//
+#import "YSFCustomAttachment.h"
 
 
-
-@interface YSFCommodityInfoShow : NSObject<YSF_NIMCustomAttachment>
+@interface YSFCommodityInfoShow : NSObject<YSFCustomAttachment>
 
 //命令
 @property (nonatomic, assign) NSInteger command;
@@ -25,6 +18,8 @@
 @property (nonatomic, copy) NSString *ext;
 //发送时是否显示
 @property (nonatomic, assign) BOOL show;
+//是否作为自动发送消息，NO为否，YES为是，默认为自动发送消息
+@property (nonatomic, assign) BOOL bAuto;
 
 + (YSFCommodityInfoShow *)objectByDict:(NSDictionary *)dict;
 

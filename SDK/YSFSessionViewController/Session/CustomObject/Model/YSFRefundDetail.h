@@ -1,7 +1,8 @@
 #import "YSFIMCustomSystemMessageApi.h"
+#import "YSFCustomAttachment.h"
 
 
-@interface YSFRefundDetail : NSObject<YSF_NIMCustomAttachment>
+@interface YSFRefundDetail : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,copy)    NSString *label;
 @property (nonatomic,copy)    NSString *refundStateType;

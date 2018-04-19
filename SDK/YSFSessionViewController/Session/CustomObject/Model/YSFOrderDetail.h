@@ -1,7 +1,8 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFAction.h"
+#import "YSFCustomAttachment.h"
 
-@interface YSFOrderDetail : NSObject<YSF_NIMCustomAttachment>
+@interface YSFOrderDetail : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,copy)    NSString *label;
 @property (nonatomic,copy)    NSString *status;

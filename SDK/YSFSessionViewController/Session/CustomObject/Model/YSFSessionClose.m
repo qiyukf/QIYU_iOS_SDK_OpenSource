@@ -38,10 +38,32 @@
         instance.message = @"客服无网络连接，系统自动关闭会话";
     }
     else if (instance.closeType == 5) {
-        instance.message = @"会话已转接";
+        NSString *text = nil;
+        NSDictionary *newStaffInfo = [[dict ysf_jsonString:@"newStaffInfo"] ysf_toDict];
+        NSString *realname = [newStaffInfo ysf_jsonString:@"realname"];
+        NSString *remarks = [dict ysf_jsonString:@"transferRemarks"];
+        if (realname && remarks) {
+            if ([remarks isEqualToString:@""]) {
+                text = [NSString stringWithFormat:@"会话转接至 %@", realname];
+            } else {
+                text = [NSString stringWithFormat:@"会话转接至 %@\n备注：%@", realname, remarks];
+            }
+        } else {
+            text = @"会话已转接";
+        }
+        instance.message = text;
+    }
+    else if (instance.closeType == 6) {
+        instance.message = @"已被其他客服接待";     //由于产品未确定，文案是码农自己添加，不做参考，只做备用
+    }
+    else if (instance.closeType == 7) {
+        instance.message = @"访客关闭";         //由于产品未确定，文案是码农自己添加，不做参考，只做备用
+    }
+    else if (instance.closeType == 8) {
+        instance.message = @"会话超时关闭";       //由于产品未确定，文案是码农自己添加，不做参考，只做备用
     }
     else {
-        NSAssert(NO, @"not handled this closeType");
+        NSAssert(NO, @"not handled this closeType %ld", instance.closeType);
     }
     return instance;
 }

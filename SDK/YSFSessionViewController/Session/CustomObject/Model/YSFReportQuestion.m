@@ -3,6 +3,13 @@
 
 @implementation YSFReportQuestion
 
+- (NSString *)thumbText
+{
+    NSString *text = [NSString stringWithFormat:@"%@", _question];
+    
+    return text;
+}
+
 - (NSDictionary *)encodeAttachment
 {
     NSMutableDictionary *params = [NSMutableDictionary dictionary];

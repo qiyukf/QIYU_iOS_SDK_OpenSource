@@ -1,9 +1,19 @@
 #import "YSFActionList.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFAction.h"
-
+#import "YSFActionListContentConfig.h"
 
 @implementation YSFActionList
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFActionListContentConfig *)contentConfig
+{
+    return [YSFActionListContentConfig new];
+}
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {

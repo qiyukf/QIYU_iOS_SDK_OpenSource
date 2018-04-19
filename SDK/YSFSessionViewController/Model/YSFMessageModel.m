@@ -8,9 +8,18 @@
 
 #import "YSFMessageModel.h"
 #import "YSFDefaultValueMaker.h"
+#import "YSFSessionConfigImp.h"
+
+@interface YSFMessageModel()
+
+@property (nonatomic,strong) id<YSFCellLayoutConfig> layoutConfig;
+
+@end
+
 
 @implementation YSFMessageModel
 
+@synthesize layoutConfig        = _layoutConfig;
 @synthesize contentSize        = _contentSize;
 @synthesize contentViewInsets  = _contentViewInsets;
 @synthesize bubbleViewInsets   = _bubbleViewInsets;
@@ -26,6 +35,10 @@
     return self;
 }
 
+- (void)cleanLayoutConfig
+{
+    self.layoutConfig = nil;
+}
 
 - (void)cleanCache
 {
@@ -54,7 +67,6 @@
 - (void)calculateContent:(CGFloat)width{
     if (CGSizeEqualToSize(_contentSize, CGSizeZero))
     {
-        
         _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
     }
     
@@ -97,7 +109,24 @@
     return _bubbleViewInsets;
 }
 
-- (void)setLayoutConfig:(id<YSFCellLayoutConfig>)layoutConfig{
+- (id<YSFCellLayoutConfig>)layoutConfig
+{
+    if (_layoutConfig == nil) {
+        id<YSFCellLayoutConfig> layoutConfig;
+        if ([[YSFSessionConfigImp sharedInstance] respondsToSelector:@selector(layoutConfigWithMessage:)]) {
+            layoutConfig = [[YSFSessionConfigImp sharedInstance] layoutConfigWithMessage:_message];
+        }
+        if (!layoutConfig) {
+            layoutConfig = [YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig;
+        }
+        self.layoutConfig = layoutConfig;
+    }
+    
+    return _layoutConfig;
+}
+
+- (void)setLayoutConfig:(id<YSFCellLayoutConfig>)layoutConfig
+{
     _layoutConfig = layoutConfig;
     if ([layoutConfig respondsToSelector:@selector(shouldShowAvatar:)])
     {

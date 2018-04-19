@@ -4,6 +4,11 @@
 
 @implementation YSFOrderOperation
 
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
 - (NSDictionary *)encodeAttachment
 {
     NSMutableDictionary *dict   = [NSMutableDictionary dictionary];

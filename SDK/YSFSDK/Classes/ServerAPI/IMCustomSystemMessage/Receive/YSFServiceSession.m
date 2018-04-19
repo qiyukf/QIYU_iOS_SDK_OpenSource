@@ -40,7 +40,9 @@
     instance.message            = [dict ysf_jsonString:YSFApiKeyMessage];
     instance.inQueeuNotify = [dict ysf_jsonString:YSFApiKeyInqueueNotify];
     instance.showNumber  = [dict ysf_jsonBool:YSFApiKeyShowNum];
-    
+    instance.robotInQueue  = [dict ysf_jsonBool:YSFApiKeyRobotInQueue];
+    instance.robotSessionId  = [dict ysf_jsonLongLong:YSFApiKeyRobotSessionId];
+
     NSMutableDictionary *evaluationDict = [NSMutableDictionary new];
     NSString *evaluation            = [dict ysf_jsonString:YSFApiKeyEvaluation];
     if (evaluation) {
@@ -48,9 +50,8 @@
         NSArray *arrayEvaluation    = [dictEvaluation ysf_jsonArray:YSFApiKeyList];
         for (NSDictionary *dict in arrayEvaluation) {
             NSString *name = [dict ysf_jsonString:YSFApiKeyName];
-            NSUInteger value= [dict ysf_jsonUInteger:YSFApiKeyValue];
             if (name) {
-                [evaluationDict setValue:@(value) forKey:name];
+                [evaluationDict setValue:dict forKey:name];
             }
         }
         instance.messageInvite = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationMessageInvite];
@@ -71,9 +72,9 @@
     for (NSDictionary *dict in bot) {
         YSFActionInfo *actionInfo = [[YSFActionInfo alloc] init];
         actionInfo.action = [dict ysf_jsonInteger:YSFApiKeyAction];
-        actionInfo.id= [dict ysf_jsonInteger:YSFApiKeyId];
-        actionInfo.label= [dict ysf_jsonString:YSFApiKeyLabel];
-        actionInfo.url= [dict ysf_jsonString:YSFApiKeyUrl];
+        actionInfo.buttonId = [NSNumber numberWithInteger:[dict ysf_jsonInteger:YSFApiKeyId]];
+        actionInfo.title = [dict ysf_jsonString:YSFApiKeyLabel];
+        actionInfo.userData = [dict ysf_jsonString:YSFApiKeyUrl];
         [actionInfoArray addObject:actionInfo];
     }
     

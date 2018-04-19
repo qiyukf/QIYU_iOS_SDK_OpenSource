@@ -24,6 +24,7 @@ extern NSString *const YSFKitEventNameTapLabelLink;
 extern NSString *const YSFKitEventNameTapLabelPhoneNumber;
 extern NSString *const YSFKitEventNameTapMachineQuestion;
 extern NSString *const YSFKitEventNameTapEvaluationSelection;
+extern NSString *const YSFKitEventNameTapEvaluationReason;
 extern NSString *const YSFKitEventNameTapGoods;
 extern NSString *const YSFKitEventNameTapFillInBotForm;
 extern NSString *const YSFKitEventNameTapMoreOrders;

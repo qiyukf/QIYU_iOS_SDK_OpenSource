@@ -38,18 +38,11 @@
         [self addSubview:_tipLabel];
 
         _rightArraw = [[UIButton alloc] initWithFrame:CGRectZero];
+        _rightArraw.hidden = YES;
         [_rightArraw setImage:[UIImage ysf_imageInKit:@"icon_right_arrow"] forState:UIControlStateNormal];
         [self addSubview:_rightArraw];
         
         _showNumber = YES;
-        
-        
-        UITapGestureRecognizer *singleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onSingleTap:)];
-        singleTapRecognizer.numberOfTapsRequired = 1;
-        singleTapRecognizer.numberOfTouchesRequired = 1;
-        singleTapRecognizer.cancelsTouchesInView = NO;
-        singleTapRecognizer.delaysTouchesEnded = NO;
-        [self addGestureRecognizer:singleTapRecognizer];
     }
     return self;
 }
@@ -75,7 +68,8 @@
     if (!should_tip) {
         return;
     }
-    
+    _rightArraw.hidden = YES;
+    [self removeTarget:self action:@selector(onSingleTap:) forControlEvents:UIControlEventTouchUpInside];
     _type = type;
     switch (_type) {
         case YSFSessionTipOK:
@@ -95,8 +89,7 @@
             NSString *text = @"连接客服失败，您可以尝试重新连接";
             [_tipLabel setText:text];
             NSRange range = NSMakeRange([text length] - 4, 4);
-            
-            [_tipLabel addCustomLink:[NSNull null]
+            [_tipLabel addCustomLink:@"reconnect"
                             forRange:range];
             
             [self setHidden:NO];
@@ -105,6 +98,8 @@
             
         case YSFSessionTipServiceNotExsit:
         {
+            _rightArraw.hidden = NO;
+            [self addTarget:self action:@selector(onSingleTap:) forControlEvents:UIControlEventTouchUpInside];
             [_tipLabel setText:@"当前客服不在线，如需帮助请留言"];
             [self setHidden:NO];
         }
@@ -126,11 +121,17 @@
     }
     
     _type = YSFSessionTipServicewaiting;
-    NSString * tip_str = [NSString stringWithFormat:@"正在排队，您的前面还有%ld个人，请稍等...", (long)waitingNumber];
+    
+    
+    NSString * tip_str = [NSString stringWithFormat:@"排队中，您排在第%ld位，排到将自动接入。", (long)waitingNumber];
     if (!_showNumber) {
         tip_str = inQueeuStr;
     }
+    tip_str = [tip_str stringByAppendingString:@"退出排队"];
     [_tipLabel setText:tip_str];
+    NSRange range = NSMakeRange([tip_str length] - 4, 4);
+    [_tipLabel addCustomLink:@"quitWaiting"
+                    forRange:range];
     [self setHidden:NO];
     [[self ysf_viewController].view setNeedsLayout];
 }
@@ -189,9 +190,16 @@
 
 - (void)ysfAttributedLabel:(YSFAttributedLabel *)label clickedOnLink:(id)linkData
 {
+    NSString *idString = linkData;
+    
     if (_delegate && [_delegate respondsToSelector:@selector(tipViewRequestService:)])
     {
-        [_delegate tipViewRequestService:self];
+        if ([idString isEqualToString:@"reconnect"]) {
+            [_delegate tipViewRequestService:self];
+        }
+        else if ([idString isEqualToString:@"quitWaiting"]) {
+            [_delegate quitWaiting:self];
+        }
     }
 }
 @end

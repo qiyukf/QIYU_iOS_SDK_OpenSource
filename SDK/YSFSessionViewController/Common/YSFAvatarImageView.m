@@ -152,7 +152,7 @@ CGRect YSFKit_CGRectWithCenterAndSize(CGPoint center, CGSize size){
     
     if (url) {
         __weak __typeof(self)wself = self;
-        YSFWebImageDownloadToken *operation = [YSFWebImageManager.sharedManager loadImageWithURL:url options:options progress:progressBlock completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, YSFImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
+        id<YSFWebImageOperation> operation = [YSFWebImageManager.sharedManager loadImageWithURL:url options:options progress:progressBlock completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, YSFImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
             if (!wself) return;
             if (image && (options & YSFWebImageAvoidAutoSetImage) && completedBlock)
             {

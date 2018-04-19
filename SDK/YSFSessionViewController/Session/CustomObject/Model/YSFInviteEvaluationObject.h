@@ -7,6 +7,7 @@
 @property (nonatomic, strong)   NSDictionary *evaluationDict;
 @property (nonatomic, copy)   NSString *evaluationMessageInvite;
 @property (nonatomic, copy)   NSString *evaluationMessageThanks;
+@property (nonatomic,assign)    BOOL evaluationAutoPopup;
 
 + (YSFInviteEvaluationObject *)objectByDict:(NSDictionary *)dict;
 

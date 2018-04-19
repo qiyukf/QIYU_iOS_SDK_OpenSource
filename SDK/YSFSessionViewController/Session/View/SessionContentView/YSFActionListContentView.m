@@ -2,15 +2,8 @@
 #import "NSDictionary+YSFJson.h"
 #import "YSFMessageModel.h"
 #import "YSFActionList.h"
+#import "UIControl+BlocksKit.h"
 
-@interface YSFActionView3 : UIButton
-
-@property (nonatomic, strong) YSFAction *action;
-
-@end
-
-@implementation YSFActionView3
-@end
 
 @interface YSFActionListContentView()
 
@@ -65,8 +58,7 @@
             offsetY += 34;
         }
         
-        YSFActionView3 *button = [YSFActionView3 new];
-        button.action = action;
+        UIButton *button = [UIButton new];
         button.layer.borderWidth = 0.5;
         button.titleLabel.font = [UIFont systemFontOfSize:15];
         button.layer.borderColor = YSFRGB(0x5092E1).CGColor;
@@ -78,18 +70,19 @@
         button.ysf_frameTop = offsetY;
         button.ysf_frameHeight = 34;
         [_content addSubview:button];
-        [button addTarget:self action:@selector(onClickAction:) forControlEvents:UIControlEventTouchUpInside];
+        __weak typeof(self) weakSelf = self;
+        [button ysf_addEventHandler:^(id  _Nonnull sender) {
+            [weakSelf onClickAction:action];
+        } forControlEvents:UIControlEventTouchUpInside];
     }];
-
-
 }
 
-- (void)onClickAction:(YSFActionView3 *)actionView
+- (void)onClickAction:(YSFAction *)action
 {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     event.eventName = YSFKitEventNameTapBot;
     event.message = self.model.message;
-    event.data = actionView.action;
+    event.data = action;
     [self.delegate onCatchEvent:event];
 }
 

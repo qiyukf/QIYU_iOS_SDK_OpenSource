@@ -72,10 +72,10 @@
                 CGSize size = [questionLabel sizeThatFits:CGSizeMake(msgContentMaxWidth - 15, CGFLOAT_MAX)];
                 offsetY += 15.5;
                 offsetY += size.height;
-                offsetY += 13;
+                offsetY += -9;
             }
         }];
-        
+        offsetY += 22;
     }
     
     if (attachment.operatorHint && attachment.operatorHintDesc.length > 0) {
@@ -94,7 +94,30 @@
     if (attachment.evaluation != YSFEvaluationSelectionTypeInvisible && attachment.shouldShow) {
         offsetY += 45;
         offsetX = msgContentMaxWidth;
+        if (attachment.evaluationReason && attachment.evaluation == YSFEvaluationSelectionTypeNo) {
+            NSString *showString;
+            if (![attachment.evaluationContent isEqualToString:@""]) {
+                showString = attachment.evaluationContent;
+            } else {
+                showString = attachment.evaluationGuide;
+            }
+            CGFloat height = [showString boundingRectWithSize:CGSizeMake(msgContentMaxWidth, 60) options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]} context:nil].size.height;
+            offsetY += height > 25 ? height : 25;
+            offsetY += 10;      //底部空白
+        }
     }
+    //底部显示差评原因
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf && (attachment.evaluation == YSFEvaluationSelectionTypeNo) && ![attachment.evaluationContent isEqualToString:@""]) {
+        offsetY += 0.5;
+        offsetX = msgContentMaxWidth;
+        offsetY += 10;  //空白间隙高度
+        
+        NSString *text = [NSString stringWithFormat:@"差评原因：%@", attachment.evaluationContent];
+        CGFloat height = [text boundingRectWithSize:CGSizeMake(msgContentMaxWidth, MAXFLOAT) options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]} context:nil].size.height;
+        offsetY += height;
+        offsetY += 10;  //空白间隙高度
+    }
+    
     return CGSizeMake(offsetX, offsetY);
 }
 

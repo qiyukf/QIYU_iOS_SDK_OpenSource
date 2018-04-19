@@ -1,5 +1,6 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFAction.h"
+#import "YSFCustomAttachment.h"
 
 
 @interface YSFOrderLogisticNode : NSObject
@@ -11,12 +12,13 @@
 
 
 
-@interface YSFOrderLogistic : NSObject<YSF_NIMCustomAttachment>
+@interface YSFOrderLogistic : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,copy)    NSString *label;
 @property (nonatomic,copy)    NSString *title;
 @property (nonatomic,copy)    NSArray *logistic;
 @property (nonatomic,strong)  YSFAction* action;
+@property (nonatomic,assign)  BOOL fullLogistic;
 
 + (instancetype)objectByDict:(NSDictionary *)dict;
 

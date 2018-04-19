@@ -7,7 +7,11 @@
 //
 
 @interface YSF_NIMMessage (YSF)
-- (NSString *)getDisplayMessageContent;//重设message显示
+/**
+ *  缩略文本，用于会话列表显示
+ */
+- (NSString *)thumbText;
+
 - (NSString *)getTextWithoutTrashWords;
 - (BOOL)hasTrashWords;
 - (NSString *)getTrashWordsTip;

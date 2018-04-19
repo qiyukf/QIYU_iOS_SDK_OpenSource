@@ -21,7 +21,7 @@
     CGFloat msgBubbleMaxWidth    = (cellWidth - 112);
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.message.messageObject;
     YSFOrderLogistic *orderLogistic = (YSFOrderLogistic *)object.attachment;
-    CGFloat height = 0;
+    __block CGFloat height = 0;
     UILabel *logistic = [UILabel new];
     logistic.numberOfLines = 0;
     logistic.font = [UIFont systemFontOfSize:16.f];
@@ -42,23 +42,38 @@
     height += logistic.ysf_frameHeight;
     height += 13;
     
-    for (YSFOrderLogisticNode *logisticNode in orderLogistic.logistic) {
+    [orderLogistic.logistic enumerateObjectsUsingBlock:^(YSFOrderLogisticNode * _Nonnull logisticNode, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (idx + 1 > 2 && !orderLogistic.fullLogistic) {
+            *stop = YES;
+        }
+        
         logistic.text = logisticNode.logistic;
         logistic.ysf_frameWidth = msgBubbleMaxWidth - 48;
         [logistic sizeToFit];
         height += logistic.ysf_frameHeight;
         height += 4;
-
+        
         logistic.text = logisticNode.timestamp;
         logistic.ysf_frameWidth = msgBubbleMaxWidth - 48;
         [logistic sizeToFit];
         height += logistic.ysf_frameHeight;
+    }];
+    
+    NSUInteger logisticCount = orderLogistic.logistic.count;
+    if (logisticCount > 3 && !orderLogistic.fullLogistic) {
+        logisticCount = 3;
     }
-    if (orderLogistic.logistic.count > 0) {
-        height += (orderLogistic.logistic.count - 1) * 13;
+    if (logisticCount > 0) {
+        height += (logisticCount - 1) * 13;
     }
+    
     height += 13;
-    height += 44;
+    if (orderLogistic.logistic.count > 3 && !orderLogistic.fullLogistic) {
+        height += 44;
+    }
+    if (orderLogistic.action.validOperation.length > 0 ) {
+        height += 44;
+    }
     
     return CGSizeMake(msgBubbleMaxWidth, height);
 

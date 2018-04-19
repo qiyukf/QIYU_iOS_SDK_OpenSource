@@ -15,6 +15,8 @@
 #define YSFAppSettingKey    @"app_setting"
 #define YSFCurrentForeignUserIdKey @"current_foreign_userid"
 #define YSFCurrentUserInfoKey @"current_user_info"
+#define YSFTrackHistoryInfo @"track_history_info"
+#define YSFTrackHistoryInfoReporting @"track_history_info_reporting"
 #define YSFDeviceInfoKey    @"device_info"
 #define YSFCachedTextKey    @"cached_text_2.0"
 #define YSFStaffIdIconUrl   @"staffid_iconrul"
@@ -26,7 +28,10 @@
 #define YSFSessionTimes     @"session_times"
 #define YSFEvaluationData   @"evaluation_data"
 #define YSFSessionStatus    @"session_status"
-
+#define     YSFApiEvaluationAutoPopupMessageID   @"evaluation_auto_popup_message_id"
+#define     YSFApiEvaluationAutoPopupSessionId   @"evaluation_auto_popup_session_id"
+#define     YSFApiEvaluationAutoPopupEvaluationMessageThanks   @"evaluation_auto_popup_evaluation_message_thanks"
+#define     YSFApiEvaluationAutoPopupEvaluationData   @"evaluation_auto_popup_evaluation_data"
 
 @protocol YSFAppInfoManagerDelegate <NSObject>
 
@@ -54,6 +59,8 @@
 - (void)checkAppInfo;
 
 - (NSString *)appDeviceId;
+
+- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key;
 
 - (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block;
 

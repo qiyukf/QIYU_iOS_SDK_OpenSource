@@ -8,7 +8,7 @@
 
 #import "YSFSessionTextContentView.h"
 #import "YSFMessageModel.h"
-#import "QYCustomUIConfig.h"
+#import "QYCustomUIConfig+Private.h"
 #import "YSFAttributedLabel.h"
 #import "YSFAttributedLabel+YSF.h"
 #import "YSFApiDefines.h"

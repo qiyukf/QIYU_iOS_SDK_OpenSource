@@ -11,6 +11,13 @@
 @class YSF_NIMPushNotificationSetting;
 
 /**
+ *  获取 badge 回调
+ *
+ *  @return badge 数量
+ */
+typedef NSUInteger(^YSF_NIMBadgeHandler)(void);
+
+/**
  *  更新推送回调
  *
  *  @param error 错误信息，成功则error为nil
@@ -36,4 +43,12 @@ typedef void(^YSF_NIMApnsHandler)(NSError *error);
  */
 - (void)updateApnsSetting:(YSF_NIMPushNotificationSetting *)setting
                completion:(YSF_NIMApnsHandler)completion;
+
+/**
+ *  注册获取 badge 数量的回调函数
+ *
+ *  @param handler 获取 badge 回调
+ */
+- (void)registerBadgeCountHandler:(YSF_NIMBadgeHandler)handler;
+
 @end

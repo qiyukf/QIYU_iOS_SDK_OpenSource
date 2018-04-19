@@ -7,7 +7,7 @@
 //
 
 #import "YSFSessionMsgDatasource.h"
-#import "UITableView+YSFKit.h"
+#import "UIScrollView+YSFKit.h"
 #import "YSFMessageModel.h"
 #import "YSFTimestampModel.h"
 #import "YSFRichText.h"

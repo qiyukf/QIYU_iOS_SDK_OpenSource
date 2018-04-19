@@ -4,6 +4,7 @@
 
 @property (nonatomic, assign) CGFloat compressQuality;
 @property (nonatomic, assign) BOOL showEvaluationEntry;
+@property (nonatomic, assign) BOOL showTransWords;
 
 @end
 

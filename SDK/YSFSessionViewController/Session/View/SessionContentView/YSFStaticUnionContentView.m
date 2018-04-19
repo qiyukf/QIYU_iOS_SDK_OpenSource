@@ -3,15 +3,9 @@
 #import "YSFMessageModel.h"
 #import "YSFStaticUnion.h"
 #import "UIImageView+YSFWebCache.h"
+#import "UIControl+BlocksKit.h"
 
-@interface YSFActionView6 : UIButton
 
-@property (nonatomic, strong) YSFAction *action;
-
-@end
-
-@implementation YSFActionView6
-@end
 
 @interface YSFStaticUnionContentView()
 
@@ -109,7 +103,7 @@
                                                  }
                                                  else {
                                                      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                                                         self.model.layoutConfig = nil;
+                                                         [self.model cleanLayoutConfig];
                                                          [self.model cleanCache];
                                                          YSFKitEvent *event = [[YSFKitEvent alloc] init];
                                                          event.eventName = YSFKitEventNameReloadData;
@@ -139,7 +133,7 @@
         else if ([item.type isEqualToString:@"link"]) {
             offsetY += 13;
             
-            YSFActionView6 *actionButton = [YSFActionView6 new];
+            UIButton *actionButton = [UIButton new];
             [_content addSubview:actionButton];
             
             YSFAction *action = [YSFAction new];
@@ -147,7 +141,6 @@
             action.params = item.params;
             action.validOperation = item.label;
             action.type = item.linkType;
-            actionButton.action = action;
             actionButton.layer.borderWidth = 0.5;
             actionButton.titleLabel.font = [UIFont systemFontOfSize:15];
             actionButton.layer.borderColor = YSFRGB(0x5092E1).CGColor;
@@ -156,7 +149,10 @@
             [actionButton setTitle:item.label forState:UIControlStateNormal];
             actionButton.frame = CGRectMake(18, offsetY,
                                             self.model.contentSize.width - 33, 34);
-            [actionButton addTarget:self action:@selector(onClickAction:) forControlEvents:UIControlEventTouchUpInside];
+            __weak typeof(self) weakSelf = self;
+            [actionButton ysf_addEventHandler:^(id  _Nonnull sender) {
+                [weakSelf onClickAction:action];
+            } forControlEvents:UIControlEventTouchUpInside];
             if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
                 actionButton.ysf_frameLeft -= 5;
             }
@@ -173,12 +169,12 @@
 }
 
 
-- (void)onClickAction:(YSFActionView6 *)actionView
+- (void)onClickAction:(YSFAction *)action
 {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     event.eventName = YSFKitEventNameTapBot;
     event.message = self.model.message;
-    event.data = actionView.action;
+    event.data = action;
     [self.delegate onCatchEvent:event];
 }
 

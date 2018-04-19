@@ -32,7 +32,8 @@
 @property (nonatomic,copy)      NSArray<YSFActionInfo *>         *actionInfoArray;
 @property (nonatomic,strong)    YSFShopInfo     *shopInfo;           //平台电商的商铺信息
 @property (nonatomic,assign)    BOOL showNumber;
-
+@property (nonatomic,assign)    BOOL robotInQueue;
+@property (nonatomic,assign)    long long robotSessionId;
 
 - (BOOL)canOfferService;
 

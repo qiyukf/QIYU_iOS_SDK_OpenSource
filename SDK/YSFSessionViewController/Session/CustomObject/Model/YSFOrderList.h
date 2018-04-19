@@ -1,5 +1,6 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFAction.h"
+#import "YSFCustomAttachment.h"
 
 @interface YSFGoods : NSObject
 
@@ -29,7 +30,7 @@
 @end
 
 
-@interface YSFOrderList : NSObject<YSF_NIMCustomAttachment>
+@interface YSFOrderList : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,copy)    NSString *label;
 @property (nonatomic,strong)  YSFAction* action;

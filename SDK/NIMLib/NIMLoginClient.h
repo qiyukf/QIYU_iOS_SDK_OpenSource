@@ -20,7 +20,7 @@ typedef NS_ENUM(NSInteger, YSF_NIMLoginClientType){
     /**
      *  iOS
      */
-    YSF_NIMLoginClientTypeIOS         = 2,
+    YSF_NIMLoginClientTypeiOS         = 2,
     /**
      *  PC
      */

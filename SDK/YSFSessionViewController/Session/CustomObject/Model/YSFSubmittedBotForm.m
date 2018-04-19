@@ -1,6 +1,6 @@
 #import "YSFSubmittedBotForm.h"
 #import "NSDictionary+YSFJson.h"
-
+#import "YSFSubmittedBotFormContentConfig.h"
 
 
 
@@ -63,6 +63,16 @@
 @end
 
 @implementation YSFSubmittedBotForm
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFSubmittedBotFormContentConfig *)contentConfig
+{
+    return [YSFSubmittedBotFormContentConfig new];
+}
 
 - (NSDictionary *)encodeAttachment
 {

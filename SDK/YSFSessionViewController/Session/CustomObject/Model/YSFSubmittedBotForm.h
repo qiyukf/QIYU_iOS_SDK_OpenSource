@@ -1,5 +1,6 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFOrderList.h"
+#import "YSFCustomAttachment.h"
 
 
 @interface YSFSubmittedBotFormCell : NSObject
@@ -14,7 +15,7 @@
 
 @end
 
-@interface YSFSubmittedBotForm : NSObject<YSF_NIMCustomAttachment>
+@interface YSFSubmittedBotForm : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,assign)    NSInteger   command;
 @property (nonatomic,copy)    NSString   *params;

@@ -3,6 +3,7 @@
 #import "YSFApiDefines.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFCoreText.h"
+#import "YSFRichTextContentConfig.h"
 
 @interface YSFRichText() <YSFAttributedTextContentViewDelegate>
 
@@ -11,6 +12,16 @@
 @end
 
 @implementation YSFRichText
+
+- (NSString *)thumbText;
+{
+    return self.displayContent;
+}
+
+- (YSFRichTextContentConfig *)contentConfig
+{
+    return [YSFRichTextContentConfig new];
+}
 
 - (NSDictionary *)encodeAttachment
 {
@@ -68,7 +79,7 @@
         NSData *data = [self.content dataUsingEncoding:NSUTF8StringEncoding];
         NSAttributedString *attributeString = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
         textView.attributedString = attributeString;
-        self.displayContent = attributeString.string;
+        _displayContent = attributeString.string;
     }
     
     return _displayContent;

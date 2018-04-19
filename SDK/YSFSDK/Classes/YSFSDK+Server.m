@@ -9,16 +9,12 @@
 #import "YSFSDK+Server.h"
 #import "QYSDK_Private.h"
 
-typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
-    YSFUseServerSettingOnline,
-    YSFUseServerSettingTest,
-    YSFUseServerSettingPre,
-    YSFUseServerSettingTest2,
-};
+
 
 @implementation QYSDK (Server)
 - (void)readEnvironmentConfig:(NSNumber *)isTest useHttps:(NSNumber *)pUseHttps
 {
+    self.serverSetting = [isTest integerValue];
     BOOL useHttps = [pUseHttps integerValue];
     [YSF_NIMSDK sharedSDK].useHttps = useHttps;
     NSString *path = [[NSBundle mainBundle] pathForResource:@"ysf_dev" ofType:@"plist"];
@@ -28,14 +24,14 @@ typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
         
         //云信配置服设置
         YSF_NIMServerSetting *nimSetting = [[YSF_NIMServerSetting alloc] init];
-        if ([isTest integerValue] == YSFUseServerSettingTest
-            || [isTest integerValue] == YSFUseServerSettingTest2)
+        if (self.serverSetting == YSFUseServerSettingTest
+            || self.serverSetting == YSFUseServerSettingTest2)
         {
             nimSetting.lbsAddress                  = [dict objectForKey:@"nim_lbs"];
             nimSetting.linkAddress                 = [dict objectForKey:@"nim_link"];
             nimSetting.rsaPublicKeyModule          = [dict objectForKey:@"nim_module"];
         }
-        else if ([isTest integerValue] == YSFUseServerSettingPre)
+        else if (self.serverSetting == YSFUseServerSettingPre)
         {
             //预上线和线上服配置一样
 //            nimSetting.lbsAddress                  = @"http://lbs.netease.im/lbs/conf.jsp";
@@ -51,12 +47,12 @@ typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
         [[YSF_NIMSDK sharedSDK] setSetting:nimSetting];
         
         //云商服
-        if ([isTest integerValue] == YSFUseServerSettingTest
-            || [isTest integerValue] == YSFUseServerSettingTest2)
+        if (self.serverSetting == YSFUseServerSettingTest
+            || self.serverSetting == YSFUseServerSettingTest2)
         {
             [YSFServerSetting sharedInstance].apiAddress = [dict objectForKey:@"ysf_api"];
         }
-        else if ([isTest integerValue] == YSFUseServerSettingPre)
+        else if (self.serverSetting == YSFUseServerSettingPre)
         {
             [YSFServerSetting sharedInstance].apiAddress = @"http://qiyukf.netease.com/";
         }

@@ -15,8 +15,11 @@
 #import "YSFRelationStore.h"
 #import "YSFAppSetting.h"
 #import "YSFSessionStatusRequest.h"
+#import "NIMDataTracker.h"
 #import "NSArray+YSF.h"
 #import "QYSDK_Private.h"
+#import "YSFDARequest.h"
+#import "YSFDARequestConfig.h"
 
 @interface YSFAppInfoManager ()
 <YSFLoginManagerDelegate,YSF_NIMLoginManagerDelegate, YSF_NIMSystemNotificationManagerDelegate>
@@ -30,6 +33,8 @@
 @property (nonatomic,strong)    YSFLoginManager     *loginManager;
 @property (nonatomic,strong)    YSFRelationStore    *relationStore;
 @property (nonatomic,strong)    NSMutableDictionary *cachedTextDict;
+@property (nonatomic,assign)      BOOL transferingTrackHistory;
+@property (nonatomic,assign)      BOOL    track;
 
 @end
 
@@ -44,7 +49,6 @@
         
         [[[YSF_NIMSDK sharedSDK] loginManager] addDelegate:self];
         [[[YSF_NIMSDK sharedSDK] systemNotificationManager] addDelegate:self];
-
     }
     return self;
 }
@@ -77,6 +81,15 @@
     {
         [self login];
     }
+    
+    __weak typeof(self) weakSelf = self;
+    YSFDARequestConfig *request = [YSFDARequestConfig new];
+    [YSFHttpApi get:request
+         completion:^(NSError *error, YSFDARequestConfig *config){
+             if (!error) {
+                 weakSelf.track = config.track;
+             }
+         }];
 }
 
 - (NSString *)appDeviceId
@@ -94,6 +107,70 @@
         }
         return _deviceId;
     }
+}
+
+- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key
+{
+    if (!_track) {
+        return;
+    }
+    [self saveTrackHistory:title enterOrOut:enterOrOut key:key];
+    [self reportTrackHistory];
+}
+
+- (void)saveTrackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key
+{
+    NSMutableArray *mutableArray = [[self arrayByKey:YSFTrackHistoryInfo] mutableCopy];
+    if (!mutableArray) {
+        mutableArray = [NSMutableArray new];
+    }
+    NSMutableDictionary *trackHistoryInfo = [NSMutableDictionary new];
+    if (title) {
+        [trackHistoryInfo setObject:title forKey:@"title"];
+    }
+    long long time =  [[NSDate date] timeIntervalSince1970] * 1000;
+    [trackHistoryInfo setObject:@(time) forKey:@"time"];
+    [trackHistoryInfo setObject:@(enterOrOut) forKey:@"enterOrOut"];
+    if (key) {
+        [trackHistoryInfo setObject:key forKey:@"key"];
+    }
+    [mutableArray addObject:trackHistoryInfo];
+    [self saveArray:mutableArray forKey:YSFTrackHistoryInfo];
+    
+    return;
+}
+
+- (void)reportTrackHistory
+{
+    YSFLogApp(@"reportTrackHistory");
+
+    NSArray *array = [self arrayByKey:YSFTrackHistoryInfo];
+    NSArray *reportingArray = [self arrayByKey:YSFTrackHistoryInfoReporting];
+    if (reportingArray.count == 0 && array.count >= 1) {
+        [self saveArray:array forKey:YSFTrackHistoryInfoReporting];
+        reportingArray = array;
+        [[self store] removeObjectByID:YSFTrackHistoryInfo];
+    }
+    
+    if (reportingArray.count == 0) {
+        return;
+    }
+    if (_transferingTrackHistory == YES) {
+        return;
+    }
+    self.transferingTrackHistory = YES;
+    __weak typeof(self) weakSelf = self;
+    YSFDARequest *request = [YSFDARequest new];
+    request.array = reportingArray;
+    [YSFHttpApi get:request
+         completion:^(NSError *error,id returendObject){
+             self.transferingTrackHistory = NO;
+             if (!error || ([error.domain isEqualToString:YSFErrorDomain] && error.code == YSFCodeInvalidData))
+             {
+                 [[weakSelf store] removeObjectByID:YSFTrackHistoryInfoReporting];
+                 [weakSelf reportTrackHistory];
+             }
+         }];
 }
 
 - (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block;
@@ -431,7 +508,7 @@
 
 - (NSString *)version
 {
-    return @"35";
+    return @"38";
 }
 
 #pragma mark - CachedText
@@ -447,7 +524,7 @@
 
 - (void)setCachedText:(NSString *)cachedText shopId:(NSString *)shopId
 {
-    if (cachedText && ![_cachedTextDict[shopId] isEqualToString:cachedText])
+    if (cachedText && shopId && ![_cachedTextDict[shopId] isEqualToString:cachedText])
     {
         _cachedTextDict[shopId] = cachedText;
         [[self store] saveDict:_cachedTextDict forKey:YSFCachedTextKey];
@@ -489,6 +566,8 @@
     {
         [self reportUserInfo];
         [self requestSessionStatus];
+        [[YSF_NIMDataTracker shared] trackEvent];
+        [self reportTrackHistory];
     }
 }
 

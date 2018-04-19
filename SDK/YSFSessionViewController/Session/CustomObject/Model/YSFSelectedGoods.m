@@ -1,8 +1,18 @@
 #import "YSFSelectedGoods.h"
 #import "NSDictionary+YSFJson.h"
-
+#import "YSFSelectedGoodsContentConfig.h"
 
 @implementation YSFSelectedGoods
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFSelectedGoodsContentConfig *)contentConfig
+{
+    return [YSFSelectedGoodsContentConfig new];
+}
 
 - (NSDictionary *)encodeAttachment
 {

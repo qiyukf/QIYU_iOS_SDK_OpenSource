@@ -27,7 +27,6 @@
 
 @property (nonatomic, strong) YSFInputAudioRecordIndicatorView *audioRecordIndicator;
 @property (nonatomic, assign) NIMAudioRecordPhase recordPhase;
-@property (nonatomic, weak) id<YSFSessionConfig> inputConfig;
 @property (nonatomic, weak) id<YSFInputDelegate> inputDelegate;
 @property (nonatomic, weak) id<YSFInputActionDelegate> actionDelegate;
 @property (nonatomic, assign) NIMInputType inputType;
@@ -42,6 +41,11 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
+        //设置最大输入字数
+        _maxTextLength = 4500;
+        //最大输入行数
+        _maxInputLines = 4;
+        
         _inputType = inputType;
         _recording = NO;
         _recordPhase = AudioRecordPhaseEnd;
@@ -86,31 +90,6 @@
         };
     }
     return self;
-}
-
-- (void)setInputConfig:(id<YSFSessionConfig>)config
-{
-    _inputConfig = config;
-    
-    //设置最大输入字数
-    NSInteger textInputLength = 4500;
-    if ([_inputConfig respondsToSelector:@selector(maxInputLength)]) {
-        textInputLength = [_inputConfig maxInputLength];
-    }
-    self.maxTextLength = textInputLength;
-    
-    //最大输入行数
-    NSInteger maxInputLines = 4;
-    if ([_inputConfig respondsToSelector:@selector(maxInputLines)]) {
-        maxInputLines = [_inputConfig maxInputLines];
-    }
-    self.maxInputLines = maxInputLines;
-    
-    //设置placeholder
-    if ([_inputConfig respondsToSelector:@selector(inputViewPlaceholder)]) {
-        NSString *placeholder = [_inputConfig inputViewPlaceholder];
-        _toolBar.inputTextView.placeHolder = placeholder;
-    }
 }
 
 - (void)setInputDelegate:(id<YSFInputDelegate>)delegate
@@ -345,9 +324,13 @@
         }
     }else{
         CGFloat bottomHeight = toFrame.size.height;
-        bottomHeight -= [[QYCustomUIConfig sharedInstance] bottomMargin];
-        if (@available(iOS 11, *)) {
-            bottomHeight -= self.ysf_viewController.view.safeAreaInsets.bottom;
+        CGFloat bottomMargin = [[QYCustomUIConfig sharedInstance] bottomMargin];
+        if (bottomMargin > 0 ) {
+            bottomHeight -= bottomMargin;
+        } else {
+            if (@available(iOS 11, *)) {
+                bottomHeight -= self.ysf_viewController.view.safeAreaInsets.bottom;
+            }
         }
         [self willShowBottomHeight:bottomHeight];
     }
@@ -577,7 +560,7 @@
     if (_inputType != InputTypeAudio) {
         [_emoticonContainer setHidden:YES];
         _inputBottomViewHeight = 0.0;
-        _inputType = InputTypeText;
+        self.inputType = InputTypeText;
         [self endTextEditWithInputBottomViewHeight:0];
         [self updateAllButtonImages];
     }
@@ -797,6 +780,13 @@
     }
     else {
         _toolBar.ysf_frameTop = 0;
+    }
+}
+
+- (void)setInputType:(NIMInputType)inputType {
+    _inputType = inputType;
+    if (self.inputDelegate && [self.inputDelegate respondsToSelector:@selector(changeInputTypeTo:)]) {
+        [self.inputDelegate changeInputTypeTo:inputType];
     }
 }
 

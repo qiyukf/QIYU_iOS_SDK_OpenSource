@@ -1,8 +1,18 @@
 #import "YSFRefundDetail.h"
 #import "NSDictionary+YSFJson.h"
-
+#import "YSFRefundDetailContentConfig.h"
 
 @implementation YSFRefundDetail
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFRefundDetailContentConfig *)contentConfig
+{
+    return [YSFRefundDetailContentConfig new];
+}
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {

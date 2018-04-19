@@ -2,15 +2,7 @@
 #import "NSDictionary+YSFJson.h"
 #import "YSFMessageModel.h"
 #import "YSFOrderLogistic.h"
-
-@interface YSFActionView4 : UIButton
-
-@property (nonatomic, strong) YSFAction *action;
-
-@end
-
-@implementation YSFActionView4
-@end
+#import "UIControl+BlocksKit.h"
 
 
 @interface YSFOrderLogisticContentView()
@@ -77,7 +69,9 @@
     CGFloat lineTop = offsetY + 28;
 
     [orderLogistic.logistic enumerateObjectsUsingBlock:^(YSFOrderLogisticNode *logisticNode, NSUInteger idx, BOOL * _Nonnull stop) {
-    
+        if (idx + 1 > 2 && !orderLogistic.fullLogistic) {
+            *stop = YES;
+        }
         offsetY += 13;
 
         if (idx == 0) {
@@ -126,9 +120,7 @@
         
         offsetY += time.ysf_frameHeight;
     }];
-    
     offsetY += 13;
-    
     UIView *line = [UIView new];
     line.backgroundColor = YSFRGB(0xdbdbdb);
     line.ysf_frameLeft = 25;
@@ -145,16 +137,48 @@
     splitLine2.ysf_frameTop = offsetY;
     [_content addSubview:splitLine2];
     
-    YSFActionView4 *more = [YSFActionView4 new];
-    [more setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
-    [more setTitle:orderLogistic.action.validOperation forState:UIControlStateNormal];
-    more.titleLabel.font = [UIFont systemFontOfSize:15.f];
-    more.frame = CGRectMake(0, offsetY,
-                            self.model.contentSize.width, 44);
-    more.action = orderLogistic.action;
-    [_content addSubview:more];
-    [more addTarget:self action:@selector(onClickAction:) forControlEvents:UIControlEventTouchUpInside];
-
+    if (orderLogistic.logistic.count > 3 && !orderLogistic.fullLogistic) {
+        UIButton *fullLogistic = [UIButton new];
+        [fullLogistic setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
+        [fullLogistic setTitle:@"查看完整物流信息" forState:UIControlStateNormal];
+        fullLogistic.titleLabel.font = [UIFont systemFontOfSize:15.f];
+        fullLogistic.frame = CGRectMake(0, offsetY,
+                                self.model.contentSize.width, 44);
+        [_content addSubview:fullLogistic];
+        __weak typeof(self) weakSelf = self;
+        [fullLogistic ysf_addEventHandler:^(id  _Nonnull sender) {
+            orderLogistic.fullLogistic = YES;
+            [weakSelf.model cleanCache];
+            YSFKitEvent *event = [[YSFKitEvent alloc] init];
+            event.eventName = YSFKitEventNameReloadData;
+            event.message = weakSelf.model.message;
+            [weakSelf.delegate onCatchEvent:event];
+        } forControlEvents:UIControlEventTouchUpInside];
+        
+        offsetY += 44;
+    }
+    
+    if (orderLogistic.action.validOperation.length > 0 ) {
+        UIView *splitLine3 = [UIView new];
+        splitLine3.backgroundColor = YSFRGB(0xdbdbdb);
+        splitLine3.ysf_frameHeight = 0.5;
+        splitLine3.ysf_frameLeft = 5;
+        splitLine3.ysf_frameWidth = self.ysf_frameWidth - 5;
+        splitLine3.ysf_frameTop = offsetY;
+        [_content addSubview:splitLine3];
+        
+        UIButton *more = [UIButton new];
+        [more setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
+        [more setTitle:orderLogistic.action.validOperation forState:UIControlStateNormal];
+        more.titleLabel.font = [UIFont systemFontOfSize:15.f];
+        more.frame = CGRectMake(0, offsetY,
+                                self.model.contentSize.width, 44);
+        [_content addSubview:more];
+        __weak typeof(self) weakSelf = self;
+        [more ysf_addEventHandler:^(id  _Nonnull sender) {
+            [weakSelf onClickAction:orderLogistic.action];
+        } forControlEvents:UIControlEventTouchUpInside];
+    }
 }
 
 - (void)layoutSubviews
@@ -168,12 +192,12 @@
 }
 
 
-- (void)onClickAction:(YSFActionView4 *)actionView
+- (void)onClickAction:(YSFAction *)action
 {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     event.eventName = YSFKitEventNameTapBot;
     event.message = self.model.message;
-    event.data = actionView.action;
+    event.data = action;
 
     [self.delegate onCatchEvent:event];
 }

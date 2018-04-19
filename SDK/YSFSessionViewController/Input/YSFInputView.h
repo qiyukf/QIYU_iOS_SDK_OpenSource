@@ -8,7 +8,6 @@
 
 #import "YSFInputTextView.h"
 #import "YSFInputProtocol.h"
-#import "YSFSessionConfig.h"
 #import "YSFActionBar.h"
 #import <UIKit/UIKit.h>
 
@@ -43,6 +42,7 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 - (void)hideInputView;
 - (void)inputViewSizeToHeight:(CGFloat)toHeight
                 showInputView:(BOOL)show;
+- (void)changeInputTypeTo:(NIMInputType)type;
 @end
 
 @interface YSFInputView : UIView
@@ -74,7 +74,6 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 - (void)setActionCallback:(SelectActionCallback)callback;
 
 - (void)setInputActionDelegate:(id<YSFInputActionDelegate>)actionDelegate;
-- (void)setInputConfig:(id<YSFSessionConfig>)config;
 
 - (void)setInputTextPlaceHolder:(NSString*)placeHolder;
 - (void)updateAudioRecordTime:(NSTimeInterval)time;

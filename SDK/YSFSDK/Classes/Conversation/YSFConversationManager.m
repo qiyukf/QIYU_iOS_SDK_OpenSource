@@ -72,7 +72,8 @@
         sessionInfo.shopId = item.session.sessionId;
         sessionInfo.avatarImageUrlString = shopInfo ? shopInfo.logo : @"";
         sessionInfo.sessionName = shopInfo ? shopInfo.name : @"";
-        sessionInfo.lastMessageText = [item.lastMessage getDisplayMessageContent];
+        sessionInfo.lastMessageText = [item.lastMessage thumbText];
+        sessionInfo.hasTrashWords = [item.lastMessage hasTrashWords];
         if (item.lastMessage.messageType == YSF_NIMMessageTypeText) {
             sessionInfo.lastMessageType = QYMessageTypeText;
         }
@@ -139,7 +140,7 @@
         if ([item.session.sessionId isEqualToString:@"-1"]) {
             QYMessageInfo *messageInfo = [QYMessageInfo new];
             YSF_NIMMessage *message = item.lastMessage;
-            messageInfo.text = [message getDisplayMessageContent];
+            messageInfo.text = [message thumbText];
             messageInfo.timeStamp = message.timestamp;
             if (message.messageType == YSF_NIMMessageTypeText) {
                 messageInfo.type = QYMessageTypeText;
@@ -212,7 +213,7 @@
         messageInfo.shopId = shopInfo.shopId;
         messageInfo.avatarImageUrlString = shopInfo ? shopInfo.logo : @"";
         messageInfo.sender = shopInfo ? shopInfo.name : @"";
-        messageInfo.text = [message getDisplayMessageContent];
+        messageInfo.text = [message thumbText];
         messageInfo.timeStamp = message.timestamp;
         if (message.messageType == YSF_NIMMessageTypeText) {
             messageInfo.type = QYMessageTypeText;

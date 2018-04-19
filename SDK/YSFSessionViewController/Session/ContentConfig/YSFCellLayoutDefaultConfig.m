@@ -44,20 +44,16 @@
     CGFloat otherNickNameHeight          = 20;
     CGFloat otherBubbleOriginX           = 55;
     CGFloat cellBubbleButtomToCellButtom = 13 + [QYCustomUIConfig sharedInstance].sessionMessageSpacing;
-    NSString *ext = model.message.ext;
-    if (![YSF_NIMSDK sharedSDK].sdkOrKf && model.message.messageType == YSF_NIMMessageTypeText &&  model.message.isOutgoingMsg) {
-        NSArray *trashWordsArray = [[ext ysf_toDict] ysf_jsonArray:YSFApiKeyTrashWords];
-        if (trashWordsArray.count > 0) {
-            UILabel *trashWordsTip = [UILabel new];
-            trashWordsTip = [UILabel new];
-            trashWordsTip.numberOfLines = 0;
-            trashWordsTip.lineBreakMode = NSLineBreakByCharWrapping;
-            trashWordsTip.font = [UIFont systemFontOfSize:12.f];
-            trashWordsTip.frame = CGRectMake(0, 0, YSFUIScreenWidth - 112, 0);
-            trashWordsTip.text = [model.message getTrashWordsTip];
-            [trashWordsTip sizeToFit];
-            cellBubbleButtomToCellButtom += 10 + trashWordsTip.ysf_frameHeight;
-        }
+    if (model.message.isOutgoingMsg && [model.message hasTrashWords]) {
+        UILabel *trashWordsTip = [UILabel new];
+        trashWordsTip = [UILabel new];
+        trashWordsTip.numberOfLines = 0;
+        trashWordsTip.lineBreakMode = NSLineBreakByCharWrapping;
+        trashWordsTip.font = [UIFont systemFontOfSize:12.f];
+        trashWordsTip.frame = CGRectMake(0, 0, YSFUIScreenWidth - 112, 0);
+        trashWordsTip.text = [model.message getTrashWordsTip];
+        [trashWordsTip sizeToFit];
+        cellBubbleButtomToCellButtom += 10 + trashWordsTip.ysf_frameHeight;
     }
     
     if (model.message.messageType == YSF_NIMMessageTypeCustom) {

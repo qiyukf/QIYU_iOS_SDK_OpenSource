@@ -1,6 +1,6 @@
 #import "YSFOrderList.h"
 #import "NSDictionary+YSFJson.h"
-
+#import "YSFOrderListContentConfig.h"
 
 
 
@@ -63,6 +63,16 @@
 
 
 @implementation YSFOrderList
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFOrderListContentConfig *)contentConfig
+{
+    return [YSFOrderListContentConfig new];
+}
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {

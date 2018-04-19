@@ -1,10 +1,5 @@
-//
-//  YSFCloseService.h
-//  YSFSDK
-//
-//  Created by amao on 9/7/15.
-//  Copyright (c) 2015 Netease. All rights reserved.
-//
+#import "YSFCustomAttachment.h"
+
 
 
 typedef enum : NSUInteger {
@@ -15,7 +10,7 @@ typedef enum : NSUInteger {
 } YSFEvaluationSelectionType;
 
 
-@interface YSFMachineResponse : NSObject<YSF_NIMCustomAttachment>
+@interface YSFMachineResponse : NSObject<YSFCustomAttachment>
 
 @property (nonatomic,copy)  NSString    *rawStringForCopy;
 
@@ -29,6 +24,9 @@ typedef enum : NSUInteger {
 
 @property (nonatomic,assign) BOOL isOneQuestionRelevant;
 @property (nonatomic,assign) YSFEvaluationSelectionType evaluation;
+@property (nonatomic, copy) NSString *evaluationContent;
+@property (nonatomic, assign) NSInteger evaluationReason;
+@property (nonatomic, copy) NSString *evaluationGuide;
 @property (nonatomic, strong, readonly) NSMutableArray<NSString *> *imageUrlStringArray;
 @property (nonatomic,assign)  BOOL    shouldShow;
 

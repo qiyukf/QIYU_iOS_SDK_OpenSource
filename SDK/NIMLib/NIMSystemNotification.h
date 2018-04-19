@@ -114,7 +114,7 @@ typedef NS_ENUM(NSInteger, YSF_NIMSystemNotificationType){
 /**
  *  通知发起者id
  */
-@property (nonatomic,copy,readonly)         NSString *sender;
+@property (nonatomic,copy)         NSString *sender;
 
 /**
  *  通知接受者id
@@ -130,7 +130,7 @@ typedef NS_ENUM(NSInteger, YSF_NIMSystemNotificationType){
 /**
  *  透传的消息体内容
  */
-@property (nonatomic,copy,readonly)         NSString    *content;
+@property (nonatomic,copy)         NSString    *content;
 
 /**
  *  是否只发送给在线用户

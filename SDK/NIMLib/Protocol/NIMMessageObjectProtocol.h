@@ -16,6 +16,8 @@
  */
 @protocol YSF_NIMMessageObject <NSObject>
 
+- (NSString *)thumbText;
+
 /**
  *  消息体所在的消息对象
  */

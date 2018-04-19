@@ -32,7 +32,7 @@
 @interface YSFSessionMachineContentView()<YSFAttributedLabelDelegate, YSFAttributedTextContentViewDelegate>
 @property (nonatomic, strong) UIView *content;
 @property (nonatomic, strong) NSMutableArray<UIImageView *> *imageViewsArray;
-
+@property (nonatomic, strong) UIView *reasonView;
 @end
 
 @implementation YSFSessionMachineContentView
@@ -101,17 +101,17 @@
     else if ((attachment.answerArray.count == 1 && attachment.isOneQuestionRelevant)
              || attachment.answerArray.count > 1)
     {
+        UIView *splitLine = [UIView new];
+        splitLine.backgroundColor = YSFRGB(0xdbdbdb);
+        splitLine.ysf_frameHeight = 0.5;
+        splitLine.ysf_frameLeft = 5;
+        splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
+        splitLine.ysf_frameTop = offsetY;
+        [_content addSubview:splitLine];
+        
         [attachment.answerArray enumerateObjectsUsingBlock:^(NSDictionary *dict, NSUInteger idx, BOOL * _Nonnull stop) {
             NSString *question = [dict objectForKey:YSFApiKeyQuestion];
             if (question) {
-                UIView *splitLine = [UIView new];
-                splitLine.backgroundColor = YSFRGB(0xdbdbdb);
-                splitLine.ysf_frameHeight = 0.5;
-                splitLine.ysf_frameLeft = 5;
-                splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
-                splitLine.ysf_frameTop = offsetY;
-                [_content addSubview:splitLine];
-                
                 UIView *point = [UIView new];
                 point.backgroundColor = YSFRGB(0xd6d6d6);
                 point.ysf_frameHeight = 7.5;
@@ -121,7 +121,6 @@
                 point.ysf_frameTop = offsetY + 23;
                 [_content addSubview:point];
 
-                
                 QuestionLink *questionLink = [[QuestionLink alloc] init];
                 questionLink.questionDict = dict;
                 
@@ -134,10 +133,10 @@
                                                  self.model.contentSize.width - 15, size.height);
                 [_content addSubview:questionLabel];
                 offsetY += size.height;
-                offsetY += 13;
+                offsetY += -9;
             }
         }];
-        
+        offsetY += 22;
     }
     
     if (attachment.operatorHint && attachment.operatorHintDesc.length > 0) {
@@ -219,6 +218,47 @@
         no.ysf_frameLeft = (self.ysf_frameWidth - 5) / 2 + ((self.ysf_frameWidth - 5) / 2 - yes.ysf_frameWidth) / 2;
         [no addTarget:self action:@selector(onSelectNo:) forControlEvents:UIControlEventTouchUpInside];
         [_content addSubview:no];
+        offsetY += yes.ysf_frameHeight;
+        
+        if (attachment.evaluationReason) {
+            UIView *reasonView = [UIView new];
+            self.reasonView = reasonView;
+            reasonView.backgroundColor = YSFRGB(0xF9F9F9);
+            reasonView.layer.cornerRadius = 2;
+            reasonView.layer.borderWidth = 0.5;
+            reasonView.layer.borderColor = YSFRGB(0xefefef).CGColor;
+            reasonView.userInteractionEnabled = YES;
+            reasonView.ysf_frameTop = offsetY;
+            reasonView.ysf_frameLeft = 10+3;
+            reasonView.ysf_frameWidth = self.ysf_frameWidth - 10*2;
+            UILabel *reasonLabel = [UILabel new];
+            reasonLabel.backgroundColor = YSFRGB(0xF9F9F9);
+            reasonLabel.numberOfLines = 3;
+            reasonLabel.textColor = YSFRGB(0x666666);
+            reasonLabel.font = [UIFont systemFontOfSize:12];
+            reasonLabel.ysf_frameTop = 0;
+            reasonLabel.ysf_frameLeft = 5;
+            reasonLabel.ysf_frameWidth = reasonView.ysf_frameWidth - 10;
+            if (![attachment.evaluationContent isEqualToString:@""]) {
+                reasonLabel.text = attachment.evaluationContent;
+            } else {
+                reasonLabel.text = attachment.evaluationGuide;
+            }
+            CGFloat height = [reasonLabel.text boundingRectWithSize:CGSizeMake(CGRectGetWidth(reasonLabel.bounds), 60) options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]} context:nil].size.height;
+            reasonView.ysf_frameHeight = height > 25 ? height : 25;
+            reasonLabel.ysf_frameHeight = height > 25 ? height : 25;
+            [reasonView addSubview:reasonLabel];
+            [_content addSubview:reasonView];
+            if (attachment.evaluation == YSFEvaluationSelectionTypeNo) {
+                reasonView.hidden = NO;
+            } else {
+                reasonView.hidden = YES;
+                attachment.evaluationContent = @"";
+            }
+            UITapGestureRecognizer *reasonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onTapReasonLabel:)];
+            [reasonView addGestureRecognizer:reasonTap];
+            offsetY += reasonView.ysf_frameHeight;
+        }
     }
     
     if (![YSF_NIMSDK sharedSDK].sdkOrKf && (attachment.evaluation == YSFEvaluationSelectionTypeYes || attachment.evaluation == YSFEvaluationSelectionTypeNo)) {
@@ -241,6 +281,33 @@
         evaluationResult.contentMode = UIViewContentModeCenter;
 
         [_content addSubview:evaluationResult];
+        
+        if (![attachment.evaluationContent isEqualToString:@""] && (attachment.evaluation == YSFEvaluationSelectionTypeNo)) {
+            UIView *splitLine = [UIView new];
+            splitLine.backgroundColor = YSFRGB(0xdbdbdb);
+            splitLine.ysf_frameHeight = 0.5;
+            splitLine.ysf_frameLeft = 0;
+            splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
+            splitLine.ysf_frameTop = offsetY;
+            [_content addSubview:splitLine];
+            offsetY += 0.5;
+            offsetY += 10;  //空白间隙
+            UILabel *noReasonLabel = [UILabel new];
+            noReasonLabel.ysf_frameTop = offsetY;
+            noReasonLabel.ysf_frameLeft = 10;
+            noReasonLabel.ysf_frameWidth = self.ysf_frameWidth - 25;
+            noReasonLabel.textColor = YSFRGBA2(0xffa3afb7);
+            noReasonLabel.text = [NSString stringWithFormat:@"差评原因：%@", attachment.evaluationContent];
+            noReasonLabel.textAlignment = NSTextAlignmentLeft;
+            noReasonLabel.font = [UIFont systemFontOfSize:12];
+            noReasonLabel.numberOfLines = 0;
+            CGFloat height = [noReasonLabel.text boundingRectWithSize:CGSizeMake(CGRectGetWidth(noReasonLabel.bounds), MAXFLOAT) options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]} context:nil].size.height;
+            noReasonLabel.ysf_frameHeight = height;
+            [_content addSubview:noReasonLabel];
+            offsetY += height;
+            offsetY += 10;  //空白间隙
+        }
+        
     }
 }
 
@@ -319,6 +386,13 @@
     event.eventName = YSFKitEventNameTapEvaluationSelection;
     event.message = self.model.message;
     event.data = @(NO);
+    [self.delegate onCatchEvent:event];
+}
+
+- (void)onTapReasonLabel:(UITapGestureRecognizer *)sender {
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameTapEvaluationReason;
+    event.message = self.model.message;
     [self.delegate onCatchEvent:event];
 }
 

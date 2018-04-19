@@ -20,9 +20,10 @@ typedef enum : NSUInteger {
 
 @protocol YSFSessionTipViewDelegate <NSObject>
 - (void)tipViewRequestService:(YSFSessionTipView *)tipView;
+- (void)quitWaiting:(YSFSessionTipView *)tipView;
 @end
 
-@interface YSFSessionTipView : UIView
+@interface YSFSessionTipView : UIControl
 @property (nonatomic,weak)  id<YSFSessionTipViewDelegate> delegate;
 
 - (CGFloat)getTipLabelHeight;

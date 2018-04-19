@@ -1,14 +1,14 @@
 typedef NS_ENUM(NSInteger, QYActionType) {
-    QYActionTypeSend,
-    QYActionTypeOpenUrl,
+    QYActionTypeSend = 1,
+    QYActionTypeOpenUrl = 2,
 };
 
 @interface YSFActionInfo : NSObject
 
 @property (nonatomic,assign)    QYActionType    action;
-@property (nonatomic,assign)    NSInteger       id;
-@property (nonatomic,copy)      NSString *      label;
-@property (nonatomic,copy)      NSString *      url;
+@property (nonatomic,strong)    id       buttonId;
+@property (nonatomic,copy)      NSString *title;
+@property (nonatomic,strong)    id      userData;
 
 @end
 

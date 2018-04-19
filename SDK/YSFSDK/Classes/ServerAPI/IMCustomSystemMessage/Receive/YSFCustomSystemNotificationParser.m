@@ -20,6 +20,8 @@
 #import "YSFEvaluationNotification.h"
 #import "YSFSessionWillCloseNotification.h"
 #import "YSFSystemConfig.h"
+#import "YSFTrashWords.h"
+#import "YSFLongMessage.h"
 
 @implementation YSFCustomSystemNotificationParser
 
@@ -58,6 +60,9 @@
                 case YSFCommandSystemConfig:
                     result = [[YSFSystemConfig sharedInstance:shopId] setNewConfig:dict];
                     break;
+                case YSFCommandTrashWords:
+                    result = [YSFTrashWords dataByJson:dict];
+                    break;
                 case YSFCommandUploadLog:
                 {
                     YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
@@ -73,7 +78,9 @@
                     
                 }
                     break;
-                    
+                case YSFCommandLongMessage:
+                    result = [YSFLongMessage dataByJson:dict];
+                    break;
                 default:
                     break;
                     

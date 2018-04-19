@@ -1,5 +1,6 @@
 #import "YSFStaticUnion.h"
 #import "NSDictionary+YSFJson.h"
+#import "YSFStaticUnionContentConfig.h"
 
 @implementation YSFLinkItem
 
@@ -12,6 +13,16 @@
 @end
 
 @implementation YSFStaticUnion
+
+- (NSString *)thumbText
+{
+    return @"[查询消息]";
+}
+
+- (YSFStaticUnionContentConfig *)contentConfig
+{
+    return [YSFStaticUnionContentConfig new];
+}
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {
