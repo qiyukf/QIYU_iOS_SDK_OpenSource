@@ -15,7 +15,7 @@
 
 // Apple's defines from TargetConditionals.h are a bit weird.
 // Seems like TARGET_OS_MAC is always defined (on all platforms).
-// To determine if we are running on OSX, we can only relly on TARGET_OS_IPHONE=0 and all the other platforms
+// To determine if we are running on OSX, we can only rely on TARGET_OS_IPHONE=0 and all the other platforms
 #if !TARGET_OS_IPHONE && !TARGET_OS_IOS && !TARGET_OS_TV && !TARGET_OS_WATCH
     #define YSF_MAC 1
 #else
@@ -81,31 +81,21 @@
 #define NS_OPTIONS(_type, _name) enum _name : _type _name; enum _name : _type
 #endif
 
-#if OS_OBJECT_USE_OBJC
-    #undef YSFDispatchQueueRelease
-    #undef YSFDispatchQueueSetterSementics
-    #define YSFDispatchQueueRelease(q)
-    #define YSFDispatchQueueSetterSementics strong
-#else
-    #undef YSFDispatchQueueRelease
-    #undef YSFDispatchQueueSetterSementics
-    #define YSFDispatchQueueRelease(q) (dispatch_release(q))
-    #define YSFDispatchQueueSetterSementics assign
-#endif
+FOUNDATION_EXPORT UIImage *YSFScaledImageForKey(NSString *key, UIImage *image);
 
-extern UIImage *YSFScaledImageForKey(NSString *key, UIImage *image);
+typedef void(^YSFWebImageNoParamsBlock)(void);
 
-typedef void(^YSFWebImageNoParamsBlock)();
+FOUNDATION_EXPORT NSString *const YSFWebImageErrorDomain;
 
-extern NSString *const YSFWebImageErrorDomain;
-
-#ifndef dispatch_main_async_safe
-#define dispatch_main_async_safe(block)\
-    if (strcmp(dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL), dispatch_queue_get_label(dispatch_get_main_queue())) == 0) {\
+#ifndef dispatch_queue_async_safe
+#define dispatch_queue_async_safe(queue, block)\
+    if (strcmp(dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL), dispatch_queue_get_label(queue)) == 0) {\
         block();\
     } else {\
-        dispatch_async(dispatch_get_main_queue(), block);\
+        dispatch_async(queue, block);\
     }
 #endif
 
-static int64_t kAsyncTestTimeout = 5;
+#ifndef dispatch_main_async_safe
+#define dispatch_main_async_safe(block) dispatch_queue_async_safe(dispatch_get_main_queue(), block)
+#endif

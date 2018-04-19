@@ -8,8 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "YSFWebImageCompat.h"
-
-@class YSFImageCacheConfig;
+#import "YSFImageCacheConfig.h"
 
 typedef NS_ENUM(NSInteger, YSFImageCacheType) {
     /**

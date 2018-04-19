@@ -25,7 +25,7 @@
 // *
 // * @param url The url for the image.
 // */
-//- (void)ysf_setImageWithURL:(nullable NSURL *)url;
+//- (void)ysf_setImageWithURL:(nullable NSURL *)url NS_REFINED_FOR_SWIFT;
 //
 ///**
 // * Set the imageView `image` with an `url` and a placeholder.
@@ -37,7 +37,7 @@
 // * @see ysf_setImageWithURL:placeholderImage:options:
 // */
 //- (void)ysf_setImageWithURL:(nullable NSURL *)url
-//          placeholderImage:(nullable UIImage *)placeholder;
+//          placeholderImage:(nullable UIImage *)placeholder NS_REFINED_FOR_SWIFT;
 //
 ///**
 // * Set the imageView `image` with an `url`, placeholder and custom options.
@@ -51,7 +51,7 @@
 //
 //- (void)ysf_setImageWithURL:(nullable NSURL *)url
 //          placeholderImage:(nullable UIImage *)placeholder
-//                   options:(YSFWebImageOptions)options;
+//                   options:(YSFWebImageOptions)options NS_REFINED_FOR_SWIFT;
 //
 ///**
 // * Set the imageView `image` with an `url`.
@@ -83,7 +83,7 @@
 // */
 //- (void)ysf_setImageWithURL:(nullable NSURL *)url
 //          placeholderImage:(nullable UIImage *)placeholder
-//                 completed:(nullable YSFExternalCompletionBlock)completedBlock;
+//                 completed:(nullable YSFExternalCompletionBlock)completedBlock NS_REFINED_FOR_SWIFT;
 //
 ///**
 // * Set the imageView `image` with an `url`, placeholder and custom options.

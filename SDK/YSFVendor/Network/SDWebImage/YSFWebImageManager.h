@@ -208,7 +208,7 @@ YSFWebImageManager *manager = [YSFWebImageManager sharedManager];
  *   This block has no return value and takes the requested UIImage as first parameter and the NSData representation as second parameter.
  *   In case of error the image parameter is nil and the third parameter may contain an NSError.
  *
- *   The forth parameter is an `SDImageCacheType` enum indicating if the image was retrieved from the local cache
+ *   The forth parameter is an `YSFImageCacheType` enum indicating if the image was retrieved from the local cache
  *   or from the memory cache or from the network.
  *
  *   The fith parameter is set to NO when the YSFWebImageProgressiveDownload option is used and the image is

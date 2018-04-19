@@ -10,10 +10,10 @@
 #import "YSFWebImageDownloader.h"
 #import "YSFWebImageOperation.h"
 
-extern NSString * _Nonnull const YSFWebImageDownloadStartNotification;
-extern NSString * _Nonnull const YSFWebImageDownloadReceiveResponseNotification;
-extern NSString * _Nonnull const YSFWebImageDownloadStopNotification;
-extern NSString * _Nonnull const YSFWebImageDownloadFinishNotification;
+FOUNDATION_EXPORT NSString * _Nonnull const YSFWebImageDownloadStartNotification;
+FOUNDATION_EXPORT NSString * _Nonnull const YSFWebImageDownloadReceiveResponseNotification;
+FOUNDATION_EXPORT NSString * _Nonnull const YSFWebImageDownloadStopNotification;
+FOUNDATION_EXPORT NSString * _Nonnull const YSFWebImageDownloadFinishNotification;
 
 
 

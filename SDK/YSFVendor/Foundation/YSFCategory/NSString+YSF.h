@@ -48,4 +48,7 @@
 
 - (NSString *)ysf_urlDecodeString;
 
+//字符串剔除重复的空格和回车换行
+- (NSString*)ysf_stringByRemoveRepeatedWhitespaceAndNewline;
+
 @end

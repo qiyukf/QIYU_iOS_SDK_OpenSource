@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface UITableView (YSF)
+@interface UIScrollView (YSF)
 
 - (void)ysf_scrollToBottom:(BOOL)animation;
+-(BOOL)ysf_isInBottom;
 @end

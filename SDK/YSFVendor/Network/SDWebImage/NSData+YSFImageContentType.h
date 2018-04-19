@@ -16,7 +16,8 @@ typedef NS_ENUM(NSInteger, YSFImageFormat) {
     YSFImageFormatPNG,
     YSFImageFormatGIF,
     YSFImageFormatTIFF,
-    YSFImageFormatWebP
+    YSFImageFormatWebP,
+    YSFImageFormatHEIC
 };
 
 @interface NSData (ImageContentType)
@@ -26,8 +27,16 @@ typedef NS_ENUM(NSInteger, YSFImageFormat) {
  *
  *  @param data the input image data
  *
- *  @return the image format as `SDImageFormat` (enum)
+ *  @return the image format as `YSFImageFormat` (enum)
  */
 + (YSFImageFormat)ysf_imageFormatForImageData:(nullable NSData *)data;
+
+/**
+ Convert YSFImageFormat to UTType
+
+ @param format Format as YSFImageFormat
+ @return The UTType as CFStringRef
+ */
++ (nonnull CFStringRef)ysf_UTTypeFromSDImageFormat:(YSFImageFormat)format;
 
 @end
