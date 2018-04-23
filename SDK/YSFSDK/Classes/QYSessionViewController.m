@@ -62,9 +62,6 @@
 #import "YSFSetEvaluationReasonRequest.h"
 #import "YSFBypassViewController.h"
 
-#if DEBUG
-#import "YYFPSLabel.h"
-#endif
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -678,14 +675,6 @@ static long long g_sessionId;
         _moreButton.frame = CGRectMake(40, 1, 50, 20);
         _moreButtonText.frame = CGRectMake(40, 17, 50, 20);
     }
-    
-#if DEBUG
-    YYFPSLabel *fpsLabel = [YYFPSLabel new];
-    fpsLabel.ysf_frameWidth = 100;
-    fpsLabel.ysf_frameTop = 100;
-    [self.view addSubview:fpsLabel];
-#endif
-
 }
 
 - (void)showSessionListEntrance
