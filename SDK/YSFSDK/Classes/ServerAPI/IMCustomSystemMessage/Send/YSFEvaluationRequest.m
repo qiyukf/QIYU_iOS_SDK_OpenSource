@@ -23,7 +23,7 @@
     if (_tagInfos) {
         NSMutableArray *tagInfoArray = [NSMutableArray new];
         for (id tagInfo in _tagInfos) {
-            if ([[tagInfo class] isKindOfClass:[YSFKaolaTagInfo class]]) {
+            if ([tagInfo isKindOfClass:[YSFKaolaTagInfo class]]) {
                 NSDictionary *tagInfoDict =  @{ YSFApiKeyId : @(((YSFKaolaTagInfo *)tagInfo).id),
                                                 YSFApiKeyName : YSFStrParam(((YSFKaolaTagInfo *)tagInfo).name),
                                                 };
