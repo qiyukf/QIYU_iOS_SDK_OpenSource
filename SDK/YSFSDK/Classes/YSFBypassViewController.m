@@ -113,6 +113,9 @@
     if ([QYCustomUIConfig sharedInstance].bypassDisplayMode == QYBypassDisplayModeBottom) {
         _imagePanel.ysf_frameWidth = self.view.ysf_frameWidth;
         _imagePanel.ysf_frameBottom = self.view.ysf_frameBottom;
+        if (@available(iOS 11, *)) {
+            _imagePanel.ysf_frameBottom -= self.view.safeAreaInsets.bottom;
+        }
     }
     else {
         _imagePanel.ysf_frameLeft = 35;
