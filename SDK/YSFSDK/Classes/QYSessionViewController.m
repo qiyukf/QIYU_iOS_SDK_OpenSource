@@ -149,7 +149,7 @@ static long long g_sessionId;
     if (_groupId || _staffId) {
         self.specifiedId = YES;
     }
-    
+
     [super viewDidLoad];
     [self initSession];
     [self makeUI];
@@ -211,7 +211,7 @@ static long long g_sessionId;
         shouldRequestService = NO;
         NSDictionary *dict = [sessionManager getEvaluationInfoByShopId:_shopId];
         NSInteger status = [[dict objectForKey:YSFSessionStatus] integerValue];
-        if (status == 2) {
+        if (status == 2 && [QYCustomUIConfig sharedInstance].showEvaluationEntry) {
             _evaluation.hidden = NO;
             _evaluation.enabled = YES;
             if (_changeEvaluationEnabledBlock) {
@@ -278,7 +278,7 @@ static long long g_sessionId;
             notification.localCommand = YSFCommandSessionWillClose;
             notification.message = @"您退出了咨询";
             YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
-            YSF_NIMSession *session = [YSF_NIMSession session:_shopId type:YSF_NIMSessionTypeYSF];
+            YSF_NIMSession *session = [YSF_NIMSession session:weakSelf.shopId type:YSF_NIMSessionTypeYSF];
             [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
             
             if (quitWaitingOrCloseSession) {
@@ -330,7 +330,7 @@ static long long g_sessionId;
                 notification.localCommand = YSFCommandSessionWillClose;
                 notification.message = @"您退出了咨询";
                 YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
-                YSF_NIMSession *session = [YSF_NIMSession session:_shopId type:YSF_NIMSessionTypeYSF];
+                YSF_NIMSession *session = [YSF_NIMSession session:weakSelf.shopId type:YSF_NIMSessionTypeYSF];
                 [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
             }
         }
@@ -865,10 +865,12 @@ static long long g_sessionId;
 
 - (void)changeEvaluationButtonToEnable
 {
-    if ([QYCustomUIConfig sharedInstance].showEvaluationEntry) {
-        _evaluation.hidden = NO;
-        _evaluationText.hidden = NO;
+    if (![QYCustomUIConfig sharedInstance].showEvaluationEntry) {
+        return;
     }
+    _evaluation.hidden = NO;
+    _evaluationText.hidden = NO;
+    
     _evaluation.enabled = YES;
     if (_changeEvaluationEnabledBlock) {
         _changeEvaluationEnabledBlock(YES);
@@ -889,10 +891,11 @@ static long long g_sessionId;
 
 - (void)changeEvaluationButtonToDone
 {
-    if ([QYCustomUIConfig sharedInstance].showEvaluationEntry) {
-        _evaluation.hidden = NO;
-        _evaluationText.hidden = NO;
+    if (![QYCustomUIConfig sharedInstance].showEvaluationEntry) {
+        return;
     }
+    _evaluation.hidden = NO;
+    _evaluationText.hidden = NO;
     _evaluation.enabled = NO;
     if (_changeEvaluationEnabledBlock) {
         _changeEvaluationEnabledBlock(NO);
@@ -1696,7 +1699,7 @@ static long long g_sessionId;
         __weak typeof(self) weakSelf = self;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-            [sessionManager clearByShopId:_shopId];
+            [sessionManager clearByShopId:weakSelf.shopId];
             [self clearSessionState];
             [weakSelf requestServiceIfNeeded:NO onlyManual:NO];
         });
@@ -1803,7 +1806,7 @@ static long long g_sessionId;
                                    }
                                    else {
                                        messageAudio.isDeliveried = NO;
-                                       [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:messageAudio forSession:_session completion:nil];
+                                       [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:messageAudio forSession:weakSelf.session completion:nil];
                                        UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
                                        [topmostWindow ysf_makeToast:@"语音转文字失败" duration:2.0 position:YSFToastPositionCenter];
                                    }
@@ -1868,7 +1871,7 @@ static long long g_sessionId;
         
         __weak typeof(self) weakSelf = self;
         [_inputtingMessage start:dispatch_get_main_queue() interval:sendingRate repeats:NO block:^{
-            if (!_inputtingMessage.isStopped && weakSelf.lastMessageContent) {
+            if (!weakSelf.inputtingMessage.isStopped && weakSelf.lastMessageContent) {
                 [weakSelf sendSendInputtingMessageRequest:weakSelf.lastMessageContent sessionId:session.sessionId sendingRate:sendingRate];
             }
         }];
@@ -2036,12 +2039,13 @@ static long long g_sessionId;
         YSFEvaluationAnswerRequest *answer = [YSFEvaluationAnswerRequest new];
         answer.evaluation = yesOrNo ? 2 : 3;
         answer.msgidClient = message.messageId;
+        __weak typeof(self) weakSelf = self;
         [YSFIMCustomSystemMessageApi sendMessage:answer shopId:_shopId completion:^(NSError *error){
             if (!error) {
                 YSF_NIMCustomObject *customObject = message.messageObject;
                 YSFMachineResponse *response = (YSFMachineResponse*)customObject.attachment;
                 response.evaluation = yesOrNo ? YSFEvaluationSelectionTypeYes : YSFEvaluationSelectionTypeNo;
-                [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:_session completion:nil];
+                [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:weakSelf.session completion:nil];
             }
         }];
         
@@ -2290,7 +2294,7 @@ static long long g_sessionId;
     __weak typeof(self) weakSelf = self;
     vc.submitCallback = ^(BOOL submitted, YSFSubmittedBotForm *submittedBotForm)
     {
-        [_sessionInputView addKeyboardObserver];
+        [weakSelf.sessionInputView addKeyboardObserver];
         if (!submitted) {
             
             YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)message.messageObject;
@@ -2302,13 +2306,13 @@ static long long g_sessionId;
             YSF_NIMCustomObject *customObject = [[YSF_NIMCustomObject alloc] init];
             customObject.attachment = botForm;
             message.messageObject = customObject;
-            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:_session completion:nil];
+            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:weakSelf.session completion:nil];
             
             return;
         }
         long long sessionId = message.sessionIdFromMessageId;
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-        YSFServiceSession *session = [sessionManager getSession:_shopId];
+        YSFServiceSession *session = [sessionManager getSession:weakSelf.shopId];
         if (session.sessionId == sessionId) {
             NSString *tmpParams = [NSString stringWithFormat:@"msgIdClient=%@&", message.messageId];
             tmpParams = [tmpParams stringByAppendingString:botForm.params];
@@ -2324,7 +2328,7 @@ static long long g_sessionId;
             YSF_NIMCustomObject *customObject = [[YSF_NIMCustomObject alloc] init];
             customObject.attachment = botForm;
             message.messageObject = customObject;
-            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:_session completion:nil];
+            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:weakSelf.session completion:nil];
         }
         else {
             UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
@@ -2497,6 +2501,7 @@ static long long g_sessionId;
     YSFSetEvaluationReasonRequest *request = [YSFSetEvaluationReasonRequest new];
     request.msgId = message.messageId;
     request.evaluationContent = text;
+    __weak typeof(self) weakSelf = self;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error) {
         if (!error) {
             if (self.evaluationResonView) {
@@ -2506,7 +2511,7 @@ static long long g_sessionId;
             YSF_NIMCustomObject *customObject = (YSF_NIMCustomObject*)message.messageObject;
             YSFMachineResponse *machineAttachment = (YSFMachineResponse*)customObject.attachment;
             machineAttachment.evaluationContent = text;
-            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:_session completion:nil];
+            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:weakSelf.session completion:nil];
             [self.view ysf_makeToast:@"感谢您的反馈" duration:1 position:YSFToastPositionCenter];
         } else {
             [self.view ysf_makeToast:@"提交失败，请稍后再试" duration:1 position:YSFToastPositionCenter];
@@ -3091,11 +3096,11 @@ static long long g_sessionId;
             [weakSelf.queryWaitingStatusTimer stop];
             [weakSelf.tipView setSessionTip:YSFSessionTipOK];
             YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-            [sessionManager clearByShopId:_shopId];
+            [sessionManager clearByShopId:weakSelf.shopId];
             
             [self clearSessionState];
-            _closeSession.enabled = NO;
-            _closeSessionText.enabled = NO;
+            weakSelf.closeSession.enabled = NO;
+            weakSelf.closeSessionText.enabled = NO;
         }
     }];
 }
@@ -3259,19 +3264,19 @@ static long long g_sessionId;
     }
     else{
         UIImage *orgImage = info[UIImagePickerControllerOriginalImage];
-        __weak typeof(self) wself = self;
+        __weak typeof(self) weakSelf = self;
         [picker dismissViewControllerAnimated:YES completion:^{
 
-            switch (_mode) {
+            switch (weakSelf.mode) {
                 case NTESImagePickerModeImage:
                 {
-                    [wself sendMessage:[YSFMessageMaker msgWithImage:orgImage]];
+                    [weakSelf sendMessage:[YSFMessageMaker msgWithImage:orgImage]];
                     break;
                 }
                 case NTESImagePickerModeShootImage:
                 {
                     UIImageWriteToSavedPhotosAlbum(orgImage, nil, nil, nil);
-                    [wself sendMessage:[YSFMessageMaker msgWithImage:orgImage]];
+                    [weakSelf sendMessage:[YSFMessageMaker msgWithImage:orgImage]];
                     break;
                 }
                 default:
