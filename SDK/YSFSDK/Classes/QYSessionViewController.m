@@ -211,14 +211,16 @@ static long long g_sessionId;
         shouldRequestService = NO;
         NSDictionary *dict = [sessionManager getEvaluationInfoByShopId:_shopId];
         NSInteger status = [[dict objectForKey:YSFSessionStatus] integerValue];
-        if (status == 2 && [QYCustomUIConfig sharedInstance].showEvaluationEntry) {
-            _evaluation.hidden = NO;
-            _evaluation.enabled = YES;
+        if (status == 2) {
             if (_changeEvaluationEnabledBlock) {
                 _changeEvaluationEnabledBlock(YES);
             }
-            _evaluationText.hidden = NO;
-            _evaluationText.enabled = YES;
+            if ([QYCustomUIConfig sharedInstance].showEvaluationEntry) {
+                _evaluation.hidden = NO;
+                _evaluation.enabled = YES;
+                _evaluationText.hidden = NO;
+                _evaluationText.enabled = YES;
+            }
         }
     }
     
@@ -865,6 +867,9 @@ static long long g_sessionId;
 
 - (void)changeEvaluationButtonToEnable
 {
+    if (_changeEvaluationEnabledBlock) {
+        _changeEvaluationEnabledBlock(YES);
+    }
     if (![QYCustomUIConfig sharedInstance].showEvaluationEntry) {
         return;
     }
@@ -872,9 +877,6 @@ static long long g_sessionId;
     _evaluationText.hidden = NO;
     
     _evaluation.enabled = YES;
-    if (_changeEvaluationEnabledBlock) {
-        _changeEvaluationEnabledBlock(YES);
-    }
     _evaluationText.enabled = YES;
     [_evaluationText setTitle:@"评价" forState:UIControlStateNormal];
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
@@ -891,15 +893,15 @@ static long long g_sessionId;
 
 - (void)changeEvaluationButtonToDone
 {
+    if (_changeEvaluationEnabledBlock) {
+        _changeEvaluationEnabledBlock(NO);
+    }
     if (![QYCustomUIConfig sharedInstance].showEvaluationEntry) {
         return;
     }
     _evaluation.hidden = NO;
     _evaluationText.hidden = NO;
     _evaluation.enabled = NO;
-    if (_changeEvaluationEnabledBlock) {
-        _changeEvaluationEnabledBlock(NO);
-    }
     _evaluationText.enabled = NO;
     [_evaluationText setTitle:@"已评价" forState:UIControlStateNormal];
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
