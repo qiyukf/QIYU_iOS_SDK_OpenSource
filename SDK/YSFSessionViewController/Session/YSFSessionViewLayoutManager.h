@@ -17,7 +17,7 @@
 
 - (instancetype)initWithInputView:(YSFInputView*)inputView tableView:(UITableView*)tableview;
 
-- (void)insertTableViewCellAtRows:(NSArray*)addIndexs;
+- (void)insertTableViewCellAtRows:(NSArray*)addIndexs scrollToBottom:(BOOL)scrollToBottom;
 
 - (void)updateCellAtIndex:(NSInteger)index model:(YSFMessageModel *)model;
 

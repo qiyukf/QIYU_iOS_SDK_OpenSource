@@ -32,6 +32,10 @@
     if (size.width > msgContentMaxWidth) {
         size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth, CGFLOAT_HEIGHT_UNKNOWN)];
     }
+    if (self.message.isPushMessageType) {
+        size.width = msgContentMaxWidth;
+        size.height += 44;
+    }
     
     return CGSizeMake(size.width, size.height);
 }

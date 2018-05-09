@@ -7,6 +7,8 @@
 #import "YSFInputEmoticonParser.h"
 #import "YSFRichText.h"
 #import "QYCustomUIConfig.h"
+#import "UIControl+BlocksKit.h"
+#import "YSF_NIMMessage+YSF.h"
 
 
 
@@ -14,6 +16,8 @@
 @interface YSFRichTextContentView() <YSFAttributedTextContentViewDelegate>
 
 @property (nonatomic, strong) YSFAttributedTextView *textView;
+@property (nonatomic, strong) UIView *splitLine;
+@property (nonatomic, strong) UIButton *action;
 @property (nonatomic, strong) NSMutableArray<UIImageView *> *imageViewsArray;
 
 @end
@@ -28,6 +32,18 @@
         _textView.textDelegate = self;
         _textView.backgroundColor = [UIColor clearColor];
         [self addSubview:_textView];
+        
+        _splitLine = [UIView new];
+        _splitLine.backgroundColor = YSFRGB(0xdbdbdb);
+        [self addSubview:_splitLine];
+
+        _action = [UIButton new];
+        [_action setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
+        __weak typeof(self) weakSelf = self;
+        [_action ysf_addEventHandler:^(id  _Nonnull sender) {
+            [weakSelf actionClick:weakSelf.model.message.actionUrl];
+        } forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_action];
         
         _imageViewsArray = [NSMutableArray new];
     }
@@ -44,6 +60,30 @@
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.model.message.messageObject;
     YSFRichText *attachment = (YSFRichText *)object.attachment;
     _textView.attributedString = [self _attributedString:attachment.content];
+    
+    if (self.model.message.isPushMessageType) {
+        _textView.ysf_frameHeight -= 44;
+        _splitLine.hidden = NO;
+        _splitLine.ysf_frameTop = _textView.ysf_frameBottom;
+        _splitLine.ysf_frameHeight = 0.5;
+        _splitLine.ysf_frameLeft = 5;
+        _splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
+        _action.hidden = NO;
+        [_action setTitle:self.model.message.actionText forState:UIControlStateNormal];
+        _action.titleLabel.font = [UIFont systemFontOfSize:15];
+        _action.ysf_frameLeft = 5;
+        _action.ysf_frameWidth = self.ysf_frameWidth - 5;
+        _action.ysf_frameTop = _splitLine.ysf_frameBottom;
+        _action.ysf_frameHeight = 44;
+        if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
+            _splitLine.ysf_frameLeft = -5;
+            _action.ysf_frameLeft = -5;
+        }
+    }
+    else {
+        _splitLine.hidden = YES;
+        _action.hidden = YES;
+    }
 }
 
 - (NSAttributedString *)_attributedString:(NSString *)text
@@ -203,6 +243,15 @@
     event.eventName = YSFKitEventNameTapLabelLink;
     event.message = self.model.message;
     event.data = button.URL.relativeString;
+    [self.delegate onCatchEvent:event];
+}
+
+- (void)actionClick:(NSString *)actionUrl
+{
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameTapPushMessageActionUrl;
+    event.message = self.model.message;
+    event.data = actionUrl;
     [self.delegate onCatchEvent:event];
 }
 

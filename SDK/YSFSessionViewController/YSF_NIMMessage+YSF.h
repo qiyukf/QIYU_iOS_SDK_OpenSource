@@ -6,6 +6,7 @@
 //  Copyright © 2016年 Netease. All rights reserved.
 //
 
+
 @interface YSF_NIMMessage (YSF)
 /**
  *  缩略文本，用于会话列表显示
@@ -15,5 +16,10 @@
 - (NSString *)getTextWithoutTrashWords;
 - (BOOL)hasTrashWords;
 - (NSString *)getTrashWordsTip;
+- (NSString *)getMiniAppTimeTip;
+- (NSString *)staffHeadImageUrl;
+- (NSString *)actionText;
+- (NSString *)actionUrl;
+
 @end
 

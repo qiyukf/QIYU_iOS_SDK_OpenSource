@@ -28,6 +28,8 @@
 #import "YSFTrashWords.h"
 #import "NSArray+YSF.h"
 #import "YSFLongMessage.h"
+#import "YSFRichText.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @interface YSFSessionManager ()
 <YSF_NIMSystemNotificationManagerDelegate,
@@ -610,7 +612,29 @@ YSFServiceRequestDelegate>
             QYPushMessageBlock pushMessageBlock = [QYSDK sharedSDK].pushMessageBlock;
             if (pushMessageBlock) {
                 QYPushMessage *pushMessage = [QYPushMessage new];
-                pushMessage.text = message.text;
+                pushMessage.headImageUrl = message.staffHeadImageUrl;
+                pushMessage.actionText = message.actionText;
+                pushMessage.actionUrl = message.actionUrl;
+                if (message.messageType == YSF_NIMMessageTypeText)
+                {
+                    pushMessage.text = message.text;
+                    pushMessage.type = QYPushMessageTypeText;
+                }
+                else if (message.messageType == YSF_NIMMessageTypeImage)
+                {
+                    YSF_NIMImageObject *object = message.messageObject;
+                    pushMessage.imageUrl = object.url;
+                    pushMessage.type = QYPushMessageTypeImage;
+                }
+                else if (message.messageType == YSF_NIMMessageTypeCustom)
+                {
+                    YSF_NIMCustomObject *customObject = message.messageObject;
+                    if ([customObject.attachment isKindOfClass:[YSFRichText class]]) {
+                        YSFRichText *richText = (YSFRichText *)customObject.attachment;
+                        pushMessage.richText = richText.content;
+                        pushMessage.type = QYPushMessageTypeRichText;
+                    }
+                }
                 pushMessage.time = message.timestamp;
                 if (pushMessage) {
                     pushMessageBlock(pushMessage);

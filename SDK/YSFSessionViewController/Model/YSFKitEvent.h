@@ -36,5 +36,8 @@ extern NSString *const YSFKitEventNameTapCommodityInfo;
 extern NSString *const YSFKitEventNameTapEvaluation;
 extern NSString *const YSFKitEventNameTapRetryAudioToText;
 extern NSString *const YSFKitEventNameTapRichTextImage;
-extern NSString *const  YSFKitEventNameTapSubmittedBotFormImage;
+extern NSString *const YSFKitEventNameTapSubmittedBotFormImage;
+extern NSString *const YSFKitEventNameTapPushMessageActionUrl;
+extern NSString *const YSFKitEventNameOpenUrl;
+
 

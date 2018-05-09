@@ -109,12 +109,14 @@
     NSString *ext = self.ext;
     if (self.isOutgoingMsg) {
         //旧版本没有auditResultType
-        NSArray *trashWordsArray = [[ext ysf_toDict] ysf_jsonArray:YSFApiKeyTrashWords];
         YSFAuditResultType andiResultType = [[ext ysf_toDict] ysf_jsonInteger:YSFApiKeyAuditResult];
+        NSArray *trashWordsArray;
         if (andiResultType == YSFAuditResultTypeYidun) {
+            trashWordsArray = [[ext ysf_toDict] ysf_jsonArray:YSFApiKeyTrashWords];
             tip = @"消息包含违禁信息，发送失败";
         }
-        else if (trashWordsArray.count > 0) {
+        else if (andiResultType == YSFAuditResultTypeTransWords) {
+            trashWordsArray = [[[ext ysf_toDict] ysf_jsonString:YSFApiKeyTrashWords] ysf_toArray];
             tip = @"消息包含违禁词“";
             int totalWords = 10;
             for (int i = 0; i < trashWordsArray.count; i++) {
@@ -142,8 +144,42 @@
     return tip;
 }
 
+- (NSString *)getMiniAppTimeTip
+{
+    NSString *tip = @"";
+    NSString *ext = self.ext;
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf && self.isOutgoingMsg) {
+        tip = [[ext ysf_toDict] ysf_jsonString:YSFApiKeyMiniAppTip];
+    }
 
+    return tip;
+}
 
+- (NSString *)staffHeadImageUrl
+{
+    NSString *ext = self.ext;
+    NSString *staffHeadImageUrl = [[[ext ysf_toDict] ysf_jsonDict:YSFApiKeySenderInfo]
+                                   ysf_jsonString:YSFApiKeyStaffIcon];
+    staffHeadImageUrl = [staffHeadImageUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    return staffHeadImageUrl;
+}
+
+- (NSString *)actionText
+{
+    NSString *ext = self.ext;
+    NSString *label = [[[ext ysf_toDict] ysf_jsonDict:YSFApiKeyAction] ysf_jsonString:YSFApiKeyLabel];
+    
+    return label;
+}
+
+- (NSString *)actionUrl
+{
+    NSString *ext = self.ext;
+    NSString *url = [[[ext ysf_toDict] ysf_jsonDict:YSFApiKeyAction] ysf_jsonString:YSFApiKeyUrl];
+    
+    return url;
+}
 
 @end
 

@@ -22,6 +22,8 @@
 #import "YSFSystemConfig.h"
 #import "YSFTrashWords.h"
 #import "YSFLongMessage.h"
+#import "YSFSendSearchQuestionResponse.h"
+#import "YSFSearchQuestionSetting.h"
 
 @implementation YSFCustomSystemNotificationParser
 
@@ -80,6 +82,12 @@
                     break;
                 case YSFCommandLongMessage:
                     result = [YSFLongMessage dataByJson:dict];
+                    break;
+                case YSFCommandSearchQuestiongResponse:
+                    result = [YSFSendSearchQuestionResponse dataByJson:dict];
+                    break;
+                case YSFCommandSearchQuestiongSetting:
+                    [[YSFSearchQuestionSetting sharedInstance:shopId] dataByJson:dict];
                     break;
                 default:
                     break;

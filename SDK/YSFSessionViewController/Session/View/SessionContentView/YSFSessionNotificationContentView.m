@@ -15,6 +15,10 @@
 #import "YSFEvaluationTipObject.h"
 #import "NSMutableAttributedString+YSFVendor.h"
 #import "YSFNotification.h"
+#import "YSFApiDefines.h"
+
+@interface YSFSessionNotificationContentView() <YSFAttributedLabelDelegate>
+@end
 
 @implementation YSFSessionNotificationContentView
 
@@ -26,7 +30,9 @@
         _label.textColor = [[QYCustomUIConfig sharedInstance] tipMessageTextColor];
         _label.backgroundColor = [UIColor clearColor];
         _label.numberOfLines = 0;
+        _label.underLineForLink = NO;
         _label.textAlignment = kCTTextAlignmentCenter;
+        _label.delegate = self;
         [self addSubview:_label];
         self.bubbleType = YSFKitBubbleTypeNotify;
     }
@@ -60,6 +66,10 @@
         }
         else if ([object.attachment isKindOfClass:[YSFNotification class]]) {
             _label.text = [model.layoutConfig formatedMessage:model];
+            YSFNotification *notification = object.attachment;
+            if (notification.localCommand == YSFCommandMiniAppTip) {
+                [_label addCustomLink:@"YSFCommandMiniAppTip" forRange:NSMakeRange(notification.message.length-6, 6)];
+            }
         }
     }
 }
@@ -75,6 +85,17 @@
     self.label.ysf_frameCenterY = self.label.ysf_frameCenterY + 2;
 }
 
-
+#pragma mark - NIMAttributedLabelDelegate
+- (void)ysfAttributedLabel:(YSFAttributedLabel *)label
+             clickedOnLink:(id)data
+{
+    if ([data isEqualToString:@"YSFCommandMiniAppTip"]) {
+        YSFKitEvent *event = [[YSFKitEvent alloc] init];
+        event.eventName = YSFKitEventNameOpenUrl;
+        event.message = self.model.message;
+        event.data = @"https://developers.weixin.qq.com/miniprogram/dev/api/custommsg/conversation.html";
+        [self.delegate onCatchEvent:event];
+    }
+}
 
 @end

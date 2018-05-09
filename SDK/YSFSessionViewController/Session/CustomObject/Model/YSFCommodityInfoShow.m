@@ -9,7 +9,10 @@
 #import "YSFCommodityInfoShow.h"
 #import "YSFApiDefines.h"
 #import "NSDictionary+YSFJson.h"
+#import "NSArray+YSF.h"
 #import "YSFCommodityInfoContentConfig.h"
+
+
 
 @implementation YSFCommodityInfoShow
 
@@ -36,6 +39,21 @@
     dict[YSFApiKeyExt]     = YSFStrParam(_ext);
     dict[YSFApiKeyShow]     = _show ? @(1) : @(0);
     dict[YSFApiKeyAuto]     = _bAuto ? @(1) : @(0);
+    if (_tagsString.length == 0) {
+        NSMutableArray *array = [NSMutableArray new];
+        for (QYCommodityTag *tag in _tagsArray) {
+            NSMutableDictionary *tagDict = [NSMutableDictionary dictionary];
+            tagDict[YSFApiKeyLabel]     = YSFStrParam(tag.label);
+            tagDict[YSFApiKeyUrl]     = YSFStrParam(tag.url);
+            tagDict[YSFApiKeyFocusIframe]     = YSFStrParam(tag.focusIframe);
+            tagDict[YSFApiKeyData]     = YSFStrParam(tag.data);
+            [array addObject:tagDict];
+        }
+        dict[YSFApiKeyTags] = [array ysf_toUTF8String];
+    }
+    else {
+        dict[YSFApiKeyTags] = YSFStrParam(_tagsString);
+    }
 
     return dict;
 }
@@ -52,6 +70,18 @@
     instance.ext            = [dict ysf_jsonString:YSFApiKeyExt];
     instance.show                = [dict ysf_jsonBool:YSFApiKeyShow];
     instance.bAuto                = [dict ysf_jsonBool:YSFApiKeyAuto];
+    
+    NSMutableArray *tagArray = [NSMutableArray new];
+    NSArray *array                = [dict ysf_jsonArray:YSFApiKeyTags];
+    for (NSDictionary *dict in array) {
+        QYCommodityTag *tag = [QYCommodityTag new];
+        tag.label            = [dict ysf_jsonString:YSFApiKeyLabel];
+        tag.url              = [dict ysf_jsonString:YSFApiKeyUrl];
+        tag.focusIframe      = [dict ysf_jsonString:YSFApiKeyFocusIframe];
+        tag.data             = [dict ysf_jsonString:YSFApiKeyData];
+        [tagArray addObject:tag];
+    }
+    instance.tagsArray = tagArray;
 
     return instance;
 }

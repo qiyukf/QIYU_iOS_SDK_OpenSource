@@ -179,6 +179,18 @@
     }
     _trashWordsTip.text = [self.model.message getTrashWordsTip];
     
+    if (_trashWordsTip.text.length == 0) {
+        NSString *tip =  [self.model.message getMiniAppTimeTip];
+        if (tip.length > 0) {
+            [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_file_transfer_cancel"] forState:UIControlStateNormal];
+            _retryButton.hidden = NO;
+            _retryButton.userInteractionEnabled = NO;
+            _trashWordsTip.hidden = NO;
+            
+            _trashWordsTip.text = tip;
+        }
+    }
+    
     _submitForm.hidden = YES;
     if (self.model.message.messageType == YSF_NIMMessageTypeCustom) {
         YSF_NIMCustomObject *customObject = self.model.message.messageObject;

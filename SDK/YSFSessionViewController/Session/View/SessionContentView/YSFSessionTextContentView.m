@@ -13,9 +13,11 @@
 #import "YSFAttributedLabel+YSF.h"
 #import "YSFApiDefines.h"
 #import "YSF_NIMMessage+YSF.h"
+#import "UIControl+BlocksKit.h"
 
 @interface YSFSessionTextContentView()<YSFAttributedLabelDelegate>
-
+@property (nonatomic, strong) UIView *splitLine;
+@property (nonatomic, strong) UIButton *action;
 @end
 
 @implementation YSFSessionTextContentView
@@ -31,6 +33,18 @@
         _textLabel.backgroundColor = [UIColor clearColor];
         _textLabel.highlightColor = YSFRGBA2(0x1a000000);
         [self addSubview:_textLabel];
+        
+        _splitLine = [UIView new];
+        _splitLine.backgroundColor = YSFRGB(0xdbdbdb);
+        [self addSubview:_splitLine];
+        
+        _action = [UIButton new];
+        [_action setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
+        __weak typeof(self) weakSelf = self;
+        [_action ysf_addEventHandler:^(id  _Nonnull sender) {
+            [weakSelf actionClick:weakSelf.model.message.actionUrl];
+        } forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_action];
     }
     return self;
 }
@@ -64,6 +78,17 @@
     else {
         [_textLabel ysf_setText:text];
     }
+    
+    if (self.model.message.isPushMessageType) {
+        _splitLine.hidden = NO;
+        _action.hidden = NO;
+        [_action setTitle:self.model.message.actionText forState:UIControlStateNormal];
+        _action.titleLabel.font = [UIFont systemFontOfSize:15];
+    }
+    else {
+        _splitLine.hidden = YES;
+        _action.hidden = YES;
+    }
 }
 
 - (void)layoutSubviews {
@@ -72,6 +97,22 @@
     CGSize contentsize         = self.model.contentSize;
     CGRect labelFrame = CGRectMake(contentInsets.left, contentInsets.top, contentsize.width, contentsize.height);
     self.textLabel.frame = labelFrame;
+    
+    if (self.model.message.isPushMessageType) {
+        _textLabel.ysf_frameHeight -= 44;
+        _splitLine.ysf_frameTop = _textLabel.ysf_frameBottom;
+        _splitLine.ysf_frameHeight = 0.5;
+        _splitLine.ysf_frameLeft = 5;
+        _splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
+        _action.ysf_frameLeft = 5;
+        _action.ysf_frameWidth = self.ysf_frameWidth - 5;
+        _action.ysf_frameTop = _splitLine.ysf_frameBottom;
+        _action.ysf_frameHeight = 44;
+        if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
+            _splitLine.ysf_frameLeft = -5;
+            _action.ysf_frameLeft = -5;
+        }
+    }
 }
 
 
@@ -100,6 +141,15 @@
         [self.delegate onCatchEvent:event];
     }
 
+}
+
+- (void)actionClick:(NSString *)actionUrl
+{
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameTapPushMessageActionUrl;
+    event.message = self.model.message;
+    event.data = actionUrl;
+    [self.delegate onCatchEvent:event];
 }
 
 @end

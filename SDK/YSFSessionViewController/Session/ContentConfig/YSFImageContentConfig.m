@@ -24,6 +24,10 @@
                                                       minSize:CGSizeMake(attachmentImageMinWidth, attachmentImageMinHeight)
                                                       maxSize:CGSizeMake(attachmemtImageMaxWidth, attachmentImageMaxHeight )];
     }
+    if (self.message.isPushMessageType) {
+        contentSize.height += 44;
+    }
+    
     return contentSize;
 }
 

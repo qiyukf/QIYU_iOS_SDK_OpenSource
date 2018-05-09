@@ -120,6 +120,7 @@
     _compressQuality = 0.5;
     _showTransWords = NO;
     _showEvaluationEntry = YES;
+    _bypassDisplayMode = QYBypassDisplayModeBottom;
 }
 
 - (void)setToKf

@@ -9,6 +9,7 @@
 #import "YSFDataProvider.h"
 #import "QYCustomUIConfig.h"
 #import "QYSDK_Private.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @implementation YSFDataProvider
 - (YSFSessionUserInfo *)infoByCustomer:(YSF_NIMMessage *)message
@@ -27,12 +28,16 @@
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     NSString *messageFrom = message.from;
     if (message.isPushMessageType) {
-        messageFrom = @"QIYU_ROBOT";
+        info.avatarUrlString = message.staffHeadImageUrl;
     }
-    info.avatarUrlString = [sessionManager queryIconUrlFromStaffId:messageFrom];
-    if (info.avatarUrlString.length == 0) {
-        info.avatarUrlString = [[QYCustomUIConfig sharedInstance] serviceHeadImageUrl];
+    else
+    {
+        info.avatarUrlString = [sessionManager queryIconUrlFromStaffId:messageFrom];
+        if (info.avatarUrlString.length == 0) {
+            info.avatarUrlString = [[QYCustomUIConfig sharedInstance] serviceHeadImageUrl];
+        }
     }
+
     return info;
 }
 

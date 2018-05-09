@@ -55,6 +55,17 @@
         [trashWordsTip sizeToFit];
         cellBubbleButtomToCellButtom += 10 + trashWordsTip.ysf_frameHeight;
     }
+    if ([model.message getMiniAppTimeTip].length > 0) {
+        UILabel *tip = [UILabel new];
+        tip = [UILabel new];
+        tip.numberOfLines = 0;
+        tip.lineBreakMode = NSLineBreakByCharWrapping;
+        tip.font = [UIFont systemFontOfSize:12.f];
+        tip.frame = CGRectMake(0, 0, YSFUIScreenWidth - 112, 0);
+        tip.text = [model.message getMiniAppTimeTip];
+        [tip sizeToFit];
+        cellBubbleButtomToCellButtom += 10 + tip.ysf_frameHeight;
+    }
     
     if (model.message.messageType == YSF_NIMMessageTypeCustom) {
         YSF_NIMCustomObject *customObject = model.message.messageObject;

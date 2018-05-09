@@ -26,6 +26,8 @@ NSString *const YSFKitEventNameTapCommodityInfo = @"YSFKitEventNameTapCommodityI
 NSString *const YSFKitEventNameTapEvaluation = @"YSFKitEventNameTapEvaluation";
 NSString *const YSFKitEventNameTapRetryAudioToText = @"YSFKitEventNameTapRetryAudioToText";
 NSString *const YSFKitEventNameTapRichTextImage = @"YSFKitEventNameTapRichTextImage";
+NSString *const YSFKitEventNameTapPushMessageActionUrl = @"YSFKitEventNameTapPushMessageActionUrl";
+NSString *const YSFKitEventNameOpenUrl = @"YSFKitEventNameOpenUrl";
 
 @implementation YSFKitEvent
 

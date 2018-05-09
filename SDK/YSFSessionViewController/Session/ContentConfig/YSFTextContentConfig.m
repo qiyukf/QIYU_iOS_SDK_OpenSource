@@ -36,6 +36,10 @@
     CGFloat msgBubbleMaxWidth    = (cellWidth - 112);
     CGFloat msgContentMaxWidth = msgBubbleMaxWidth - self.contentViewInsets.left - self.contentViewInsets.right;
     CGSize size = [label sizeThatFits:CGSizeMake(msgContentMaxWidth, CGFLOAT_MAX)];
+    if (self.message.isPushMessageType) {
+        size.width = msgContentMaxWidth;
+        size.height += 44;
+    }
     if (size.height < 26) {
         size.height = 26;
     }

@@ -1,4 +1,5 @@
 #import "YSFCustomAttachment.h"
+#import "QYCommodityInfo.h"
 
 
 @interface YSFCommodityInfoShow : NSObject<YSFCustomAttachment>
@@ -20,6 +21,8 @@
 @property (nonatomic, assign) BOOL show;
 //是否作为自动发送消息，NO为否，YES为是，默认为自动发送消息
 @property (nonatomic, assign) BOOL bAuto;
+@property (nonatomic, copy) NSArray<QYCommodityTag *> *tagsArray;
+@property (nonatomic, copy) NSString *tagsString;
 
 + (YSFCommodityInfoShow *)objectByDict:(NSDictionary *)dict;
 

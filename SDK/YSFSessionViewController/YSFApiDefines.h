@@ -196,12 +196,23 @@
 #define     YSFApiEvaluationAutoPopup   @"evaluation_auto_popup"
 #define     YSFApiTagList               @"tagList"
 #define     YSFApiKeyMsgType            @"msg_type"
-#define     YSFApiKeyMsgId2              @"msg_id"
+#define     YSFApiKeyMsgId2             @"msg_id"
 #define     YSFApiKeySplitId            @"split_id"
 #define     YSFApiKeySplitCount         @"split_count"
 #define     YSFApiKeySplitIndex         @"split_index"
 #define     YSFApiKeySplitContent       @"split_content"
 #define     YSFApiKeyTrack              @"track"
+#define     YSFApiKeyMsgType2           @"msgType"
+#define     YSFApiKeyQuestionContents   @"questionContents"
+#define     YSFApiKeyKey1               @"key1"
+#define     YSFApiKeyTags               @"tags"
+#define     YSFApiKeyFocusIframe        @"focusIframe"
+#define     YSFApiKeyData               @"data"
+#define     YSFApiKeyStaffIcon          @"staffIcon"
+#define     YSFApiKeySenderInfo         @"senderInfo"
+#define     YSFApiKeySwitch             @"switch"
+#define     YSFApiKeyChildren           @"children"
+#define     YSFApiKeyMiniAppTip         @"miniTrashTip"
 
 
 
@@ -221,6 +232,9 @@ typedef enum : NSUInteger {
     YSFCommandReadSessionRequest        =   9,      //会话已读标记
     YSFCommandWaitingStatusResponse     =   15,     //等待状态回包
     YSFCommandWaitingStatusRequest      =   16,     //查询等待状态
+    YSFCommandSearchQuestiongSetting    =   23,     //查询知识库问题请求
+    YSFCommandSearchQuestiongRequest    =   24,     //查询知识库问题请求
+    YSFCommandSearchQuestiongResponse   =   25,     //查询知识库问题响应
     YSFCommandCancelWaiting             =   26,     //取消排队
     YSFCommandSetCrmResult              =   41,     //设置crm结果
     YSFCommandEvaluationNotification    =   50,     //主动邀请评价
@@ -256,6 +270,7 @@ typedef enum : NSUInteger {
     YSFCommandOfflineTimeout            =   32,    //离线时间超时
     YSFCommandWelcome                   =   40,     //欢迎语
     YSFCommandTrashWords                =   42,     //消息匹配到敏感词、反垃圾
+    YSFCommandMiniAppTimeout            =   44,     //小程序超时
     YSFCommandReportQuestion            =   63,     //选择问题
     YSFCommandSessionWillClose          =   70,     //用户没有回复，稍后系统将关闭
     YSFCommandSessionClosedBySysterm    =   71,     //系统自动关闭会话
@@ -279,6 +294,7 @@ typedef enum : NSUInteger {
     YSFCommandNotification              =   10002,  //只有message字段
     YSFCommandNewMessage                =   10003,  //新消息提示
     YSFCommandInviteEvaluation          =   10004,  //邀请评价
+    YSFCommandMiniAppTip                =   10005,  //小程序提醒
 
 
 } YSFCommand;

@@ -170,6 +170,8 @@ typedef NS_ENUM(NSInteger, YSF_NIMMessageStatus) {
 
 @property (nonatomic, assign, readonly) long long sessionIdFromMessageId;
 
+@property (nonatomic,assign)         NSInteger toType;
+
 @end
 
 
