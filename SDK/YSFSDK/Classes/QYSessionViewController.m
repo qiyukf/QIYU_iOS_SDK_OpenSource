@@ -2847,25 +2847,26 @@ static long long g_sessionId;
 - (void)sendCommodityInfoRequest:(BOOL)bAuto
 {
     if (_commodityInfo) {
+        YSFCommodityInfoShow *commodityInfoShow = [[YSFCommodityInfoShow alloc] init];
+        QYCommodityInfo *commodityInfo = [self checkCommodityInfoValid];
+        commodityInfoShow.command           = YSFCommandSetCommodityInfoRequest;
+        commodityInfoShow.title             = YSFStrParam(commodityInfo.title);
+        commodityInfoShow.desc              = YSFStrParam(commodityInfo.desc);
+        commodityInfoShow.pictureUrlString  = YSFStrParam(commodityInfo.pictureUrlString);
+        commodityInfoShow.urlString         = YSFStrParam(commodityInfo.urlString);
+        commodityInfoShow.note              = YSFStrParam(commodityInfo.note);
+        commodityInfoShow.show              = commodityInfo.show;
+        commodityInfoShow.ext          = YSFStrParam(commodityInfo.ext);
+        commodityInfoShow.bAuto = bAuto;
+        commodityInfoShow.tagsArray = commodityInfo.tagsArray;
+        commodityInfoShow.tagsString = commodityInfo.tagsString;
+        
         if (!_commodityInfo.show) {
             YSFSetCommodityInfoRequest *request = [[YSFSetCommodityInfoRequest alloc] init];
-            request.commodityInfo = [self checkCommodityInfoValid];
+            request.commodityInfo = [commodityInfoShow encodeAttachment];
             [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:nil];
         }
         else{
-            YSFCommodityInfoShow *commodityInfoShow = [[YSFCommodityInfoShow alloc] init];
-            QYCommodityInfo *commodityInfo = [self checkCommodityInfoValid];
-            commodityInfoShow.command           = YSFCommandSetCommodityInfoRequest;
-            commodityInfoShow.title             = YSFStrParam(commodityInfo.title);
-            commodityInfoShow.desc              = YSFStrParam(commodityInfo.desc);
-            commodityInfoShow.pictureUrlString  = YSFStrParam(commodityInfo.pictureUrlString);
-            commodityInfoShow.urlString         = YSFStrParam(commodityInfo.urlString);
-            commodityInfoShow.note              = YSFStrParam(commodityInfo.note);
-            commodityInfoShow.show              = commodityInfo.show;
-            commodityInfoShow.ext          = YSFStrParam(commodityInfo.ext);
-            commodityInfoShow.bAuto = bAuto;
-            commodityInfoShow.tagsArray = commodityInfo.tagsArray;
-            commodityInfoShow.tagsString = commodityInfo.tagsString;
             YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:commodityInfoShow];
             [self sendMessage:commodityInfoMessage];
         }
