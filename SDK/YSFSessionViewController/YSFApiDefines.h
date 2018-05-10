@@ -202,6 +202,9 @@
 #define     YSFApiKeySplitIndex         @"split_index"
 #define     YSFApiKeySplitContent       @"split_content"
 #define     YSFApiKeyTrack              @"track"
+#define     YSFApiKeyTags               @"tags"
+#define     YSFApiKeyFocusIframe        @"focusIframe"
+#define     YSFApiKeyData               @"data"
 
 
 
