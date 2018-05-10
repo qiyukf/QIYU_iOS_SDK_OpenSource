@@ -2864,6 +2864,8 @@ static long long g_sessionId;
             commodityInfoShow.show              = commodityInfo.show;
             commodityInfoShow.ext          = YSFStrParam(commodityInfo.ext);
             commodityInfoShow.bAuto = bAuto;
+            commodityInfoShow.tagsArray = commodityInfo.tagsArray;
+            commodityInfoShow.tagsString = commodityInfo.tagsString;
             YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:commodityInfoShow];
             [self sendMessage:commodityInfoMessage];
         }
