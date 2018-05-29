@@ -393,12 +393,12 @@ YSFServiceRequestDelegate>
     }
     NSNumber *autoPopup  = [shopDict objectForKey:YSFApiEvaluationAutoPopup];
     if (![autoPopup boolValue]) {
-        [shopDict setObject:@(evaluationAutoPopup) forKey:YSFApiEvaluationAutoPopup];
-        [shopDict setObject:currentInviteEvaluationMessage.messageId forKey:YSFApiEvaluationAutoPopupMessageID];
-        [shopDict setObject:@(inviteEvaluation.sessionId) forKey:YSFApiEvaluationAutoPopupSessionId];
-        [shopDict setObject:inviteEvaluation.evaluationMessageThanks forKey:YSFApiEvaluationAutoPopupEvaluationMessageThanks];
-        [shopDict setObject:inviteEvaluation.evaluationDict forKey:YSFApiEvaluationAutoPopupEvaluationData];
-
+        [shopDict setValue:@(evaluationAutoPopup) forKey:YSFApiEvaluationAutoPopup];
+        [shopDict setValue:currentInviteEvaluationMessage.messageId forKey:YSFApiEvaluationAutoPopupMessageID];
+        [shopDict setValue:@(inviteEvaluation.sessionId)  forKey:YSFApiEvaluationAutoPopupSessionId];
+        [shopDict setValue:inviteEvaluation.evaluationMessageThanks forKey:YSFApiEvaluationAutoPopupEvaluationMessageThanks];
+        [shopDict setValue:inviteEvaluation.evaluationDict forKey:YSFApiEvaluationAutoPopupEvaluationData];
+        
         [self setEvaluationInfo:shopDict shopId:shopId];
     }
 }
@@ -545,9 +545,10 @@ YSFServiceRequestDelegate>
         YSFTrashWords *transWords = (YSFTrashWords *)object;
         if (transWords.msgIdClient && transWords.trashWords) {
             YSF_QYKFMessage * message = (YSF_QYKFMessage *)[[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:transWords.msgIdClient forSession:session];
-            message.ext = [@{ YSFApiKeyTrashWords : [transWords.trashWords ysf_toUTF8String],
-                              YSFApiKeyAuditResult : @(transWords.auditResultType)
-                              } ysf_toUTF8String];
+            NSMutableDictionary *extMutDic = [[NSMutableDictionary alloc] init];
+            [extMutDic setValue:[transWords.trashWords ysf_toUTF8String] forKey:YSFApiKeyTrashWords];
+            [extMutDic setValue:@(transWords.auditResultType) forKey:YSFApiKeyAuditResult];
+            message.ext = [extMutDic ysf_toUTF8String];
             [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:session completion:nil];
         }
         else {
