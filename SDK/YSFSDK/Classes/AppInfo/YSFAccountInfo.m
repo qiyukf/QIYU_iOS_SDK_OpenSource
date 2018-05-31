@@ -38,10 +38,10 @@
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     
     if ([self isValid]) {
-        [dict setObject:_accid forKey:@"accid"];
-        [dict setObject:_token forKey:@"token"];
-        [dict setObject:@(_isEverLogined) forKey:@"ysf_ever_logined"];
-        [dict setObject:YSFStrParam(_bid) forKey:@"bid"];
+        [dict setValue:_accid forKey:@"accid"];
+        [dict setValue:_token forKey:@"token"];
+        [dict setValue:@(_isEverLogined) forKey:@"ysf_ever_logined"];
+        [dict setValue:YSFStrParam(_bid) forKey:@"bid"];
     }
     else
     {

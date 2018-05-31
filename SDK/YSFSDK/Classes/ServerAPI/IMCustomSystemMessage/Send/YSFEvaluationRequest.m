@@ -32,7 +32,7 @@
                 [tagInfoArray addObject:tagInfo];
             }
         }
-        [infos setObject:[tagInfoArray ysf_toUTF8String] forKey:YSFApiKeyTagList];
+        [infos setValue:[tagInfoArray ysf_toUTF8String] forKey:YSFApiKeyTagList];
     }
     
     return infos;

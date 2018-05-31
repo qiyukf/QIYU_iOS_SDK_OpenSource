@@ -308,23 +308,23 @@ YSFServiceRequestDelegate>
     if (!shopDict) {
         shopDict = [[NSMutableDictionary alloc] init];
     }
-    [shopDict setObject:[[NSNumber alloc]initWithLongLong:session.sessionId] forKey:YSFCurrentSessionId];
-    [shopDict setObject:@"0" forKey:YSFSessionTimes];
+    [shopDict setValue:[[NSNumber alloc]initWithLongLong:session.sessionId] forKey:YSFCurrentSessionId];
+    [shopDict setValue:@"0" forKey:YSFSessionTimes];
     if (session.evaluation) {
-        [shopDict setObject:session.evaluation forKey:YSFEvaluationData];
+        [shopDict setValue:session.evaluation forKey:YSFEvaluationData];
     }
     if (session.messageInvite) {
-        [shopDict setObject:session.messageInvite forKey:YSFApiKeyEvaluationMessageInvite];
+        [shopDict setValue:session.messageInvite forKey:YSFApiKeyEvaluationMessageInvite];
     }
     if (session.messageThanks) {
-        [shopDict setObject:session.messageThanks forKey:YSFApiKeyEvaluationMessageThanks];
+        [shopDict setValue:session.messageThanks forKey:YSFApiKeyEvaluationMessageThanks];
     }
 
     if (session.humanOrMachine) {
-        [shopDict setObject:@(2) forKey:YSFSessionStatus];
+        [shopDict setValue:@(2) forKey:YSFSessionStatus];
     }
     else {
-        [shopDict setObject:@(1) forKey:YSFSessionStatus];
+        [shopDict setValue:@(1) forKey:YSFSessionStatus];
     }
     [self setEvaluationInfo:shopDict shopId:shopId];
 }
@@ -690,14 +690,14 @@ YSFServiceRequestDelegate>
 - (void)setEvaluationInfo:(NSDictionary *)evaluation shopId:(NSString *)shopId
 {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
-    [_evaluationInfo setObject:evaluation forKey:shopId];
+    [_evaluationInfo setValue:evaluation forKey:shopId];
     [infoManager saveDict:_evaluationInfo forKey:YSFEvalution];
 }
 
 - (void)addShopInfo:(YSFShopInfo *)shop
 {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
-    [_shopInfo setObject:[shop toDict] forKey:shop.shopId];
+    [_shopInfo setValue:[shop toDict] forKey:shop.shopId];
     [infoManager saveDict:_shopInfo forKey:YSFShopInfoKey];
 }
 
@@ -713,7 +713,7 @@ YSFServiceRequestDelegate>
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     if (staffId && iconUrl) {
         iconUrl = [iconUrl ysf_https];
-        [_staffIdIconUrl setObject:iconUrl forKey:staffId];
+        [_staffIdIconUrl setValue:iconUrl forKey:staffId];
         [infoManager saveDict:_staffIdIconUrl forKey:YSFStaffIdIconUrl];
     }
 }

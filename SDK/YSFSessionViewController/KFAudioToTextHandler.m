@@ -49,7 +49,7 @@
 
 - (void)addMessage:(NSString *)from messageId:(NSString *)messageId
 {
-    [_cacheTransferingAudio setObject:from forKey:messageId];
+    [_cacheTransferingAudio setValue:from forKey:messageId];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(120 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         NSString *from = [_cacheTransferingAudio objectForKey:messageId];
         //如果超时，则更新为失败
@@ -76,7 +76,7 @@
     
     for (YSF_QYKFMessage *message in messages) {
         if (message.messageType == YSF_NIMMessageTypeAudio) {
-            [_cacheTransferingAudio setObject:message.from forKey:message.messageId];
+            [_cacheTransferingAudio setValue:message.from forKey:message.messageId];
             
             NSDictionary *dic = [_cacheAudioText objectForKey:message.messageId];
             if (dic) {
@@ -138,7 +138,7 @@
                             [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:NO message:message forSession:session completion:nil];
                         }
                         else {
-                            [_cacheAudioText setObject:dic forKey:msgId];
+                            [_cacheAudioText setValue:dic forKey:msgId];
                         }
                     }
                     else {

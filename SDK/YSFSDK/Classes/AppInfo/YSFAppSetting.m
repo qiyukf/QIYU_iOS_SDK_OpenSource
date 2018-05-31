@@ -30,7 +30,7 @@
     
     if ([self isValid]) {
         NSNumber *recevierOrSpeaker = [[NSNumber alloc] initWithBool: _recevierOrSpeaker];
-        [dict setObject:recevierOrSpeaker forKey:@"recevierOrSpeaker"];
+        [dict setValue:recevierOrSpeaker forKey:@"recevierOrSpeaker"];
     }
     else
     {

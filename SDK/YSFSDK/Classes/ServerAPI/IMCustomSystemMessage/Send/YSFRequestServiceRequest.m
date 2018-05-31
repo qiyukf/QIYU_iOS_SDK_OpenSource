@@ -39,23 +39,23 @@
     
     //附带信息
     if ([_source.title length]) {
-        [params setObject:_source.title forKey:YSFApiKeyFromTitle];
+        [params setValue:_source.title forKey:YSFApiKeyFromTitle];
     }
     if ([_source.urlString length]) {
-        [params setObject:_source.urlString forKey:YSFApiKeyFromPage];
+        [params setValue:_source.urlString forKey:YSFApiKeyFromPage];
     }
     if ([_source.customInfo length]) {
-        [params setObject:_source.customInfo forKey:YSFApiKeyFromCustom];
+        [params setValue:_source.customInfo forKey:YSFApiKeyFromCustom];
     }
     
     NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
     if ([bundleId length]) {
-        [params setObject:bundleId forKey:YSFApiKeyFromBundleId];
+        [params setValue:bundleId forKey:YSFApiKeyFromBundleId];
     }
     NSString *ip = [[YSF_NIMSDK sharedSDK] currentIp];
     if ([ip length])
     {
-        [params setObject:ip forKey:YSFApiKeyFromIp];
+        [params setValue:ip forKey:YSFApiKeyFromIp];
     }
     
     return params;

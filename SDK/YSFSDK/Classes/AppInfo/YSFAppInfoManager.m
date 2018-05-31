@@ -126,13 +126,13 @@
     }
     NSMutableDictionary *trackHistoryInfo = [NSMutableDictionary new];
     if (title) {
-        [trackHistoryInfo setObject:title forKey:@"title"];
+        [trackHistoryInfo setValue:title forKey:@"title"];
     }
     long long time =  [[NSDate date] timeIntervalSince1970] * 1000;
-    [trackHistoryInfo setObject:@(time) forKey:@"time"];
-    [trackHistoryInfo setObject:@(enterOrOut) forKey:@"enterOrOut"];
+    [trackHistoryInfo setValue:@(time) forKey:@"time"];
+    [trackHistoryInfo setValue:@(enterOrOut) forKey:@"enterOrOut"];
     if (key) {
-        [trackHistoryInfo setObject:key forKey:@"key"];
+        [trackHistoryInfo setValue:key forKey:@"key"];
     }
     [mutableArray addObject:trackHistoryInfo];
     [self saveArray:mutableArray forKey:YSFTrackHistoryInfo];
@@ -389,10 +389,10 @@
         
         NSMutableDictionary *userInfo = [NSMutableDictionary new];
         if (_qyUserInfo.userId) {
-            [userInfo setObject:_qyUserInfo.userId forKey:@"id"];
+            [userInfo setValue:_qyUserInfo.userId forKey:@"id"];
         }
         if (_qyUserInfo.data) {
-            [userInfo setObject:_qyUserInfo.data forKey:@"data"];
+            [userInfo setValue:_qyUserInfo.data forKey:@"data"];
         }
         [self saveDict:userInfo forKey:YSFCurrentUserInfoKey];
     }
