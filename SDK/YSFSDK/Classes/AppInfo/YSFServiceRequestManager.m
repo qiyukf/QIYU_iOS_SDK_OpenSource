@@ -77,7 +77,7 @@
         if (request == nil)
         {
             request = [[YSFServiceRequest alloc] init];
-            [_requests setObject:request
+            [_requests setValue:request
                           forKey:shopId];
         }
     }

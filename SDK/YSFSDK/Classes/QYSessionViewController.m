@@ -1075,7 +1075,7 @@ static long long g_sessionId;
     [_sessionInputView addKeyboardObserver];
     
     NSMutableDictionary *shopDict = [[[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId] mutableCopy];
-    [shopDict setObject:@(NO) forKey:YSFApiEvaluationAutoPopup];
+    [shopDict setValue:@(NO) forKey:YSFApiEvaluationAutoPopup];
     [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
     
     if (!needShow) {
@@ -1083,7 +1083,7 @@ static long long g_sessionId;
     }
     
     if (shopDict) {
-        [shopDict setObject:@(3) forKey:YSFSessionStatus];
+        [shopDict setValue:@(3) forKey:YSFSessionStatus];
         [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
     }
     
@@ -1104,7 +1104,7 @@ static long long g_sessionId;
         [self changeEvaluationButtonToDone];
         
         if (shopDict) {
-            [shopDict setObject:@"-1" forKey:YSFSessionTimes];
+            [shopDict setValue:@"-1" forKey:YSFSessionTimes];
             [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:self.shopId];
         }
     }
@@ -1494,7 +1494,7 @@ static long long g_sessionId;
                 else if ([sessionTimesStr isEqualToString:@"2"]) {
                     sessionTimesStr = @"3";
                 }
-                [shopDict setObject:sessionTimesStr forKey:YSFSessionTimes];
+                [shopDict setValue:sessionTimesStr forKey:YSFSessionTimes];
                 [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
             }
         }
@@ -1589,7 +1589,7 @@ static long long g_sessionId;
                 else if ([sessionTimesStr isEqualToString:@"3"]) {
                     sessionTimesStr = @"4";
                 }
-                [shopDict setObject:sessionTimesStr forKey:YSFSessionTimes];
+                [shopDict setValue:sessionTimesStr forKey:YSFSessionTimes];
                 [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
                 
                 if ([sessionTimesStr isEqualToString:@"4"]) {
