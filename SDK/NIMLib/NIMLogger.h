@@ -34,7 +34,7 @@ extern "C" {
 
     void YSF_NIMLOG_OBJC(uint32_t level, const char *file, const char *func, uint32_t line, NSString *format, ...);
 
-    NSString *YSF_GetMessage(NSUInteger lastestMessageSize);
+//    NSString *YSF_GetMessage(NSUInteger lastestMessageSize);
 
 #if defined(__cplusplus)
 }

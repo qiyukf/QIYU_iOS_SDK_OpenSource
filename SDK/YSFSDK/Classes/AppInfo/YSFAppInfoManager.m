@@ -209,26 +209,26 @@
 - (void)createAccount
 {
     YSFCreateAccountRequest *request = [[YSFCreateAccountRequest alloc] init];
-    
+    __weak typeof(self) weakSelf = self;
     [YSFHttpApi post:request
              completion:^(NSError *error, id returendObject) {
              if (error == nil && [returendObject isKindOfClass:[YSFAccountInfo class]]) {
-                 _accountInfo = returendObject;
-                 YSFLogApp(@"createAccount success accid: %@", _accountInfo.accid);
+                 weakSelf.accountInfo = returendObject;
+                 YSFLogApp(@"createAccount success accid: %@", weakSelf.accountInfo.accid);
 
                  
                  [self saveAccountInfo];
                  [self login];
                  //创建账号成功后回调
-                 if (_delegate && [_delegate respondsToSelector:@selector(didCreateAccountSuccessfully)]) {
-                     [_delegate didCreateAccountSuccessfully];
+                 if (weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(didCreateAccountSuccessfully)]) {
+                     [weakSelf.delegate didCreateAccountSuccessfully];
                  }
              }
              else
              {
                  YSFLogErr(@"createAccount failed %@", error);
                  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                     [self createAccount];
+                     [weakSelf createAccount];
                  });
              }
          }];
@@ -508,7 +508,7 @@
 
 - (NSString *)version
 {
-    return @"38";
+    return @"40";
 }
 
 #pragma mark - CachedText

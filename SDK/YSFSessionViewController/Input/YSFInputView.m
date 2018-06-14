@@ -345,11 +345,6 @@
         toHeight += _actionBar.ysf_frameHeight;
     }
     CGRect toFrame = CGRectMake(fromFrame.origin.x, fromFrame.origin.y + (fromFrame.size.height - toHeight), fromFrame.size.width, toHeight);
-    
-    if(bottomHeight == 0 && self.frame.size.height == self.toolBar.frame.size.height)
-    {
-        return;
-    }
     self.frame = toFrame;
     
     if (bottomHeight == 0) {
@@ -458,24 +453,25 @@
 
 - (void)changeInputTypeToAudio
 {
+    __weak typeof(self) weakSelf = self;
     if ([[AVAudioSession sharedInstance] respondsToSelector:@selector(requestRecordPermission:)]) {
         [[AVAudioSession sharedInstance] performSelector:@selector(requestRecordPermission:) withObject:^(BOOL granted) {
             if (granted) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    self.inputType = InputTypeAudio;
-                    if ([self.toolBar.inputTextView isFirstResponder]) {
-                        _inputBottomViewHeight = 0;
-                        [_emoticonContainer setHidden:YES];
-                        [self.toolBar.inputTextView resignFirstResponder];
+                    weakSelf.inputType = InputTypeAudio;
+                    if ([weakSelf.toolBar.inputTextView isFirstResponder]) {
+                        weakSelf.inputBottomViewHeight = 0;
+                        [weakSelf.emoticonContainer setHidden:YES];
+                        [weakSelf.toolBar.inputTextView resignFirstResponder];
                     }
-                    else if (_inputBottomViewHeight > 0)
+                    else if (self.inputBottomViewHeight > 0)
                     {
-                        _inputBottomViewHeight = 0;
-                        [_emoticonContainer setHidden:YES];
-                        [self willShowBottomHeight:_inputBottomViewHeight];
+                        weakSelf.inputBottomViewHeight = 0;
+                        [weakSelf.emoticonContainer setHidden:YES];
+                        [weakSelf willShowBottomHeight:self.inputBottomViewHeight];
                     }
-                    [self inputTextViewChangeHeight:YSFTopInputViewHeight];;
-                    [self updateAllButtonImages];
+                    [weakSelf inputTextViewChangeHeight:YSFTopInputViewHeight];;
+                    [weakSelf updateAllButtonImages];
                 });
             }
             else {
@@ -519,15 +515,11 @@
     if (_inputType != InputTypeEmot) {
         if (!_emoticonContainer) {
             _emoticonContainer = [[YSFInputEmoticonContainerView alloc] initWithFrame:CGRectMake(0, _inputTextViewOlderHeight, self.ysf_frameWidth, YSFBottomInputViewHeight)];
-            if (!_actionBar.hidden) {
-                _emoticonContainer.ysf_frameTop += YSFActionBarHeight;
-            }
             _emoticonContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth;
             _emoticonContainer.delegate = self;
             _emoticonContainer.hidden = YES;
             [self addSubview:_emoticonContainer];
         }
-        
         self.inputType = InputTypeEmot;
         _inputBottomViewHeight = YSFBottomInputViewHeight;
         [self bringSubviewToFront:_emoticonContainer];
@@ -766,6 +758,12 @@
 
 - (void)layoutSubviews
 {
+    if (_actionBar && !_actionBar.hidden) {
+        _emoticonContainer.ysf_frameTop = _inputTextViewOlderHeight + YSFActionBarHeight;
+    }
+    else {
+        _emoticonContainer.ysf_frameTop = _inputTextViewOlderHeight;
+    }
     _actionBar.ysf_frameTop = 0;
     _actionBar.ysf_frameWidth = self.ysf_frameWidth;
     if (@available(iOS 11, *)) {

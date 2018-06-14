@@ -94,7 +94,7 @@
                                          self.model.contentSize.width - 28, 0);
         [refundContent sizeToFit];
         offsetY += refundContent.ysf_frameHeight;
-        [_content addSubview:refundContent];
+        [self.content addSubview:refundContent];
         
     }];
 

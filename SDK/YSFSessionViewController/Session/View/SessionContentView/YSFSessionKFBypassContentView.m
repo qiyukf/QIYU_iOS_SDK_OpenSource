@@ -116,7 +116,7 @@
             splitLine.ysf_frameLeft = 5;
             splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
             splitLine.ysf_frameTop = offsetY;
-            [_content addSubview:splitLine];
+            [self.content addSubview:splitLine];
             
             UIView *point = [UIView new];
             point.backgroundColor = YSFRGB(0xd6d6d6);
@@ -125,7 +125,7 @@
             point.ysf_frameWidth = 7.5;
             point.layer.cornerRadius = 4;
             point.ysf_frameTop = offsetY + 19;
-            [_content addSubview:point];
+            [self.content addSubview:point];
             
             YSFAttributedLabel *questionLabel = [self newAttrubutedLabel];
             if (!attachment.disable) {
@@ -148,7 +148,7 @@
             
 
             
-            [_content addSubview:questionLabel];
+            [self.content addSubview:questionLabel];
             offsetY += size.height;
             offsetY += 12;
             }

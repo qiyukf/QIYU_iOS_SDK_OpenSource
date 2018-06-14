@@ -7,7 +7,6 @@
 //
 
 #import "YSFCellLayoutConfig.h"
-#import "NIMSDK.h"
 
 @interface YSFMessageModel : NSObject
 

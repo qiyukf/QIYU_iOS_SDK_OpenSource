@@ -383,20 +383,21 @@ typedef enum : NSUInteger {
 }
 
 - (void)keyboardChangedWithTransition:(YSFKeyboardTransition)transition {
+    __weak typeof(self) weakSelf = self;
     [UIView animateWithDuration:transition.animationDuration delay:0 options:transition.animationOption animations:^{
         if (transition.toVisible) {
-            for (UIView * view in _scrollView.subviews) {
+            for (UIView * view in weakSelf.scrollView.subviews) {
                 if (view.isFirstResponder && [view isKindOfClass:[UITextField class]]) {
-                    CGRect kbFrame = [[YSFKeyboardManager defaultManager] convertRect:transition.toFrame toView:_scrollView];
-                    CGRect scrollViewFrame = _scrollViewFrame;
+                    CGRect kbFrame = [[YSFKeyboardManager defaultManager] convertRect:transition.toFrame toView:weakSelf.scrollView];
+                    CGRect scrollViewFrame = weakSelf.scrollViewFrame;
                     scrollViewFrame.size.height -= kbFrame.size.height;
-                    _scrollView.frame = scrollViewFrame;
-                    [_scrollView scrollRectToVisible:view.frame animated:YES];
+                    weakSelf.scrollView.frame = scrollViewFrame;
+                    [weakSelf.scrollView scrollRectToVisible:view.frame animated:YES];
                 }
             }
         }
         else {
-            _scrollView.frame = _scrollViewFrame;
+            weakSelf.scrollView.frame = weakSelf.scrollViewFrame;
         }
     } completion:^(BOOL finished) {
         
@@ -523,7 +524,7 @@ typedef enum : NSUInteger {
                     }
                     [picker dismissViewControllerAnimated:YES completion:^{
                         
-                        switch (_mode) {
+                        switch (weakSelf.mode) {
                             case NTESImagePickerModeImage:
                             {
                                 [weakSelf uploadImageResource:orgImage imageSourceName:imageSourceName];

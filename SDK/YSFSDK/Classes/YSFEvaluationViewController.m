@@ -625,8 +625,9 @@
 
 - (void)closeHandle
 {
+    __weak typeof(self) weakSelf = self;
     [self dismissViewControllerAnimated:YES completion:^{
-        _evaluationCallback(NO, @"");
+        weakSelf.evaluationCallback(NO, @"");
     }];
 }
 

@@ -12,7 +12,6 @@
 #import "YSFStartServiceObject.h"
 #import "YSFMachineResponse.h"
 #import "YSFEvaluationTipObject.h"
-#import "YSFNewSession.h"
 #import "YSFWelcome.h"
 #import "YSFSessionClose.h"
 #import "YSFNotification.h"

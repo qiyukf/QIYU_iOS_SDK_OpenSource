@@ -8,11 +8,12 @@
 
 #import "YSFCommodityInfoShow.h"
 #import "YSFApiDefines.h"
-#import "NSDictionary+YSFJson.h"
 #import "NSArray+YSF.h"
 #import "YSFCommodityInfoContentConfig.h"
+#import "QYCommodityInfo.h"
 
-
+@implementation QYCommodityTag
+@end
 
 @implementation YSFCommodityInfoShow
 
@@ -39,6 +40,16 @@
     dict[YSFApiKeyExt]     = YSFStrParam(_ext);
     dict[YSFApiKeyShow]     = _show ? @(1) : @(0);
     dict[YSFApiKeyAuto]     = _bAuto ? @(1) : @(0);
+    dict[YSFApiKeyPayMoney]     = YSFStrParam(_payMoney);
+    dict[YSFApiKeyPrice]     = YSFStrParam(_price);
+    dict[YSFApiKeyOrderCount]     = YSFStrParam(_orderCount);
+    dict[YSFApiKeyOrderSku]     = YSFStrParam(_orderSku);
+    dict[YSFApiKeyOrderStatus]     = YSFStrParam(_orderStatus);
+    dict[YSFApiKeyOrderId]     = YSFStrParam(_orderId);
+    dict[YSFApiKeyOrderTime]     = YSFStrParam(_orderTime);
+    dict[YSFApiKeyActivity]     = YSFStrParam(_activity);
+    dict[YSFApiKeyActivityHref]     = YSFStrParam(_activityHref);
+    
     if (_tagsString.length == 0) {
         NSMutableArray *array = [NSMutableArray new];
         for (QYCommodityTag *tag in _tagsArray) {
@@ -70,6 +81,15 @@
     instance.ext            = [dict ysf_jsonString:YSFApiKeyExt];
     instance.show                = [dict ysf_jsonBool:YSFApiKeyShow];
     instance.bAuto                = [dict ysf_jsonBool:YSFApiKeyAuto];
+    instance.payMoney                = [dict ysf_jsonString:YSFApiKeyPayMoney];
+    instance.price                = [dict ysf_jsonString:YSFApiKeyPrice];
+    instance.orderCount                = [dict ysf_jsonString:YSFApiKeyOrderCount];
+    instance.orderSku                = [dict ysf_jsonString:YSFApiKeyOrderSku];
+    instance.orderStatus                = [dict ysf_jsonString:YSFApiKeyOrderStatus];
+    instance.orderId                = [dict ysf_jsonString:YSFApiKeyOrderId];
+    instance.orderTime                = [dict ysf_jsonString:YSFApiKeyOrderTime];
+    instance.activity                = [dict ysf_jsonString:YSFApiKeyActivity];
+    instance.activityHref                = [dict ysf_jsonString:YSFApiKeyActivityHref];
     
     NSMutableArray *tagArray = [NSMutableArray new];
     NSArray *array                = [dict ysf_jsonArray:YSFApiKeyTags];

@@ -122,8 +122,8 @@
               [weakSelf.displayResult setTitle:@"转换失败" forState:UIControlStateNormal];
           }
           else {
-              _message.ext = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", YSFApiKeyContent, text];
-              [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:NO message:_message forSession:_message.session completion:nil];
+              weakSelf.message.ext = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", YSFApiKeyContent, text];
+              [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:NO message:weakSelf.message forSession:weakSelf.message.session completion:nil];
               
               weakSelf.displayResult.titleLabel.numberOfLines = 0;
               [weakSelf.displayResult setTitle:text forState:UIControlStateNormal];

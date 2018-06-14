@@ -253,6 +253,7 @@
     }
     [request setValue:@"application/x-www-form-urlencoded;charset=utf-8"
    forHTTPHeaderField:@"Content-Type"];
+    __weak typeof(self) weakSelf = self;
     NSURLSessionTask *task =
     [self.session dataTaskWithRequest:request
                     completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
@@ -269,7 +270,7 @@
                             if ([jsonDict isKindOfClass:[NSDictionary class]])
                             {
                                 self.config.serverConfig = jsonDict;
-                                _lastRefreshConfigDate = [NSDate date];
+                                weakSelf.lastRefreshConfigDate = [NSDate date];
                             }
                         }
                     }];

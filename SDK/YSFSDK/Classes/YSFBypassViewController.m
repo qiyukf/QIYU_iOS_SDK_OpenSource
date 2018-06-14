@@ -81,7 +81,7 @@
         entry.titleLabel.font = [UIFont systemFontOfSize:15];
         [entry setTitleColor:YSFRGB(0x222222) forState:UIControlStateNormal];
         entry.titleLabel.textAlignment = NSTextAlignmentCenter;
-        entry.ysf_frameWidth = _imagePanel.ysf_frameWidth;
+        entry.ysf_frameWidth = weakSelf.imagePanel.ysf_frameWidth;
         entry.ysf_frameHeight = 44;
         entry.ysf_frameTop = idx * 44;
         [entry ysf_addEventHandler:^(id  _Nonnull sender) {

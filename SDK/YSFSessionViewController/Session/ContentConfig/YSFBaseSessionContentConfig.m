@@ -16,7 +16,6 @@
 #import "YSFUnsupportContentConfig.h"
 #import "YSFMachineResponse.h"
 #import "YSFMachineContentConfig.h"
-#import "YSFNewSession.h"
 #import "YSFSessionClose.h"
 #import "YSFWelcome.h"
 #import "YSFReportQuestion.h"
@@ -108,9 +107,6 @@
             if ([customObject.attachment isKindOfClass:[YSFOrderOperation class]]) {
                 YSFOrderOperation *orderOperation = (YSFOrderOperation *)customObject.attachment;
                 message.text = [orderOperation.template ysf_jsonString:@"label"];
-                config = [[YSFTextContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFNewSession class]]) {
                 config = [[YSFTextContentConfig alloc] init];
             }
             else if ([customObject.attachment isKindOfClass:[YSFSessionClose class]]) {

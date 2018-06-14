@@ -82,7 +82,7 @@
         button.ysf_frameWidth = self.ysf_frameWidth - 45;
         button.ysf_frameTop = offsetY;
         button.ysf_frameHeight = 34;
-        [_content addSubview:button];
+        [self.content addSubview:button];
         __weak typeof(self) weakSelf = self;
         [button ysf_addEventHandler:^(id  _Nonnull sender) {
             [weakSelf onClickAction:action];

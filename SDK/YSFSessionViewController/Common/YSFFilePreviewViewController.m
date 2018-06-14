@@ -318,24 +318,25 @@
 {
     _isDownloading = YES;
     YSF_NIMFileObject *fileObject = (YSF_NIMFileObject *)_message.messageObject;
+    __weak typeof(self) weakSelf = self;
     [[[YSF_NIMSDK sharedSDK] resourceManager] download:fileObject.url filepath:fileObject.path progress:^(CGFloat progress) {
-        [_loadProgressView setProgress:progress animated:YES];
-        _downloadingLabel.text = [NSString stringWithFormat:@"正在下载...（%@/%@）", [NSString getFileSizeTextWithFileLength:fileObject.fileLength*progress], [NSString getFileSizeTextWithFileLength:fileObject.fileLength]];
+        [weakSelf.loadProgressView setProgress:progress animated:YES];
+        weakSelf.downloadingLabel.text = [NSString stringWithFormat:@"正在下载...（%@/%@）", [NSString getFileSizeTextWithFileLength:fileObject.fileLength*progress], [NSString getFileSizeTextWithFileLength:fileObject.fileLength]];
     } completion:^(NSError *error) {
         if (!error) {
-            if ([self canOpenWithFileName:fileObject.displayName]) {
-                [self loadFile];
+            if ([weakSelf canOpenWithFileName:fileObject.displayName]) {
+                [weakSelf loadFile];
             } else {
-                _downloadingLabel.hidden = YES;
-                _loadProgressView.hidden = YES;
-                _cancelDownloadButton.hidden = YES;
-                _fileLengthLabel.hidden = NO;
-                _openByOtherAppsButton.hidden = NO;
-                _tipLabel.hidden = NO;
+                weakSelf.downloadingLabel.hidden = YES;
+                weakSelf.loadProgressView.hidden = YES;
+                weakSelf.cancelDownloadButton.hidden = YES;
+                weakSelf.fileLengthLabel.hidden = NO;
+                weakSelf.openByOtherAppsButton.hidden = NO;
+                weakSelf.tipLabel.hidden = NO;
             }
         }
-        if ([_reachability isReachable]) {
-            _isDownloading = NO;
+        if ([weakSelf.reachability isReachable]) {
+            weakSelf.isDownloading = NO;
         }
     }];
 }

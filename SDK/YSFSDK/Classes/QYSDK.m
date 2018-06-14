@@ -95,8 +95,9 @@
 {
     YSFLogApp(@"trackHistory title:%@ enterOrOut:%@", title, enterOrOut);
 
+    __weak typeof(self) weakSelf = self;
     ysf_main_async(^{
-        [_infoManager trackHistory:title enterOrOut:enterOrOut key:key];
+        [weakSelf.infoManager trackHistory:title enterOrOut:enterOrOut key:key];
     });
 }
 

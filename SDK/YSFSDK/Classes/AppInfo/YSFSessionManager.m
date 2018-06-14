@@ -749,11 +749,12 @@ YSFServiceRequestDelegate>
         YSFPushMessageStatusChangeRequest *request = [[YSFPushMessageStatusChangeRequest alloc] init];
         request.msgSessionId = llSessionId;
         request.status = 2;
+        __weak typeof(self) weakSelf = self;
         [YSFIMCustomSystemMessageApi sendMessage:request shopId:@"-1" completion:^(NSError *error) {
             if (!error) {
-                [_unreadPushMessageSessionId removeAllObjects];
+                [weakSelf.unreadPushMessageSessionId removeAllObjects];
                 YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
-                [infoManager saveArray:_unreadPushMessageSessionId forKey:YSFUnreadPushMessageSessionId];
+                [infoManager saveArray:weakSelf.unreadPushMessageSessionId forKey:YSFUnreadPushMessageSessionId];
             }
         }];
     }

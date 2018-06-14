@@ -79,14 +79,14 @@
             point.frame = CGRectMake(21, offsetY + 7, 8, 8);
             point.backgroundColor = YSFRGB(0x5092e1);
             point.layer.cornerRadius = 4;
-            [_content addSubview:point];
+            [self.content addSubview:point];
         }
         else {
             UIView *point = [UIView new];
             point.frame = CGRectMake(22, offsetY + 7, 6, 6);
             point.backgroundColor = YSFRGB(0xdbdbdb);
             point.layer.cornerRadius = 3;
-            [_content addSubview:point];
+            [self.content addSubview:point];
         }
         
         UILabel *logistic = [UILabel new];

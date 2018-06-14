@@ -12,6 +12,6 @@
 
 @interface YSFSetCommodityInfoRequest : NSObject<YSFIMCustomSystemMessageApiProtocol>
 
-@property (nonatomic, strong) QYCommodityInfo *commodityInfo;
+@property (nonatomic, copy) NSDictionary *commodityInfo;
 
 @end

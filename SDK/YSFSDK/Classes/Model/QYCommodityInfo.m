@@ -8,8 +8,7 @@
 
 #import "QYCommodityInfo.h"
 
-@implementation QYCommodityTag
-@end
+
 
 @implementation QYCommodityInfo
 

@@ -241,7 +241,7 @@
     timeModel.messageTime = model.message.timestamp;
     [self.modelArray insertObject:timeModel atIndex:0];
     self.firstTimeInterval = model.message.timestamp;
-    [self.msgIdDict setValue:model forKey:model.message.messageId];
+    [self.msgIdDict setObject:model forKey:model.message.messageId];
 }
 
 - (void)insertMessageAt:(NSInteger)postion message:(YSF_NIMMessage *)message{
@@ -250,7 +250,7 @@
         return;
     }
     [self.modelArray insertObject:model atIndex:postion];
-    [self.msgIdDict setValue:model forKey:model.message.messageId];
+    [self.msgIdDict setObject:model forKey:model.message.messageId];
 }
 
 - (void)appendMessage:(YSF_NIMMessage *)message{
@@ -265,7 +265,7 @@
     }
     [self.modelArray addObject:model];
     self.lastTimeInterval = model.message.timestamp;
-    [self.msgIdDict setValue:model forKey:model.message.messageId];
+    [self.msgIdDict setObject:model forKey:model.message.messageId];
 }
 
 

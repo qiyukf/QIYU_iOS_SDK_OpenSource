@@ -54,7 +54,7 @@
         UIView *shopCell = [shop createCell:self.ysf_frameWidth - 5 eventHander:self];
         shopCell.ysf_frameLeft = 5;
         shopCell.ysf_frameTop = offsetY;
-        [_content addSubview:shopCell];
+        [self.content addSubview:shopCell];
         
         offsetY += shopCell.ysf_frameHeight;
     }];

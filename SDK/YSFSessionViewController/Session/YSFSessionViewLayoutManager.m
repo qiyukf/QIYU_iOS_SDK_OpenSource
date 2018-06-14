@@ -57,22 +57,23 @@ YSFNotification(kKFInputViewInputTypeChanged);
     [_tableView insertRowsAtIndexPaths:addIndexPathes withRowAnimation:UITableViewRowAnimationNone];
     [_tableView endUpdates];
     
+    __weak typeof(self) weakSelf = self;
     NSTimeInterval scrollDelay = .05f;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(scrollDelay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         NSIndexPath *indexPath = [addIndexPathes lastObject];
-        NSInteger sectionNumber = [_tableView numberOfRowsInSection:indexPath.section];
+        NSInteger sectionNumber = [weakSelf.tableView numberOfRowsInSection:indexPath.section];
         if (indexPath.row > sectionNumber - 1) {
             indexPath = [NSIndexPath indexPathForRow:sectionNumber - 1 inSection:indexPath.section];
         }
         if ([YSF_NIMSDK sharedSDK].sdkOrKf) {
-            [_tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+            [weakSelf.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
         }
         else {
             if (scrollToBottom) {
-                [_tableView ysf_scrollToBottom:YES];
+                [weakSelf.tableView ysf_scrollToBottom:YES];
             }
         }
-    });    
+    });
 }
 
 - (void)updateCellAtIndex:(NSInteger)index model:(YSFMessageModel *)model

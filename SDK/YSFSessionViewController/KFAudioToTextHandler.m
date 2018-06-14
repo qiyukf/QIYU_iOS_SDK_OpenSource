@@ -49,12 +49,13 @@
 
 - (void)addMessage:(NSString *)from messageId:(NSString *)messageId
 {
-    [_cacheTransferingAudio setValue:from forKey:messageId];
+    [_cacheTransferingAudio setObject:from forKey:messageId];
+    __weak typeof(self) weakSelf = self;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(120 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        NSString *from = [_cacheTransferingAudio objectForKey:messageId];
+        NSString *from = [weakSelf.cacheTransferingAudio objectForKey:messageId];
         //如果超时，则更新为失败
         if (messageId) {
-            [self removeMessage:messageId];
+            [weakSelf removeMessage:messageId];
             YSF_NIMSession *session = [YSF_NIMSession session:from type:YSF_NIMSessionTypeYSF];
             YSF_QYKFMessage * message = (YSF_QYKFMessage *)[[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:messageId forSession:session];
             [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:session completion:nil];
@@ -76,7 +77,7 @@
     
     for (YSF_QYKFMessage *message in messages) {
         if (message.messageType == YSF_NIMMessageTypeAudio) {
-            [_cacheTransferingAudio setValue:message.from forKey:message.messageId];
+            [_cacheTransferingAudio setObject:message.from forKey:message.messageId];
             
             NSDictionary *dic = [_cacheAudioText objectForKey:message.messageId];
             if (dic) {
@@ -117,12 +118,13 @@
                 
             case YSFCommandAudioToText:
             {
+                __weak typeof(self) weakSelf = self;
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.9 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                     NSString *msgId = [dic ysf_jsonString:YSFApiKeyMsgId];
                     NSString *text = [dic ysf_jsonString:YSFApiKeyText];
                     NSString *yxId = [dic ysf_jsonString:YSFApiKeyFromImId];
                     NSInteger type = [dic ysf_jsonInteger:YSFApiKeyType];
-                    [_cacheTransferingAudio removeObjectForKey:msgId];
+                    [weakSelf.cacheTransferingAudio removeObjectForKey:msgId];
                     
                     if (msgId) {
                         YSF_NIMSession *session = [YSF_NIMSession session:yxId type:YSF_NIMSessionTypeYSF];
@@ -138,7 +140,7 @@
                             [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:NO message:message forSession:session completion:nil];
                         }
                         else {
-                            [_cacheAudioText setValue:dic forKey:msgId];
+                            [weakSelf.cacheAudioText setObject:dic forKey:msgId];
                         }
                     }
                     else {

@@ -119,7 +119,7 @@
                 point.ysf_frameWidth = 7.5;
                 point.layer.cornerRadius = 4;
                 point.ysf_frameTop = offsetY + 23;
-                [_content addSubview:point];
+                [self.content addSubview:point];
 
                 QuestionLink *questionLink = [[QuestionLink alloc] init];
                 questionLink.questionDict = dict;
@@ -131,7 +131,7 @@
                 offsetY += 15.5;
                 questionLabel.frame = CGRectMake(self.model.contentViewInsets.left + 15, offsetY,
                                                  self.model.contentSize.width - 15, size.height);
-                [_content addSubview:questionLabel];
+                [self.content addSubview:questionLabel];
                 offsetY += size.height;
                 offsetY += -9;
             }

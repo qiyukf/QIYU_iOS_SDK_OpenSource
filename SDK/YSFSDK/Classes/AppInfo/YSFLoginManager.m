@@ -34,6 +34,7 @@ static NSInteger YSFMaxRetryDelay = 64;
     NSString *account   = info.accid;
     NSString *token     = info.token;
     
+    __weak typeof(self) weakSelf = self;
     if (info.isEverLogined) {
         
         [[[YSF_NIMSDK sharedSDK] loginManager] autoLogin:account
@@ -46,9 +47,9 @@ static NSInteger YSFMaxRetryDelay = 64;
                                       completion:^(NSError *error) {
                                           if (error == nil)
                                           {
-                                              if (_delegate && [_delegate respondsToSelector:@selector(onLoginSuccess:)])
+                                              if (weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(onLoginSuccess:)])
                                               {
-                                                  [_delegate onLoginSuccess:account];
+                                                  [weakSelf.delegate onLoginSuccess:account];
                                               }
                                           }
                                           else
