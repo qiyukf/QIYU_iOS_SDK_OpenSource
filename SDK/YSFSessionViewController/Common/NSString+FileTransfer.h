@@ -13,5 +13,6 @@
 + (NSString *)getFileSizeTextWithFileLength:(long long)fileLength;
 
 - (BOOL)isImageByFileName;
+- (NSAttributedString *)ysf_attributedString:(BOOL)isOutgoingMsg;
 
 @end

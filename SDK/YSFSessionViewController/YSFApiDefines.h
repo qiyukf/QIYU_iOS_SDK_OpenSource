@@ -165,6 +165,7 @@
 #define     YSFApiKeyData               @"data"
 #define     YSFApiKeyState              @"state"
 #define     YSFApiKeyImg                @"img"
+#define     YSFApiKeyImage              @"image"
 #define     YSFApiKeyActionCnt          @"action_cnt"
 #define     YSFApiKeyActionUrl          @"action_url"
 #define     YSFApiKeyValidOperation     @"valid_operation"
@@ -223,6 +224,8 @@
 #define     YSFApiKeySwitch             @"switch"
 #define     YSFApiKeyChildren           @"children"
 #define     YSFApiKeyMiniAppTip         @"miniTrashTip"
+#define     YSFApiKeyLink               @"link"
+#define     YSFApiKeyRichText           @"richText"
 
 
 

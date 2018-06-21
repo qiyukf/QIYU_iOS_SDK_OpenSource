@@ -13,6 +13,9 @@
 #import "YSFApiDefines.h"
 #import "YSFStaticUnion.h"
 #import "UIImageView+YSFWebCache.h"
+#import "NSString+FileTransfer.h"
+#import "YSFCoreText.h"
+#import "NSAttributedString+YSF.h"
 
 
 @implementation YSFStaticUnionContentConfig
@@ -25,7 +28,7 @@
     YSFStaticUnion *staticUnion = (YSFStaticUnion *)object.attachment;
     
     for (YSFLinkItem *item in staticUnion.linkItems) {
-        if ([item.type isEqualToString:@"text"]) {
+        if ([item.type isEqualToString:YSFApiKeyText]) {
             offsetY += 13;
             UILabel *content = [UILabel new];
             content.font = [UIFont systemFontOfSize:16];
@@ -35,7 +38,7 @@
             [content sizeToFit];
             offsetY += content.ysf_frameHeight;
         }
-        else if ([item.type isEqualToString:@"image"]) {
+        else if ([item.type isEqualToString:YSFApiKeyImage]) {
             offsetY += 13;
 
             if (item.imageUrl.length > 0) {
@@ -65,8 +68,19 @@
                 offsetY += imageView.ysf_frameHeight;
             }
         }
-        else if ([item.type isEqualToString:@"link"]) {
+        else if ([item.type isEqualToString:YSFApiKeyLink]) {
             offsetY += 13 + 34;
+        }
+        else if ([item.type isEqualToString:YSFApiKeyRichText]) {
+            offsetY += 13;
+            
+            NSAttributedString *attributedString = [item.label ysf_attributedString:self.message.isOutgoingMsg];
+            CGSize size = [attributedString intrinsicContentSizeWithin:CGSizeMake(CGFLOAT_WIDTH_UNKNOWN, CGFLOAT_HEIGHT_UNKNOWN)];
+            if (size.width > msgContentMaxWidth) {
+                size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth - 33, CGFLOAT_HEIGHT_UNKNOWN)];
+            }
+            
+            offsetY += size.height;
         }
     }
     

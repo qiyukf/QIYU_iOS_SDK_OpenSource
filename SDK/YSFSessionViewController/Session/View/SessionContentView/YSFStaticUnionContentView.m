@@ -4,10 +4,12 @@
 #import "YSFStaticUnion.h"
 #import "UIImageView+YSFWebCache.h"
 #import "UIControl+BlocksKit.h"
+#import "YSFCoreText.h"
+#import "NSString+FileTransfer.h"
+#import "YSFInputEmoticonManager.h"
+#import "YSFInputEmoticonParser.h"
 
-
-
-@interface YSFStaticUnionContentView()
+@interface YSFStaticUnionContentView() <YSFAttributedTextContentViewDelegate>
 
 @property (nonatomic, strong) UIView *content;
 @property (nonatomic, strong) NSMutableArray<UIImageView *> *imageViewsArray;
@@ -41,7 +43,7 @@
     
     for (YSFLinkItem *item in staticUnion.linkItems) {
         
-        if ([item.type isEqualToString:@"text"]) {
+        if ([item.type isEqualToString:YSFApiKeyText]) {
             offsetY += 13;
             
             UILabel * content;
@@ -59,7 +61,7 @@
             
             offsetY += content.ysf_frameHeight;
         }
-        else if ([item.type isEqualToString:@"image"]) {
+        else if ([item.type isEqualToString:YSFApiKeyImage]) {
             offsetY += 13;
             
             if (item.imageUrl.length > 0) {
@@ -130,7 +132,7 @@
                 offsetY += imageView.ysf_frameHeight;
             }
         }
-        else if ([item.type isEqualToString:@"link"]) {
+        else if ([item.type isEqualToString:YSFApiKeyLink]) {
             offsetY += 13;
             
             UIButton *actionButton = [UIButton new];
@@ -159,6 +161,27 @@
             
             offsetY += 34;
         }
+        else if ([item.type isEqualToString:YSFApiKeyRichText]) {
+            offsetY += 13;
+            
+            YSFAttributedTextView *label = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
+            label.shouldDrawImages = NO;
+            label.textDelegate = self;
+            label.backgroundColor = [UIColor clearColor];
+            
+            label.attributedString = [item.label ysf_attributedString:self.model.message.isOutgoingMsg];
+            label.ysf_frameWidth = self.model.contentSize.width - 33;
+            CGSize size = [label.attributedTextContentView sizeThatFits:CGSizeZero];
+            label.frame = CGRectMake(18, offsetY,
+                                             self.model.contentSize.width - 33, size.height);
+            [label layoutSubviews];
+            [_content addSubview:label];
+            if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
+                label.ysf_frameLeft -=5;
+            }
+            
+            offsetY += size.height;
+        }
     }
 }
 
@@ -184,7 +207,81 @@
     event.eventName = YSFKitEventNameTapRichTextImage;
     event.message = self.model.message;
     event.data = gesture.view;
+    NSInteger tagIndex = 0;
+    for (id viewObject in _imageViewsArray) {
+        if (viewObject == gesture.view) {
+            break;
+        }
+        tagIndex++;
+    }
+    gesture.view.tag = tagIndex;
     [self.delegate onCatchEvent:event];
+}
+
+
+- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView viewForAttachment:(YSFTextAttachment *)attachment frame:(CGRect)frame
+{
+    if ([attachment isKindOfClass:[YSFImageTextAttachment class]])
+    {
+        // if the attachment has a hyperlinkURL then this is currently ignored
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:frame];
+        imageView.backgroundColor = YSFRGB(0xebebeb);
+        imageView.contentMode = UIViewContentModeCenter;
+        UIImage *placeHoderImage = [UIImage ysf_imageInKit:@"icon_image_loading_default"];
+        CGRect orginalRect = frame;
+        if (frame.size.width < 90) {
+            frame.size.width = 90;
+        }
+        if (frame.size.height < 90) {
+            frame.size.height = 90;
+        }
+        if (!CGRectEqualToRect(orginalRect, frame)) {
+            [attachment setDisplaySize:frame.size];
+            [attributedTextContentView.superview setNeedsLayout];
+        }
+        [imageView ysf_setImageWithURL:attachment.contentURL placeholderImage:placeHoderImage
+                             completed:^(UIImage * _Nullable image, NSError * _Nullable error,
+                                         YSFImageCacheType cacheType, NSURL * _Nullable imageURL) {
+                                 if (error != nil) {
+                                     UIImage *failedImage = [UIImage ysf_imageInKit:@"icon_image_loading_failed"];
+                                     imageView.image = failedImage;
+                                 }
+                                 else {
+                                     if (!CGRectEqualToRect(orginalRect, frame)) {
+                                         [attachment setDisplaySize:orginalRect.size];
+                                         [attributedTextContentView.superview setNeedsLayout];
+                                     }
+                                     imageView.contentMode = UIViewContentModeScaleToFill;
+                                     imageView.backgroundColor = [UIColor clearColor];
+                                 }
+                             }];
+        
+        // NOTE: this is a hack, you probably want to use your own image view and touch handling
+        // also, this treats an image with a hyperlink by itself because we don't have the GUID of the link parts
+        imageView.userInteractionEnabled = YES;
+        
+        // demonstrate combination with long press
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)];
+        [imageView addGestureRecognizer:tap];
+        
+        [_imageViewsArray addObject:imageView];
+        return imageView;
+    }
+    else if ([attachment isKindOfClass:[YSFObjectTextAttachment class]])
+    {
+        UIImageView *someView = [[UIImageView alloc] initWithFrame:frame];
+        NSInteger type = [[attachment.attributes objectForKey:@"type"] integerValue];
+        if (type == 0) {    //emoji
+            NSString *emojiStr = [attachment.attributes objectForKey:@"data"];
+            YSFInputEmoticon *emoticon = [[YSFInputEmoticonManager sharedManager] emoticonByTag:emojiStr];
+            UIImage *image = [UIImage imageNamed:emoticon.filename];
+            someView.image = image;
+        }
+        
+        return someView;
+    }
+    
+    return nil;
 }
 
 

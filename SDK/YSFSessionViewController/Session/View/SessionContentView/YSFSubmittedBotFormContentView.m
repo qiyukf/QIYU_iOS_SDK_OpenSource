@@ -74,7 +74,7 @@
         offsetY += 10;
         label.frame = CGRectMake(self.model.contentViewInsets.left, offsetY,
                                          self.model.contentSize.width, size.height);
-        [_content addSubview:label];
+        [self.content addSubview:label];
         
         offsetY += size.height;
         offsetY += 10;
@@ -92,7 +92,7 @@
                 removeImageView.backgroundColor = YSFRGB(0xfafafa);
                 removeImageView.layer.borderWidth = 0.5;
                 removeImageView.layer.borderColor = YSFRGB(0xcccccc).CGColor;
-                [_content addSubview:removeImageView];
+                [self.content addSubview:removeImageView];
                 [_imageViewsArray addObject:removeImageView];
                 
                 UIImageView *imageView = [UIImageView new];
@@ -128,7 +128,7 @@
             CGSize size2 = [value sizeThatFits:CGSizeMake(self.model.contentSize.width, 0)];
             value.frame = CGRectMake(self.model.contentViewInsets.left, offsetY,
                                      self.model.contentSize.width, size2.height);
-            [_content addSubview:value];
+            [self.content addSubview:value];
             
             offsetY += size2.height;
         }
@@ -144,7 +144,7 @@
                 splitLine.ysf_frameLeft = 5;
             }
             splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
-            [_content addSubview:splitLine];
+            [self.content addSubview:splitLine];
         }
 
     }];
@@ -156,6 +156,14 @@
     event.eventName = YSFKitEventNameTapRichTextImage;
     event.message = self.model.message;
     event.data = gesture.view;
+    NSInteger tagIndex = 0;
+    for (id viewObject in _imageViewsArray) {
+        if (viewObject == gesture.view) {
+            break;
+        }
+        tagIndex++;
+    }
+    gesture.view.tag = tagIndex;
     [self.delegate onCatchEvent:event];
 }
 

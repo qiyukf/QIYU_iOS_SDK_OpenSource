@@ -13,10 +13,9 @@
 #import "YSFAttributedLabel.h"
 #import "YSFApiDefines.h"
 #import "YSFCoreText.h"
-#import "YSFInputEmoticonManager.h"
-#import "YSFInputEmoticonParser.h"
 #import "YSFRichText.h"
 #import "NSAttributedString+YSF.h"
+#import "NSString+FileTransfer.h"
 
 @implementation YSFMachineContentConfig
 - (CGSize)contentSize:(CGFloat)cellWidth
@@ -29,7 +28,7 @@
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.message.messageObject;
     YSFMachineResponse *attachment = (YSFMachineResponse *)object.attachment;
     NSString *tmpAnswerLabel = attachment.answerLabel; //unescapeHtml];
-    NSAttributedString *attributedString = [self _attributedString:tmpAnswerLabel];
+    NSAttributedString *attributedString = [tmpAnswerLabel ysf_attributedString:self.message.isOutgoingMsg];
     
     if (attributedString.length > 0) {
         CGSize size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth, CGFLOAT_HEIGHT_UNKNOWN)];
@@ -47,7 +46,7 @@
             answer = [answer stringByAppendingString:oneAnswer];
         }
         //answer = [answer unescapeHtml];
-        NSAttributedString *attributedString = [self _attributedString:answer];
+        NSAttributedString *attributedString = [answer ysf_attributedString:self.message.isOutgoingMsg];
         CGSize size = [attributedString intrinsicContentSizeWithin:CGSizeMake(CGFLOAT_WIDTH_UNKNOWN, CGFLOAT_HEIGHT_UNKNOWN)];
         if (size.width > msgContentMaxWidth) {
             size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth, CGFLOAT_HEIGHT_UNKNOWN)];
@@ -82,7 +81,7 @@
         offsetX = msgContentMaxWidth;
         
         NSString *tmpOperatorHintDesc = attachment.operatorHintDesc; //[attachment.operatorHintDesc unescapeHtml];
-        NSAttributedString *attributedString = [self _attributedString:tmpOperatorHintDesc];
+        NSAttributedString *attributedString = [tmpOperatorHintDesc ysf_attributedString:self.message.isOutgoingMsg];
         CGSize size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth, CGFLOAT_HEIGHT_UNKNOWN)];
         
         offsetY += 15.5;
@@ -156,47 +155,5 @@
 }
 
 
-- (NSAttributedString *)_attributedString:(NSString *)text
-{
-    NSRegularExpression *exp = [NSRegularExpression regularExpressionWithPattern:@"\\[[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]"
-                                                                         options:NSRegularExpressionCaseInsensitive
-                                                                           error:nil];
-    __block NSInteger index = 0;
-    __block NSString *resultText = @"";
-    [exp enumerateMatchesInString:text
-                          options:0
-                            range:NSMakeRange(0, [text length])
-                       usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
-                           NSString *rangeText = [text substringWithRange:result.range];
-                           if ([[YSFInputEmoticonManager sharedManager] emoticonByTag:rangeText])
-                           {
-                               if (result.range.location > index)
-                               {
-                                   NSString *rawText = [text substringWithRange:NSMakeRange(index, result.range.location - index)];
-                                   resultText = [resultText stringByAppendingString:rawText];
-                               }
-                               NSString *rawText = [NSString stringWithFormat:@"<object type=\"0\" data=\"%@\" width=\"18\" height=\"18\"></object>", rangeText];
-                               resultText = [resultText stringByAppendingString:rawText];
-                               
-                               index = result.range.location + result.range.length;
-                           }
-                       }];
-    
-    if (index < [text length])
-    {
-        NSString *rawText = [text substringWithRange:NSMakeRange(index, [text length] - index)];
-        resultText = [resultText stringByAppendingString:rawText];
-    }
-    resultText = [NSString stringWithFormat:@"<span>%@</span>", resultText];
-    NSData *data = [resultText dataUsingEncoding:NSUTF8StringEncoding];
-    
-    // Create attributed string from HTML
-    CGSize maxImageSize = CGSizeMake(239, 425);
-    NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSValue valueWithCGSize:maxImageSize], YSFMaxImageSize, @(16), YSFDefaultFontSize, nil];
-    
-    NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:options documentAttributes:NULL];
-    
-    return string;
-}
 
 @end

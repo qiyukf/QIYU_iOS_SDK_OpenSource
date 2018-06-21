@@ -205,7 +205,9 @@
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)];
         [imageView addGestureRecognizer:tap];
         
+        imageView.tag = (NSInteger)_imageViewsArray.count;
         [_imageViewsArray addObject:imageView];
+        
         return imageView;
     }
     else if ([attachment isKindOfClass:[YSFObjectTextAttachment class]])
@@ -234,6 +236,14 @@
     event.eventName = YSFKitEventNameTapRichTextImage;
     event.message = self.model.message;
     event.data = gesture.view;
+    NSInteger tagIndex = 0;
+    for (id viewObject in _imageViewsArray) {
+        if (viewObject == gesture.view) {
+            break;
+        }
+        tagIndex++;
+    }
+    gesture.view.tag = tagIndex;
     [self.delegate onCatchEvent:event];
 }
 

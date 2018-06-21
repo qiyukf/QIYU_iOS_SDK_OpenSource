@@ -2468,17 +2468,7 @@ static long long g_sessionId;
 
 - (void)showImage:(YSF_NIMMessage *)message touchView:(UIView *)touchView
 {
-    UIView *conentView = touchView.superview;
-    NSInteger imageViewIndex = 0;
-    for (UIView *imageView in conentView.subviews) {
-        if ([imageView isKindOfClass:[UIImageView class]] && imageView.userInteractionEnabled == YES) {
-            if (touchView == imageView) {
-                break;
-            }
-            imageViewIndex++;
-        }
-    }
-    
+    NSInteger imageViewIndex = touchView.tag;
     NSMutableArray *allGalleryItems = [NSMutableArray array];
     NSMutableArray *allLoadedImages = [self.sessionDatasource queryAllImageMessages];
     __block NSUInteger index = 0;

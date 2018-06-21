@@ -17,6 +17,7 @@
 #import "YSFInputEmoticonManager.h"
 #import "YSFInputEmoticonParser.h"
 #import "YSFRichText.h"
+#import "NSString+FileTransfer.h"
 
 
 @interface QuestionLink : NSObject
@@ -62,7 +63,7 @@
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)data.message.messageObject;
     YSFMachineResponse *attachment = (YSFMachineResponse *)object.attachment;
     NSString *tmpAnswerLabel = attachment.answerLabel; //unescapeHtml];
-    answerLabel.attributedString = [self _attributedString:tmpAnswerLabel];
+    answerLabel.attributedString = [tmpAnswerLabel ysf_attributedString:self.model.message.isOutgoingMsg];
 
     if (answerLabel.attributedString.length > 0) {
         offsetY += 15.5;
@@ -70,6 +71,7 @@
         CGSize size = [answerLabel.attributedTextContentView sizeThatFits:CGSizeZero];
         answerLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY,
                                        self.model.contentSize.width, size.height);
+        [answerLabel layoutSubviews];
         [_content addSubview:answerLabel];
         offsetY += size.height;
         offsetY += 13;
@@ -88,12 +90,13 @@
             answer = [answer stringByAppendingString:oneAnswer];
         }
         //answer = [answer unescapeHtml];
-        questionLabel.attributedString = [self _attributedString:answer];
+        questionLabel.attributedString = [answer ysf_attributedString:self.model.message.isOutgoingMsg];
         questionLabel.ysf_frameWidth = self.model.contentSize.width;
         CGSize size = [questionLabel.attributedTextContentView sizeThatFits:CGSizeZero];
         offsetY += 15.5;
         questionLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY,
                                          self.model.contentSize.width, size.height);
+        [questionLabel layoutSubviews];
         [_content addSubview:questionLabel];
         offsetY += size.height;
         offsetY += 13;
@@ -155,12 +158,13 @@
         questionLabel.textDelegate = self;
         questionLabel.backgroundColor = [UIColor clearColor];
         NSString *tmpOperatorHintDesc = attachment.operatorHintDesc; //unescapeHtml];
-        questionLabel.attributedString = [self _attributedString:tmpOperatorHintDesc];
+        questionLabel.attributedString = [tmpOperatorHintDesc ysf_attributedString:self.model.message.isOutgoingMsg];
         questionLabel.ysf_frameWidth = self.model.contentSize.width;
         CGSize size = [questionLabel.attributedTextContentView sizeThatFits:CGSizeZero];
         offsetY += 15.5;
         questionLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY,
                                          self.model.contentSize.width, size.height);
+        [questionLabel layoutSubviews];
         [_content addSubview:questionLabel];
         offsetY += size.height;
         offsetY += 13;
@@ -396,59 +400,6 @@
     [self.delegate onCatchEvent:event];
 }
 
-- (NSAttributedString *)_attributedString:(NSString *)text
-{
-    NSRegularExpression *exp = [NSRegularExpression regularExpressionWithPattern:@"\\[[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]"
-                                                                         options:NSRegularExpressionCaseInsensitive
-                                                                           error:nil];
-    __block NSInteger index = 0;
-    __block NSString *resultText = @"";
-    [exp enumerateMatchesInString:text
-                          options:0
-                            range:NSMakeRange(0, [text length])
-                       usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
-                           NSString *rangeText = [text substringWithRange:result.range];
-                           if ([[YSFInputEmoticonManager sharedManager] emoticonByTag:rangeText])
-                           {
-                               if (result.range.location > index)
-                               {
-                                   NSString *rawText = [text substringWithRange:NSMakeRange(index, result.range.location - index)];
-                                   resultText = [resultText stringByAppendingString:rawText];
-                               }
-                               NSString *rawText = [NSString stringWithFormat:@"<object type=\"0\" data=\"%@\" width=\"18\" height=\"18\"></object>", rangeText];
-                               resultText = [resultText stringByAppendingString:rawText];
-                               
-                               index = result.range.location + result.range.length;
-                           }
-                       }];
-    
-    if (index < [text length])
-    {
-        NSString *rawText = [text substringWithRange:NSMakeRange(index, [text length] - index)];
-        resultText = [resultText stringByAppendingString:rawText];
-    }
-    resultText = [NSString stringWithFormat:@"<span>%@</span>", resultText];
-    NSData *data = [resultText dataUsingEncoding:NSUTF8StringEncoding];
-    
-    // Create attributed string from HTML
-    CGSize maxImageSize = CGSizeMake(239, 425);
-    UIColor *defaultTextColor = nil;
-    UIColor *defaultLinkColor = nil;
-    QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
-    if (self.model.message.isOutgoingMsg) {
-        defaultTextColor = uiConfig.customMessageTextColor;
-        defaultLinkColor = uiConfig.customMessageHyperLinkColor;
-    }
-    else {
-        defaultTextColor = uiConfig.serviceMessageTextColor;
-        defaultLinkColor = uiConfig.serviceMessageHyperLinkColor;
-    }
-    NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSValue valueWithCGSize:maxImageSize], YSFMaxImageSize, @(16), YSFDefaultFontSize, defaultTextColor, YSFDefaultTextColor, defaultLinkColor, YSFDefaultLinkColor, nil];
-    NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:options documentAttributes:NULL];
-    
-    return string;
-}
-
 #pragma mark Private Methods
 
 
@@ -544,6 +495,14 @@
     event.eventName = YSFKitEventNameTapRichTextImage;
     event.message = self.model.message;
     event.data = gesture.view;
+    NSInteger tagIndex = 0;
+    for (id viewObject in _imageViewsArray) {
+        if (viewObject == gesture.view) {
+            break;
+        }
+        tagIndex++;
+    }
+    gesture.view.tag = tagIndex;
     [self.delegate onCatchEvent:event];
 }
 
