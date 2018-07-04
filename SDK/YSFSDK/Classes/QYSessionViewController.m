@@ -1947,7 +1947,7 @@ static long long g_sessionId;
         if (session && (!session.humanOrMachine || session.robotInQueue) && _inputtingMessage.isStopped && self.lastMessageContent) {
             __weak typeof(self) weakSelf = self;
             [_inputtingMessage start:dispatch_get_main_queue() interval:sendingRate repeats:NO block:^{
-                if (!_inputtingMessage.isStopped && weakSelf.lastMessageContent) {
+                if (!weakSelf.inputtingMessage.isStopped && weakSelf.lastMessageContent) {
                     [weakSelf sendSearchQuestionRequest:weakSelf.lastMessageContent sessionId:session.sessionId sendingRate:sendingRate];
                 }
             }];

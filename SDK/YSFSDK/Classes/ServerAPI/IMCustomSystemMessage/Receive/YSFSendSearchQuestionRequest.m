@@ -12,7 +12,7 @@
                               YSFApiKeyCmd        :   @(YSFCommandSearchQuestiongRequest),
                               YSFApiKeySessionId  :   @(_sessionId),
                               YSFApiKeyMsgType2   :   @"text",
-                              YSFApiKeyContent    :   _content
+                              YSFApiKeyContent    :   YSFStrParam(_content)
                               };
     
     return params;

@@ -125,20 +125,21 @@ static CGFloat const kTextMaxHeight = 172;
             [attributedTextContentView.superview setNeedsLayout];
         }
         UIImage *placeHoderImage = [UIImage imageNamed:@"icon_image_loading_default"];
+        __weak typeof(imageView) weakIimageView = imageView;
         [imageView ysf_setImageWithURL:attachment.contentURL placeholderImage:placeHoderImage
                              completed:^(UIImage * _Nullable image, NSError * _Nullable error,
                                          YSFImageCacheType cacheType, NSURL * _Nullable imageURL) {
                                  if (error != nil) {
                                      UIImage *failedImage = [UIImage imageNamed:@"icon_image_loading_failed"];
-                                     imageView.image = failedImage;
+                                     weakIimageView.image = failedImage;
                                  }
                                  else {
                                      if (!CGRectEqualToRect(orginalRect, frame)) {
                                          [attachment setDisplaySize:orginalRect.size];
                                          [attributedTextContentView.superview setNeedsLayout];
                                      }
-                                     imageView.contentMode = UIViewContentModeScaleToFill;
-                                     imageView.backgroundColor = [UIColor clearColor];
+                                     weakIimageView.contentMode = UIViewContentModeScaleToFill;
+                                     weakIimageView.backgroundColor = [UIColor clearColor];
                                  }
                              }];
         
