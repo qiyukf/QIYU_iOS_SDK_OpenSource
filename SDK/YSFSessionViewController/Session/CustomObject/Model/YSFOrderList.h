@@ -1,17 +1,9 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFAction.h"
 #import "YSFCustomAttachment.h"
+#import "QYSessionViewController.h"
 
-@interface YSFGoods : NSObject
-
-@property (nonatomic,copy)    NSString *p_status;
-@property (nonatomic,copy)    NSString *p_img;
-@property (nonatomic,copy)    NSString *p_name;
-@property (nonatomic,copy)    NSString *params;
-@property (nonatomic,copy)    NSString *p_price;
-@property (nonatomic,copy)    NSString *p_count;
-@property (nonatomic,copy)    NSString *p_stock;
-@property (nonatomic,copy)    NSString *target;
+@interface QYSelectedCommodityInfo()
 
 - (NSDictionary *)encodeAttachment;
 + (instancetype)objectByDict:(NSDictionary *)dict;

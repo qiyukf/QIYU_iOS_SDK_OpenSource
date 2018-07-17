@@ -4,7 +4,7 @@
 
 
 
-@implementation YSFGoods
+@implementation QYSelectedCommodityInfo
 
 - (NSDictionary *)encodeAttachment
 {
@@ -24,7 +24,7 @@
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {
-    YSFGoods *instance = [YSFGoods new];
+    QYSelectedCommodityInfo *instance = [QYSelectedCommodityInfo new];
     instance.p_status = [dict ysf_jsonString:YSFApiKeyPStatus];
     instance.p_img = [dict ysf_jsonString:YSFApiKeyPImg];
     instance.p_name = [dict ysf_jsonString:YSFApiKeyPName];
@@ -51,7 +51,7 @@
     NSArray *goodsArray = [dict ysf_jsonArray:YSFApiKeyGoods];
     NSMutableArray *mutableGoods = [NSMutableArray new];
     [goodsArray enumerateObjectsUsingBlock:^(NSDictionary *dict, NSUInteger idx, BOOL * _Nonnull stop) {
-        YSFGoods *shop = [YSFGoods objectByDict:dict];
+        QYSelectedCommodityInfo *shop = [QYSelectedCommodityInfo objectByDict:dict];
         [mutableGoods addObject:shop];
     }];
     instance.goods = mutableGoods;

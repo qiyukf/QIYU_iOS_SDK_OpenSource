@@ -508,7 +508,7 @@
 
 - (NSString *)version
 {
-    return @"40";
+    return @"41";
 }
 
 #pragma mark - CachedText

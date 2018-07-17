@@ -2,7 +2,7 @@
 #import "NSDictionary+YSFJson.h"
 #import "YSFSelectedGoodsContentConfig.h"
 
-@implementation YSFSelectedGoods
+@implementation YSFSelectedCommodityInfo
 
 - (NSString *)thumbText
 {
@@ -28,12 +28,12 @@
 
 + (instancetype)objectByDict:(NSDictionary *)dict
 {
-    YSFSelectedGoods *instance = [[YSFSelectedGoods alloc] init];
+    YSFSelectedCommodityInfo *instance = [[YSFSelectedCommodityInfo alloc] init];
     instance.command           = [dict ysf_jsonInteger:YSFApiKeyCmd];
     instance.target            = [dict ysf_jsonString:YSFApiKeyTarget];
     instance.params            = [dict ysf_jsonString:YSFApiKeyParams];
     NSDictionary *template           = [dict ysf_jsonDict:YSFApiKeyTemplate];
-    instance.goods = [YSFGoods objectByDict:template];
+    instance.goods = [QYSelectedCommodityInfo objectByDict:template];
     
     return instance;
 }

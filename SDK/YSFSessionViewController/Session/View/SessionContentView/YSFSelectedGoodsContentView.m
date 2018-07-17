@@ -61,7 +61,7 @@
     [super refresh:data];
 
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)data.message.messageObject;
-    YSFSelectedGoods *selectedGoods = (YSFSelectedGoods *)object.attachment;
+    YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
     [_imageView ysf_setImageWithURL:[NSURL URLWithString:selectedGoods.goods.p_img]];
     
     _goodName.text = selectedGoods.goods.p_name;

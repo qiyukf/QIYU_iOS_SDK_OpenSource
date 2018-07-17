@@ -140,7 +140,7 @@
     
     offsetY += 40;
     
-    [self.goods enumerateObjectsUsingBlock:^(YSFGoods *goods, NSUInteger idx, BOOL * _Nonnull stop) {
+    [self.goods enumerateObjectsUsingBlock:^(QYSelectedCommodityInfo *goods, NSUInteger idx, BOOL * _Nonnull stop) {
         YSFCellView *goodView = [YSFCellView new];
         goodView.ysf_frameTop = offsetY;
         goodView.ysf_frameHeight = 80;

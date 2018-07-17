@@ -36,6 +36,7 @@
 #import "YSFSubmittedBotForm.h"
 #import "YSFFlightList.h"
 #import "YSFFlightDetail.h"
+#import "YSFBotCustomObject.h"
 
 @implementation YSFCustomObjectParser
 - (id<YSF_NIMCustomAttachment>)decodeAttachment:(NSString *)content
@@ -79,57 +80,62 @@
                 }
                 else if ([type isEqualToString:@"11"]) {
                     NSString *templeteId = [tempateDict ysf_jsonString:@"id"];
-                    if ([templeteId isEqualToString:@"order_list"]) {
+                    if ([templeteId isEqualToString:YSFApiKeyOrderList]) {
                         YSFOrderList *orderList = [YSFOrderList objectByDict:tempateDict];
                         object = orderList;
                     }
-                    else if ([templeteId isEqualToString:@"order_status"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyOrderStatus2]) {
                         YSFOrderStatus *orderList = [YSFOrderStatus objectByDict:tempateDict];
                         object = orderList;
                     }
-                    else if ([templeteId isEqualToString:@"refund_detail"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyRefundDetail]) {
                         YSFRefundDetail *orderList = [YSFRefundDetail objectByDict:tempateDict];
                         object = orderList;
                     }
-                    else if ([templeteId isEqualToString:@"order_detail"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyOrderDetail]) {
                         YSFOrderDetail *orderList = [YSFOrderDetail objectByDict:tempateDict];
                         object = orderList;
                     }
-                    else if ([templeteId isEqualToString:@"order_logistic"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyOrderLogistic]) {
                         YSFOrderLogistic *orderList = [YSFOrderLogistic objectByDict:tempateDict];
                         object = orderList;
                     }
-                    else if ([templeteId isEqualToString:@"action_list"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyActionList]) {
                         YSFActionList *orderList = [YSFActionList objectByDict:tempateDict];
                         object = orderList;
                     }
-                    else if ([templeteId isEqualToString:@"active_page"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyActivePage]) {
                         YSFActivePage *activePage = [YSFActivePage objectByDict:tempateDict];
                         object = activePage;
                     }
-                    else if ([templeteId isEqualToString:@"static_union"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyStaticUnion]) {
                         YSFStaticUnion *staticUnion = [YSFStaticUnion objectByDict:tempateDict];
                         object = staticUnion;
                     }
-                    else if ([templeteId isEqualToString:@"bot_form"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyBotForm]) {
                         YSFBotForm *botForm = [YSFBotForm objectByDict:tempateDict];
                         object = botForm;
                     }
-                    else if ([templeteId isEqualToString:@"card_layout"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyCardLayout]) {
                         YSFFlightList *fightList = [YSFFlightList objectByDict:tempateDict];
                         object = fightList;
                     }
-                    else if ([templeteId isEqualToString:@"detail_view"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyDetailView]) {
                         YSFFlightThumbnailAndDetail *fightDetail = [YSFFlightThumbnailAndDetail objectByDict:tempateDict];
                         YSFFlightList *fightList = [YSFFlightList objectByFlightThumbnail:fightDetail.thumbnail];
                         fightList.detail = fightDetail.detail;
                         object = fightList;
                     }
-                    else if ([templeteId isEqualToString:@"error_msg"]) {
+                    else if ([templeteId isEqualToString:YSFApiKeyErrorMsg]) {
                         YSFMachineResponse *response = [YSFMachineResponse new];
                         response.command = YSFCommandMachine;
                         response.answerLabel = [tempateDict ysf_jsonString:@"label"];
                         object = response;
+                    }
+                    else if ([templeteId isEqualToString:YSFApiKeyCustom]) {
+                        YSFBotCustomObject *customObject = [YSFBotCustomObject new];
+                        customObject.customObject = [tempateDict ysf_jsonArray:@"list"];
+                        object = customObject;
                     }
                     else {
                         //assert(false);
@@ -149,7 +155,7 @@
                     object = [YSFOrderOperation objectByDict:dict];
                 }
                 else if ([templeteId isEqualToString:@"qiyu_template_goods"]) {
-                    object = [YSFSelectedGoods objectByDict:dict];
+                    object = [YSFSelectedCommodityInfo objectByDict:dict];
                 }
                 else if ([templeteId isEqualToString:@"qiyu_template_botForm"]) {
                     object = [YSFSubmittedBotForm objectByDict:dict];
