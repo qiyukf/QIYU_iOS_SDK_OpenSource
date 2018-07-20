@@ -1,7 +1,18 @@
 #import "YSFActionBar.h"
 #import "QYCustomUIConfig.h"
+#import "YSFApiDefines.h"
 
 @implementation YSFActionInfo
+
++ (YSFActionInfo *)dataByJson:(NSDictionary *)dict
+{
+    YSFActionInfo *actionInfo = [[YSFActionInfo alloc] init];
+    actionInfo.action = [dict ysf_jsonInteger:YSFApiKeyAction];
+    actionInfo.buttonId = [NSNumber numberWithInteger:[dict ysf_jsonInteger:YSFApiKeyId]];
+    actionInfo.title = [dict ysf_jsonString:YSFApiKeyLabel];
+    actionInfo.userData = [dict ysf_jsonString:YSFApiKeyUrl];
+    return actionInfo;
+}
 @end
 
 

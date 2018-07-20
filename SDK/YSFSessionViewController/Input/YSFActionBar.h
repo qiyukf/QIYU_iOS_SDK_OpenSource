@@ -10,6 +10,8 @@ typedef NS_ENUM(NSInteger, QYActionType) {
 @property (nonatomic,copy)      NSString *title;
 @property (nonatomic,strong)    id      userData;
 
++ (YSFActionInfo *)dataByJson:(NSDictionary *)dict;
+
 @end
 
 

@@ -70,11 +70,7 @@
     NSArray *bot    = [dict ysf_jsonArray:YSFApiKeyBot];
     NSMutableArray *actionInfoArray = [NSMutableArray arrayWithCapacity:bot.count];
     for (NSDictionary *dict in bot) {
-        YSFActionInfo *actionInfo = [[YSFActionInfo alloc] init];
-        actionInfo.action = [dict ysf_jsonInteger:YSFApiKeyAction];
-        actionInfo.buttonId = [NSNumber numberWithInteger:[dict ysf_jsonInteger:YSFApiKeyId]];
-        actionInfo.title = [dict ysf_jsonString:YSFApiKeyLabel];
-        actionInfo.userData = [dict ysf_jsonString:YSFApiKeyUrl];
+        YSFActionInfo *actionInfo = [YSFActionInfo dataByJson:dict];
         [actionInfoArray addObject:actionInfo];
     }
     

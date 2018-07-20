@@ -68,6 +68,7 @@
 #import "KFNewMsgTipViewToDown.h"
 #import "YSFSearchQuestionSetting.h"
 #import "YSFBotCustomObject.h"
+#import "YSFBotEntry.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -3195,6 +3196,14 @@ static long long g_sessionId;
                 self.quickReplyView.ysf_frameHeight = self.quickReplyView.dataArray.count * 40;
             }
             [self.view addSubview:self.quickReplyView];
+        }
+    }
+    else if ([object isKindOfClass:[YSFBotEntry class]])
+    {
+        [_sessionInputView setActionInfoArray:((YSFBotEntry *)object).entryArray];
+        YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
+        if (sessionManager) {
+            [sessionManager getSession:_shopId].actionInfoArray = ((YSFBotEntry *)object).entryArray;
         }
     }
 }

@@ -14,7 +14,7 @@
 #import "YSFNotification.h"
 #import "YSFInviteEvaluationObject.h"
 #import "YSFInviteEvaluationCellLayoutConfig.h"
-
+#import "YSFBotCustomObject.h"
 
 @implementation YSFSessionConfigImp
 
@@ -40,7 +40,8 @@
         id attachment = [(YSF_NIMCustomObject *)object attachment];
         if ([attachment isKindOfClass:[YSFStartServiceObject class]]
             || [attachment isKindOfClass:[YSFEvaluationTipObject class]]
-            || [attachment isKindOfClass:[YSFNotification class]])
+            || [attachment isKindOfClass:[YSFNotification class]]
+            || [attachment isKindOfClass:[YSFBotCustomObject class]])
         {
             layoutConfig =  [YSFNotificationCellLayoutConfig new];
         }

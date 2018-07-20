@@ -13,6 +13,7 @@
 #import "QYCustomUIConfig.h"
 #import "YSFNotification.h"
 #import "YSFAttributedLabel.h"
+#import "YSFBotCustomObject.h"
 
 @implementation YSFNotificationCellLayoutConfig
 
@@ -93,6 +94,9 @@
     else if ([object.attachment isKindOfClass:[YSFNotification class]]) {
         YSFNotification *attachment = (YSFNotification *)object.attachment;
         return attachment.message;
+    }
+    else if ([object.attachment isKindOfClass:[YSFBotCustomObject class]]) {
+        return @"";
     }
     else {
         NSAssert(0, @"not support model");

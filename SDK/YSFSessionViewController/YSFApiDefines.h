@@ -282,6 +282,8 @@ typedef enum : NSUInteger {
     YSFCommandBotSend                   = 202,      //bot
     YSFCommandBotQueryRequest           = 204,      //bot
     YSFCommandBotQueryResponse          = 205,      //bot
+    YSFCommandBotEntry                  = 211,      //实时推送bot入口信息
+
 
 
     //客服端
