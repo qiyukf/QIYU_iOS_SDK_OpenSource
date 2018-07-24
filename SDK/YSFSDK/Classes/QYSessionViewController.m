@@ -3178,22 +3178,22 @@ static long long g_sessionId;
     {
         YSFSendSearchQuestionResponse *sendSearchQuestionResponse = (YSFSendSearchQuestionResponse *)object;
 
-        [_quickReplyView.dataArray removeAllObjects];
+        NSMutableArray *array = [NSMutableArray arrayWithCapacity:sendSearchQuestionResponse.questionContents.count];
         _quickReplyView.searchText = sendSearchQuestionResponse.content;
         for (YSFQuickReplyKeyWordAndContent *content in sendSearchQuestionResponse.questionContents) {
             content.content = content.content;
             content.isContentRich = NO;
-            [self.quickReplyView.dataArray addObject:content];
+            [array addObject:content];
         }
 
-        [self.quickReplyView update];
+        [self.quickReplyView updateDataArray:array];
         [self.quickReplyView removeFromSuperview];
-        if (self.quickReplyView.dataArray.count) {
+        if (self.quickReplyView.itemCount) {
             //动态改变高度
-            if (self.quickReplyView.dataArray.count > 2) {
+            if (self.quickReplyView.itemCount > 2) {
                 self.quickReplyView.ysf_frameHeight = 121;
             } else {
-                self.quickReplyView.ysf_frameHeight = self.quickReplyView.dataArray.count * 40;
+                self.quickReplyView.ysf_frameHeight = self.quickReplyView.viewHeight;
             }
             [self.view addSubview:self.quickReplyView];
         }

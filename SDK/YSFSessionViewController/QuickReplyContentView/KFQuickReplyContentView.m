@@ -10,10 +10,14 @@
 #import "KFQuickReplyContentCell.h"
 #import "YSFSendSearchQuestionResponse.h"
 
+static CGFloat const kCellHeight = 40.f;
 
 @interface YSFQuickReplyContentView()<UITableViewDelegate, UITableViewDataSource>
 //view
 @property (nonatomic, strong) UITableView *tableview;
+
+//Data
+@property (nonatomic, strong) NSMutableArray<YSFQuickReplyKeyWordAndContent*> *dataArray;
 
 @end
 
@@ -47,8 +51,18 @@
 }
 
 #pragma mark - Public Methods
-- (void)update {
+- (void)updateDataArray:(NSArray<YSFQuickReplyKeyWordAndContent *> *)dataArray {
+    [self.dataArray removeAllObjects];
+    [self.dataArray addObjectsFromArray:dataArray];
     [self.tableview reloadData];
+}
+
+- (NSUInteger)itemCount {
+    return self.dataArray.count;
+}
+
+- (CGFloat)viewHeight {
+    return self.dataArray.count * kCellHeight;
 }
 
 #pragma mark - DataSource
@@ -58,10 +72,12 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     YSFQuickReplyContentCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([YSFQuickReplyContentCell class])];
-    cell.searchText = self.searchText;
-    cell.onlyMatchFirst = _onlyMatchFirst;
-    YSFQuickReplyKeyWordAndContent *object = self.dataArray[indexPath.row];
-    [cell refresh:object.keyword showContent:object.content];
+    if (indexPath.row < self.dataArray.count) {
+        cell.searchText = self.searchText;
+        cell.onlyMatchFirst = _onlyMatchFirst;
+        YSFQuickReplyKeyWordAndContent *object = self.dataArray[indexPath.row];
+        [cell refresh:object.keyword showContent:object.content];
+    }
     
     return cell;
 }
@@ -74,6 +90,9 @@
 
 #pragma mark - Private Methods
 - (void)onTapCellAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row >= self.dataArray.count) {
+        return;
+    }
     if (self.delegate && [self.delegate respondsToSelector:@selector(didTapRowAtIndex:data:)]) {
         [self.delegate didTapRowAtIndex:indexPath.row data:self.dataArray[indexPath.row]];
     }
@@ -85,8 +104,8 @@
         _tableview = [[UITableView alloc] initWithFrame:self.bounds style:UITableViewStylePlain];
         _tableview.delegate = self;
         _tableview.dataSource = self;
-        _tableview.rowHeight = 40;
-        _tableview.estimatedRowHeight = 40;
+        _tableview.rowHeight = kCellHeight;
+        _tableview.estimatedRowHeight = kCellHeight;
         _tableview.estimatedSectionFooterHeight = 0;
         _tableview.estimatedSectionHeaderHeight = 0;
         _tableview.separatorStyle = UITableViewCellSeparatorStyleNone;
