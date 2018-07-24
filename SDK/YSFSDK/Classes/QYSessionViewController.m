@@ -3176,6 +3176,9 @@ static long long g_sessionId;
     }
     else if ([object isKindOfClass:[YSFSendSearchQuestionResponse class]])
     {
+        if (_sessionInputView.toolBar.inputTextView.text.length == 0) {
+            return;
+        }
         YSFSendSearchQuestionResponse *sendSearchQuestionResponse = (YSFSendSearchQuestionResponse *)object;
 
         NSMutableArray *array = [NSMutableArray arrayWithCapacity:sendSearchQuestionResponse.questionContents.count];
