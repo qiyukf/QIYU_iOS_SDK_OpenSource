@@ -17,7 +17,7 @@
 #import "YSFNotification.h"
 #import "YSFKFBypassNotification.h"
 #import "YSFReportQuestion.h"
-#import "YSFCommodityInfoShow.h"
+#import "QYCommodityInfo_private.h"
 #import "YSFInviteEvaluationObject.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFOrderList.h"
@@ -59,7 +59,7 @@
                 object = [YSFInviteEvaluationObject objectByDict:dict];
                 break;
             case YSFCommandSetCommodityInfoRequest:
-                object = [YSFCommodityInfoShow objectByDict:dict];
+                object = [QYCommodityInfo objectByDict:dict];
                 break;
             case YSFCommandRichText:
                 object = [YSFRichText objectByDict:dict];

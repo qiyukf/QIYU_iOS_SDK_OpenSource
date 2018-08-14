@@ -7,8 +7,8 @@
 //
 
 #import "YSFCommodityInfoContentConfig.h"
-#import "YSFCommodityInfoShow.h"
-#import "QYCommodityInfo.h"
+#import "QYCommodityInfo_private.h"
+#import "YSFApiDefines.h"
 
 @implementation YSFCommodityInfoContentConfig
 
@@ -21,37 +21,49 @@
     
     CGFloat height = 102;
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.message.messageObject;
-    YSFCommodityInfoShow *attachment = (YSFCommodityInfoShow *)object.attachment;
-    if (attachment.orderId.length > 0) {
-        height += 30;
+    QYCommodityInfo *attachment = (QYCommodityInfo *)object.attachment;
+    if (attachment.isCustom) {
+        height = 150;
     }
-    if (attachment.orderTime.length > 0) {
-        height += 30;
-    }
-    if (attachment.activity.length > 0) {
-        height += 36;
-    }
-    __block CGFloat right = 5;
-    __block CGFloat top = 0;
-    [attachment.tagsArray enumerateObjectsUsingBlock:^(QYCommodityTag *tag, NSUInteger idx, BOOL * _Nonnull stop) {
-        UIButton *button = [[UIButton alloc] init];
-        button.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
-        button.titleLabel.font = [UIFont systemFontOfSize:12];
-        [button setTitle:tag.label forState:UIControlStateNormal];
-        [button sizeToFit];
-        button.ysf_frameWidth += 20;
-        button.ysf_frameLeft = right + 10;
-        if (button.ysf_frameRight > msgBubbleMaxWidth - 10) {
-            top += 22 + 10;
-            right = 5;
-            button.ysf_frameLeft = right + 10;
+    else
+    {
+        if (attachment.orderId.length > 0) {
+            height += 30;
         }
-        button.ysf_frameTop = top;
-        button.ysf_frameHeight = 22;
-        right = button.ysf_frameRight;
-    }];
-    if (attachment.tagsArray.count > 0) {
-        height += 14 + top + 22;
+        if (attachment.orderTime.length > 0) {
+            height += 30;
+        }
+        if (attachment.activity.length > 0) {
+            height += 36;
+        }
+        if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
+            __block CGFloat right = 5;
+            __block CGFloat top = 0;
+            [attachment.tagsArray enumerateObjectsUsingBlock:^(QYCommodityTag *tag, NSUInteger idx, BOOL * _Nonnull stop) {
+                UIButton *button = [[UIButton alloc] init];
+                button.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
+                button.titleLabel.font = [UIFont systemFontOfSize:12];
+                [button setTitle:tag.label forState:UIControlStateNormal];
+                [button sizeToFit];
+                button.ysf_frameWidth += 20;
+                button.ysf_frameLeft = right + 10;
+                if (button.ysf_frameRight > msgBubbleMaxWidth - 10) {
+                    top += 22 + 10;
+                    right = 5;
+                    button.ysf_frameLeft = right + 10;
+                }
+                button.ysf_frameTop = top;
+                button.ysf_frameHeight = 22;
+                right = button.ysf_frameRight;
+            }];
+            if (attachment.tagsArray.count > 0) {
+                height += 14 + top + 22;
+            }
+        }
+    }
+    
+    if (attachment.sendByUser) {
+        height += 36;
     }
     
     return CGSizeMake(msgContentMaxWidth, height);

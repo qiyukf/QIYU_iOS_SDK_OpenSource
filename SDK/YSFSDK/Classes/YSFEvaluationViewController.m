@@ -175,180 +175,170 @@
     _tagList1.hidden = YES;
     [_scrollView addSubview:_tagList1];
     NSDictionary *dict = [_evaluationDict objectForKey:@"非常满意"];
-    NSArray *tagListArray = [dict objectForKey:YSFApiKeyTagList];
-//    UIButton *lastButton = nil;
-    for (NSString *tagString in tagListArray) {
-        UIButton *tagButton = [UIButton new];
-        [tagButton setTitle:tagString forState:UIControlStateNormal];
-        [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
-        tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
-        tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
-        tagButton.layer.cornerRadius = 10.0;
-        tagButton.layer.borderWidth = 0.5;
-        tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
-        [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
-        [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-        tagButton.titleLabel.layer.masksToBounds = YES;
+    //比较老的版本，存在本地的数据，dict是一个Number，所以这里需要判断一下
+    if ([dict isKindOfClass:[NSDictionary class]]) {
+        NSArray *tagListArray = [dict objectForKey:YSFApiKeyTagList];
+        for (NSString *tagString in tagListArray) {
+            UIButton *tagButton = [UIButton new];
+            [tagButton setTitle:tagString forState:UIControlStateNormal];
+            [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
+            tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
+            tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
+            tagButton.layer.cornerRadius = 10.0;
+            tagButton.layer.borderWidth = 0.5;
+            tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
+            [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+            [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            tagButton.titleLabel.layer.masksToBounds = YES;
 
-//        [tagButton sizeToFit];
-//        tagButton.ysf_frameWidth += 20;
-//        tagButton.ysf_frameLeft = lastButton.ysf_frameRight + 10;
-        __weak typeof(tagButton) weakTagButton = tagButton;
-        [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
-            weakTagButton.selected = !weakTagButton.selected;
-            if (weakTagButton.selected) {
-                weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-            }
-            else {
-                weakTagButton.backgroundColor = [UIColor clearColor];
-            }
-        } forControlEvents:UIControlEventTouchUpInside];
-        [_tagList1 addSubview:tagButton];
-//        lastButton = tagButton;
+            __weak typeof(tagButton) weakTagButton = tagButton;
+            [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
+                weakTagButton.selected = !weakTagButton.selected;
+                if (weakTagButton.selected) {
+                    weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+                else {
+                    weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+            } forControlEvents:UIControlEventTouchUpInside];
+            [_tagList1 addSubview:tagButton];
+        }
     }
     
     _tagList2 = [[UIView alloc] initWithFrame:CGRectZero];
     _tagList2.hidden = YES;
     [_scrollView addSubview:_tagList2];
     dict = [_evaluationDict objectForKey:@"满意"];
-    tagListArray = [dict objectForKey:YSFApiKeyTagList];
-//    lastButton = nil;
-    for (NSString *tagString in tagListArray) {
-        UIButton *tagButton = [UIButton new];
-        [tagButton setTitle:tagString forState:UIControlStateNormal];
-        [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
-        tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
-        tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
-        tagButton.layer.cornerRadius = 10.0;
-        tagButton.layer.borderWidth = 0.5;
-        tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
-        [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
-        [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-        tagButton.titleLabel.layer.masksToBounds = YES;
-        
-//        [tagButton sizeToFit];
-//        tagButton.ysf_frameWidth += 20;
-//        tagButton.ysf_frameLeft = lastButton.ysf_frameRight + 10;
-        __weak typeof(tagButton) weakTagButton = tagButton;
-        [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
-            weakTagButton.selected = !weakTagButton.selected;
-            if (weakTagButton.selected) {
-                weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-            }
-            else {
-                weakTagButton.backgroundColor = [UIColor clearColor];
-            }
-        } forControlEvents:UIControlEventTouchUpInside];
-        [_tagList2 addSubview:tagButton];
-//        lastButton = tagButton;
+    //比较老的版本，存在本地的数据，dict是一个Number，所以这里需要判断一下
+    if ([dict isKindOfClass:[NSDictionary class]]) {
+        NSArray *tagListArray = [dict objectForKey:YSFApiKeyTagList];
+        for (NSString *tagString in tagListArray) {
+            UIButton *tagButton = [UIButton new];
+            [tagButton setTitle:tagString forState:UIControlStateNormal];
+            [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
+            tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
+            tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
+            tagButton.layer.cornerRadius = 10.0;
+            tagButton.layer.borderWidth = 0.5;
+            tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
+            [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+            [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            tagButton.titleLabel.layer.masksToBounds = YES;
+            
+            __weak typeof(tagButton) weakTagButton = tagButton;
+            [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
+                weakTagButton.selected = !weakTagButton.selected;
+                if (weakTagButton.selected) {
+                    weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+                else {
+                    weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+            } forControlEvents:UIControlEventTouchUpInside];
+            [_tagList2 addSubview:tagButton];
+        }
     }
     
     _tagList3 = [[UIView alloc] initWithFrame:CGRectZero];
     _tagList3.hidden = YES;
     [_scrollView addSubview:_tagList3];
     dict = [_evaluationDict objectForKey:@"一般"];
-    tagListArray = [dict objectForKey:YSFApiKeyTagList];
-//    lastButton = nil;
-    for (NSString *tagString in tagListArray) {
-        UIButton *tagButton = [UIButton new];
-        [tagButton setTitle:tagString forState:UIControlStateNormal];
-        [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
-        tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
-        tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
-        tagButton.layer.cornerRadius = 10.0;
-        tagButton.layer.borderWidth = 0.5;
-        tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
-        [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
-        [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-        tagButton.titleLabel.layer.masksToBounds = YES;
-        
-//        [tagButton sizeToFit];
-//        tagButton.ysf_frameWidth += 20;
-//        tagButton.ysf_frameLeft = lastButton.ysf_frameRight + 10;
-        __weak typeof(tagButton) weakTagButton = tagButton;
-        [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
-            weakTagButton.selected = !weakTagButton.selected;
-            if (weakTagButton.selected) {
-                weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-            }
-            else {
-                weakTagButton.backgroundColor = [UIColor clearColor];
-            }
-        } forControlEvents:UIControlEventTouchUpInside];
-        [_tagList3 addSubview:tagButton];
-//        lastButton = tagButton;
+    //比较老的版本，存在本地的数据，dict是一个Number，所以这里需要判断一下
+    if ([dict isKindOfClass:[NSDictionary class]]) {
+        NSArray *tagListArray = [dict objectForKey:YSFApiKeyTagList];
+        for (NSString *tagString in tagListArray) {
+            UIButton *tagButton = [UIButton new];
+            [tagButton setTitle:tagString forState:UIControlStateNormal];
+            [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
+            tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
+            tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
+            tagButton.layer.cornerRadius = 10.0;
+            tagButton.layer.borderWidth = 0.5;
+            tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
+            [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+            [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            tagButton.titleLabel.layer.masksToBounds = YES;
+            
+            __weak typeof(tagButton) weakTagButton = tagButton;
+            [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
+                weakTagButton.selected = !weakTagButton.selected;
+                if (weakTagButton.selected) {
+                    weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+                else {
+                    weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+            } forControlEvents:UIControlEventTouchUpInside];
+            [_tagList3 addSubview:tagButton];
+        }
     }
     
     _tagList4 = [[UIView alloc] initWithFrame:CGRectZero];
     _tagList4.hidden = YES;
     [_scrollView addSubview:_tagList4];
     dict = [_evaluationDict objectForKey:@"不满意"];
-    tagListArray = [dict objectForKey:YSFApiKeyTagList];
-//    lastButton = nil;
-    for (NSString *tagString in tagListArray) {
-        UIButton *tagButton = [UIButton new];
-        [tagButton setTitle:tagString forState:UIControlStateNormal];
-        [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
-        tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
-        tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
-        tagButton.layer.cornerRadius = 10.0;
-        tagButton.layer.borderWidth = 0.5;
-        tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
-        [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
-        [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-        tagButton.titleLabel.layer.masksToBounds = YES;
-        
-//        [tagButton sizeToFit];
-//        tagButton.ysf_frameWidth += 20;
-//        tagButton.ysf_frameLeft = lastButton.ysf_frameRight + 10;
-        __weak typeof(tagButton) weakTagButton = tagButton;
-        [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
-            weakTagButton.selected = !weakTagButton.selected;
-            if (weakTagButton.selected) {
-                weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-            }
-            else {
-                weakTagButton.backgroundColor = [UIColor clearColor];
-            }
-        } forControlEvents:UIControlEventTouchUpInside];
-        [_tagList4 addSubview:tagButton];
-//        lastButton = tagButton;
+    //比较老的版本，存在本地的数据，dict是一个Number，所以这里需要判断一下
+    if ([dict isKindOfClass:[NSDictionary class]]) {
+        NSArray *tagListArray = [dict objectForKey:YSFApiKeyTagList];
+        for (NSString *tagString in tagListArray) {
+            UIButton *tagButton = [UIButton new];
+            [tagButton setTitle:tagString forState:UIControlStateNormal];
+            [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
+            tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
+            tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
+            tagButton.layer.cornerRadius = 10.0;
+            tagButton.layer.borderWidth = 0.5;
+            tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
+            [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+            [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            tagButton.titleLabel.layer.masksToBounds = YES;
+            
+            __weak typeof(tagButton) weakTagButton = tagButton;
+            [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
+                weakTagButton.selected = !weakTagButton.selected;
+                if (weakTagButton.selected) {
+                    weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+                else {
+                    weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+            } forControlEvents:UIControlEventTouchUpInside];
+            [_tagList4 addSubview:tagButton];
+        }
     }
     
     _tagList5 = [[UIView alloc] initWithFrame:CGRectZero];
     _tagList5.hidden = YES;
     [_scrollView addSubview:_tagList5];
     dict = [_evaluationDict objectForKey:@"非常不满意"];
-    tagListArray = [dict objectForKey:YSFApiKeyTagList];
-//    lastButton = nil;
-    for (NSString *tagString in tagListArray) {
-        UIButton *tagButton = [UIButton new];
-        [tagButton setTitle:tagString forState:UIControlStateNormal];
-        [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
-        tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
-        tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
-        tagButton.layer.cornerRadius = 10.0;
-        tagButton.layer.borderWidth = 0.5;
-        tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
-        [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
-        [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-        tagButton.titleLabel.layer.masksToBounds = YES;
-        
-//        [tagButton sizeToFit];
-//        tagButton.ysf_frameWidth += 20;
-//        tagButton.ysf_frameLeft = lastButton.ysf_frameRight + 10;
-        __weak typeof(tagButton) weakTagButton = tagButton;
-        [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
-            weakTagButton.selected = !weakTagButton.selected;
-            if (weakTagButton.selected) {
-                weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-            }
-            else {
-                weakTagButton.backgroundColor = [UIColor clearColor];
-            }
-        } forControlEvents:UIControlEventTouchUpInside];
-        [_tagList5 addSubview:tagButton];
-//        lastButton = tagButton;
+    //比较老的版本，存在本地的数据，dict是一个Number，所以这里需要判断一下
+    if ([dict isKindOfClass:[NSDictionary class]]) {
+        NSArray *tagListArray = [dict objectForKey:YSFApiKeyTagList];
+        for (NSString *tagString in tagListArray) {
+            UIButton *tagButton = [UIButton new];
+            [tagButton setTitle:tagString forState:UIControlStateNormal];
+            [tagButton setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
+            tagButton.titleLabel.font = [UIFont systemFontOfSize:12];
+            tagButton.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 10);
+            tagButton.layer.cornerRadius = 10.0;
+            tagButton.layer.borderWidth = 0.5;
+            tagButton.layer.borderColor = YSFRGB(0xcccccc).CGColor;
+            [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+            [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            tagButton.titleLabel.layer.masksToBounds = YES;
+            
+            __weak typeof(tagButton) weakTagButton = tagButton;
+            [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
+                weakTagButton.selected = !weakTagButton.selected;
+                if (weakTagButton.selected) {
+                    weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+                else {
+                    weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+            } forControlEvents:UIControlEventTouchUpInside];
+            [_tagList5 addSubview:tagButton];
+        }
     }
     
     _evaluationClose = [[UIButton alloc] initWithFrame:CGRectZero];
@@ -706,7 +696,14 @@
     [_submit setTitle:@"提交中..." forState:UIControlStateNormal];
     NSString *selectString = _selectedButton.titleLabel.text;
     NSDictionary *dict = [_evaluationDict objectForKey:selectString];
-    NSUInteger selectScore= [dict ysf_jsonUInteger:YSFApiKeyValue];
+    NSUInteger selectScore = 0;
+    //比较老的版本，存在本地的数据，dict是一个Number，所以这里需要判断一下
+    if ([dict isKindOfClass:[NSNumber class]]) {
+        selectScore = [(NSNumber *)dict unsignedIntegerValue];
+    }
+    else {
+        selectScore = [dict ysf_jsonUInteger:YSFApiKeyValue];
+    }
     NSMutableArray *tagList = [NSMutableArray new];
     for (UIButton *tagButton in _selectedTagListView.subviews) {
         if (tagButton.selected) {

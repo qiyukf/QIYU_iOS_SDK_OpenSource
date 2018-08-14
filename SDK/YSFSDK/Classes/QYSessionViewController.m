@@ -28,7 +28,7 @@
 #import "YSFAlertController.h"
 #import "YSFKFBypassNotification.h"
 #import "YSFSetCommodityInfoRequest.h"
-#import "YSFCommodityInfoShow.h"
+#import "QYCommodityInfo.h"
 #import "QYCommodityInfo.h"
 #import "YSFStartServiceObject.h"
 #import "YSFInviteEvaluationObject.h"
@@ -69,6 +69,7 @@
 #import "YSFSearchQuestionSetting.h"
 #import "YSFBotCustomObject.h"
 #import "YSFBotEntry.h"
+#import "QYCommodityInfo_private.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -78,7 +79,7 @@ typedef enum : NSUInteger {
     NTESImagePickerModeShootImage,
 } NTESImagePickerMode;
 
-NIMInputType g_inputType = InputTypeText;
+YSFInputStatus g_inputStatus = YSFInputStatusText;
 QYCommodityInfo *g_commodityInfo = nil;
 int64_t g_commonQuestionTemplateId = 0;
 static long long g_sessionId;
@@ -209,9 +210,9 @@ static long long g_sessionId;
         }
     }
     
-    if ((_staffId != 0 && [sessionManager getSession:_shopId].realStaffId != _staffId)
-        || (_groupId != 0 && [sessionManager getSession:_shopId].groupId != _groupId)
-        || (_robotId != 0 && [sessionManager getSession:_shopId].realStaffId != -_robotId)
+    if ((_staffId != 0 && [sessionManager getOnlineSession:_shopId].realStaffId != _staffId)
+        || (_groupId != 0 && [sessionManager getOnlineSession:_shopId].groupId != _groupId)
+        || (_robotId != 0 && [sessionManager getOnlineSession:_shopId].realStaffId != -_robotId)
         || (_commonQuestionTemplateId != g_commonQuestionTemplateId)) {
         shouldRequestService = YES;
         [sessionManager clearByShopId:_shopId];
@@ -235,9 +236,9 @@ static long long g_sessionId;
         }
     }
     
-    if ([sessionManager getSession:_shopId] && [sessionManager getSession:_shopId].humanOrMachine)
+    if ([sessionManager getOnlineSession:_shopId] && [sessionManager getOnlineSession:_shopId].humanOrMachine)
     {
-        if (_commodityInfo && ![g_commodityInfo isEqual:_commodityInfo]) {
+        if (_commodityInfo && (![g_commodityInfo isEqual:_commodityInfo] || _commodityInfo.sendByUser)) {
             [self sendCommodityInfoRequest:YES];
         }
     }
@@ -252,19 +253,19 @@ static long long g_sessionId;
     NSString *text = [[[QYSDK sharedSDK] infoManager] cachedText:_shopId];
     [self.sessionInputView setInputText:text];
     BOOL autoPopUp = [self showEvaluaViewController];
-    if (!autoPopUp && [QYCustomUIConfig sharedInstance].autoShowKeyboard && g_inputType != InputTypeAudio) {
+    if (!autoPopUp && [QYCustomUIConfig sharedInstance].autoShowKeyboard && g_inputStatus != YSFInputStatusAudio) {
         [self.sessionInputView.toolBar.inputTextView becomeFirstResponder];
     }
 }
 
 - (void)inputViewInputTypeChanged:(NSNotification*)sender {
     NSNumber *type = (NSNumber*)sender.object;
-    NIMInputType inputType = (NIMInputType)type.integerValue;
-    if (inputType == InputTypeAudio) {
+    YSFInputStatus inputType = (YSFInputStatus)type.integerValue;
+    if (inputType == YSFInputStatusAudio) {
         if (_quickReplyView) {
             _quickReplyView.hidden = YES;
         }
-    } else if (inputType == InputTypeText || inputType == InputTypeEmot) {
+    } else if (inputType == YSFInputStatusText || inputType == YSFInputStatusEmoticon) {
         if (_quickReplyView) {
             _quickReplyView.hidden = NO;
         }
@@ -285,7 +286,7 @@ static long long g_sessionId;
     __weak typeof(self) weakSelf = self;
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     YSFCancelWaitingRequest *request = [YSFCancelWaitingRequest new];
-    request.sessionId = [sessionManager getSessionInAll:_shopId].sessionId;
+    request.sessionId = [sessionManager getOnlineOrWaitingSession:_shopId].sessionId;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error){
         if (error) {
             UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
@@ -336,7 +337,7 @@ static long long g_sessionId;
     __weak typeof(self) weakSelf = self;
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     YSFCancelWaitingRequest *request = [YSFCancelWaitingRequest new];
-    request.sessionId = [sessionManager getSessionInAll:_shopId].sessionId;
+    request.sessionId = [sessionManager getOnlineOrWaitingSession:_shopId].sessionId;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error){
         if (error) {
             UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
@@ -387,7 +388,7 @@ static long long g_sessionId;
     [[YSF_NIMSDK sharedSDK].conversationManager removeDelegate:self];
     [[YSF_NIMSDK sharedSDK].chatManager removeDelegate:self];
     [[[YSF_NIMSDK sharedSDK] systemNotificationManager] removeDelegate:self];
-    g_inputType = _sessionInputView.inputType;
+    g_inputStatus = _sessionInputView.inputStatus;
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -561,7 +562,7 @@ static long long g_sessionId;
     CGRect inputViewRect = CGRectMake(0, 0, self.view.ysf_frameWidth, YSFTopInputViewHeight);
     BOOL disableInputView = NO;
     if (!disableInputView) {
-        self.sessionInputView = [[YSFInputView alloc] initWithFrame:inputViewRect inputType:g_inputType];
+        self.sessionInputView = [[YSFInputView alloc] initWithFrame:inputViewRect inputType:g_inputStatus];
         _sessionInputView.containerController = self;
         [_sessionInputView setInputActionDelegate:self];
         [self.view addSubview:_sessionInputView];
@@ -599,7 +600,7 @@ static long long g_sessionId;
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     if (![sessionManager shouldRequestService:YES shopId:_shopId])
     {
-        YSFServiceSession *session = [sessionManager getSession:_shopId];
+        YSFServiceSession *session = [sessionManager getOnlineSession:_shopId];
         if (session) {
             _closeSession.hidden = NO;
             _closeSession.enabled = YES;
@@ -1443,7 +1444,7 @@ static long long g_sessionId;
                 }
                 YSFMachineResponse *machineResponse = (YSFMachineResponse *)attachment;
                 YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-                YSFServiceSession *session = [sessionManager getSessionInAll:_shopId];
+                YSFServiceSession *session = [sessionManager getOnlineOrWaitingSession:_shopId];
                 machineResponse.shouldShow = (session.sessionId == ysfSessionId || session.robotSessionId == ysfSessionId);
                 [model cleanCache];
             }
@@ -1490,7 +1491,7 @@ static long long g_sessionId;
 {
     [_inputtingMessage stop];
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-    if ([sessionManager getSession:_shopId] && [sessionManager getSession:_shopId].humanOrMachine) {
+    if ([sessionManager getOnlineSession:_shopId] && [sessionManager getOnlineSession:_shopId].humanOrMachine) {
         NSMutableDictionary *shopDict = [[[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId] mutableCopy];
         if (shopDict) {
             NSString *sessionTimesStr = [shopDict objectForKey:YSFSessionTimes];
@@ -1579,12 +1580,12 @@ static long long g_sessionId;
         }
     }
 
-    if ([sessionManager getSession:_shopId] && [sessionManager getSession:_shopId].humanOrMachine) {
+    if ([sessionManager getOnlineSession:_shopId] && [sessionManager getOnlineSession:_shopId].humanOrMachine) {
         //收到XXX为您服务后发送一次
         if ([customObject isMemberOfClass:[YSF_NIMCustomObject class]]) {
             id object = ((YSF_NIMCustomObject *)customObject).attachment;
-            if (g_sessionId != [sessionManager getSession:_shopId].sessionId && [object isMemberOfClass:[YSFStartServiceObject class]]) {
-                g_sessionId = [sessionManager getSession:_shopId].sessionId;
+            if (g_sessionId != [sessionManager getOnlineSession:_shopId].sessionId && [object isMemberOfClass:[YSFStartServiceObject class]]) {
+                g_sessionId = [sessionManager getOnlineSession:_shopId].sessionId;
                 [self sendCommodityInfoRequest:YES];
             }
         }
@@ -1832,7 +1833,7 @@ static long long g_sessionId;
 {
     YSF_NIMMessage *messageAudio = [YSFMessageMaker msgWithAudio:filePath];
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-    if ([sessionManager getSession:_shopId] && ![sessionManager getSession:_shopId].humanOrMachine) {
+    if ([sessionManager getOnlineSession:_shopId] && ![sessionManager getOnlineSession:_shopId].humanOrMachine) {
         YSF_NIMSession *session = [YSF_NIMSession session:_shopId type:YSF_NIMSessionTypeYSF];
         messageAudio.from = [[YSF_NIMSDK sharedSDK].loginManager currentAccount];
         NSError *error = [messageAudio prepareForSend];
@@ -1916,11 +1917,28 @@ static long long g_sessionId;
 
 
 #pragma mark - NIMInputActionDelegate
-- (void)onTapMediaItem:(YSFMediaItem *)item{}
+- (void)onTapMediaItemPicture
+{
+    [self mediaPicturePressed];
+}
+
+- (void)onTapMediaItemShoot
+{
+    [self mediaShootPressed];
+}
+
+- (void)onTapMediaItem:(QYMediaItemWithBlock *)item
+{
+//    if (item.block) {
+//        item.block();
+//    }
+    UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
+    [topmostWindow ysf_makeToast:item.text duration:2.0 position:YSFToastPositionCenter];
+}
 
 - (void)SendInputtingMessage
 {
-    YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getSession:_shopId];
+    YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
     BOOL switchOpen = [YSFSystemConfig sharedInstance:_shopId].switchOpen;
     CGFloat sendingRate = [YSFSystemConfig sharedInstance:_shopId].sendingRate;
 
@@ -1953,7 +1971,7 @@ static long long g_sessionId;
     }
     
     if (_lastMessageContent.length > 0 && _lastMessageContent.length <= 10) {
-        YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getSessionInAll:_shopId];
+        YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getOnlineOrWaitingSession:_shopId];
         CGFloat sendingRate = [YSFSearchQuestionSetting sharedInstance:_shopId].sendingRate;
         
         if (session && (!session.humanOrMachine || session.robotInQueue) && _inputtingMessage.isStopped && self.lastMessageContent) {
@@ -2114,7 +2132,7 @@ static long long g_sessionId;
         NSDictionary *questionDict = event.data;
         NSString *question = [questionDict objectForKey:YSFApiKeyQuestion];
 
-        YSFServiceSession *session = [[QYSDK sharedSDK].sessionManager getSession:_shopId];
+        YSFServiceSession *session = [[QYSDK sharedSDK].sessionManager getOnlineSession:_shopId];
         if (session && !session.humanOrMachine) {
             NSNumber *questionId = [questionDict objectForKey:YSFApiKeyId];
             
@@ -2187,7 +2205,7 @@ static long long g_sessionId;
     }
     else if ([eventName isEqualToString:YSFKitEventNameTapCommodityInfo]){
         YSF_NIMCustomObject *customObject = event.message.messageObject;
-        YSFCommodityInfoShow *commodityInfo = customObject.attachment;
+        QYCommodityInfo *commodityInfo = customObject.attachment;
         NSString *commodityUrl = commodityInfo.urlString;
         if (commodityUrl && ![commodityUrl isEqualToString:@""]) {
             [self openUrl:commodityUrl];
@@ -2261,7 +2279,7 @@ static long long g_sessionId;
     else if ([eventName isEqualToString:YSFKitEventNameTapFillInBotForm]){
         long long sessionId = event.message.sessionIdFromMessageId;
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-        YSFServiceSession *session = [sessionManager getSession:_shopId];
+        YSFServiceSession *session = [sessionManager getOnlineSession:_shopId];
         if (session.sessionId == sessionId) {
             [self displayFillInBotForm:event.message];
         }
@@ -2270,6 +2288,28 @@ static long long g_sessionId;
             [topmostWindow ysf_makeToast:@"该会话已结束，表单已失效" duration:2 position:YSFToastPositionCenter];
         }
         
+        handled = YES;
+    }
+    else if ([eventName isEqualToString:YSFKitEventNameSendCommdityInfo]){
+        YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
+        YSFServiceSession *session = [sessionManager getOnlineOrWaitingSession:_shopId];
+        if (!session) {
+            UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
+            [topmostWindow ysf_makeToast:@"发送失败，会话已结束" duration:2 position:YSFToastPositionCenter];
+        }
+        else if (session && !session.humanOrMachine) {
+            UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
+            [topmostWindow ysf_makeToast:@"发送失败，机器人看不懂卡片哦 " duration:2 position:YSFToastPositionCenter];
+        }
+        else {
+            YSF_NIMCustomObject *customObject = event.message.messageObject;
+            QYCommodityInfo *show = (QYCommodityInfo *)(customObject.attachment);
+            QYCommodityInfo *showCopy = [show copy];
+            showCopy.sendByUser = NO;
+            YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:showCopy];
+            [self sendMessage:commodityInfoMessage];
+        }
+
         handled = YES;
     }
     
@@ -2418,7 +2458,7 @@ static long long g_sessionId;
         }
         long long sessionId = message.sessionIdFromMessageId;
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-        YSFServiceSession *session = [sessionManager getSession:weakSelf.shopId];
+        YSFServiceSession *session = [sessionManager getOnlineSession:weakSelf.shopId];
         if (session.sessionId == sessionId) {
             NSString *tmpParams = [NSString stringWithFormat:@"msgIdClient=%@&", message.messageId];
             tmpParams = [tmpParams stringByAppendingString:botForm.params];
@@ -2728,7 +2768,7 @@ static long long g_sessionId;
     } else if (message.messageType == YSF_NIMMessageTypeCustom) {
         YSF_NIMCustomObject *customObject = (YSF_NIMCustomObject *)message.messageObject;
         if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]
-            || [customObject.attachment isKindOfClass:[YSFCommodityInfoShow class]]) {
+            || [customObject.attachment isKindOfClass:[QYCommodityInfo class]]) {
             [items addObject:[[UIMenuItem alloc] initWithTitle:@"复制"
                                                         action:@selector(copyTextOrImage:)]];
             
@@ -2839,8 +2879,8 @@ static long long g_sessionId;
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             [pasteboard setString:YSFStrParam(notification.question)];
         }
-        else if ([customObject.attachment isKindOfClass:[YSFCommodityInfoShow class]]){
-            YSFCommodityInfoShow *commodityInfoShow = (YSFCommodityInfoShow *)customObject.attachment;
+        else if ([customObject.attachment isKindOfClass:[QYCommodityInfo class]]){
+            QYCommodityInfo *commodityInfoShow = (QYCommodityInfo *)customObject.attachment;
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             [pasteboard setString:YSFStrParam(commodityInfoShow.urlString)];
         }
@@ -2944,52 +2984,30 @@ static long long g_sessionId;
 - (void)sendCommodityInfoRequest:(BOOL)bAuto
 {
     if (_commodityInfo) {
-        YSFCommodityInfoShow *commodityInfoShow = [[YSFCommodityInfoShow alloc] init];
-        QYCommodityInfo *commodityInfo = [self checkCommodityInfoValid];
-        commodityInfoShow.command           = YSFCommandSetCommodityInfoRequest;
-        commodityInfoShow.title             = YSFStrParam(commodityInfo.title);
-        commodityInfoShow.desc              = YSFStrParam(commodityInfo.desc);
-        commodityInfoShow.pictureUrlString  = YSFStrParam(commodityInfo.pictureUrlString);
-        commodityInfoShow.urlString         = YSFStrParam(commodityInfo.urlString);
-        commodityInfoShow.note              = YSFStrParam(commodityInfo.note);
-        commodityInfoShow.show              = commodityInfo.show;
-        commodityInfoShow.ext          = YSFStrParam(commodityInfo.ext);
+        [_commodityInfo checkCommodityInfoValid];
+        QYCommodityInfo *commodityInfoShow = [_commodityInfo copy];
         commodityInfoShow.bAuto = bAuto;
-        commodityInfoShow.tagsArray = commodityInfo.tagsArray;
-        commodityInfoShow.tagsString = commodityInfo.tagsString;
         
-        if (!_commodityInfo.show) {
-            YSFSetCommodityInfoRequest *request = [[YSFSetCommodityInfoRequest alloc] init];
-            request.commodityInfo = [commodityInfoShow encodeAttachment];
-            [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:nil];
-        }
-        else{
+        if (_commodityInfo.sendByUser) {
             YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:commodityInfoShow];
-            [self sendMessage:commodityInfoMessage];
+            commodityInfoMessage.session = _session;
+            commodityInfoMessage.from = [[YSF_NIMSDK sharedSDK].loginManager currentAccount];
+            commodityInfoMessage.isDeliveried = YES;
+            [self onAddMessage:commodityInfoMessage];
+        }
+        else {
+            if (!_commodityInfo.show) {
+                YSFSetCommodityInfoRequest *request = [[YSFSetCommodityInfoRequest alloc] init];
+                request.commodityInfo = [commodityInfoShow encodeAttachment];
+                [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:nil];
+            }
+            else{
+                YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:commodityInfoShow];
+                [self sendMessage:commodityInfoMessage];
+            }
         }
         g_commodityInfo = _commodityInfo;
     }
-}
-
-//对title,desc,note有字数限制要求
-- (QYCommodityInfo *)checkCommodityInfoValid
-{
-    QYCommodityInfo *commodityInfo = [[QYCommodityInfo alloc] init];
-    if (_commodityInfo) {
-        if (_commodityInfo.title.length > 100) {
-            _commodityInfo.title  = [_commodityInfo.title substringToIndex:99];
-        }
-        if (_commodityInfo.desc.length > 300) {
-            _commodityInfo.desc = [_commodityInfo.desc substringToIndex:299];
-        }
-        if (_commodityInfo.note.length > 100) {
-            _commodityInfo.note = [_commodityInfo.note substringToIndex:99];
-        }
-        _commodityInfo.pictureUrlString = [_commodityInfo.pictureUrlString ysf_trim];
-    }
-    commodityInfo = _commodityInfo;
-    
-    return commodityInfo;
 }
 
 #pragma mark - YSFSessionProtocol
@@ -3113,7 +3131,7 @@ static long long g_sessionId;
     if (![_shopId isEqualToString:shopId]) return;
     
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-    if ([sessionManager getSession:_shopId] && [sessionManager getSession:_shopId].sessionId == session.sessionId) {
+    if ([sessionManager getOnlineSession:_shopId] && [sessionManager getOnlineSession:_shopId].sessionId == session.sessionId) {
         [self clearSessionState];
         _closeSession.enabled = NO;
         _closeSessionText.enabled = NO;
@@ -3206,7 +3224,7 @@ static long long g_sessionId;
         [_sessionInputView setActionInfoArray:((YSFBotEntry *)object).entryArray];
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
         if (sessionManager) {
-            [sessionManager getSession:_shopId].actionInfoArray = ((YSFBotEntry *)object).entryArray;
+            [sessionManager getOnlineSession:_shopId].actionInfoArray = ((YSFBotEntry *)object).entryArray;
         }
     }
 }

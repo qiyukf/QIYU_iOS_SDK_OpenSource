@@ -69,9 +69,18 @@
         _imageButton.imageEdgeInsets = UIEdgeInsetsMake(7, 7, 7, 7);
         [_imageButton sizeToFit];
         _imageButton.ysf_frameSize = CGSizeMake(_imageButton.ysf_frameWidth + 14, _imageButton.ysf_frameHeight + 14);
-        _imageButton.hidden = ![QYCustomUIConfig sharedInstance].showImageEntry;
         [self addSubview:_imageButton];
         
+        _moreMediaBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_moreMediaBtn setImage:[UIImage ysf_imageInKit:@"icon_toolview_add_normal"] forState:UIControlStateNormal];
+        [_moreMediaBtn setImage:[UIImage ysf_imageInKit:@"icon_toolview_add_pressed"] forState:UIControlStateHighlighted];
+        _moreMediaBtn.imageEdgeInsets = UIEdgeInsetsMake(7, 7, 7, 7);
+        [_moreMediaBtn sizeToFit];
+        _moreMediaBtn.ysf_frameSize = CGSizeMake(_moreMediaBtn.ysf_frameWidth + 14, _moreMediaBtn.ysf_frameHeight + 14);
+        _moreMediaBtn.hidden = [QYCustomUIConfig sharedInstance].mediaItems.count == 0;
+        [self addSubview:_moreMediaBtn];
+        _imageButton.hidden = !([QYCustomUIConfig sharedInstance].showImageEntry && _moreMediaBtn.hidden);
+
         _topSep = [[UIView alloc] initWithFrame:CGRectZero];
         _topSep.backgroundColor = YSFColorFromRGB(0xcccccc);
         [self addSubview:_topSep];
@@ -103,6 +112,9 @@
         self.inputTextBkgImage.ysf_frameWidth     = self.ysf_frameWidth - 2*leftSpacing;
         if (!_imageButton.hidden) {
             self.inputTextBkgImage.ysf_frameWidth      += -self.imageButton.ysf_frameWidth - leftSpacing + 14;
+        }
+        if (!_moreMediaBtn.hidden) {
+            self.inputTextBkgImage.ysf_frameWidth      += -self.moreMediaBtn.ysf_frameWidth - leftSpacing + 14;
         }
         if (!_voiceBtn.hidden) {
             self.inputTextBkgImage.ysf_frameWidth      += -self.voiceBtn.ysf_frameWidth - leftSpacing + 14;
@@ -146,6 +158,8 @@
     
     self.imageButton.ysf_frameRight      = self.ysf_frameWidth - leftSpacing + 7;
     self.imageButton.ysf_frameBottom     = self.ysf_frameHeight - 2;
+    self.moreMediaBtn.ysf_frameRight      = self.ysf_frameWidth - leftSpacing + 7;
+    self.moreMediaBtn.ysf_frameBottom     = self.ysf_frameHeight - 2;
     
     //底部分割线
     _topSep.ysf_frameSize        = CGSizeMake(self.ysf_frameWidth, sepHeight);
@@ -164,9 +178,8 @@
     if ([QYCustomUIConfig sharedInstance].showEmoticonEntry) {
         self.emoticonBtn.hidden = !humanOrMachine;
     }
-    if ([QYCustomUIConfig sharedInstance].showImageEntry) {
-        self.imageButton.hidden = !humanOrMachine;
-    }
+    self.moreMediaBtn.hidden = !([QYCustomUIConfig sharedInstance].mediaItems.count > 0 && humanOrMachine);
+    self.imageButton.hidden = !([QYCustomUIConfig sharedInstance].showImageEntry && humanOrMachine && self.moreMediaBtn.hidden);
     
     [self setNeedsLayout];
 }

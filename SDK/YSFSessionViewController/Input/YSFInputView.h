@@ -21,10 +21,11 @@
 #define YSFTopInputViewMaxHeight 82
 #define YSFBottomInputViewHeight 216.0
 
-typedef NS_ENUM(NSInteger, NIMInputType){
-    InputTypeText = 1,
-    InputTypeEmot = 2,
-    InputTypeAudio = 3,
+typedef NS_ENUM(NSInteger, YSFInputStatus){
+    YSFInputStatusText,
+    YSFInputStatusAudio,
+    YSFInputStatusEmoticon,
+    YSFInputStatusMore
 };
 
 typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
@@ -42,7 +43,7 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 - (void)hideInputView;
 - (void)inputViewSizeToHeight:(CGFloat)toHeight
                 showInputView:(BOOL)show;
-- (void)changeInputTypeTo:(NIMInputType)type;
+- (void)changeInputTypeTo:(YSFInputStatus)inputStatus;
 @end
 
 @interface YSFInputView : UIView
@@ -50,7 +51,7 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 @property (nonatomic, assign) NSInteger             maxTextLength;
 @property (nonatomic, assign) NSInteger             maxInputLines;
 @property (nonatomic, assign) CGFloat               inputBottomViewHeight;
-@property (nonatomic, assign, readonly)             NIMInputType inputType;
+@property (nonatomic, assign, readonly)             YSFInputStatus inputStatus;
 
 @property (nonatomic,assign) BOOL    humanOrMachine;
 @property (assign, nonatomic, getter=isRecording) BOOL recording;
@@ -62,7 +63,7 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 
 @property (weak,nonatomic)UIViewController* containerController;
 
-- (instancetype)initWithFrame:(CGRect)frame inputType:(NIMInputType)inputType;
+- (instancetype)initWithFrame:(CGRect)frame inputType:(YSFInputStatus)inputStatus;
 
 - (void)addKeyboardObserver;
 - (void)removeKeyboardObserver;

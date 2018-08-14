@@ -29,15 +29,16 @@
 @property (nonatomic, assign) NIMAudioRecordPhase recordPhase;
 @property (nonatomic, weak) id<YSFInputDelegate> inputDelegate;
 @property (nonatomic, weak) id<YSFInputActionDelegate> actionDelegate;
-@property (nonatomic, assign) NIMInputType inputType;
+@property (nonatomic, assign) YSFInputStatus inputStatus;
 @property (nonatomic, assign) CGFloat bottomHeight;
+@property (strong, nonatomic)  YSFInputMoreContainerView *moreContainer;
 
 @end
 
 
 @implementation YSFInputView
 
-- (instancetype)initWithFrame:(CGRect)frame inputType:(NIMInputType)inputType
+- (instancetype)initWithFrame:(CGRect)frame inputType:(YSFInputStatus)inputStatus
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -46,12 +47,12 @@
         //最大输入行数
         _maxInputLines = 4;
         
-        _inputType = inputType;
+        _inputStatus = inputStatus;
         _recording = NO;
         _recordPhase = AudioRecordPhaseEnd;
         _inputTextViewOlderHeight = YSFTopInputViewHeight;
 
-        if (_inputType == InputTypeAudio) {
+        if (_inputStatus == YSFInputStatusAudio) {
             [self changeInputTypeToAudio];
         }
         else
@@ -68,6 +69,7 @@
 
         _toolBar = [[YSFInputToolBar alloc] initWithFrame:CGRectZero];
         [_toolBar.emoticonBtn addTarget:self action:@selector(onTouchEmoticonBtn:) forControlEvents:UIControlEventTouchUpInside];
+        [_toolBar.moreMediaBtn addTarget:self action:@selector(onTouchMoreBtn:) forControlEvents:UIControlEventTouchUpInside];
         [_toolBar.voiceBtn addTarget:self action:@selector(onTouchVoiceBtn:) forControlEvents:UIControlEventTouchUpInside];
         [_toolBar.recordButton addTarget:self action:@selector(onTouchRecordBtnDown:) forControlEvents:UIControlEventTouchDown];
         [_toolBar.recordButton addTarget:self action:@selector(onTouchRecordBtnDragInside:) forControlEvents:UIControlEventTouchDragInside];
@@ -226,7 +228,7 @@
 
 - (void)updateAllButtonImages
 {
-    if (_inputType == InputTypeText)
+    if (_inputStatus == YSFInputStatusText)
     {
         [self updateVoiceBtnImages:YES];
         [self updateEmotAndTextBtnImages:YES];
@@ -235,7 +237,7 @@
         [_toolBar.inputTextView setHidden:NO];
         [_toolBar.inputTextBkgImage setHidden:NO];
     }
-    else if(_inputType == InputTypeAudio)
+    else if(_inputStatus == YSFInputStatusAudio)
     {
         [self updateVoiceBtnImages:NO];
         [self updateEmotAndTextBtnImages:YES];
@@ -244,7 +246,7 @@
         [_toolBar.inputTextView setHidden:YES];
         [_toolBar.inputTextBkgImage setHidden:YES];
     }
-    else if (_inputType == InputTypeEmot)
+    else if (_inputStatus == YSFInputStatusEmoticon)
     {
         [self updateVoiceBtnImages:YES];
         [self updateEmotAndTextBtnImages:NO];
@@ -319,7 +321,7 @@
 //    toFrame.origin.y -= _inputBottomViewHeight;
 
     if (toFrame.origin.y == [[UIScreen mainScreen] bounds].size.height) {
-        if (_inputType != InputTypeEmot) {
+        if (_inputStatus != YSFInputStatusEmoticon && _inputStatus != YSFInputStatusMore) {
             [self willShowBottomHeight:0];
         }
     }else{
@@ -433,7 +435,7 @@
 #pragma mark - button actions
 - (void)onTouchVoiceBtn:(id)sender {
     // image change
-    if (_inputType != InputTypeAudio) {
+    if (_inputStatus != YSFInputStatusAudio) {
         [self changeInputTypeToAudio];
     }
     else
@@ -445,7 +447,7 @@
 
 - (void)changeInputTypeToText
 {
-    self.inputType = InputTypeText;
+    self.inputStatus = YSFInputStatusText;
 
     [self inputTextViewToHeight:[self getTextViewContentH:self.toolBar.inputTextView]];;
     [self updateAllButtonImages];
@@ -458,7 +460,7 @@
         [[AVAudioSession sharedInstance] performSelector:@selector(requestRecordPermission:) withObject:^(BOOL granted) {
             if (granted) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    weakSelf.inputType = InputTypeAudio;
+                    weakSelf.inputStatus = YSFInputStatusAudio;
                     if ([weakSelf.toolBar.inputTextView isFirstResponder]) {
                         weakSelf.inputBottomViewHeight = 0;
                         [weakSelf.emoticonContainer setHidden:YES];
@@ -512,7 +514,7 @@
 
 - (void)onTouchEmoticonBtn:(id)sender
 {
-    if (_inputType != InputTypeEmot) {
+    if (_inputStatus != YSFInputStatusEmoticon) {
         if (!_emoticonContainer) {
             _emoticonContainer = [[YSFInputEmoticonContainerView alloc] initWithFrame:CGRectMake(0, _inputTextViewOlderHeight, self.ysf_frameWidth, YSFBottomInputViewHeight)];
             _emoticonContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -520,19 +522,49 @@
             _emoticonContainer.hidden = YES;
             [self addSubview:_emoticonContainer];
         }
-        self.inputType = InputTypeEmot;
-        _inputBottomViewHeight = YSFBottomInputViewHeight;
         [self bringSubviewToFront:_emoticonContainer];
         [_emoticonContainer setHidden:NO];
+        [_moreContainer setHidden:YES];
+        self.inputStatus = YSFInputStatusEmoticon;
+        _inputBottomViewHeight = YSFBottomInputViewHeight;
         [self endTextEditWithInputBottomViewHeight:_inputBottomViewHeight];
     }
     else
     {
         [_emoticonContainer setHidden:YES];
-        self.inputType = InputTypeText;
+        self.inputStatus = YSFInputStatusText;
         _inputBottomViewHeight = 0;
         [self.toolBar.inputTextView becomeFirstResponder];
     }
+    [self inputTextViewToHeight:[self getTextViewContentH:self.toolBar.inputTextView]];;
+    [self updateAllButtonImages];
+}
+
+- (void)onTouchMoreBtn:(id)sender {
+    if (_inputStatus != YSFInputStatusMore)
+    {
+        if (!_moreContainer) {
+            _moreContainer = [[YSFInputMoreContainerView alloc] initWithFrame:CGRectMake(0, _inputTextViewOlderHeight, self.ysf_frameWidth, YSFBottomInputViewHeight)];
+            _moreContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+            _moreContainer.hidden   = YES;
+            [_moreContainer genMediaButtons];
+            _moreContainer.actionDelegate = self.actionDelegate;
+            [self addSubview:_moreContainer];
+        }
+        [self bringSubviewToFront:self.moreContainer];
+        [_emoticonContainer setHidden:YES];
+        [_moreContainer setHidden:NO];
+        self.inputStatus = YSFInputStatusMore;
+        _inputBottomViewHeight = YSFBottomInputViewHeight;
+        [self endTextEditWithInputBottomViewHeight:_inputBottomViewHeight];
+    }
+    else
+    {
+        self.inputStatus = YSFInputStatusText;
+        _inputBottomViewHeight = 0;
+        [self.toolBar.inputTextView becomeFirstResponder];
+    }
+    
     [self inputTextViewToHeight:[self getTextViewContentH:self.toolBar.inputTextView]];;
     [self updateAllButtonImages];
 }
@@ -549,10 +581,10 @@
 
 - (void)inputBottomViewHeightToZero
 {
-    if (_inputType != InputTypeAudio) {
+    if (_inputStatus != YSFInputStatusAudio) {
         [_emoticonContainer setHidden:YES];
         _inputBottomViewHeight = 0.0;
-        self.inputType = InputTypeText;
+        self.inputStatus = YSFInputStatusText;
         [self endTextEditWithInputBottomViewHeight:0];
         [self updateAllButtonImages];
     }
@@ -573,7 +605,7 @@
 
 - (void)textViewDidBeginEditing:(UITextView *)textView
 {
-    self.inputType = InputTypeText;
+    self.inputStatus = YSFInputStatusText;
     
     [textView becomeFirstResponder];
 }
@@ -740,7 +772,7 @@
 {
     if ([self.actionDelegate respondsToSelector:@selector(OnMediaPicturePressed)]) {
         [self.actionDelegate OnMediaPicturePressed];
-        self.inputType = InputTypeText;
+        self.inputStatus = YSFInputStatusText;
         _inputBottomViewHeight = 0;
         [_emoticonContainer setHidden:YES];
         [self endTextEditWithInputBottomViewHeight:0];
@@ -781,10 +813,10 @@
     }
 }
 
-- (void)setInputType:(NIMInputType)inputType {
-    _inputType = inputType;
+- (void)setInputType:(YSFInputStatus)inputStatus {
+    _inputStatus = inputStatus;
     if (self.inputDelegate && [self.inputDelegate respondsToSelector:@selector(changeInputTypeTo:)]) {
-        [self.inputDelegate changeInputTypeTo:inputType];
+        [self.inputDelegate changeInputTypeTo:inputStatus];
     }
 }
 

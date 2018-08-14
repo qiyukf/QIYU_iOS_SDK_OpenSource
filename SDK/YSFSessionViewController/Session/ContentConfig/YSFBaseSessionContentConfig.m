@@ -22,7 +22,6 @@
 #import "YSFKFBypassContentConfig.h"
 #import "YSFKFBypassNotification.h"
 #import "YSFCommodityInfoContentConfig.h"
-#import "YSFCommodityInfoShow.h"
 #import "YSFOrderList.h"
 #import "YSFOrderListContentConfig.h"
 #import "YSFBotText.h"

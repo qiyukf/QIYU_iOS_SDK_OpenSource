@@ -1,6 +1,16 @@
 #import "QYCustomUIConfig+Private.h"
 #import "QYPOPCustomUIConfig.h"
 
+@implementation QYMediaItem
+
+@end
+
+
+@implementation QYMediaItemWithBlock
+
+@end
+
+
 @interface QYCustomUIConfig()
 
 /**
@@ -65,62 +75,64 @@
 
 - (void)restoreToDefault
 {
-    _sessionTipTextColor = YSFRGBA2(0xffc08722);
-    _sessionTipTextFontSize = 14;
-    _customMessageTextColor = [UIColor whiteColor];
-    _customMessageHyperLinkColor = [UIColor whiteColor];
-    _customMessageTextFontSize = 16;
-    _serviceMessageTextColor = [UIColor blackColor];
-    _serviceMessageHyperLinkColor = YSFRGBA2(0xff4e97d9);
-    _serviceMessageTextFontSize = 16;
-    _tipMessageTextColor = YSFRGBA2(0xffa3afb7);
-    _tipMessageTextFontSize = 12;
-    _inputTextColor = [UIColor blackColor];
-    _inputTextFontSize = 14;
+    self.sessionTipTextColor = YSFRGBA2(0xffc08722);
+    self.sessionTipTextFontSize = 14;
+    self.customMessageTextColor = [UIColor whiteColor];
+    self.customMessageHyperLinkColor = [UIColor whiteColor];
+    self.customMessageTextFontSize = 16;
+    self.serviceMessageTextColor = [UIColor blackColor];
+    self.serviceMessageHyperLinkColor = YSFRGBA2(0xff4e97d9);
+    self.serviceMessageTextFontSize = 16;
+    self.tipMessageTextColor = YSFRGBA2(0xffa3afb7);
+    self.tipMessageTextFontSize = 12;
+    self.inputTextColor = [UIColor blackColor];
+    self.inputTextFontSize = 14;
 
-    _sessionBackground = nil;
-    _sessionTipBackgroundColor = YSFRGBA2(0xfffff9e2);
-    _customerHeadImage = [UIImage ysf_imageInKit:@"icon_customer_avatar"];
-    _customerHeadImageUrl = nil;
-    _serviceHeadImage = [UIImage ysf_imageInKit:@"icon_service_avatar"];
-    _serviceHeadImageUrl = nil;
-    _sessionMessageSpacing = 0;
-    _showHeadImage = YES;
+    self.sessionBackground = nil;
+    self.sessionTipBackgroundColor = YSFRGBA2(0xfffff9e2);
+    self.customerHeadImage = [UIImage ysf_imageInKit:@"icon_customer_avatar"];
+    self.customerHeadImageUrl = nil;
+    self.serviceHeadImage = [UIImage ysf_imageInKit:@"icon_service_avatar"];
+    self.serviceHeadImageUrl = nil;
+    self.sessionMessageSpacing = 0;
+    self.showHeadImage = YES;
     
-    _customerMessageBubbleNormalImage = [[UIImage ysf_imageInKit:@"icon_sender_node_normal"]
+    self.customerMessageBubbleNormalImage = [[UIImage ysf_imageInKit:@"icon_sender_node_normal"]
                                          resizableImageWithCapInsets:UIEdgeInsetsMake(25,10,10,10)
                                          resizingMode:UIImageResizingModeStretch];
-    _customerMessageBubblePressedImage = [[UIImage ysf_imageInKit:@"icon_sender_node_pressed"]
+    self.customerMessageBubblePressedImage = [[UIImage ysf_imageInKit:@"icon_sender_node_pressed"]
                                             resizableImageWithCapInsets:UIEdgeInsetsMake(25,10,10,10)
                                             resizingMode:UIImageResizingModeStretch];
-    _serviceMessageBubbleNormalImage = [[UIImage ysf_imageInKit:@"icon_receiver_node_normal"]
+    self.serviceMessageBubbleNormalImage = [[UIImage ysf_imageInKit:@"icon_receiver_node_normal"]
                                             resizableImageWithCapInsets:UIEdgeInsetsMake(25,10,10,10)
                                             resizingMode:UIImageResizingModeStretch];
-    _serviceMessageBubblePressedImage = [[UIImage ysf_imageInKit:@"icon_receiver_node_pressed"]
+    self.serviceMessageBubblePressedImage = [[UIImage ysf_imageInKit:@"icon_receiver_node_pressed"]
                                             resizableImageWithCapInsets:UIEdgeInsetsMake(25,10,10,10)
                                             resizingMode:UIImageResizingModeStretch];
     
-    _actionButtonTextColor = YSFRGB(0x4f82ae);
-    _actionButtonBorderColor = YSFRGB(0x4f82ae);
-    _rightBarButtonItemColorBlackOrWhite = YES;
-    _showAudioEntry = YES;
-    _showAudioEntryInRobotMode = YES;
-    _showEmoticonEntry = YES;
-    _showImageEntry = YES;
-    _autoShowKeyboard = YES;
+    self.actionButtonTextColor = YSFRGB(0x4f82ae);
+    self.actionButtonBorderColor = YSFRGB(0x4f82ae);
+    self.rightBarButtonItemColorBlackOrWhite = YES;
+    self.showAudioEntry = YES;
+    self.showAudioEntryInRobotMode = YES;
+    self.showEmoticonEntry = YES;
+    self.showImageEntry = YES;
+    self.autoShowKeyboard = YES;
     
-    _showShopEntrance = NO;
-    _shopEntranceImage = nil;
-    _shopEntranceText = @"商铺";
+    self.showShopEntrance = NO;
+    self.shopEntranceImage = nil;
+    self.shopEntranceText = @"商铺";
     
-    _showSessionListEntrance = NO;
-    _sessionListEntrancePosition = YES;
-    _sessionListEntranceImage = nil;
+    self.showSessionListEntrance = NO;
+    self.sessionListEntrancePosition = YES;
+    self.sessionListEntranceImage = nil;
     
-    _compressQuality = 0.5;
-    _showTransWords = NO;
-    _showEvaluationEntry = YES;
-    _bypassDisplayMode = QYBypassDisplayModeBottom;
+    self.compressQuality = 0.5;
+    self.showTransWords = NO;
+    self.showEvaluationEntry = YES;
+    self.bypassDisplayMode = QYBypassDisplayModeBottom;
+    
+    self.mediaItems = nil;
 }
 
 - (void)setToKf

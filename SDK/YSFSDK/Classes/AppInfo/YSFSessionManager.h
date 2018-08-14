@@ -56,8 +56,8 @@ typedef enum : NSUInteger {
 - (void)requestServicewithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId;
 
 - (YSFSessionStateType)getSessionStateType:(NSString *)shopId;
-- (YSFServiceSession *)getSession:(NSString *)shopId;
-- (YSFServiceSession *)getSessionInAll:(NSString *)shopId;
+- (YSFServiceSession *)getOnlineSession:(NSString *)shopId;
+- (YSFServiceSession *)getOnlineOrWaitingSession:(NSString *)shopId;
 
 - (void)clear;
 - (void)clearByShopId:(NSString *)shopId;

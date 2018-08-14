@@ -23,5 +23,6 @@
 @property (nonatomic,strong) YSFInputTextView *inputTextView;
 
 @property (nonatomic,strong) UIButton    *imageButton;
+@property (nonatomic,strong) UIButton    *moreMediaBtn;
 
 @end

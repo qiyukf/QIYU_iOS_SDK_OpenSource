@@ -12,7 +12,7 @@
 #import "NIMSession.h"
 #import "YSFNotification.h"
 #import "YSFWelcome.h"
-#import "YSFCommodityInfoShow.h"
+#import "QYCommodityInfo.h"
 #import "YSFInviteEvaluationObject.h"
 #import "YSFEvaluationTipObject.h"
 #import "YSFStartServiceObject.h"

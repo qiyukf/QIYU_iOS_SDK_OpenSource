@@ -28,6 +28,7 @@ NSString *const YSFKitEventNameTapRetryAudioToText = @"YSFKitEventNameTapRetryAu
 NSString *const YSFKitEventNameTapRichTextImage = @"YSFKitEventNameTapRichTextImage";
 NSString *const YSFKitEventNameTapPushMessageActionUrl = @"YSFKitEventNameTapPushMessageActionUrl";
 NSString *const YSFKitEventNameOpenUrl = @"YSFKitEventNameOpenUrl";
+NSString *const YSFKitEventNameSendCommdityInfo = @"YSFKitEventNameSendMessage";
 
 @implementation YSFKitEvent
 

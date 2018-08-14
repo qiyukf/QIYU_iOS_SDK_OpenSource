@@ -246,7 +246,7 @@
         NSMutableArray *array = [[_qyUserInfo.data ysf_toArray] mutableCopy];
         if (array) {
             NSString *version = [NSString stringWithFormat:@"{\"key\":\"sdk_version\", \"value\":\"%@\", \"hidden\":true}",
-                                  [[QYSDK sharedSDK].infoManager version]];
+                                  [[QYSDK sharedSDK].infoManager versionNumber]];
             NSDictionary *versionDict = [version ysf_toDict];
             [array addObject:versionDict];
             newUserInfo.data = [array ysf_toUTF8String];
@@ -506,9 +506,14 @@
     }
 }
 
+- (NSString *)versionNumber
+{
+    return @"43";
+}
+
 - (NSString *)version
 {
-    return @"42";
+    return @"4.3.0";
 }
 
 #pragma mark - CachedText

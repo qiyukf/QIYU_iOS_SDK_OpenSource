@@ -8,7 +8,7 @@
 
 #import "YSFInputMoreContainerView.h"
 #import "YSFPageView.h"
-#import "YSFMediaItem.h"
+#import "QYCustomUIConfig+Private.h"
 #import "YSFDefaultValueMaker.h"
 
 NSInteger YSF_NIMMaxItemCountInPage = 8;
@@ -36,36 +36,24 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
 
 - (void)genMediaButtons
 {
+    NSMutableArray *items = [[QYCustomUIConfig sharedInstance].mediaItems mutableCopy];
+    [items insertObject:[QYCustomUIConfig sharedInstance].mediaItemPicture atIndex:0];
+    [items insertObject:[QYCustomUIConfig sharedInstance].mediaItemShoot atIndex:0];
+
     NSMutableArray *mediaButtons = [NSMutableArray array];
     NSMutableArray *mediaItems = [NSMutableArray array];
-    
-//    if (self.config && [self.config respondsToSelector:@selector(mediaItems)]) {
-//        NSArray *items = [self.config mediaItems];
-//
-//        [items enumerateObjectsUsingBlock:^(YSFMediaItem *item, NSUInteger idx, BOOL *stop) {
-//
-//            BOOL shouldHidden = NO;
-//            if ([self.config respondsToSelector:@selector(shouldHideItem:)]) {
-//                shouldHidden = [self.config shouldHideItem:item];
-//            }
-//
-//            if (!shouldHidden) {
-//
-//                [mediaItems addObject:item];
-//
-//                UIButton *btn = [[UIButton alloc] init];
-//                [btn setImage:item.normalImage forState:UIControlStateNormal];
-//                [btn setImage:item.selectedImage forState:UIControlStateHighlighted];
-//                [btn setTitle:item.title forState:UIControlStateNormal];
-//                [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-//                [btn setTitleEdgeInsets:UIEdgeInsetsMake(76, -72, 0, 0)];
-//                [btn.titleLabel setFont:[UIFont systemFontOfSize:14.0]];
-//                btn.tag = item.tag;
-//                [mediaButtons addObject:btn];
-//
-//            }
-//        }];
-//    }
+    [items enumerateObjectsUsingBlock:^(QYMediaItem *item, NSUInteger idx, BOOL *stop) {
+        [mediaItems addObject:item];
+        UIButton *btn = [[UIButton alloc] init];
+        [btn setImage:item.normalImage forState:UIControlStateNormal];
+        [btn setImage:item.selectedImage forState:UIControlStateHighlighted];
+        [btn setTitle:item.text forState:UIControlStateNormal];
+        [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [btn setTitleEdgeInsets:UIEdgeInsetsMake(76, -72, 0, 0)];
+        [btn.titleLabel setFont:[UIFont systemFontOfSize:14.0]];
+        btn.tag = idx;
+        [mediaButtons addObject:btn];
+    }];
     
     _mediaButtons = mediaButtons;
     _mediaItems = mediaItems;
@@ -174,15 +162,17 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
 #pragma mark - button actions
 - (void)onTouchButton:(id)sender
 {
-    NSInteger tag = [(UIButton *)sender tag];
-    for (YSFMediaItem *item in _mediaItems) {
-        if (item.tag == tag) {
-            if (_actionDelegate && [_actionDelegate respondsToSelector:@selector(onTapMediaItem:)]) {
-                [_actionDelegate onTapMediaItem:item];
-            }
-            break;
-        }
+    NSInteger index = [(UIButton *)sender tag];
+    if (index == 0 && _actionDelegate && [_actionDelegate respondsToSelector:@selector(onTapMediaItemPicture)]) {
+        [_actionDelegate onTapMediaItemPicture];
+    }
+    else if (index == 1 && _actionDelegate && [_actionDelegate respondsToSelector:@selector(onTapMediaItemShoot)]) {
+        [_actionDelegate onTapMediaItemShoot];
+    }
+    else if (index >=2 && _actionDelegate && [_actionDelegate respondsToSelector:@selector(onTapMediaItem:)]) {
+        [_actionDelegate onTapMediaItem:_mediaItems[index]];
     }
 }
+
 
 @end

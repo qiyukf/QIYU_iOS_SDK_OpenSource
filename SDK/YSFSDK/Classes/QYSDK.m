@@ -81,7 +81,7 @@
     
     YSF_NIMDataTrackerOption *trackerOption = [YSF_NIMDataTrackerOption new];
     trackerOption.name      = @"qy";
-    trackerOption.version   = @"4.2.2";
+    trackerOption.version   = [[QYSDK sharedSDK].infoManager version];
     trackerOption.appKey    = appKey;
     [[YSF_NIMDataTracker shared] start:trackerOption];
     

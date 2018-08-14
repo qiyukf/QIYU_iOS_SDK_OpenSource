@@ -116,6 +116,9 @@
 #define     YSFApiKeyOrderSku           @"orderSku"
 #define     YSFApiKeyActivity           @"activity"
 #define     YSFApiKeyActivityHref       @"activityHref"
+#define     YSFApiKeySendByUser         @"sendByUser"
+#define     YSFApiKeyActionText         @"actionText"
+#define     YSFApiKeyActionTextColor    @"actionTextColor"
 #define     YSFApiKeyMsgId              @"msgId"
 #define     YSFApiKeyText               @"text"
 #define     YSFApiKeyMessageId          @"msgId"
@@ -239,7 +242,7 @@
 #define     YSFApiKeyDetailView         @"detail_view"
 #define     YSFApiKeyErrorMsg           @"error_msg"
 #define     YSFApiKeyCustom             @"custom"
-
+#define     YSFApiKeyPictureLink        @"pictureLink"
 
 
 #define     YSFApiValueIOS              @"iOS"

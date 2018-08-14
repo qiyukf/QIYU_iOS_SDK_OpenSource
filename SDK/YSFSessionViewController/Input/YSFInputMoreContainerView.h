@@ -12,5 +12,6 @@
 @interface YSFInputMoreContainerView : UIView
 
 @property (nonatomic,weak)  id<YSFInputActionDelegate> actionDelegate;
+- (void)genMediaButtons;
 
 @end

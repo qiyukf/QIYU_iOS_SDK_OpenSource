@@ -12,7 +12,6 @@
 #import "YSFApiDefines.h"
 #import "NSDictionary+YSF.h"
 #import "YSFWelcome.h"
-#import "YSFCommodityInfoShow.h"
 #import "YSFInviteEvaluationObject.h"
 #import "YSFEvaluationTipObject.h"
 #import "YSFStartServiceObject.h"

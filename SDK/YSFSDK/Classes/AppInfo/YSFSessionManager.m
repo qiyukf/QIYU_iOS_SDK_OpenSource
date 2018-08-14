@@ -150,7 +150,7 @@ YSFServiceRequestDelegate>
 - (BOOL)serviceOutOfDate:(NSString *)shopId
 {
     BOOL result = YES;
-    if ([self getSession:shopId])
+    if ([self getOnlineSession:shopId])
     {
         result = NO;
     }
@@ -164,7 +164,7 @@ YSFServiceRequestDelegate>
 - (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId;
 {
     BOOL waitingOrNotExist = false;
-    if (![self getSession:shopId] && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
+    if (![self getOnlineSession:shopId] && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
                                || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist
                                || [self getSessionStateType:shopId] == YSFSessionStateNotExistAndLeaveMessageClosed)) {
         waitingOrNotExist = true;
@@ -366,7 +366,7 @@ YSFServiceRequestDelegate>
         [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
     }
     
-    [_delegate didClose:object.evaluate session:[self getSession:shopId] shopId:shopId];
+    [_delegate didClose:object.evaluate session:[self getOnlineSession:shopId] shopId:shopId];
     [self clearByShopId:shopId];
 }
 
@@ -657,7 +657,7 @@ YSFServiceRequestDelegate>
 
 #pragma mark - ServiceSession操作
 
-- (YSFServiceSession *)getSession:(NSString *)shopId
+- (YSFServiceSession *)getOnlineSession:(NSString *)shopId
 {
     if (!shopId) return nil;
     YSFServiceSession *session = _sessions[shopId];
@@ -669,7 +669,7 @@ YSFServiceRequestDelegate>
     }
 }
 
-- (YSFServiceSession *)getSessionInAll:(NSString *)shopId
+- (YSFServiceSession *)getOnlineOrWaitingSession:(NSString *)shopId
 {
     if (!shopId) return nil;
     YSFServiceSession *session = _sessions[shopId];
@@ -683,8 +683,10 @@ YSFServiceRequestDelegate>
     _sessions[shopId] = session;
 
     if (session) {
-        [self addStaffIdIconUrl:session.staffId icornUrl:session.iconUrl];
-        [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
+        if (session.staffId.length > 0) {
+            [self addStaffIdIconUrl:session.staffId icornUrl:session.iconUrl];
+            [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
+        }
     }
     else {
         [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:nil];

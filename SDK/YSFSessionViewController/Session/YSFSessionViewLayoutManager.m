@@ -149,8 +149,8 @@ YSFNotification(kKFInputViewInputTypeChanged);
     
 }
 
-- (void)changeInputTypeTo:(NIMInputType)type {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kKFInputViewInputTypeChanged object:@(type)];
+- (void)changeInputTypeTo:(YSFInputStatus)inputStatus {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kKFInputViewInputTypeChanged object:@(inputStatus)];
 }
 
 
