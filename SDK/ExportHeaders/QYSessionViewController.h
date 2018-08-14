@@ -10,6 +10,24 @@
 @class QYSource;
 @class QYCommodityInfo;
 
+/**
+ *  右上角入口以及聊天内容区域的按钮 点击以后的回调
+ */
+@protocol QYSessionViewDelegate <NSObject>
+
+/**
+ *  点击右上角（对于平台电商来说，这里可以考虑放“商铺入口”）按钮回调
+ */
+- (void)onTapShopEntrance;
+
+/**
+ *  点击聊天内容区域的按钮（对于平台电商来说，这里可以考虑放置“会话列表入口“）回调
+ */
+- (void)onTapSessionListEntrance;
+
+@end
+
+
 @interface QYSelectedCommodityInfo : NSObject
 
 @property (nonatomic,copy)    NSString *target;

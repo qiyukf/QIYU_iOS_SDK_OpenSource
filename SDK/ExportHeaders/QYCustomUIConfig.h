@@ -214,6 +214,36 @@ typedef void (^QYMediaItemBlock)();
  */
 @property (nonatomic, assign) QYBypassDisplayMode bypassDisplayMode;
 
+/**
+ *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）显示，默认不显示
+ */
+@property (nonatomic, assign)   BOOL showShopEntrance;
+
+/**
+ *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）icon
+ */
+@property (nonatomic, strong) UIImage *shopEntranceImage;
+
+/**
+ *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）文本
+ */
+@property (nonatomic, copy) NSString *shopEntranceText;
+
+/**
+ *  聊天内容区域的按钮（对于平台电商来说，这里可以考虑放置“会话列表入口“）显示，默认不显示
+ */
+@property (nonatomic, assign) BOOL showSessionListEntrance;
+
+/**
+ *  聊天内容区域的按钮（对于平台电商来说，这里可以考虑放置“会话列表入口“）在聊天页面的位置，YES代表在右上角，NO代表在左上角，默认在右上角
+ */
+@property (nonatomic, assign) BOOL sessionListEntrancePosition;
+
+/**
+ *  会话列表入口icon
+ */
+@property (nonatomic, strong) UIImage *sessionListEntranceImage;
+
 @property (nonatomic, strong) QYMediaItem *mediaItemPicture;
 @property (nonatomic, strong) QYMediaItem *mediaItemShoot;
 @property (nonatomic, strong) NSArray<QYMediaItemWithBlock *> *mediaItems;
