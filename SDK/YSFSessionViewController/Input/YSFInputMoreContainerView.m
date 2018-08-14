@@ -38,7 +38,7 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
 {
     NSMutableArray *items = [[QYCustomUIConfig sharedInstance].mediaItems mutableCopy];
     [items insertObject:[QYCustomUIConfig sharedInstance].mediaItemPicture atIndex:0];
-    [items insertObject:[QYCustomUIConfig sharedInstance].mediaItemShoot atIndex:0];
+    [items insertObject:[QYCustomUIConfig sharedInstance].mediaItemShoot atIndex:1];
 
     NSMutableArray *mediaButtons = [NSMutableArray array];
     NSMutableArray *mediaItems = [NSMutableArray array];
