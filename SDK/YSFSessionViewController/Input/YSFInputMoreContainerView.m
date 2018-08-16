@@ -36,13 +36,13 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
 
 - (void)genMediaButtons
 {
-    NSMutableArray *items = [[QYCustomUIConfig sharedInstance].mediaItems mutableCopy];
-    [items insertObject:[QYCustomUIConfig sharedInstance].mediaItemPicture atIndex:0];
-    [items insertObject:[QYCustomUIConfig sharedInstance].mediaItemShoot atIndex:1];
+    NSMutableArray *items = [[QYCustomUIConfig sharedInstance].customInputItems mutableCopy];
+    [items insertObject:[QYCustomUIConfig sharedInstance].customInputItemPicture atIndex:0];
+    [items insertObject:[QYCustomUIConfig sharedInstance].customInputItemShoot atIndex:1];
 
     NSMutableArray *mediaButtons = [NSMutableArray array];
     NSMutableArray *mediaItems = [NSMutableArray array];
-    [items enumerateObjectsUsingBlock:^(QYMediaItem *item, NSUInteger idx, BOOL *stop) {
+    [items enumerateObjectsUsingBlock:^(QYCustominputItem *item, NSUInteger idx, BOOL *stop) {
         [mediaItems addObject:item];
         UIButton *btn = [[UIButton alloc] init];
         [btn setImage:item.normalImage forState:UIControlStateNormal];

@@ -1927,7 +1927,7 @@ static long long g_sessionId;
     [self mediaShootPressed];
 }
 
-- (void)onTapMediaItem:(QYMediaItemWithBlock *)item
+- (void)onTapMediaItem:(QYCustominputItemWithBlock *)item
 {
 //    if (item.block) {
 //        item.block();

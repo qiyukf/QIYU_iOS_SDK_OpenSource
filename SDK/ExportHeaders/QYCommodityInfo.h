@@ -67,22 +67,22 @@
 @property (nonatomic, copy) NSString *tagsString;
 
 /**
- *  是否自定义，YES代表是，NO代表否，默认NO。自定义的话，只有pictureUrlString、urlString有效，只显示一张图片
+ *  是否自定义，YES代表是，NO代表否，默认NO。自定义的话，只有pictureUrlString、urlString有效，只显示一张图片 (v4.3.0)
  */
 @property (nonatomic, assign) BOOL isCustom;
 
 /**
- *  是否由访客手动发送，YES代表是，NO代表否
+ *  是否由访客手动发送，YES代表是，NO代表否 (v4.3.0)
  */
 @property (nonatomic, assign) BOOL sendByUser;
 
 /**
- *  发送按钮文案
+ *  发送按钮文案 (v4.3.0)
  */
 @property (nonatomic, copy) NSString *actionText;
 
 /**
- *  发送按钮文案颜色
+ *  发送按钮文案颜色 (v4.3.0)
  */
 @property (nonatomic, strong) UIColor *actionTextColor;
 

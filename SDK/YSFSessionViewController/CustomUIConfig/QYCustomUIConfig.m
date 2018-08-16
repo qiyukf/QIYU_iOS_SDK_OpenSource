@@ -1,11 +1,11 @@
 #import "QYCustomUIConfig+Private.h"
 
-@implementation QYMediaItem
+@implementation QYCustominputItem
 
 @end
 
 
-@implementation QYMediaItemWithBlock
+@implementation QYCustominputItemWithBlock
 
 @end
 
@@ -101,7 +101,7 @@
     self.showEvaluationEntry = YES;
     self.bypassDisplayMode = QYBypassDisplayModeBottom;
     
-    self.mediaItems = nil;
+    self.customInputItems = nil;
 }
 
 - (void)setToKf

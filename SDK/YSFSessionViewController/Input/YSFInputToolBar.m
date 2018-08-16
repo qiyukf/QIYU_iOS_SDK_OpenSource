@@ -77,7 +77,7 @@
         _moreMediaBtn.imageEdgeInsets = UIEdgeInsetsMake(7, 7, 7, 7);
         [_moreMediaBtn sizeToFit];
         _moreMediaBtn.ysf_frameSize = CGSizeMake(_moreMediaBtn.ysf_frameWidth + 14, _moreMediaBtn.ysf_frameHeight + 14);
-        _moreMediaBtn.hidden = [QYCustomUIConfig sharedInstance].mediaItems.count == 0;
+        _moreMediaBtn.hidden = [QYCustomUIConfig sharedInstance].customInputItems.count == 0;
         [self addSubview:_moreMediaBtn];
         _imageButton.hidden = !([QYCustomUIConfig sharedInstance].showImageEntry && _moreMediaBtn.hidden);
 
@@ -178,7 +178,7 @@
     if ([QYCustomUIConfig sharedInstance].showEmoticonEntry) {
         self.emoticonBtn.hidden = !humanOrMachine;
     }
-    self.moreMediaBtn.hidden = !([QYCustomUIConfig sharedInstance].mediaItems.count > 0 && humanOrMachine);
+    self.moreMediaBtn.hidden = !([QYCustomUIConfig sharedInstance].customInputItems.count > 0 && humanOrMachine);
     self.imageButton.hidden = !([QYCustomUIConfig sharedInstance].showImageEntry && humanOrMachine && self.moreMediaBtn.hidden);
     
     [self setNeedsLayout];
