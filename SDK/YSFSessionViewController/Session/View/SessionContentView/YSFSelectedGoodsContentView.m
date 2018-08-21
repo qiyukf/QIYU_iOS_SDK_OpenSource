@@ -13,6 +13,8 @@
 @property (nonatomic,strong) UILabel * price;
 @property (nonatomic,strong) UILabel * number;
 @property (nonatomic,strong) UILabel * status;
+@property (nonatomic,strong) UIView *splitLine;
+@property (nonatomic,strong) UIButton * button;
 
 @end
 
@@ -53,6 +55,17 @@
         _status.font = [UIFont systemFontOfSize:14.f];
         _status.textColor = YSFRGBA2(0xffa3afb7);
         [self addSubview:_status];
+        
+        _splitLine = [UIView new];
+        _splitLine.backgroundColor = YSFRGB(0xdbdbdb);
+        [self addSubview:_splitLine];
+        
+        _button = [UIButton new];
+        _button.titleLabel.font = [UIFont systemFontOfSize:14.f];
+        _button.titleLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+        [_button setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
+        [_button addTarget:self action:@selector(onClickButton:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_button];
     }
     return self;
 }
@@ -69,6 +82,15 @@
     _price.text = selectedGoods.goods.p_price;
     _number.text = selectedGoods.goods.p_count;
     _status.text = selectedGoods.goods.p_status;
+    
+    if (selectedGoods.goods.p_reselect.length > 0) {
+        _splitLine.hidden = NO;
+        _button.hidden = NO;
+        [_button setTitle:selectedGoods.goods.p_reselect forState:UIControlStateNormal];
+    } else {
+        _splitLine.hidden = YES;
+        _button.hidden = YES;
+    }
 }
 
 - (void)layoutSubviews
@@ -149,7 +171,27 @@
     if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
         _stock.ysf_frameLeft += 5;
     }
+    
+    YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.model.message.messageObject;
+    YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
+    if (selectedGoods.goods.p_reselect.length > 0) {
+        _splitLine.ysf_frameWidth = self.ysf_frameWidth - 13;
+        _splitLine.ysf_frameLeft = 4;
+        _splitLine.ysf_frameTop = CGRectGetMaxY(_stock.frame);
+        _splitLine.ysf_frameHeight = 1. / [UIScreen mainScreen].scale;
+        
+        _button.ysf_frameWidth = self.ysf_frameWidth - 20;
+        _button.ysf_frameLeft = 10;
+        _button.ysf_frameTop = CGRectGetMaxY(_splitLine.frame);
+        _button.ysf_frameHeight = 36;
+    }
 }
 
+- (void)onClickButton:(id)sender {
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameReselectCommdity;
+    event.message = self.model.message;
+    [self.delegate onCatchEvent:event];
+}
 
 @end

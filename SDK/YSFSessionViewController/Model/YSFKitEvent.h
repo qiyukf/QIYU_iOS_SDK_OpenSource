@@ -40,5 +40,6 @@ extern NSString *const YSFKitEventNameTapSubmittedBotFormImage;
 extern NSString *const YSFKitEventNameTapPushMessageActionUrl;
 extern NSString *const YSFKitEventNameOpenUrl;
 extern NSString *const YSFKitEventNameSendCommdityInfo;
+extern NSString *const YSFKitEventNameReselectCommdity;
 
 

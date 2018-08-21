@@ -3,7 +3,7 @@
 
 
 
-@interface QYCommodityInfo()
+@interface QYCommodityInfo() <YSF_NIMCustomAttachment>
 
 //支付金额
 @property (nonatomic, copy) NSString *payMoney;

@@ -287,8 +287,7 @@
         _actionButton.hidden = NO;
         [_actionButton setTitle:attachment.actionText forState:UIControlStateNormal];
         [_actionButton setTitleColor:attachment.actionTextColor forState:UIControlStateNormal];
-    }
-    else {
+    } else {
         _splitLine4.hidden = YES;
         _actionButton.hidden = YES;
     }

@@ -165,6 +165,8 @@
 #define     YSFApiKeyPStock             @"p_stock"
 #define     YSFApiKeyPPrice             @"p_price"
 #define     YSFApiKeyPCount             @"p_count"
+#define     YSFApiKeyPReselect          @"p_reselect"
+#define     YSFApiKeyPUserData          @"p_userData"
 #define     YSFApiKeyData               @"data"
 #define     YSFApiKeyState              @"state"
 #define     YSFApiKeyImg                @"img"

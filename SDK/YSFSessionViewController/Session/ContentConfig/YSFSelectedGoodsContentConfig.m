@@ -3,6 +3,7 @@
 #import "YSFMachineResponse.h"
 #import "QYCustomUIConfig.h"
 #import "YSFApiDefines.h"
+#import "YSFSelectedGoods.h"
 
 
 @implementation YSFSelectedGoodsContentConfig
@@ -10,7 +11,13 @@
 {
     CGFloat msgBubbleMaxWidth    = (cellWidth - 112);
     CGFloat msgContentMaxWidth = msgBubbleMaxWidth - self.contentViewInsets.left - self.contentViewInsets.right;
-    return CGSizeMake(msgContentMaxWidth, 80);}
+    CGFloat height = 80;
+    YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.message.messageObject;
+    YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
+    if (selectedGoods.goods.p_reselect.length > 0) {
+        height += 36;
+    }
+    return CGSizeMake(msgContentMaxWidth, height);}
 
 - (NSString *)cellContent
 {

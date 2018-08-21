@@ -38,6 +38,8 @@
 @property (nonatomic,copy)    NSString *p_price;
 @property (nonatomic,copy)    NSString *p_count;
 @property (nonatomic,copy)    NSString *p_stock;
+@property (nonatomic,copy)    NSString *p_reselect;
+@property (nonatomic,copy)    NSString *p_userData;
 
 @end
 
@@ -120,6 +122,11 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
 @property (nonatomic, copy) QYButtonClickBlock buttonClickBlock;
 
 /**
+ *  机器人自动发送商品信息功能
+ */
+@property (nonatomic,assign) BOOL autoSendInRobot;
+
+/**
  *  发送商品信息展示
  */
 - (void)sendCommodityInfo:(QYCommodityInfo *)commodityInfo;
@@ -128,6 +135,11 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
  *  发送订单列表中选中的商品信息
  */
 - (void)sendSelectedCommodityInfo:(QYSelectedCommodityInfo *)commodityInfo;
+
+/**
+ *  请求人工客服
+ */
+- (void)requestHumanStaff;
 
 @end
 

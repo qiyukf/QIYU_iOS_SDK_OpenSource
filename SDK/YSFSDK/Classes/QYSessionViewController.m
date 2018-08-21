@@ -119,6 +119,7 @@ static long long g_sessionId;
 @property (nonatomic,copy)      NSString *lastMessageContent;
 @property (nonatomic,strong)    NSMutableArray<YSFActionInfo *> *ysfActionInfoArray;
 @property (nonatomic, strong)   YSFQuickReplyContentView *quickReplyView;
+@property (nonatomic,assign)    BOOL onlyManual;
 
 @end
 
@@ -235,16 +236,25 @@ static long long g_sessionId;
             }
         }
     }
-    
-    if ([sessionManager getOnlineSession:_shopId] && [sessionManager getOnlineSession:_shopId].humanOrMachine)
-    {
-        if (_commodityInfo && (![g_commodityInfo isEqual:_commodityInfo] || _commodityInfo.sendByUser)) {
-            [self sendCommodityInfoRequest:YES];
+    //进入会话界面时会话未结束，此时若设置了首问卡片，则需要主动发送
+    if ([sessionManager getOnlineSession:_shopId]) {
+        if ([sessionManager getOnlineSession:_shopId].humanOrMachine) {
+            //人工模式下，始终支持首问卡片发送
+            if (_commodityInfo && (![g_commodityInfo isEqual:_commodityInfo] || _commodityInfo.sendByUser)) {
+                [self sendCommodityInfoRequest:YES];
+            }
+        } else {
+            //机器人模式下，若开启了autoSendInRobot则支持首问卡片发送
+            if (self.autoSendInRobot) {
+                if (_commodityInfo && (![g_commodityInfo isEqual:_commodityInfo] || _commodityInfo.sendByUser)) {
+                    [self sendCommodityInfoRequest:YES];
+                }
+            }
         }
     }
     
     if (shouldRequestService) {
-        [self requestServiceIfNeeded:YES onlyManual:NO];
+        [self requestServiceIfNeededInScene:QYRequestStaffSceneInit onlyManual:NO];
     }
     
     [[[YSF_NIMSDK sharedSDK] conversationManager] markAllMessageReadInSession:_session];
@@ -1579,33 +1589,43 @@ static long long g_sessionId;
             [self showBotCustomViewController:(YSFBotCustomObject *)object];
         }
     }
-
-    if ([sessionManager getOnlineSession:_shopId] && [sessionManager getOnlineSession:_shopId].humanOrMachine) {
-        //收到XXX为您服务后发送一次
+    //1、进入会话界面，首次请求客服，人工模式下始终发送卡片，机器人模式下判断autoSendInRobot决定是否发送
+    //2、机器人模式下，转人工客服，收到XXX为您服务后发送卡片
+    if ([sessionManager getOnlineSession:_shopId]) {
+        BOOL isHuman = [sessionManager getOnlineSession:_shopId].humanOrMachine;
         if ([customObject isMemberOfClass:[YSF_NIMCustomObject class]]) {
             id object = ((YSF_NIMCustomObject *)customObject).attachment;
-            if (g_sessionId != [sessionManager getOnlineSession:_shopId].sessionId && [object isMemberOfClass:[YSFStartServiceObject class]]) {
+            if (g_sessionId != [sessionManager getOnlineSession:_shopId].sessionId
+                && [object isMemberOfClass:[YSFStartServiceObject class]]) {
                 g_sessionId = [sessionManager getOnlineSession:_shopId].sessionId;
-                [self sendCommodityInfoRequest:YES];
+                if (isHuman) {
+                    [self sendCommodityInfoRequest:YES];
+                } else {
+                    if (self.autoSendInRobot) {
+                        [self sendCommodityInfoRequest:YES];
+                    }
+                }
             }
         }
         
-        NSMutableDictionary *shopDict = [[[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId] mutableCopy];
-        if (shopDict) {
-            NSString *sessionTimesStr = [shopDict objectForKey:YSFSessionTimes];
-            if (sessionTimesStr) {
-                if ([sessionTimesStr isEqualToString:@"1"]) {
-                    sessionTimesStr = @"2";
-                }
-                else if ([sessionTimesStr isEqualToString:@"3"]) {
-                    sessionTimesStr = @"4";
-                }
-                [shopDict setValue:sessionTimesStr forKey:YSFSessionTimes];
-                [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
-                
-                if ([sessionTimesStr isEqualToString:@"4"]) {
-                    if (!self.presentedViewController) {
-                        [_evaluation animation_shakeImageWithDuration];
+        if (isHuman) {
+            NSMutableDictionary *shopDict = [[[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId] mutableCopy];
+            if (shopDict) {
+                NSString *sessionTimesStr = [shopDict objectForKey:YSFSessionTimes];
+                if (sessionTimesStr) {
+                    if ([sessionTimesStr isEqualToString:@"1"]) {
+                        sessionTimesStr = @"2";
+                    }
+                    else if ([sessionTimesStr isEqualToString:@"3"]) {
+                        sessionTimesStr = @"4";
+                    }
+                    [shopDict setValue:sessionTimesStr forKey:YSFSessionTimes];
+                    [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
+                    
+                    if ([sessionTimesStr isEqualToString:@"4"]) {
+                        if (!self.presentedViewController) {
+                            [_evaluation animation_shakeImageWithDuration];
+                        }
                     }
                 }
             }
@@ -1760,7 +1780,7 @@ static long long g_sessionId;
             YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
             [sessionManager clearByShopId:weakSelf.shopId];
             [self clearSessionState];
-            [weakSelf requestServiceIfNeeded:NO onlyManual:NO];
+            [weakSelf requestServiceIfNeededInScene:QYRequestStaffSceneNone onlyManual:NO];
         });
     }
 }
@@ -2186,7 +2206,7 @@ static long long g_sessionId;
         [dict.allValues enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSString *commandStr = obj;
             if ([commandStr isEqualToString:@"applyHumanStaff"]) {
-                [self onHumanChat:self.humanService];
+                [self applyHumanStaff];
                 handled = YES;
             }
             else {
@@ -2311,6 +2331,13 @@ static long long g_sessionId;
         }
 
         handled = YES;
+    } else if ([eventName isEqualToString:YSFKitEventNameReselectCommdity]) {
+        if ([QYCustomActionConfig sharedInstance].reselectClick) {
+            YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)event.message.messageObject;
+            YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
+            [QYCustomActionConfig sharedInstance].reselectClick(selectedGoods.goods);
+        }
+        handled = YES;
     }
     
     if (!handled) {
@@ -2338,7 +2365,7 @@ static long long g_sessionId;
     else if (type == 2) {
         _staffId = kfId;
     }
-    [self requestServiceIfNeeded:NO onlyManual:YES];
+    [self requestServiceIfNeededInScene:QYRequestStaffSceneNone onlyManual:YES];
 }
 
 - (void)popUpMoreListNav:(YSFFlightList *)flightList
@@ -2939,44 +2966,54 @@ static long long g_sessionId;
 
 
 #pragma mark - 客服相关的接口
-- (BOOL)requestServiceIfNeeded:(BOOL)isInit onlyManual:(BOOL)onlyManual
-{
+- (BOOL)requestServiceIfNeededInScene:(QYRequestStaffScene)scene onlyManual:(BOOL)onlyManual {
     if ([self isLastMessageKFBypassNotificationAndEnable]) {
         return NO;
     }
     
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     sessionManager.delegate = self;
+    self.onlyManual = onlyManual;
     
-    if ([sessionManager shouldRequestService:isInit shopId:_shopId])
-    {
-        [[YSFSearchQuestionSetting sharedInstance:_shopId] clear];
-        self.hasRequested = YES;
-        _evaluation.enabled = NO;
-        if (_changeEvaluationEnabledBlock) {
-            _changeEvaluationEnabledBlock(NO);
+    if ([sessionManager shouldRequestService:(QYRequestStaffSceneInit == scene) shopId:_shopId]) {
+        if ([QYCustomActionConfig sharedInstance].requestStaffBlock) {
+            __weak typeof(self) weakSelf = self;
+            [QYCustomActionConfig sharedInstance].requestStaffBlock(scene, ^(BOOL needed) {
+                if (needed) {
+                    [weakSelf startRequestStaff];
+                }
+            });
+        } else {
+            return [self startRequestStaff];
         }
-        _evaluationText.enabled = NO;
-        YSFRequestServiceRequest *request = [[YSFRequestServiceRequest alloc] init];
-        request.source = _source;
-        request.onlyManual = onlyManual;
-        request.groupId = _groupId;
-        request.staffId = _staffId;
-        request.robotId = _robotId;
-        request.vipLevel = _vipLevel;
-        request.entryId = _entryId;
-        request.commonQuestionTemplateId = _commonQuestionTemplateId;
-        request.openRobotInShuntMode = _openRobotInShuntMode;
-        [sessionManager requestServicewithSource:request shopId:_shopId];
-        if ([sessionManager getSessionStateType:_shopId] == YSFSessionStateTypeNotExist) {
-            return YES;
-        }
-        else {
-            return NO;
-        }
-        
     }
     return YES;
+}
+
+- (BOOL)startRequestStaff {
+    [[YSFSearchQuestionSetting sharedInstance:_shopId] clear];
+    self.hasRequested = YES;
+    _evaluation.enabled = NO;
+    if (_changeEvaluationEnabledBlock) {
+        _changeEvaluationEnabledBlock(NO);
+    }
+    _evaluationText.enabled = NO;
+    YSFRequestServiceRequest *request = [[YSFRequestServiceRequest alloc] init];
+    request.source = _source;
+    request.onlyManual = self.onlyManual;
+    request.groupId = _groupId;
+    request.staffId = _staffId;
+    request.robotId = _robotId;
+    request.vipLevel = _vipLevel;
+    request.entryId = _entryId;
+    request.commonQuestionTemplateId = _commonQuestionTemplateId;
+    request.openRobotInShuntMode = _openRobotInShuntMode;
+    [[[QYSDK sharedSDK] sessionManager] requestServicewithSource:request shopId:_shopId];
+    if (YSFSessionStateTypeNotExist == [[[QYSDK sharedSDK] sessionManager] getSessionStateType:_shopId]) {
+        return YES;
+    } else {
+        return NO;
+    }
 }
 
 #pragma mark - 商品信息展示发送请求
@@ -2989,19 +3026,20 @@ static long long g_sessionId;
         commodityInfoShow.bAuto = bAuto;
         
         if (_commodityInfo.sendByUser) {
+            //仅将消息加入会话列表，但没有真正发送出去
             YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:commodityInfoShow];
             commodityInfoMessage.session = _session;
             commodityInfoMessage.from = [[YSF_NIMSDK sharedSDK].loginManager currentAccount];
             commodityInfoMessage.isDeliveried = YES;
             [self onAddMessage:commodityInfoMessage];
-        }
-        else {
+        } else {
             if (!_commodityInfo.show) {
+                //发送消息，但不在会话列表中展示消息
                 YSFSetCommodityInfoRequest *request = [[YSFSetCommodityInfoRequest alloc] init];
                 request.commodityInfo = [commodityInfoShow encodeAttachment];
                 [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:nil];
-            }
-            else{
+            } else {
+                //发送消息，同时在会话列表中展示消息
                 YSF_NIMMessage *commodityInfoMessage = [YSFMessageMaker msgWithCustom:commodityInfoShow];
                 [self sendMessage:commodityInfoMessage];
             }
@@ -3154,7 +3192,25 @@ static long long g_sessionId;
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     [sessionManager clearByShopId:_shopId];
     [self clearSessionState];
-    [self requestServiceIfNeeded:NO onlyManual:YES];
+    [self requestServiceIfNeededInScene:QYRequestStaffSceneNavHumanButton onlyManual:YES];
+}
+
+- (void)applyHumanStaff {
+    YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
+    [sessionManager clearByShopId:_shopId];
+    [self clearSessionState];
+    [self requestServiceIfNeededInScene:QYRequestStaffSceneRobotUnable onlyManual:YES];
+}
+
+- (void)requestHumanStaff {
+    YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
+    if (!session
+        || (session && !session.humanOrMachine)) {
+        YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
+        [sessionManager clearByShopId:_shopId];
+        [self clearSessionState];
+        [self requestServiceIfNeededInScene:QYRequestStaffSceneActiveRequest onlyManual:YES];
+    }
 }
 
 - (void)queryWaitingStatus:(NSString *)shopId
@@ -3239,7 +3295,7 @@ static long long g_sessionId;
 #pragma mark - TipViewDelegate
 - (void)tipViewRequestService:(YSFSessionTipView *)tipView
 {
-    [self requestServiceIfNeeded:NO onlyManual:NO];
+    [self requestServiceIfNeededInScene:QYRequestStaffSceneNone onlyManual:NO];
 }
 
 - (void)quitWaiting:(YSFSessionTipView *)tipView
@@ -3282,7 +3338,7 @@ static long long g_sessionId;
         return NO;
     }
     
-    shouldSend = [self requestServiceIfNeeded:NO onlyManual:NO];
+    shouldSend = [self requestServiceIfNeededInScene:QYRequestStaffSceneNone onlyManual:NO];
     if (!shouldSend) {
         UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
         [topmostWindow ysf_makeToast:@"请等待连接客服成功后，再发送消息" duration:2.0 position:YSFToastPositionCenter];
