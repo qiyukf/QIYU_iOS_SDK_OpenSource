@@ -79,11 +79,14 @@
     [[YSF_NIMSDK sharedSDK] registerWithAppID:YES appKey:appKey
                                   cerName:appName];
     
-    YSF_NIMDataTrackerOption *trackerOption = [YSF_NIMDataTrackerOption new];
-    trackerOption.name      = @"qy";
-    trackerOption.version   = [[QYSDK sharedSDK].infoManager version];
-    trackerOption.appKey    = appKey;
-    [[YSF_NIMDataTracker shared] start:trackerOption];
+    /**
+     * 去掉wfd.netease.im域名访问，云信已不采集此部分数据
+     YSF_NIMDataTrackerOption *trackerOption = [YSF_NIMDataTrackerOption new];
+     trackerOption.name      = @"qy";
+     trackerOption.version   = [[QYSDK sharedSDK].infoManager version];
+     trackerOption.appKey    = appKey;
+     [[YSF_NIMDataTracker shared] start:trackerOption];
+     */
     
     [_pathManager setup:appKey];
     [_infoManager checkAppInfo];

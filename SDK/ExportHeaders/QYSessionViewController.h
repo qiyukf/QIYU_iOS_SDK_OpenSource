@@ -129,6 +129,11 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
  */
 - (void)sendSelectedCommodityInfo:(QYSelectedCommodityInfo *)commodityInfo;
 
+/**
+ *  发送图片
+ */
+- (void)sendPicture:(UIImage *)picture;
+
 @end
 
 

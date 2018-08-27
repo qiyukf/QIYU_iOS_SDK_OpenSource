@@ -571,7 +571,10 @@
     {
         [self reportUserInfo];
         [self requestSessionStatus];
-        [[YSF_NIMDataTracker shared] trackEvent];
+        /**
+         * 去掉wfd.netease.im域名访问，云信已不采集此部分数据
+         [[YSF_NIMDataTracker shared] trackEvent];
+         */
         [self reportTrackHistory];
     }
 }
