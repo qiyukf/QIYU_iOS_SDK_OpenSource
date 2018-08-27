@@ -16,7 +16,7 @@
     dict[YSFApiKeyPStock]        = YSFStrParam(_p_stock);
     dict[YSFApiKeyPPrice]       = YSFStrParam(_p_price);
     dict[YSFApiKeyPCount]       = YSFStrParam(_p_count);
-    dict[YSFApiKeyPReselect]    = YSFStrParam(_p_reselect);
+    dict[YSFApiKeyPAction]      = YSFStrParam(_p_action);
     dict[YSFApiKeyPUserData]    = YSFStrParam(_p_userData);
     dict[YSFApiKeyParams]       = YSFStrParam(_params);
     dict[YSFApiKeyTarget]       = YSFStrParam(_target);
@@ -33,7 +33,7 @@
     instance.p_stock = [dict ysf_jsonString:YSFApiKeyPStock];
     instance.p_price = [dict ysf_jsonString:YSFApiKeyPPrice];
     instance.p_count = [dict ysf_jsonString:YSFApiKeyPCount];
-    instance.p_reselect = [dict ysf_jsonString:YSFApiKeyPReselect];
+    instance.p_action = [dict ysf_jsonString:YSFApiKeyPAction];
     instance.p_userData = [dict ysf_jsonString:YSFApiKeyPUserData];
     instance.params = [dict ysf_jsonString:YSFApiKeyParams];
     instance.target = [dict ysf_jsonString:YSFApiKeyTarget];

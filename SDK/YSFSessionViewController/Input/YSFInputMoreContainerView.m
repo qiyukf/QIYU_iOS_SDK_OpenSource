@@ -37,9 +37,6 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
 - (void)genMediaButtons
 {
     NSMutableArray *items = [[QYCustomUIConfig sharedInstance].customInputItems mutableCopy];
-    [items insertObject:[QYCustomUIConfig sharedInstance].customInputItemPicture atIndex:0];
-    [items insertObject:[QYCustomUIConfig sharedInstance].customInputItemShoot atIndex:1];
-
     NSMutableArray *mediaButtons = [NSMutableArray array];
     NSMutableArray *mediaItems = [NSMutableArray array];
     [items enumerateObjectsUsingBlock:^(QYCustominputItem *item, NSUInteger idx, BOOL *stop) {
@@ -163,14 +160,9 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
 - (void)onTouchButton:(id)sender
 {
     NSInteger index = [(UIButton *)sender tag];
-    if (index == 0 && _actionDelegate && [_actionDelegate respondsToSelector:@selector(onTapMediaItemPicture)]) {
-        [_actionDelegate onTapMediaItemPicture];
-    }
-    else if (index == 1 && _actionDelegate && [_actionDelegate respondsToSelector:@selector(onTapMediaItemShoot)]) {
-        [_actionDelegate onTapMediaItemShoot];
-    }
-    else if (index >=2 && _actionDelegate && [_actionDelegate respondsToSelector:@selector(onTapMediaItem:)]) {
-        [_actionDelegate onTapMediaItem:_mediaItems[index]];
+    QYCustominputItem *item = _mediaItems[index];
+    if (item.block) {
+        item.block();
     }
 }
 

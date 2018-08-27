@@ -51,20 +51,16 @@
     return self;
 }
 
-- (NSString *)serverAddress
-{
+- (NSString *)serverAddress {
     NSString *serverAddress = @"";
-    if (_serverSetting == YSFUseServerSettingTest)
-    {
-        serverAddress = @"ysf.space";
-    }
-    else if (_serverSetting == YSFUseServerSettingPre)
-    {
-        serverAddress = @"qiyukf.netease.com";
-    }
-    else if (_serverSetting == YSFUseServerSettingOnline)
-    {
+    if (YSFUseServerSettingOnline == _serverSetting) {
         serverAddress = @"qiyukf.com";
+    } else if (YSFUseServerSettingPre == _serverSetting) {
+        serverAddress = @"qiyukf.netease.com";
+    } else if (YSFUseServerSettingTest == _serverSetting) {
+        serverAddress = @"ysf.space";
+    } else if (YSFUseServerSettingDev == _serverSetting) {
+        serverAddress = @"qydev.netease.com";
     }
     
     return serverAddress;
@@ -79,11 +75,14 @@
     [[YSF_NIMSDK sharedSDK] registerWithAppID:YES appKey:appKey
                                   cerName:appName];
     
-    YSF_NIMDataTrackerOption *trackerOption = [YSF_NIMDataTrackerOption new];
-    trackerOption.name      = @"qy";
-    trackerOption.version   = [[QYSDK sharedSDK].infoManager version];
-    trackerOption.appKey    = appKey;
-    [[YSF_NIMDataTracker shared] start:trackerOption];
+    /**
+     * 去掉wfd.netease.im域名访问，云信已不采集此部分数据
+     YSF_NIMDataTrackerOption *trackerOption = [YSF_NIMDataTrackerOption new];
+     trackerOption.name      = @"qy";
+     trackerOption.version   = [[QYSDK sharedSDK].infoManager version];
+     trackerOption.appKey    = appKey;
+     [[YSF_NIMDataTracker shared] start:trackerOption];
+     */
     
     [_pathManager setup:appKey];
     [_infoManager checkAppInfo];
@@ -91,13 +90,17 @@
     [_sessionManager readData];
 }
 
-- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key
-{
-    YSFLogApp(@"trackHistory title:%@ enterOrOut:%@", title, enterOrOut);
-
+- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key {
     __weak typeof(self) weakSelf = self;
     ysf_main_async(^{
         [weakSelf.infoManager trackHistory:title enterOrOut:enterOrOut key:key];
+    });
+}
+
+- (void)trackHistory:(NSString *)title description:(NSDictionary *)description key:(NSString *)key {
+    __weak typeof(self) weakSelf = self;
+    ysf_main_async(^{
+        [weakSelf.infoManager trackHistory:title description:description key:key];
     });
 }
 

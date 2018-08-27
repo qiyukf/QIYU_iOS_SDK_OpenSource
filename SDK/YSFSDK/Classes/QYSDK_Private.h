@@ -17,10 +17,10 @@
 @class QYCustomUIConfig;
 
 typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
-    YSFUseServerSettingOnline,
+    YSFUseServerSettingOnline = 0,
     YSFUseServerSettingTest,
     YSFUseServerSettingPre,
-    YSFUseServerSettingTest2,
+    YSFUseServerSettingDev,
 };
 
 @interface QYSDK ()

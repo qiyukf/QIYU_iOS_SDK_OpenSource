@@ -83,10 +83,10 @@
     _number.text = selectedGoods.goods.p_count;
     _status.text = selectedGoods.goods.p_status;
     
-    if (selectedGoods.goods.p_reselect.length > 0) {
+    if (selectedGoods.goods.p_action.length > 0) {
         _splitLine.hidden = NO;
         _button.hidden = NO;
-        [_button setTitle:selectedGoods.goods.p_reselect forState:UIControlStateNormal];
+        [_button setTitle:selectedGoods.goods.p_action forState:UIControlStateNormal];
     } else {
         _splitLine.hidden = YES;
         _button.hidden = YES;
@@ -174,7 +174,7 @@
     
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.model.message.messageObject;
     YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
-    if (selectedGoods.goods.p_reselect.length > 0) {
+    if (selectedGoods.goods.p_action.length > 0) {
         _splitLine.ysf_frameWidth = self.ysf_frameWidth - 13;
         _splitLine.ysf_frameLeft = 4;
         _splitLine.ysf_frameTop = CGRectGetMaxY(_stock.frame);

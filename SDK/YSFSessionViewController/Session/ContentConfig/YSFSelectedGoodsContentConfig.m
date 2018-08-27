@@ -14,7 +14,7 @@
     CGFloat height = 80;
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.message.messageObject;
     YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
-    if (selectedGoods.goods.p_reselect.length > 0) {
+    if (selectedGoods.goods.p_action.length > 0) {
         height += 36;
     }
     return CGSizeMake(msgContentMaxWidth, height);}

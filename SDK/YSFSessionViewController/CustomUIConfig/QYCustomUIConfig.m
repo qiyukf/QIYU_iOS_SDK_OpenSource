@@ -1,11 +1,7 @@
 #import "QYCustomUIConfig+Private.h"
 
+
 @implementation QYCustominputItem
-
-@end
-
-
-@implementation QYCustominputItemWithBlock
 
 @end
 

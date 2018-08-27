@@ -24,7 +24,7 @@
     if (![YSF_NIMSDK sharedSDK].sdkOrKf && !self.message.isOutgoingMsg && !uiConfig.showTransWords) {
         text = [self.message getTextWithoutTrashWords];
     }
-
+    
     if (self.message.isPushMessageType) {
         [label ysf_setText:@""];
         [label appendHTMLText:text];
@@ -36,7 +36,8 @@
     CGFloat msgBubbleMaxWidth    = (cellWidth - 112);
     CGFloat msgContentMaxWidth = msgBubbleMaxWidth - self.contentViewInsets.left - self.contentViewInsets.right;
     CGSize size = [label sizeThatFits:CGSizeMake(msgContentMaxWidth, CGFLOAT_MAX)];
-    if (self.message.isPushMessageType) {
+    if (self.message.isPushMessageType
+        && self.message.actionText.length) {
         size.width = msgContentMaxWidth;
         size.height += 44;
     }

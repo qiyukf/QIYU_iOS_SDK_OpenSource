@@ -38,7 +38,7 @@
 @property (nonatomic,copy)    NSString *p_price;
 @property (nonatomic,copy)    NSString *p_count;
 @property (nonatomic,copy)    NSString *p_stock;
-@property (nonatomic,copy)    NSString *p_reselect;
+@property (nonatomic,copy)    NSString *p_action;
 @property (nonatomic,copy)    NSString *p_userData;
 
 @end
@@ -140,6 +140,11 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
  *  请求人工客服
  */
 - (void)requestHumanStaff;
+
+/**
+ *  发送图片
+ */
+- (void)sendPicture:(UIImage *)picture;
 
 @end
 

@@ -21,20 +21,26 @@
 #import "YSFDARequest.h"
 #import "YSFDARequestConfig.h"
 
-@interface YSFAppInfoManager ()
-<YSFLoginManagerDelegate,YSF_NIMLoginManagerDelegate, YSF_NIMSystemNotificationManagerDelegate>
-@property (nonatomic,strong)    YSFAccountInfo      *accountInfo;
-@property (nonatomic,strong)    YSFAppSetting       *appSetting;
-@property (nonatomic,strong)    QYUserInfo          *qyUserInfo;
-@property (nonatomic,copy)      QYCompletionWithResultBlock completionWithResultBlock;
-@property (nonatomic,copy)      NSString            *currentForeignUserId;
-@property (nonatomic,strong)    YSFKeyValueStore    *store;
-@property (nonatomic,copy)      NSString            *deviceId;
-@property (nonatomic,strong)    YSFLoginManager     *loginManager;
-@property (nonatomic,strong)    YSFRelationStore    *relationStore;
-@property (nonatomic,strong)    NSMutableDictionary *cachedTextDict;
-@property (nonatomic,assign)      BOOL transferingTrackHistory;
-@property (nonatomic,assign)      BOOL    track;
+typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
+    YSFTrackHistoryTypeNone,
+    YSFTrackHistoryTypePage,      //访问轨迹
+    YSFTrackHistoryTypeAction,    //行为轨迹
+};
+
+@interface YSFAppInfoManager () <YSFLoginManagerDelegate,YSF_NIMLoginManagerDelegate, YSF_NIMSystemNotificationManagerDelegate>
+
+@property (nonatomic, strong) YSFAccountInfo *accountInfo;
+@property (nonatomic, strong) YSFAppSetting *appSetting;
+@property (nonatomic, strong) QYUserInfo *qyUserInfo;
+@property (nonatomic, copy) QYCompletionWithResultBlock completionWithResultBlock;
+@property (nonatomic, copy) NSString *currentForeignUserId;
+@property (nonatomic, strong) YSFKeyValueStore *store;
+@property (nonatomic, copy) NSString *deviceId;
+@property (nonatomic, strong) YSFLoginManager *loginManager;
+@property (nonatomic, strong) YSFRelationStore *relationStore;
+@property (nonatomic, strong) NSMutableDictionary *cachedTextDict;
+@property (nonatomic, assign) BOOL isSendingTrackData;
+@property (nonatomic, assign) BOOL track;
 
 @end
 
@@ -114,61 +120,89 @@
     if (!_track) {
         return;
     }
-    [self saveTrackHistory:title enterOrOut:enterOrOut key:key];
-    [self reportTrackHistory];
+    [self saveTrackHistory:title type:YSFTrackHistoryTypePage enterOrOut:enterOrOut description:nil key:key];
+    [self sendTrackHistoryData];
 }
 
-- (void)saveTrackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key
-{
-    NSMutableArray *mutableArray = [[self arrayByKey:YSFTrackHistoryInfo] mutableCopy];
-    if (!mutableArray) {
-        mutableArray = [NSMutableArray new];
+- (void)trackHistory:(NSString *)title description:(NSDictionary *)description key:(NSString *)key {
+    if (!_track) {
+        return;
     }
-    NSMutableDictionary *trackHistoryInfo = [NSMutableDictionary new];
+    [self saveTrackHistory:title type:YSFTrackHistoryTypeAction enterOrOut:NO description:description key:key];
+    [self sendTrackHistoryData];
+}
+
+- (void)saveTrackHistory:(NSString *)title
+                    type:(YSFTrackHistoryType)type
+              enterOrOut:(BOOL)enterOrOut
+             description:(NSDictionary *)description
+                     key:(NSString *)key {
+    //1.将轨迹信息转换为dictionary
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:10];
     if (title) {
-        [trackHistoryInfo setValue:title forKey:@"title"];
+        [dict setValue:title forKey:YSFDARequestTitleKey];
+    }
+    if (key) {
+        [dict setValue:key forKey:YSFDARequestKeyKey];
     }
     long long time =  [[NSDate date] timeIntervalSince1970] * 1000;
-    [trackHistoryInfo setValue:@(time) forKey:@"time"];
-    [trackHistoryInfo setValue:@(enterOrOut) forKey:@"enterOrOut"];
-    if (key) {
-        [trackHistoryInfo setValue:key forKey:@"key"];
+    [dict setValue:@(time) forKey:YSFDARequestTimeKey];
+
+    if (YSFTrackHistoryTypePage == type) {
+        [dict setValue:@"0" forKey:YSFDARequestTypeKey];
+        [dict setValue:@(!enterOrOut) forKey:YSFDARequestEnterOrOutKey];
+        YSFLogApp(@"trackHistory title:%@ type:page enterOrOut:%@", title, @(enterOrOut));
+    } else if (YSFTrackHistoryTypeAction == type) {
+        [dict setValue:@"1" forKey:YSFDARequestTypeKey];
+        if (description && description.count) {
+            NSError *parseError = nil;
+            NSData *jsonData = [NSJSONSerialization dataWithJSONObject:description options:NSJSONWritingPrettyPrinted error:&parseError];
+            if (!parseError) {
+                NSString *descStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+                if (descStr) {
+                    [dict setValue:descStr forKey:YSFDARequestDescriptionKey];
+                    YSFLogApp(@"trackHistory title:%@ type:action description:%@", title, descStr);
+                }
+            }
+        }
     }
-    [mutableArray addObject:trackHistoryInfo];
-    [self saveArray:mutableArray forKey:YSFTrackHistoryInfo];
-    
-    return;
+    //2.读出本地未上传的轨迹
+    NSMutableArray *array = [[self arrayByKey:YSFTrackHistoryDataKey] mutableCopy];
+    if (!array) {
+        array = [NSMutableArray array];
+    }
+    //3.新的轨迹信息追加至旧轨迹数组，并保存
+    [array addObject:dict];
+    [self saveArray:array forKey:YSFTrackHistoryDataKey];
 }
 
-- (void)reportTrackHistory
-{
-    YSFLogApp(@"reportTrackHistory");
-
-    NSArray *array = [self arrayByKey:YSFTrackHistoryInfo];
-    NSArray *reportingArray = [self arrayByKey:YSFTrackHistoryInfoReporting];
-    if (reportingArray.count == 0 && array.count >= 1) {
-        [self saveArray:array forKey:YSFTrackHistoryInfoReporting];
-        reportingArray = array;
-        [[self store] removeObjectByID:YSFTrackHistoryInfo];
+- (void)sendTrackHistoryData {
+    NSArray *array = [self arrayByKey:YSFTrackHistoryDataKey];
+    NSArray *sendArray = [self arrayByKey:YSFTrackHistoryDataSendKey];
+    if (sendArray.count == 0 && array.count >= 1) {
+        [self saveArray:array forKey:YSFTrackHistoryDataSendKey];
+        sendArray = array;
+        [[self store] removeObjectByID:YSFTrackHistoryDataKey];
     }
+    if (sendArray.count == 0) {
+        return;
+    }
+    if (self.isSendingTrackData) {
+        return;
+    }
+    YSFLogApp(@"sendTrackHistoryData");
     
-    if (reportingArray.count == 0) {
-        return;
-    }
-    if (_transferingTrackHistory == YES) {
-        return;
-    }
-    self.transferingTrackHistory = YES;
-    __weak typeof(self) weakSelf = self;
     YSFDARequest *request = [YSFDARequest new];
-    request.array = reportingArray;
+    request.array = sendArray;
+    
+    self.isSendingTrackData = YES;
+    __weak typeof(self) weakSelf = self;
     [YSFHttpApi get:request
-         completion:^(NSError *error,id returendObject){
-             self.transferingTrackHistory = NO;
-             if (!error || ([error.domain isEqualToString:YSFErrorDomain] && error.code == YSFCodeInvalidData))
-             {
-                 [[weakSelf store] removeObjectByID:YSFTrackHistoryInfoReporting];
-                 [weakSelf reportTrackHistory];
+         completion:^(NSError *error, id returendObject) {
+             weakSelf.isSendingTrackData = NO;
+             if (!error || ([error.domain isEqualToString:YSFErrorDomain] && error.code == YSFCodeInvalidData)) {
+                 [[weakSelf store] removeObjectByID:YSFTrackHistoryDataSendKey];
+                 [weakSelf sendTrackHistoryData];
              }
          }];
 }
@@ -508,12 +542,12 @@
 
 - (NSString *)versionNumber
 {
-    return @"43";
+    return @"44";
 }
 
 - (NSString *)version
 {
-    return @"4.3.0";
+    return @"4.4.0";
 }
 
 #pragma mark - CachedText
@@ -571,8 +605,11 @@
     {
         [self reportUserInfo];
         [self requestSessionStatus];
-        [[YSF_NIMDataTracker shared] trackEvent];
-        [self reportTrackHistory];
+        /**
+         * 去掉wfd.netease.im域名访问，云信已不采集此部分数据
+         [[YSF_NIMDataTracker shared] trackEvent];
+         */
+        [self sendTrackHistoryData];
     }
 }
 

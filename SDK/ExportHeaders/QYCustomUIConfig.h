@@ -21,22 +21,14 @@ typedef NS_ENUM(NSInteger, QYBypassDisplayMode) {
 typedef void (^QYCustominputItemBlock)();
 
 /**
- *  输入框下方“相册”、“拍照”配置项
+ *  输入框下方“完全自定义”配置项
  */
 @interface QYCustominputItem : NSObject
 
 @property (nonatomic,strong)    UIImage *normalImage;
 @property (nonatomic,strong)    UIImage *selectedImage;
 @property (nonatomic,copy)      NSString *text;
-
-@end
-
-/**
- *  输入框下方“完全自定义”配置项
- */
-@interface QYCustominputItemWithBlock : QYCustominputItem
-
-@property (nonatomic,assign)    QYCustominputItemBlock block;
+@property (nonatomic,copy)    QYCustominputItemBlock block;
 
 @end
 
@@ -255,19 +247,9 @@ typedef void (^QYCustominputItemBlock)();
 @property (nonatomic, strong) UIImage *sessionListEntranceImage;
 
 /**
- *  输入框下方“相册”配置项 (v4.3.0)
- */
-@property (nonatomic, strong) QYCustominputItem *customInputItemPicture;
-
-/**
- *  输入框下方“拍照”配置项 (v4.3.0)
- */
-@property (nonatomic, strong) QYCustominputItem *customInputItemShoot;
-
-/**
  *  输入框下方“完全自定义”配置项 (v4.3.0)
  */
-@property (nonatomic, strong) NSArray<QYCustominputItemWithBlock *> *customInputItems;
+@property (nonatomic, strong) NSArray<QYCustominputItem *> *customInputItems;
 
 @end
 

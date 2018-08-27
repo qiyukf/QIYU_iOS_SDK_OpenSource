@@ -15,8 +15,8 @@
 #define YSFAppSettingKey    @"app_setting"
 #define YSFCurrentForeignUserIdKey @"current_foreign_userid"
 #define YSFCurrentUserInfoKey @"current_user_info"
-#define YSFTrackHistoryInfo @"track_history_info"
-#define YSFTrackHistoryInfoReporting @"track_history_info_reporting"
+#define YSFTrackHistoryDataKey @"track_history_data"
+#define YSFTrackHistoryDataSendKey @"track_history_data_send"
 #define YSFDeviceInfoKey    @"device_info"
 #define YSFCachedTextKey    @"cached_text_2.0"
 #define YSFStaffIdIconUrl   @"staffid_iconrul"
@@ -63,6 +63,8 @@
 - (NSString *)appDeviceId;
 
 - (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key;
+
+- (void)trackHistory:(NSString *)title description:(NSDictionary *)description key:(NSString *)key;
 
 - (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block;
 

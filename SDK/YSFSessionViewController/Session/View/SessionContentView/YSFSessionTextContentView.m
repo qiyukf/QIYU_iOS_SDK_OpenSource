@@ -79,7 +79,8 @@
         [_textLabel ysf_setText:text];
     }
     
-    if (self.model.message.isPushMessageType) {
+    if (self.model.message.isPushMessageType
+        && self.model.message.actionText.length) {
         _splitLine.hidden = NO;
         _action.hidden = NO;
         [_action setTitle:self.model.message.actionText forState:UIControlStateNormal];
@@ -98,7 +99,8 @@
     CGRect labelFrame = CGRectMake(contentInsets.left, contentInsets.top, contentsize.width, contentsize.height);
     self.textLabel.frame = labelFrame;
     
-    if (self.model.message.isPushMessageType) {
+    if (self.model.message.isPushMessageType
+        && self.model.message.actionText.length) {
         _textLabel.ysf_frameHeight -= 44;
         _splitLine.ysf_frameTop = _textLabel.ysf_frameBottom;
         _splitLine.ysf_frameHeight = 0.5;

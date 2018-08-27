@@ -75,9 +75,9 @@
 @import AVFoundation;
 
 typedef enum : NSUInteger {
-    NTESImagePickerModeImage,
-    NTESImagePickerModeShootImage,
-} NTESImagePickerMode;
+    YSFImagePickerModePicture,
+    YSFImagePickerModeShoot,
+} YSFImagePickerMode;
 
 YSFInputStatus g_inputStatus = YSFInputStatusText;
 QYCommodityInfo *g_commodityInfo = nil;
@@ -93,7 +93,7 @@ static long long g_sessionId;
 
 @interface QYSessionViewController()
 <UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, YSF_NIMSystemNotificationManagerDelegate, YSFAppInfoManagerDelegate, YSFEvaluationReasonViewDelegate, YSFQuickReplyContentViewDelegate>
-@property (nonatomic,assign)    NTESImagePickerMode      mode;
+@property (nonatomic,assign)    YSFImagePickerMode      mode;
 @property (nonatomic,strong)    UIButton *humanService;
 @property (nonatomic,strong)    UIButton *humanServiceText;
 @property (nonatomic,strong)    UIButton *shopEntrance;
@@ -1937,24 +1937,6 @@ static long long g_sessionId;
 
 
 #pragma mark - NIMInputActionDelegate
-- (void)onTapMediaItemPicture
-{
-    [self mediaPicturePressed];
-}
-
-- (void)onTapMediaItemShoot
-{
-    [self mediaShootPressed];
-}
-
-- (void)onTapMediaItem:(QYCustominputItemWithBlock *)item
-{
-//    if (item.block) {
-//        item.block();
-//    }
-    UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
-    [topmostWindow ysf_makeToast:item.text duration:2.0 position:YSFToastPositionCenter];
-}
 
 - (void)SendInputtingMessage
 {
@@ -2291,6 +2273,11 @@ static long long g_sessionId;
 
         handled = YES;
     }
+    else if ([eventName isEqualToString:YSFKitEventNameTapMixReply]){
+        [self onTapMixReplyAction:event.data];
+        
+        handled = YES;
+    }
     else if ([eventName isEqualToString:YSFKitEventNameTapPushMessageActionUrl]){
         [self onTapPushMessageActionUrl:event.data];
         
@@ -2439,10 +2426,22 @@ static long long g_sessionId;
         orderOperation.command = YSFCommandBotSend;
         orderOperation.target = action.target;
         orderOperation.params = action.params;
-        orderOperation.template = @{@"id":@"qiyu_template_text", @"label":YSFStrParam(action.validOperation)};
+        orderOperation.templateInfo = @{@"id":@"qiyu_template_text", @"label":YSFStrParam(action.validOperation)};
         YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
         [self sendMessage:orderOperationMessage];
     }
+}
+
+- (void)onTapMixReplyAction:(YSFAction *)action {
+    YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
+    orderOperation.command = YSFCommandBotSend;
+    orderOperation.target = action.target;
+    orderOperation.params = action.params;
+    orderOperation.label = action.validOperation;
+    orderOperation.type = action.type;
+    orderOperation.templateInfo = @{@"id":@"qiyu_template_mixReply", @"label":YSFStrParam(action.validOperation)};
+    YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
+    [self sendMessage:orderOperationMessage];
 }
 
 - (void)onTapPushMessageActionUrl:(NSString *)actionUrl
@@ -3399,13 +3398,12 @@ static long long g_sessionId;
 
 - (void)mediaPicturePressed
 {
-    self.mode = NTESImagePickerModeImage;
+    self.mode = YSFImagePickerModePicture;
     
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     imagePicker.mediaTypes = @[(NSString *)kUTTypeImage];
-    _mode = NTESImagePickerModeImage;
     [self presentViewController:imagePicker animated:YES completion:nil];
 }
 
@@ -3444,7 +3442,7 @@ static long long g_sessionId;
 {
     UIImagePickerController *imagePicker = [self cameraInit];
     if (imagePicker) {
-        self.mode = NTESImagePickerModeShootImage;
+        self.mode = YSFImagePickerModeShoot;
         imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
         [self presentViewController:imagePicker animated:YES completion:nil];
     }
@@ -3478,12 +3476,12 @@ static long long g_sessionId;
         [picker dismissViewControllerAnimated:YES completion:^{
 
             switch (weakSelf.mode) {
-                case NTESImagePickerModeImage:
+                case YSFImagePickerModePicture:
                 {
                     [weakSelf sendMessage:[YSFMessageMaker msgWithImage:orgImage]];
                     break;
                 }
-                case NTESImagePickerModeShootImage:
+                case YSFImagePickerModeShoot:
                 {
                     UIImageWriteToSavedPhotosAlbum(orgImage, nil, nil, nil);
                     [weakSelf sendMessage:[YSFMessageMaker msgWithImage:orgImage]];
@@ -3560,6 +3558,11 @@ static long long g_sessionId;
     selectedGoods.goods = commodityInfo;
     YSF_NIMMessage *selectedGoodsMessage = [YSFMessageMaker msgWithCustom:selectedGoods];
     [self sendMessage:selectedGoodsMessage];
+}
+
+- (void)sendPicture:(UIImage *)picture
+{
+    [self sendMessage:[YSFMessageMaker msgWithImage:picture]];
 }
 
 @end

@@ -61,7 +61,8 @@
     YSFRichText *attachment = (YSFRichText *)object.attachment;
     _textView.attributedString = [self _attributedString:attachment.content];
     
-    if (self.model.message.isPushMessageType) {
+    if (self.model.message.isPushMessageType
+        && self.model.message.actionText.length) {
         _textView.ysf_frameHeight -= 44;
         _splitLine.hidden = NO;
         _splitLine.ysf_frameTop = _textView.ysf_frameBottom;
@@ -79,8 +80,7 @@
             _splitLine.ysf_frameLeft = -5;
             _action.ysf_frameLeft = -5;
         }
-    }
-    else {
+    } else {
         _splitLine.hidden = YES;
         _action.hidden = YES;
     }

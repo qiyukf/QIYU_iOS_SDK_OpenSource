@@ -12,11 +12,6 @@
 @protocol YSFInputActionDelegate <NSObject>
 
 @optional
-- (void)onTapMediaItemPicture;
-
-- (void)onTapMediaItemShoot;
-
-- (void)onTapMediaItem:(QYMediaItemWithBlock *)item;
 
 - (void)onTextChanged:(id)sender;
 

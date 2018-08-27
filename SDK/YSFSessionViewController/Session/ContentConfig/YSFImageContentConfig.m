@@ -7,6 +7,7 @@
 //
 
 #import "YSFImageContentConfig.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @implementation YSFImageContentConfig
 - (CGSize)contentSize:(CGFloat)cellWidth
@@ -24,7 +25,8 @@
                                                       minSize:CGSizeMake(attachmentImageMinWidth, attachmentImageMinHeight)
                                                       maxSize:CGSizeMake(attachmemtImageMaxWidth, attachmentImageMaxHeight )];
     }
-    if (self.message.isPushMessageType) {
+    if (self.message.isPushMessageType
+        && self.message.actionText.length) {
         contentSize.height += 44;
     }
     

@@ -18,21 +18,17 @@
     BOOL useHttps = [pUseHttps integerValue];
     [YSF_NIMSDK sharedSDK].useHttps = useHttps;
     NSString *path = [[NSBundle mainBundle] pathForResource:@"ysf_dev" ofType:@"plist"];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:path])
-    {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
         NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
         
         //云信配置服设置
         YSF_NIMServerSetting *nimSetting = [[YSF_NIMServerSetting alloc] init];
         if (self.serverSetting == YSFUseServerSettingTest
-            || self.serverSetting == YSFUseServerSettingTest2)
-        {
+            || self.serverSetting == YSFUseServerSettingDev) {
             nimSetting.lbsAddress                  = [dict objectForKey:@"nim_lbs"];
             nimSetting.linkAddress                 = [dict objectForKey:@"nim_link"];
             nimSetting.rsaPublicKeyModule          = [dict objectForKey:@"nim_module"];
-        }
-        else if (self.serverSetting == YSFUseServerSettingPre)
-        {
+        } else if (self.serverSetting == YSFUseServerSettingPre) {
             //预上线和线上服配置一样
 //            nimSetting.lbsAddress                  = @"http://lbs.netease.im/lbs/conf.jsp";
 //            nimSetting.linkAddress                 = @"link.netease.im:8080";
@@ -47,14 +43,12 @@
         [[YSF_NIMSDK sharedSDK] setSetting:nimSetting];
         
         //云商服
-        if (self.serverSetting == YSFUseServerSettingTest
-            || self.serverSetting == YSFUseServerSettingTest2)
-        {
+        if (self.serverSetting == YSFUseServerSettingTest) {
             [YSFServerSetting sharedInstance].apiAddress = [dict objectForKey:@"ysf_api"];
-        }
-        else if (self.serverSetting == YSFUseServerSettingPre)
-        {
+        } else if (self.serverSetting == YSFUseServerSettingPre) {
             [YSFServerSetting sharedInstance].apiAddress = @"http://qiyukf.netease.com/";
+        } else if (self.serverSetting == YSFUseServerSettingDev) {
+            [YSFServerSetting sharedInstance].apiAddress = @"http://qydev.netease.com/";
         }
     }
 }

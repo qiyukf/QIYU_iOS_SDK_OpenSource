@@ -61,7 +61,8 @@
         [self.progressView setProgress:[[[YSF_NIMSDK sharedSDK] chatManager] messageTransportProgress:self.model.message]];
     }
     
-    if (self.model.message.isPushMessageType) {
+    if (self.model.message.isPushMessageType
+        && self.model.message.actionText.length) {
         _splitLine.hidden = NO;
         _action.hidden = NO;
         [_action setTitle:self.model.message.actionText forState:UIControlStateNormal];
@@ -82,7 +83,8 @@
     self.imageView.frame  = imageViewFrame;
     self.imageView.layer.mask = [self.bubbleImageView layer];
     
-    if (self.model.message.isPushMessageType) {
+    if (self.model.message.isPushMessageType
+        && self.model.message.actionText.length) {
         _imageView.ysf_frameHeight -= 44;
         _splitLine.ysf_frameTop = _imageView.ysf_frameBottom;
         _splitLine.ysf_frameHeight = 0.5;

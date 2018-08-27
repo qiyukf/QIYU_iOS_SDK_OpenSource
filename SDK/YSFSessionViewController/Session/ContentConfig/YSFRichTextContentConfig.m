@@ -17,6 +17,7 @@
 #import "YSFInputEmoticonParser.h"
 #import "YSFRichText.h"
 #import "NSAttributedString+YSF.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @implementation YSFRichTextContentConfig
 - (CGSize)contentSize:(CGFloat)cellWidth
@@ -32,7 +33,8 @@
     if (size.width > msgContentMaxWidth) {
         size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth, CGFLOAT_HEIGHT_UNKNOWN)];
     }
-    if (self.message.isPushMessageType) {
+    if (self.message.isPushMessageType
+        && self.message.actionText.length) {
         size.width = msgContentMaxWidth;
         size.height += 44;
     }

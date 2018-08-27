@@ -21,6 +21,7 @@ NSString *const YSFKitEventNameTapMoreOrders = @"YSFKitEventNameTapMoreOrders";
 NSString *const YSFKitEventNameTapMoreFlight = @"YSFKitEventNameTapMoreFlight";
 NSString *const YSFKitEventNameTapBot = @"YSFKitEventNameTapBot";
 NSString *const YSFKitEventNameTapAction = @"YSFKitEventNameTapAction";
+NSString *const YSFKitEventNameTapMixReply = @"YSFKitEventNameTapMixReply";
 NSString *const YSFKitEventNameTapKFBypass = @"YSFKitEventNameTapKFBypass";
 NSString *const YSFKitEventNameTapCommodityInfo = @"YSFKitEventNameTapCommodityInfo";
 NSString *const YSFKitEventNameTapEvaluation = @"YSFKitEventNameTapEvaluation";
