@@ -60,9 +60,9 @@ typedef void (^QYRequestStaffCompletion)(BOOL needed);
 typedef void (^QYRequestStaffBlock)(QYRequestStaffScene scene, QYRequestStaffCompletion completion);
 
 /**
- *  重新选择按钮点击事件回调
+ *  bot商品按钮点击事件回调
  */
-typedef void (^QYReselectClickBlock)(QYSelectedCommodityInfo *commodityInfo);
+typedef void (^QYSelectedCommodityActionBlock)(QYSelectedCommodityInfo *commodityInfo);
 
 /**
  *  自定义行为配置类
@@ -112,9 +112,9 @@ typedef void (^QYReselectClickBlock)(QYSelectedCommodityInfo *commodityInfo);
 @property (nonatomic, copy) QYRequestStaffBlock requestStaffBlock;
 
 /**
- *  重新选择事件回调
+ *  bot商品按钮点击事件
  */
-@property (nonatomic, copy) QYReselectClickBlock reselectClick;
+@property (nonatomic, copy) QYSelectedCommodityActionBlock commodityActionBlock;
 
 @end
 

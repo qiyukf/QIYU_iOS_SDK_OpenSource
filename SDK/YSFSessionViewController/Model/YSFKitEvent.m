@@ -30,7 +30,7 @@ NSString *const YSFKitEventNameTapRichTextImage = @"YSFKitEventNameTapRichTextIm
 NSString *const YSFKitEventNameTapPushMessageActionUrl = @"YSFKitEventNameTapPushMessageActionUrl";
 NSString *const YSFKitEventNameOpenUrl = @"YSFKitEventNameOpenUrl";
 NSString *const YSFKitEventNameSendCommdityInfo = @"YSFKitEventNameSendMessage";
-NSString *const YSFKitEventNameReselectCommdity = @"YSFKitEventNameReselectCommdity";
+NSString *const YSFKitEventNameTapCommdityAction = @"YSFKitEventNameTapCommdityAction";
 
 @implementation YSFKitEvent
 

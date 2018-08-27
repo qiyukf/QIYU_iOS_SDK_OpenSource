@@ -189,7 +189,7 @@
 
 - (void)onClickButton:(id)sender {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
-    event.eventName = YSFKitEventNameReselectCommdity;
+    event.eventName = YSFKitEventNameTapCommdityAction;
     event.message = self.model.message;
     [self.delegate onCatchEvent:event];
 }

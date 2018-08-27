@@ -2318,11 +2318,11 @@ static long long g_sessionId;
         }
 
         handled = YES;
-    } else if ([eventName isEqualToString:YSFKitEventNameReselectCommdity]) {
-        if ([QYCustomActionConfig sharedInstance].reselectClick) {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapCommdityAction]) {
+        if ([QYCustomActionConfig sharedInstance].commodityActionBlock) {
             YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)event.message.messageObject;
             YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
-            [QYCustomActionConfig sharedInstance].reselectClick(selectedGoods.goods);
+            [QYCustomActionConfig sharedInstance].commodityActionBlock(selectedGoods.goods);
         }
         handled = YES;
     }
