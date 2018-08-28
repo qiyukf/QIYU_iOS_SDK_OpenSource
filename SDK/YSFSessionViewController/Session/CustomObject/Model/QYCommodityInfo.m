@@ -161,6 +161,16 @@
     instance.urlString           = [dict ysf_jsonString:YSFApiKeyUrl];
     instance.note                = [dict ysf_jsonString:YSFApiKeyNote];
     instance.ext            = [dict ysf_jsonString:YSFApiKeyExt];
+    if (!instance.ext) {
+        NSDictionary *extDict = [dict ysf_jsonDict:YSFApiKeyExt];
+        if (dict) {
+            NSError *error = nil;
+            NSData *data = [NSJSONSerialization dataWithJSONObject:extDict options:NSJSONWritingPrettyPrinted error:&error];
+            if (!error) {
+                instance.ext = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            }
+        }
+    }
     instance.show                = [dict ysf_jsonBool:YSFApiKeyShow];
     instance.bAuto                = [dict ysf_jsonBool:YSFApiKeyAuto];
     instance.payMoney                = [dict ysf_jsonString:YSFApiKeyPayMoney];
