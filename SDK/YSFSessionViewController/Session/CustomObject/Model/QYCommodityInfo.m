@@ -163,10 +163,10 @@
     instance.ext            = [dict ysf_jsonString:YSFApiKeyExt];
     if (!instance.ext) {
         NSDictionary *extDict = [dict ysf_jsonDict:YSFApiKeyExt];
-        if (dict) {
+        if (extDict) {
             NSError *error = nil;
             NSData *data = [NSJSONSerialization dataWithJSONObject:extDict options:NSJSONWritingPrettyPrinted error:&error];
-            if (!error) {
+            if (data && !error) {
                 instance.ext = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             }
         }
