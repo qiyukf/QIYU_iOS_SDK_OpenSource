@@ -69,7 +69,7 @@
         YSFStartServiceObject *attachment = (YSFStartServiceObject *)object.attachment;
         NSString *group = @"";
         if (attachment.message.length > 0 && attachment.humanOrMachine) {
-            group = [NSString stringWithFormat:@"%@，",attachment.message];
+            group = [NSString stringWithFormat:@"%@",attachment.message];
         }
         if (attachment.groupName.length > 0) {
             group = [group stringByAppendingString:[NSString stringWithFormat:@"已连接至%@，",attachment.groupName]];

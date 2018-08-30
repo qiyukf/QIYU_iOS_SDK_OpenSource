@@ -606,7 +606,7 @@
 - (void)textViewDidBeginEditing:(UITextView *)textView
 {
     self.inputStatus = YSFInputStatusText;
-    
+    [self updateAllButtonImages];
     [textView becomeFirstResponder];
 }
 

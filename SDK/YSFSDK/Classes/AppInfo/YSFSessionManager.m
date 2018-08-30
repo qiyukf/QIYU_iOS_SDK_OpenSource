@@ -161,19 +161,25 @@ YSFServiceRequestDelegate>
     return result;
 }
 
-- (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId;
-{
+- (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId {
+    /*
+     1、若没有会话session：
+     a.当前会话状态为正在排队或客服不在线，waitingOrNotExist=YES，若为初次请求会话则请求客服，若不是初次请求则不请求客服
+     b.当前会话状态为离线或正在服务，waitingOrNotExist=NO，则一律请求客服
+     2、若有会话session：
+     a.无论当前会话什么状态，waitingOrNotExist=NO，则一律不请求客服
+     */
     BOOL waitingOrNotExist = false;
-    if (![self getOnlineSession:shopId] && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
-                               || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist
-                               || [self getSessionStateType:shopId] == YSFSessionStateNotExistAndLeaveMessageClosed)) {
+    if (![self getOnlineSession:shopId]
+        && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
+            || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist
+            || [self getSessionStateType:shopId] == YSFSessionStateNotExistAndLeaveMessageClosed)) {
         waitingOrNotExist = true;
     }
     YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
     if ([self serviceOutOfDate:shopId] && (isInit || !waitingOrNotExist)) {
         return true;
-    }
-    else {
+    } else {
         return false;
     }
 }
