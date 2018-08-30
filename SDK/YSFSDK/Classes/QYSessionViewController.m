@@ -1777,6 +1777,7 @@ static long long g_sessionId;
         //不延后的话，requestServiceIfNeeded时可能刚好处在延时2秒提示请求结果的过程中
         __weak typeof(self) weakSelf = self;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            [weakSelf clearSessionState];
             [weakSelf requestServiceIfNeededInScene:QYRequestStaffSceneNone onlyManual:NO clearSession:YES];
         });
     }
@@ -2983,7 +2984,6 @@ static long long g_sessionId;
             if (needed) {
                 if (clear) {
                     [sessionManager clearByShopId:weakSelf.shopId];
-                    [weakSelf clearSessionState];
                 }
                 if ([sessionManager shouldRequestService:(QYRequestStaffSceneInit == scene) shopId:weakSelf.shopId]) {
                     [weakSelf startRequestStaff];
@@ -2993,7 +2993,6 @@ static long long g_sessionId;
     } else {
         if (clear) {
             [sessionManager clearByShopId:_shopId];
-            [self clearSessionState];
         }
         if ([sessionManager shouldRequestService:(QYRequestStaffSceneInit == scene) shopId:_shopId]) {
             return [self startRequestStaff];
@@ -3200,10 +3199,12 @@ static long long g_sessionId;
 }
 
 - (void)onHumanChat:(id)sender {
+    [self clearSessionState];
     [self requestServiceIfNeededInScene:QYRequestStaffSceneNavHumanButton onlyManual:YES clearSession:YES];
 }
 
 - (void)applyHumanStaff {
+    [self clearSessionState];
     [self requestServiceIfNeededInScene:QYRequestStaffSceneRobotUnable onlyManual:YES clearSession:YES];
 }
 
@@ -3211,6 +3212,7 @@ static long long g_sessionId;
     YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
     if (!session
         || (session && !session.humanOrMachine)) {
+        [self clearSessionState];
         [self requestServiceIfNeededInScene:QYRequestStaffSceneActiveRequest onlyManual:YES clearSession:YES];
     }
 }
