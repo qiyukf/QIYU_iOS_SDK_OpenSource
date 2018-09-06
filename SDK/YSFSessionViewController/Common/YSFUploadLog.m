@@ -20,7 +20,7 @@
              YSFApiKeyVersion :            _version,
              YSFApiKeyPlatform :           [[UIDevice currentDevice] systemVersion],
              YSFApiKeyType :               _type,
-             YSFApiKeyAppkey :             [[YSF_NIMSDK sharedSDK] appKey],
+             YSFApiKeyAppKey :             [[YSF_NIMSDK sharedSDK] appKey],
              YSFApiKeyClientId :           [[[YSF_NIMSDK sharedSDK] loginManager] currentAccount],
              YSFApiKeyLevel :              @"TRACE",
              YSFApiKeyMessage :            _message,

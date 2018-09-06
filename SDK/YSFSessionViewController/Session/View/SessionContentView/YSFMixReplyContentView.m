@@ -10,8 +10,12 @@
 #import "YSFMessageModel.h"
 #import "YSFMixReply.h"
 #import "UIControl+BlocksKit.h"
+#import "NSString+FileTransfer.h"
+#import "NSAttributedString+YSF.h"
+#import "YSFCoreText.h"
+#import "QYCustomUIConfig.h"
 
-@interface YSFMixReplyContentView()
+@interface YSFMixReplyContentView() <YSFAttributedLabelDelegate>
 
 @property (nonatomic, strong) UIView *contentView;
 
@@ -43,20 +47,24 @@
     YSFMixReply *mixReply = (YSFMixReply *)object.attachment;
     
     [_contentView ysf_removeAllSubviews];
-    
     __block CGFloat offsetY = self.model.contentViewInsets.top;
-    offsetY += 13;
     
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-    label.numberOfLines = 0;
-    label.font = [UIFont systemFontOfSize:16.0f];
-    label.text = mixReply.label;
-    label.frame = CGRectMake(18, offsetY, self.ysf_frameWidth - 28, 0);
-    [label sizeToFit];
-    [_contentView addSubview:label];
+    YSFAttributedTextView *attrLabel = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
+    attrLabel.shouldDrawImages = NO;
+    attrLabel.backgroundColor = [UIColor clearColor];
     
-    offsetY += label.ysf_frameHeight;
-    offsetY += 13;
+    NSString *labelStr = mixReply.label;
+    attrLabel.attributedString = [labelStr ysf_attributedString:self.model.message.isOutgoingMsg];
+    if (attrLabel.attributedString.length) {
+        offsetY += 15.5;
+        attrLabel.ysf_frameWidth = self.model.contentSize.width;
+        CGSize size = [attrLabel.attributedTextContentView sizeThatFits:CGSizeZero];
+        attrLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY, self.model.contentSize.width, size.height);
+        [attrLabel layoutSubviews];
+        [_contentView addSubview:attrLabel];
+        offsetY += size.height;
+        offsetY += 13;
+    }
     
     CGFloat lineDegree = 1. / [UIScreen mainScreen].scale;
     UIView *splitLine = [[UIView alloc] init];
@@ -66,31 +74,59 @@
     
     __weak typeof(self) weakSelf = self;
     [mixReply.actionList enumerateObjectsUsingBlock:^(YSFAction *action, NSUInteger idx, BOOL * _Nonnull stop) {
-        offsetY += 15;
-        if (idx > 0) {
-            offsetY += 34;
+        NSString *title = action.validOperation;
+        if (title.length) {
+            UIView *point = [[UIView alloc] init];
+            point.backgroundColor = YSFRGB(0xd6d6d6);
+            point.layer.cornerRadius = 4;
+            point.frame = CGRectMake(18, offsetY + 23, 7.5, 7.5);
+            [weakSelf.contentView addSubview:point];
+            
+            YSFAttributedLabel *actionLabel = [self getAttrubutedLabel];
+            [actionLabel setText:title];
+            [actionLabel addCustomLink:action forRange:NSMakeRange(0, title.length)];
+            CGSize size = [actionLabel sizeThatFits:CGSizeMake(self.model.contentSize.width - 15, CGFLOAT_MAX)];
+            offsetY += 15.5;
+            actionLabel.frame = CGRectMake(self.model.contentViewInsets.left + 15, offsetY, self.model.contentSize.width - 15, size.height);
+            [weakSelf.contentView addSubview:actionLabel];
+            offsetY += size.height;
+            offsetY += -9;
         }
-        UIButton *button = [[UIButton alloc] init];
-        button.titleLabel.font = [UIFont systemFontOfSize:15];
-        button.layer.borderWidth = lineDegree;
-        button.layer.borderColor = YSFRGB(0x5092E1).CGColor;
-        button.layer.cornerRadius = 2.;
-        button.frame = CGRectMake(25, offsetY, self.ysf_frameWidth - 45, 34);
-        [button setTitle:action.validOperation forState:UIControlStateNormal];
-        [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        [button ysf_addEventHandler:^(id  _Nonnull sender) {
-            [weakSelf clickButtonAction:action];
-        } forControlEvents:UIControlEventTouchUpInside];
-        [weakSelf.contentView addSubview:button];
     }];
+    offsetY += 22;
 }
 
-- (void)clickButtonAction:(YSFAction *)action {
-    YSFKitEvent *event = [[YSFKitEvent alloc] init];
-    event.eventName = YSFKitEventNameTapMixReply;
-    event.message = self.model.message;
-    event.data = action;
-    [self.delegate onCatchEvent:event];
+- (YSFAttributedLabel *)getAttrubutedLabel {
+    YSFAttributedLabel *label = [[YSFAttributedLabel alloc] initWithFrame:CGRectZero];
+    label.delegate = self;
+    label.numberOfLines = 0;
+    label.underLineForLink = NO;
+    label.autoDetectNumber = NO;
+    label.lineBreakMode = NSLineBreakByWordWrapping;
+    label.font = [UIFont systemFontOfSize:16.f];
+    label.highlightColor = YSFRGBA2(0x1a000000);
+    label.backgroundColor = [UIColor clearColor];
+    QYCustomUIConfig *config = [QYCustomUIConfig sharedInstance];
+    if (self.model.message.isOutgoingMsg) {
+        label.textColor = config.customMessageTextColor;
+        label.linkColor = config.customMessageHyperLinkColor;
+    } else {
+        label.textColor = config.serviceMessageTextColor;
+        label.linkColor = config.serviceMessageHyperLinkColor;
+    }
+    CGFloat fontSize = self.model.message.isOutgoingMsg ? config.customMessageTextFontSize : config.serviceMessageTextFontSize;
+    label.font = [UIFont systemFontOfSize:fontSize];
+    return label;
+}
+
+- (void)ysfAttributedLabel:(YSFAttributedLabel *)label clickedOnLink:(id)linkData {
+    if ([linkData isKindOfClass:[YSFAction class]]) {
+        YSFKitEvent *event = [[YSFKitEvent alloc] init];
+        event.eventName = YSFKitEventNameTapMixReply;
+        event.message = self.model.message;
+        event.data = linkData;
+        [self.delegate onCatchEvent:event];
+    }
 }
 
 @end

@@ -125,9 +125,8 @@
     return @"YSFSessionMachineContentView";
 }
 
-- (UIEdgeInsets)contentViewInsets
-{
-    return self.message.isOutgoingMsg ? UIEdgeInsetsMake(0,12,0,18) : UIEdgeInsetsMake(0,18,0,12);
+- (UIEdgeInsets)contentViewInsets {
+    return UIEdgeInsetsMake(0, 18, 0, 12);
 }
 
 

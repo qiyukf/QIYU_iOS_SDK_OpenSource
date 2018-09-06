@@ -736,10 +736,10 @@
 - (void)keyboardChangedWithTransition:(YSFKeyboardTransition)transition {
     [UIView animateWithDuration:transition.animationDuration delay:0 options:transition.animationOption animations:^{
         CGRect kbFrame = [[YSFKeyboardManager defaultManager] convertRect:transition.toFrame toView:self.view];
-        CGRect imagePanleframe = _imagePanel.frame;
+        CGRect imagePanleframe = self.imagePanel.frame;
         imagePanleframe.size.width = kbFrame.size.width;
         imagePanleframe.origin.y = kbFrame.origin.y - imagePanleframe.size.height;
-        _imagePanel.frame = imagePanleframe;
+        self.imagePanel.frame = imagePanleframe;
     } completion:^(BOOL finished) {
         
     }];

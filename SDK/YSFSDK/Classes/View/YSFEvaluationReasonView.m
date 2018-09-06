@@ -119,13 +119,14 @@ static CGFloat const kMaxTextLength = 200;
         [self removeView];
     } else {
         self.hidden = YES;
+        __weak typeof(self) weakSelf = self;
         YSFAlertController *alert = [YSFAlertController alertWithTitle:nil message:@"确定放弃编辑吗？"];
         [alert addCancelActionWithHandler:^(YSFAlertAction * _Nonnull action) {
-            self.hidden = NO;
-            [self.contentTextView becomeFirstResponder];
+            weakSelf.hidden = NO;
+            [weakSelf.contentTextView becomeFirstResponder];
         }];
         [alert addAction:[YSFAlertAction actionWithTitle:@"确定" handler:^(YSFAlertAction * _Nonnull action) {
-            [self removeView];
+            [weakSelf removeView];
         }]];
         [alert showWithSender:nil controller:self.ysf_viewController animated:YES completion:nil];
     }

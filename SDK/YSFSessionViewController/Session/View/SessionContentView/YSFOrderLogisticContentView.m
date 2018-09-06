@@ -96,7 +96,7 @@
         logistic.frame = CGRectMake(38, offsetY,
                                  self.model.contentSize.width - 48, 0);
         [logistic sizeToFit];
-        [_content addSubview:logistic];
+        [self.content addSubview:logistic];
         if (idx == 0) {
             logistic.textColor = YSFRGB(0x5092E1);
         }
@@ -113,7 +113,7 @@
                                     self.model.contentSize.width - 48, 0);
         
         [time sizeToFit];
-        [_content addSubview:time];
+        [self.content addSubview:time];
         if (idx == 0) {
             time.textColor = YSFRGB(0x5092E1);
         }

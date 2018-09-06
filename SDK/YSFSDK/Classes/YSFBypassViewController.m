@@ -140,8 +140,8 @@
 - (void)onClose:(id)sender
 {
     [self dismissViewControllerAnimated:YES completion:^{
-        if (_callback) {
-            _callback(NO, nil);
+        if (self.callback) {
+            self.callback(NO, nil);
         }
     }];
 }

@@ -137,14 +137,14 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
 - (void)sendSelectedCommodityInfo:(QYSelectedCommodityInfo *)commodityInfo;
 
 /**
- *  请求人工客服
- */
-- (void)requestHumanStaff;
-
-/**
  *  发送图片
  */
 - (void)sendPicture:(UIImage *)picture;
+
+/**
+ *  请求人工客服
+ */
+- (void)requestHumanStaff;
 
 @end
 

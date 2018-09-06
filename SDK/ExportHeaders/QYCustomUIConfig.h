@@ -18,17 +18,17 @@ typedef NS_ENUM(NSInteger, QYBypassDisplayMode) {
 /**
  *  输入框下方“更多”配置项点击回调
  */
-typedef void (^QYCustominputItemBlock)();
+typedef void (^QYCustomInputItemBlock)();
 
 /**
  *  输入框下方“完全自定义”配置项
  */
-@interface QYCustominputItem : NSObject
+@interface QYCustomInputItem : NSObject
 
-@property (nonatomic,strong)    UIImage *normalImage;
-@property (nonatomic,strong)    UIImage *selectedImage;
-@property (nonatomic,copy)      NSString *text;
-@property (nonatomic,copy)    QYCustominputItemBlock block;
+@property (nonatomic, strong) UIImage *normalImage;
+@property (nonatomic, strong) UIImage *selectedImage;
+@property (nonatomic, copy) NSString *text;
+@property (nonatomic, copy) QYCustomInputItemBlock block;
 
 @end
 
@@ -42,8 +42,6 @@ typedef void (^QYCustominputItemBlock)();
 
 /**
  *  恢复成默认设置
- *
- *  @return void
  */
 - (void)restoreToDefault;
 
@@ -215,41 +213,40 @@ typedef void (^QYCustominputItemBlock)();
 @property (nonatomic, assign) QYBypassDisplayMode bypassDisplayMode;
 
 /**
- *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）显示，默认不显示 (v4.3.0 在此之前，只有平台电商版本才有此配置项)
+ *  以下配置项在V4.4.0版本前，只有平台电商版本有；V4.4.0以后，平台电商/非平台电商均有这些配置项
+ *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）显示，默认不显示
  */
 @property (nonatomic, assign)   BOOL showShopEntrance;
 
 /**
- *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）icon (v4.3.0 在此之前，只有平台电商版本才有此配置项)
+ *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）icon
  */
 @property (nonatomic, strong) UIImage *shopEntranceImage;
 
 /**
- *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）文本 (v4.3.0 在此之前，只有平台电商版本才有此配置项)
+ *  聊天窗口右上角按钮（对于平台电商来说，这里可以考虑放“商铺入口”）文本
  */
 @property (nonatomic, copy) NSString *shopEntranceText;
 
 /**
  *  聊天内容区域的按钮（对于平台电商来说，这里可以考虑放置“会话列表入口“）显示，默认不显示
- *  (v4.3.0 在此之前，只有平台电商版本才有此配置项)
  */
 @property (nonatomic, assign) BOOL showSessionListEntrance;
 
 /**
  *  聊天内容区域的按钮（对于平台电商来说，这里可以考虑放置“会话列表入口“）在聊天页面的位置，YES代表在右上角，NO代表在左上角，默认在右上角
- *  (v4.3.0 在此之前，只有平台电商版本才有此配置项)
  */
 @property (nonatomic, assign) BOOL sessionListEntrancePosition;
 
 /**
- *  会话列表入口icon (v4.3.0 在此之前，只有平台电商版本才有此配置项)
+ *  会话列表入口icon
  */
 @property (nonatomic, strong) UIImage *sessionListEntranceImage;
 
 /**
- *  输入框下方“完全自定义”配置项 (v4.3.0)
+ *  输入框下方“完全自定义”配置项
  */
-@property (nonatomic, strong) NSArray<QYCustominputItem *> *customInputItems;
+@property (nonatomic, strong) NSArray<QYCustomInputItem *> *customInputItems;
 
 @end
 

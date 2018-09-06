@@ -39,7 +39,7 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
     NSMutableArray *items = [[QYCustomUIConfig sharedInstance].customInputItems mutableCopy];
     NSMutableArray *mediaButtons = [NSMutableArray array];
     NSMutableArray *mediaItems = [NSMutableArray array];
-    [items enumerateObjectsUsingBlock:^(QYCustominputItem *item, NSUInteger idx, BOOL *stop) {
+    [items enumerateObjectsUsingBlock:^(QYCustomInputItem *item, NSUInteger idx, BOOL *stop) {
         [mediaItems addObject:item];
         UIButton *btn = [[UIButton alloc] init];
         [btn setImage:item.normalImage forState:UIControlStateNormal];
@@ -160,7 +160,7 @@ NSInteger YSF_NIMButtonBegintLeftX = 11;
 - (void)onTouchButton:(id)sender
 {
     NSInteger index = [(UIButton *)sender tag];
-    QYCustominputItem *item = _mediaItems[index];
+    QYCustomInputItem *item = _mediaItems[index];
     if (item.block) {
         item.block();
     }

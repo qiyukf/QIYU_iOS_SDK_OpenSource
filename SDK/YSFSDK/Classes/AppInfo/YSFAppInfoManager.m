@@ -290,17 +290,17 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
         request.authToken = [QYSDK sharedSDK].authToken;
         request.userInfo = newUserInfo;
         QYUserInfo *cachedUserInfo = _qyUserInfo;
-
+        
         __weak typeof(self) weakSelf = self;
-        [YSFIMCustomSystemMessageApi sendMessage:request shopId:@"-1"
-               completion:^(NSError *error) {
-                    if (error == nil && cachedUserInfo == _qyUserInfo)
-                    {
-                        [self cleanCurrentUserInfo];
-                        [weakSelf mapForeignId:cachedUserInfo.userId];
-                    }
-                    YSFLogApp(@"reportUserInfo error:%@", error);
-               }];
+        [YSFIMCustomSystemMessageApi sendMessage:request
+                                          shopId:@"-1"
+                                      completion:^(NSError *error) {
+                                          if (error == nil && cachedUserInfo == weakSelf.qyUserInfo) {
+                                              [weakSelf cleanCurrentUserInfo];
+                                              [weakSelf mapForeignId:cachedUserInfo.userId];
+                                          }
+                                          YSFLogApp(@"reportUserInfo error:%@", error);
+                                      }];
     }
 }
 

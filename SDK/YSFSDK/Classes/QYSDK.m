@@ -104,24 +104,11 @@
     });
 }
 
-//- (void)trackHistory:(NSString *)urlString
-//      withAttributes:(NSDictionary *)attributes
-//{
-//    YSFLogApp(@"urlString: %@ attributes: %@", urlString, attributes);
-//
-//    YSFViewHistoryRequest *request = [[YSFViewHistoryRequest alloc] init];
-//    request.urlString = urlString;
-//    request.attributes= attributes;
-//
-//    [YSFHttpApi get:request
-//         completion:nil];
-//}
-
-- (void)setUserInfo:(QYUserInfo *)userInfo
-{
+- (void)setUserInfo:(QYUserInfo *)userInfo {
     YSFLogApp(@"userInfoId: %@  userInfoData: %@", userInfo.userId, userInfo.data);
+    __weak typeof(self) weakSelf = self;
     ysf_main_async(^{
-        [_infoManager setUserInfo:userInfo authTokenVerificationResultBlock:nil];
+        [weakSelf.infoManager setUserInfo:userInfo authTokenVerificationResultBlock:nil];
     });
 }
 
@@ -130,12 +117,11 @@
     _authToken = authToken;
 }
 
-- (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block
-{
+- (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block {
     YSFLogApp(@"userInfoId: %@  userInfoData: %@", userInfo.userId, userInfo.data);
-    
+    __weak typeof(self) weakSelf = self;
     ysf_main_async(^{
-        [_infoManager setUserInfo:userInfo authTokenVerificationResultBlock:block];
+        [weakSelf.infoManager setUserInfo:userInfo authTokenVerificationResultBlock:block];
     });
 }
 
@@ -166,10 +152,10 @@
 - (void)logoutNim:(QYCompletionBlock)completion
 {
     YSFLogApp(@"begin to logoutNim");
-
+    __weak typeof(self) weakSelf = self;
     [[[YSF_NIMSDK sharedSDK] loginManager] logout:^(NSError *error) {
-        [_sessionManager clear];
-        [_infoManager logout];
+        [weakSelf.sessionManager clear];
+        [weakSelf.infoManager logout];
         
         if (completion) {
             completion();
@@ -191,8 +177,9 @@
     }];
     
     YSFSetLeaveStatusRequest *request = [[YSFSetLeaveStatusRequest alloc] init];
+    __weak typeof(self) weakSelf = self;
     [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
-        [self logoutNim:completion];
+        [weakSelf logoutNim:completion];
     }];
 }
 

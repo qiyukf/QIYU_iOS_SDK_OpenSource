@@ -125,24 +125,25 @@ YSFNotification(kKFInputViewInputTypeChanged);
 - (void)inputViewSizeToHeight:(CGFloat)toHeight showInputView:(BOOL)show
 {
     //[_tableView setUserInteractionEnabled:!show];
+    __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        CGRect orginRect = [_tableView frame];
+        CGRect orginRect = [weakSelf.tableView frame];
         CGRect rect = orginRect;
         rect.origin.y = 0;
-        rect.size.height = self.viewRect.size.height - toHeight;
+        rect.size.height = weakSelf.viewRect.size.height - toHeight;
         CGFloat bottomMargin = [[QYCustomUIConfig sharedInstance] bottomMargin];
         if (bottomMargin > 0) {
             rect.size.height -= bottomMargin;
         } else {
             if (@available(iOS 11, *)) {
-                rect.size.height -= _tableView.ysf_viewController.view.safeAreaInsets.bottom;
+                rect.size.height -= weakSelf.tableView.ysf_viewController.view.safeAreaInsets.bottom;
             }
         }
         if (!CGRectEqualToRect(orginRect, rect)) {
             [UIView animateWithDuration:0.3 animations:^{
-                [_tableView setFrame:rect];
+                [weakSelf.tableView setFrame:rect];
             }];
-            [_tableView ysf_scrollToBottom:YES];
+            [weakSelf.tableView ysf_scrollToBottom:YES];
             [[NSNotificationCenter defaultCenter] postNotificationName:kKFInputViewFrameChanged object:@(YES)];
         }
     });

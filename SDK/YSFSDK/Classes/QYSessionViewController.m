@@ -1359,7 +1359,7 @@ static long long g_sessionId;
     if (lastMessage && lastMessage.messageType == YSF_NIMMessageTypeCustom) {
         YSF_NIMCustomObject *customObject = lastMessage.messageObject;
         if ([customObject.attachment isKindOfClass:[YSFKFBypassNotification class]]) {
-            YSFKFBypassNotification *notification = customObject.attachment;
+            YSFKFBypassNotification *notification = (YSFKFBypassNotification *)customObject.attachment;
             if (!notification.disable) {
                 return YES;
             }
@@ -2020,6 +2020,10 @@ static long long g_sessionId;
     
     if (text) {
         text = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        //bug#16432，部分第三方输入法换行使用“\r”，该字符仅在Mac中表示换行和回车
+        if ([text containsString:@"\r"]) {
+            text = [text stringByReplacingOccurrencesOfString:@"\r" withString:@"\n"];
+        }
     }
     if (text.length == 0) {
         UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
@@ -2147,11 +2151,7 @@ static long long g_sessionId;
                 [self sendMessage:message];
             }
         } else {
-            BOOL shouldSend = [self requestServiceIfNeededInScene:QYRequestStaffSceneNone onlyManual:NO clearSession:NO];
-            if (!shouldSend) {
-                UIWindow *topWindow = [[[UIApplication sharedApplication] windows] lastObject];
-                [topWindow ysf_makeToast:@"请等待连接客服成功后，再发送消息" duration:2.0 position:YSFToastPositionCenter];
-            }
+            [self shouldSendMessage];
         }
         
         handled = YES;
@@ -2426,26 +2426,36 @@ static long long g_sessionId;
         [self popUpMoreListNav:flightList];
     }
     else {
-        YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
-        orderOperation.command = YSFCommandBotSend;
-        orderOperation.target = action.target;
-        orderOperation.params = action.params;
-        orderOperation.templateInfo = @{@"id":@"qiyu_template_text", @"label":YSFStrParam(action.validOperation)};
-        YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
-        [self sendMessage:orderOperationMessage];
+        YSFServiceSession *session = [[QYSDK sharedSDK].sessionManager getOnlineSession:_shopId];
+        if (session) {
+            YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
+            orderOperation.command = YSFCommandBotSend;
+            orderOperation.target = action.target;
+            orderOperation.params = action.params;
+            orderOperation.templateInfo = @{@"id":@"qiyu_template_text", @"label":YSFStrParam(action.validOperation)};
+            YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
+            [self sendMessage:orderOperationMessage];
+        } else {
+            [self shouldSendMessage];
+        }
     }
 }
 
 - (void)onTapMixReplyAction:(YSFAction *)action {
-    YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
-    orderOperation.command = YSFCommandBotSend;
-    orderOperation.target = action.target;
-    orderOperation.params = action.params;
-    orderOperation.label = action.validOperation;
-    orderOperation.type = action.type;
-    orderOperation.templateInfo = @{@"id":@"qiyu_template_mixReply", @"label":YSFStrParam(action.validOperation)};
-    YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
-    [self sendMessage:orderOperationMessage];
+    YSFServiceSession *session = [[QYSDK sharedSDK].sessionManager getOnlineSession:_shopId];
+    if (session) {
+        YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
+        orderOperation.command = YSFCommandBotSend;
+        orderOperation.target = action.target;
+        orderOperation.params = action.params;
+        orderOperation.label = action.validOperation;
+        orderOperation.type = action.type;
+        orderOperation.templateInfo = @{@"id":@"qiyu_template_mixReply", @"label":YSFStrParam(action.validOperation)};
+        YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
+        [self sendMessage:orderOperationMessage];
+    } else {
+        [self shouldSendMessage];
+    }
 }
 
 - (void)onTapPushMessageActionUrl:(NSString *)actionUrl
@@ -2465,7 +2475,7 @@ static long long g_sessionId;
     vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     
     YSF_NIMCustomObject *customObject = message.messageObject;
-    YSFBotForm *botForm = customObject.attachment;
+    YSFBotForm *botForm = (YSFBotForm *)customObject.attachment;
     vc.botForm = botForm;
     __weak typeof(self) weakSelf = self;
     vc.submitCallback = ^(BOOL submitted, YSFSubmittedBotForm *submittedBotForm)
@@ -2670,17 +2680,17 @@ static long long g_sessionId;
     __weak typeof(self) weakSelf = self;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error) {
         if (!error) {
-            if (self.evaluationResonView) {
-                [self.evaluationResonView removeFromSuperview];
-                self.evaluationResonView = nil;
+            if (weakSelf.evaluationResonView) {
+                [weakSelf.evaluationResonView removeFromSuperview];
+                weakSelf.evaluationResonView = nil;
             }
             YSF_NIMCustomObject *customObject = (YSF_NIMCustomObject*)message.messageObject;
             YSFMachineResponse *machineAttachment = (YSFMachineResponse*)customObject.attachment;
             machineAttachment.evaluationContent = text;
             [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:weakSelf.session completion:nil];
-            [self.view ysf_makeToast:@"感谢您的反馈" duration:1 position:YSFToastPositionCenter];
+            [weakSelf.view ysf_makeToast:@"感谢您的反馈" duration:1 position:YSFToastPositionCenter];
         } else {
-            [self.view ysf_makeToast:@"提交失败，请稍后再试" duration:1 position:YSFToastPositionCenter];
+            [weakSelf.view ysf_makeToast:@"提交失败，请稍后再试" duration:1 position:YSFToastPositionCenter];
         }
     }];
 }
@@ -3128,6 +3138,31 @@ static long long g_sessionId;
         else {
             [_sessionInputView setActionInfoArray:session.actionInfoArray];
         }
+        
+        if (session && session.sessionId) {
+            NSString *key = @"lastSessionID";
+            if (self.commodityInfo) {
+                id obj = [[NSUserDefaults standardUserDefaults] objectForKey:key];
+                if (obj && [obj isKindOfClass:[NSNumber class]]) {
+                    long long oldSessionID = [(NSNumber *)obj longLongValue];
+                    if (session.sessionId == oldSessionID) {
+                        //本次获取到的sessionId与保存的本地sessionId相等
+                        //说明本次会话是未断线的旧会话，不会收到欢迎语消息，故这里需要再次发送商品信息
+                        if (g_sessionId != session.sessionId) {
+                            g_sessionId = session.sessionId;
+                            if (session.humanOrMachine) {
+                                [self sendCommodityInfoRequest:YES];
+                            } else {
+                                if (self.autoSendInRobot) {
+                                    [self sendCommodityInfoRequest:YES];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            [[NSUserDefaults standardUserDefaults] setObject:@(session.sessionId) forKey:key];
+        }
     }
     else
     {
@@ -3342,7 +3377,12 @@ static long long g_sessionId;
         return NO;
     }
     
-    shouldSend = [self requestServiceIfNeededInScene:QYRequestStaffSceneNone onlyManual:NO clearSession:NO];
+    shouldSend = [self shouldSendMessage];
+    return shouldSend;
+}
+
+- (BOOL)shouldSendMessage {
+    BOOL shouldSend = [self requestServiceIfNeededInScene:QYRequestStaffSceneNone onlyManual:NO clearSession:NO];
     if (!shouldSend) {
         UIWindow *topmostWindow = [[[UIApplication sharedApplication] windows] lastObject];
         [topmostWindow ysf_makeToast:@"请等待连接客服成功后，再发送消息" duration:2.0 position:YSFToastPositionCenter];

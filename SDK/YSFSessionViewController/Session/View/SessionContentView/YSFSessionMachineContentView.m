@@ -365,6 +365,9 @@
 
 - (void)layoutSubviews{
     [super layoutSubviews];
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
+        _content.ysf_frameLeft = -5;
+    }
     _content.ysf_frameWidth = self.ysf_frameWidth;
     _content.ysf_frameHeight = self.ysf_frameHeight;
 }

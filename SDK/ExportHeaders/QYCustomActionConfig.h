@@ -50,19 +50,22 @@ typedef void (^QYQuitWaitingBlock)(QuitWaitingType quitType);
 typedef void (^QYShowBotCustomInfoBlock)(NSArray *array);
 
 /**
+ *  bot商品卡片按钮点击事件回调
+ */
+typedef void (^QYSelectedCommodityActionBlock)(QYSelectedCommodityInfo *commodityInfo);
+
+/**
  *  请求客服-回传结果
  */
 typedef void (^QYRequestStaffCompletion)(BOOL needed);
 
 /**
  *  请求客服前回调
+ *
+ *  @param scene 请求客服场景
+ *  @param completion 处理完成后的回调，若需继续请求客服，则调用completion(YES)；若需停止请求，调用completion(NO)
  */
 typedef void (^QYRequestStaffBlock)(QYRequestStaffScene scene, QYRequestStaffCompletion completion);
-
-/**
- *  bot商品按钮点击事件回调
- */
-typedef void (^QYSelectedCommodityActionBlock)(QYSelectedCommodityInfo *commodityInfo);
 
 /**
  *  自定义行为配置类
@@ -107,14 +110,14 @@ typedef void (^QYSelectedCommodityActionBlock)(QYSelectedCommodityInfo *commodit
 @property (nonatomic, copy) QYShowBotCustomInfoBlock showBotCustomInfoBlock;
 
 /**
+ *  bot商品卡片按钮点击事件
+ */
+@property (nonatomic, copy) QYSelectedCommodityActionBlock commodityActionBlock;
+
+/**
  *  请求客服前调用
  */
 @property (nonatomic, copy) QYRequestStaffBlock requestStaffBlock;
-
-/**
- *  bot商品按钮点击事件
- */
-@property (nonatomic, copy) QYSelectedCommodityActionBlock commodityActionBlock;
 
 @end
 
