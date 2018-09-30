@@ -6,7 +6,7 @@
 //  Copyright (c) 2017 Netease. All rights reserved.
 //
 
-@class QYSelectedCommodityInfo;
+@class QYSelectedCommodityInfo,YSF_NIMMessage;
 
 /**
  *  退出排队结果类型
@@ -68,6 +68,13 @@ typedef void (^QYRequestStaffCompletion)(BOOL needed);
 typedef void (^QYRequestStaffBlock)(QYRequestStaffScene scene, QYRequestStaffCompletion completion);
 
 /**
+ 点赞回调
+
+ @param isLike 是否喜欢或踩
+ */
+typedef void (^QYDianZanBlock)(BOOL isLike,YSF_NIMMessage *parameter);
+
+/**
  *  自定义行为配置类
  */
 @interface QYCustomActionConfig : NSObject
@@ -118,6 +125,11 @@ typedef void (^QYRequestStaffBlock)(QYRequestStaffScene scene, QYRequestStaffCom
  *  请求客服前调用
  */
 @property (nonatomic, copy) QYRequestStaffBlock requestStaffBlock;
+
+/**
+ 点赞回调
+ */
+@property (nonatomic, copy) QYDianZanBlock dianZanBlock;
 
 @end
 

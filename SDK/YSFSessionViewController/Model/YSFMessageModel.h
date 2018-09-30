@@ -8,6 +8,7 @@
 
 #import "YSFCellLayoutConfig.h"
 #import "NIMSDK.h"
+#import "YSFDianZanViewLayoutConfig.h"
 
 @interface YSFMessageModel : NSObject
 
@@ -30,7 +31,6 @@
  */
 @property (nonatomic,strong,readonly) id<YSFCellLayoutConfig> layoutConfig;
 
-
 @property (nonatomic, readonly) CGSize     contentSize;
 
 @property (nonatomic, readonly) UIEdgeInsets  contentViewInsets;
@@ -40,6 +40,17 @@
 @property (nonatomic, readonly) BOOL shouldShowAvatar;
 
 @property (nonatomic, readonly) BOOL shouldShowNickName;
+
+/**
+ *  点赞的布局配置
+ */
+@property (nonatomic, strong, readonly) id<YSFDianZanViewLayoutConfig> dianZanLayoutConfig;
+
+@property (nonatomic, readonly) CGSize dianZanViewSize;
+
+@property (nonatomic, readonly) UIEdgeInsets dianZanViewInsets;
+
+@property (nonatomic, readonly) BOOL shouldShowDianZan;
 
 /**
  *  计算内容大小

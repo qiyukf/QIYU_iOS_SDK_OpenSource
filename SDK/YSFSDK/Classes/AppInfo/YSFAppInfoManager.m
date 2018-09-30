@@ -20,6 +20,7 @@
 #import "QYSDK_Private.h"
 #import "YSFDARequest.h"
 #import "YSFDARequestConfig.h"
+#import "YSFUploadLog.h"
 
 typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     YSFTrackHistoryTypeNone,
@@ -75,16 +76,13 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     return _currentForeignUserId;
 }
 
-- (void)checkAppInfo
-{
+- (void)checkAppInfo {
     [self readAccountInfo];
     [self readUserInfo];
     
     if (![_accountInfo isValid]) {
         [self createAccount];
-    }
-    else
-    {
+    } else {
         [self login];
     }
     
@@ -542,12 +540,12 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
 
 - (NSString *)versionNumber
 {
-    return @"44";
+    return @"45";
 }
 
 - (NSString *)version
 {
-    return @"4.4.0";
+    return @"4.5.0";
 }
 
 #pragma mark - CachedText
@@ -596,6 +594,19 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     [self cleanAppSetting];
     [self cleanDeviceId];
     [self createAccount];
+    //日志上传节点：SDK初始化失败
+    [self uploadLog];
+}
+
+- (void)uploadLog {
+    YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
+    uploadLog.version = [self version];
+    uploadLog.type = YSFUploadLogTypeSDKInitFail;
+    uploadLog.logString = YSF_GetMessage(1000000);
+    [YSFHttpApi post:uploadLog
+          completion:^(NSError *error, id returendObject) {
+              
+          }];
 }
 
 #pragma mark - YSF_NIMLoginManagerDelegate

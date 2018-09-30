@@ -83,6 +83,9 @@
         else if (item.lastMessage.messageType == YSF_NIMMessageTypeAudio) {
             sessionInfo.lastMessageType = QYMessageTypeAudio;
         }
+        else if (item.lastMessage.messageType == YSF_NIMMessageTypeVideo) {
+            sessionInfo.lastMessageType = QYMessageTypeVideo;
+        }
         else {
             sessionInfo.lastMessageType = QYMessageTypeCustom;
         }
@@ -150,6 +153,9 @@
             }
             else if (message.messageType == YSF_NIMMessageTypeAudio) {
                 messageInfo.type = QYMessageTypeAudio;
+            }
+            else if (message.messageType == YSF_NIMMessageTypeVideo) {
+                messageInfo.type = QYMessageTypeVideo;
             }
             else {
                 messageInfo.type = QYMessageTypeCustom;
@@ -223,6 +229,9 @@
         }
         else if (message.messageType == YSF_NIMMessageTypeAudio) {
             messageInfo.type = QYMessageTypeAudio;
+        }
+        else if (message.messageType == YSF_NIMMessageTypeVideo) {
+            messageInfo.type = QYMessageTypeVideo;
         }
         else {
             messageInfo.type = QYMessageTypeCustom;

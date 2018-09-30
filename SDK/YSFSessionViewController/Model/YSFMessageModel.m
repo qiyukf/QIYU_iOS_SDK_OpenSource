@@ -13,7 +13,7 @@
 @interface YSFMessageModel()
 
 @property (nonatomic,strong) id<YSFCellLayoutConfig> layoutConfig;
-
+@property (nonatomic, strong, readwrite) id<YSFDianZanViewLayoutConfig> dianZanLayoutConfig;
 @end
 
 
@@ -25,6 +25,10 @@
 @synthesize bubbleViewInsets   = _bubbleViewInsets;
 @synthesize shouldShowAvatar   = _shouldShowAvatar;
 @synthesize shouldShowNickName = _shouldShowNickName;
+
+@synthesize dianZanViewSize = _dianZanViewSize;
+@synthesize dianZanViewInsets = _dianZanViewInsets;
+@synthesize shouldShowDianZan = _shouldShowDianZan;
 
 - (instancetype)initWithMessage:(YSF_NIMMessage*)message
 {
@@ -38,6 +42,7 @@
 - (void)cleanLayoutConfig
 {
     self.layoutConfig = nil;
+    self.dianZanLayoutConfig = nil;
 }
 
 - (void)cleanCache
@@ -45,6 +50,9 @@
     _contentSize = CGSizeZero;
     _bubbleViewInsets = UIEdgeInsetsZero;
     _contentViewInsets = UIEdgeInsetsZero;
+    
+    _dianZanViewSize = CGSizeZero;
+    _dianZanViewInsets = UIEdgeInsetsZero;
 }
 
 - (NSString*)description{
@@ -65,14 +73,20 @@
 }
 
 - (void)calculateContent:(CGFloat)width{
+    if (CGSizeEqualToSize(_dianZanViewSize, CGSizeZero))
+    {
+        _dianZanViewSize = [self.dianZanLayoutConfig dianZanViewSize:self];
+    }
+    
     if (CGSizeEqualToSize(_contentSize, CGSizeZero))
     {
         _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
     }
-    
 }
 
 - (void)reCalculateContent:(CGFloat)width{
+    _dianZanViewSize = [self.dianZanLayoutConfig dianZanViewSize:self];
+    
     if (_contentSize.width != width) {
         _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
     }
@@ -145,6 +159,33 @@
     {
         _shouldShowNickName = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowNickName:self];
     }
+    
+    if ([layoutConfig respondsToSelector:@selector(shouldShowDianZan:)]) {
+        _shouldShowDianZan = [layoutConfig shouldShowDianZan:self];
+    }
+    else {
+        _shouldShowDianZan = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowDianZan:self];
+    }
+}
+
+#pragma mark 点赞视图布局参数
+
+- (id<YSFDianZanViewLayoutConfig>)dianZanLayoutConfig
+{
+    if (!_dianZanLayoutConfig) {
+        _dianZanLayoutConfig = [YSFDefaultValueMaker sharedMaker].dianZanViewLayoutConfig;
+    }
+    
+    return _dianZanLayoutConfig;
+}
+
+- (UIEdgeInsets)dianZanViewInsets
+{
+    if (UIEdgeInsetsEqualToEdgeInsets(_dianZanViewInsets, UIEdgeInsetsZero)) {
+        _dianZanViewInsets = [self.dianZanLayoutConfig dianZanViewInsets:self];
+    }
+    
+    return _dianZanViewInsets;
 }
 
 @end

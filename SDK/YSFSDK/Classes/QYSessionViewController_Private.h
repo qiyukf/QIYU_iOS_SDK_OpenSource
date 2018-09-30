@@ -64,6 +64,7 @@ YSFSessionTipViewDelegate>
 @property (nonatomic,strong)                YSFSessionViewLayoutManager *layoutManager;
 @property (nonatomic,strong)                YSFSessionMsgDatasource *sessionDatasource;
 @property (nonatomic,strong)                YSF_NIMMessage *messageForMenu;
+@property (nonatomic,strong)                UIView *messageTouchView;
 @property (nonatomic,strong,readonly)       YSF_NIMSession *session;
 @property (nonatomic,strong)                YSFSessionTipView *tipView;
 @property (nonatomic,strong)                YSFRecordTipView *recordTipView;

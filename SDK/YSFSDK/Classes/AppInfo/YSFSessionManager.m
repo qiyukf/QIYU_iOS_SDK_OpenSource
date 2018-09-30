@@ -30,6 +30,7 @@
 #import "YSFLongMessage.h"
 #import "YSFRichText.h"
 #import "YSF_NIMMessage+YSF.h"
+#import "YSFUploadLog.h"
 
 @interface YSFSessionManager ()
 <YSF_NIMSystemNotificationManagerDelegate,
@@ -185,45 +186,49 @@ YSFServiceRequestDelegate>
 }
 
 #pragma mark - 请求客服
-- (void)requestServicewithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId
+- (void)requestServiceWithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId
 {
-    if ([_requestManager isInRequest:shopId])
-    {
+    if ([_requestManager isInRequest:shopId]) {
         YSFLogWar(@"@%: in request service process", shopId);
         return;
     }
     
     [_requestManager updateRequestState:shopId inRequest:YES];
 
-    if (_delegate && [_delegate respondsToSelector:@selector(didBeginSendReqeustWithShopId:)])
-    {
+    if (_delegate && [_delegate respondsToSelector:@selector(didBeginSendReqeustWithShopId:)]) {
         [_delegate didBeginSendReqeustWithShopId:shopId];
     }
-    
-    
     //这里在请求接口上做个小hack,发生错误如果请求时间过短就尝试延长,使得界面能够有表现
     static const int64_t minProcessDuration = 2;
     NSDate *startDate = [NSDate date];
     __weak typeof(self) weakSelf = self;
-    [YSFIMCustomSystemMessageApi sendMessage:request shopId:shopId 
-           completion:^(NSError *error) {
-               
-               NSDate *endDate = [NSDate date];
-               NSTimeInterval duration = fabs([endDate timeIntervalSinceDate:startDate]);
-               
-               if (error && duration < (double)minProcessDuration)
-               {
-                   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(minProcessDuration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                       [weakSelf onSendRequest:shopId error:error];
-                       
-                   });
+    [YSFIMCustomSystemMessageApi sendMessage:request shopId:shopId completion:^(NSError *error) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        NSDate *endDate = [NSDate date];
+        NSTimeInterval duration = fabs([endDate timeIntervalSinceDate:startDate]);
+        if (error && duration < (double)minProcessDuration) {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(minProcessDuration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [strongSelf onSendRequest:shopId error:error];
+            });
+        } else {
+            [strongSelf onSendRequest:shopId error:error];
+        }
+        //日志上传节点：请求客服失败
+        if (!error) {
+            [strongSelf uploadLog];
+        }
+    }];
+}
 
-               }
-               else
-               {
-                   [weakSelf onSendRequest:shopId error:error];
-               }
-           }];
+- (void)uploadLog {
+    YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
+    uploadLog.version = [[QYSDK sharedSDK].infoManager version];
+    uploadLog.type = YSFUploadLogTypeRequestStaffFail;
+    uploadLog.logString = YSF_GetMessage(1000000);
+    [YSFHttpApi post:uploadLog
+          completion:^(NSError *error, id returendObject) {
+              
+          }];
 }
 
 - (void)onSendRequest:(NSString*)shopId error:(NSError *)error
@@ -382,14 +387,19 @@ YSFServiceRequestDelegate>
     inviteEvaluation.command = YSFCommandInviteEvaluation;
     inviteEvaluation.sessionId = sessionId;
     NSDictionary *dict = [self getEvaluationInfoByShopId:shopId];
-    inviteEvaluation.evaluationDict = [dict objectForKey:YSFEvaluationData];
-    inviteEvaluation.evaluationMessageInvite = [dict objectForKey:YSFApiKeyEvaluationMessageInvite];
-    inviteEvaluation.evaluationMessageThanks = [dict objectForKey:YSFApiKeyEvaluationMessageThanks];
+    if (dict) {
+        inviteEvaluation.evaluationDict = [dict objectForKey:YSFEvaluationData];
+        inviteEvaluation.evaluationMessageInvite = [dict objectForKey:YSFApiKeyEvaluationMessageInvite];
+        inviteEvaluation.evaluationMessageThanks = [dict objectForKey:YSFApiKeyEvaluationMessageThanks];
+    }
 
     YSF_NIMMessage *currentInviteEvaluationMessage = [YSFMessageMaker msgWithCustom:inviteEvaluation];
-    YSF_NIMSession *session  =[YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
-    [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:currentInviteEvaluationMessage
-                                                   forSession:session addUnreadCount:YES completion:nil];
+    YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+    [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES
+                                                      message:currentInviteEvaluationMessage
+                                                   forSession:session
+                                               addUnreadCount:YES
+                                                   completion:nil];
     
     NSMutableDictionary *evalueDict = [[[[QYSDK sharedSDK] infoManager] dictByKey:YSFEvalution] mutableCopy];
     if (!evalueDict) {
@@ -399,15 +409,28 @@ YSFServiceRequestDelegate>
     if (!shopDict) {
         shopDict = [[NSMutableDictionary alloc] init];
     }
-    NSNumber *autoPopup  = [shopDict objectForKey:YSFApiEvaluationAutoPopup];
-    if (![autoPopup boolValue]) {
+    
+    BOOL popup = NO;
+    id popupObj = [shopDict objectForKey:YSFApiEvaluationAutoPopup];
+    if (popupObj) {
+        popupObj = (NSNumber *)popupObj;
+        popup = [popupObj boolValue];
+    }
+    if (!popup) {
         [shopDict setValue:@(evaluationAutoPopup) forKey:YSFApiEvaluationAutoPopup];
-        [shopDict setValue:currentInviteEvaluationMessage.messageId forKey:YSFApiEvaluationAutoPopupMessageID];
         [shopDict setValue:@(inviteEvaluation.sessionId)  forKey:YSFApiEvaluationAutoPopupSessionId];
-        [shopDict setValue:inviteEvaluation.evaluationMessageThanks forKey:YSFApiEvaluationAutoPopupEvaluationMessageThanks];
-        [shopDict setValue:inviteEvaluation.evaluationDict forKey:YSFApiEvaluationAutoPopupEvaluationData];
-        
-        [self setEvaluationInfo:shopDict shopId:shopId];
+        if (currentInviteEvaluationMessage.messageId) {
+            [shopDict setValue:currentInviteEvaluationMessage.messageId forKey:YSFApiEvaluationAutoPopupMessageID];
+        }
+        if (inviteEvaluation.evaluationMessageThanks) {
+            [shopDict setValue:inviteEvaluation.evaluationMessageThanks forKey:YSFApiEvaluationAutoPopupEvaluationMessageThanks];
+        }
+        if (inviteEvaluation.evaluationDict) {
+            [shopDict setValue:inviteEvaluation.evaluationDict forKey:YSFApiEvaluationAutoPopupEvaluationData];
+        }
+        if (shopDict) {
+            [self setEvaluationInfo:shopDict shopId:shopId];
+        }
     }
 }
 

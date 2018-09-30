@@ -30,8 +30,11 @@ typedef void(^YSFTimerBlock)();
  *  @param repeats  是否重复
  *  @param cb  定时任务
  */
-- (void)start:(dispatch_queue_t)queue startAfter:(double)startAfter interval:(NSInteger)interval
-            repeats:(BOOL)repeats block:(YSFTimerBlock)block;
+- (void)start:(dispatch_queue_t)queue
+   startAfter:(double)startAfter
+     interval:(double)interval
+      repeats:(BOOL)repeats
+        block:(YSFTimerBlock)block;
 
 /**
  *  停止定时；YSFTimer析构时会自动调用，如果需要停止定时的时候YSFTimer会析构，则不需要手动调用stop

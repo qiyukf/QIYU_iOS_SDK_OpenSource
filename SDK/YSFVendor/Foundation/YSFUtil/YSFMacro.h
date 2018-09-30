@@ -140,4 +140,9 @@ sizeWithAttributes:@{NSFontAttributeName:font}] : CGSizeZero;
 
 #define ResourceFromBundle(x) [BundleName stringByAppendingPathComponent:@#x]
 
+
+#pragma mark - 测试宏
+
+#define YSFDemoEnvironmentDebug     0
+
 #endif

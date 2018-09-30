@@ -22,8 +22,15 @@
 
 - (CGSize)contentSize:(YSFMessageModel *)model cellWidth:(CGFloat)cellWidth{
     id<YSFSessionContentConfig>config = [[YSFSessionContentConfigFactory sharedFacotry] configBy:model.message];
-    return [config contentSize:cellWidth];
-
+    CGSize contentSize = [config contentSize:cellWidth];
+    
+    if (model.shouldShowDianZan) {//适配气泡高度低于点赞视图的高度
+        CGFloat contentMinHeight = model.dianZanViewSize.height + model.dianZanViewInsets.top + model.dianZanViewInsets.bottom;
+        return CGSizeMake(contentSize.width, MAX(contentSize.height, contentMinHeight));
+    }
+    else {
+        return contentSize;
+    }
 }
 
 - (NSString *)cellContent:(YSFMessageModel *)model{
@@ -106,6 +113,16 @@
     return (!message.isOutgoingMsg && message.session.sessionType == YSF_NIMSessionTypeTeam);
 }
 
+- (BOOL)shouldShowDianZan:(YSFMessageModel *)model
+{
+    YSF_NIMMessage *message = model.message;
+    /**
+     TODO 七鱼LSP
+     新增字段判断是否显示点赞视图
+     */
+    
+    return (!message.isOutgoingMsg && (model.message.messageType == YSF_NIMMessageTypeCustom));
+}
 
 - (NSString *)formatedMessage:(YSFMessageModel *)model{
     return [YSFKitUtil formatedMessage:model.message];

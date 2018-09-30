@@ -226,6 +226,13 @@
 #define     YSFApiKeyErrorMsg           @"error_msg"
 #define     YSFApiKeyCustom             @"custom"
 #define     YSFApiKeyPictureLink        @"pictureLink"
+#define     YSFApiKeyHeadImage          @"headImg"
+#define     YSFApiTolerantKeyHeadImage  @"headimg"
+#define     YSFApiKeyMiniTitle          @"Title"
+#define     YSFApiTolerantKeyMiniTitle  @"title"
+#define     YSFApiKeyThumbUrl           @"ThumbUrl"
+#define     YSFApiTolerantKeyThumbUrl   @"thumburl"
+#define     YSFApiKeyTransferTips       @"transfertips"
 
 
 #define     YSFApiValueIOS              @"iOS"
@@ -298,6 +305,7 @@ typedef enum : NSUInteger {
     YSFCommandSessionTransferOK         =   95,     //通知用户会话已经转接
     YSFCommandSessionTransferCanceled   =   96,     //通知接收者转接已被取消
     YSFCommandNewWorkOrder              =   115,    //有新的工单分配过来
+    YSFCommandMiniProgramPage           =   122,    //小程序卡片
     YSFCommandAudioToText               =   136,    //推送语音转文字结果
     YSFCommandLongMessage               =   405,    //超长消息
     YSFCommandWorkOrderGroupChanged     =   601,    //组内未受理工单工单所在组已被改变

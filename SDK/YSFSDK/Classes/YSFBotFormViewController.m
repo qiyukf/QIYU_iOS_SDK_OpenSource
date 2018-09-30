@@ -43,8 +43,8 @@ typedef enum : NSUInteger {
 @property (nonatomic, strong) UIScrollView* scrollView;
 @property (nonatomic, strong) YSFAction *action;
 @property (nonatomic, assign) CGRect scrollViewFrame;
-@property (nonatomic, assign)    NTESImagePickerMode      mode;
-@property (nonatomic, assign)    UIButton      *uploadImageButton;
+@property (nonatomic, assign) NTESImagePickerMode mode;
+@property (nonatomic, strong) UIButton *uploadImageButton;
 
 @end
 

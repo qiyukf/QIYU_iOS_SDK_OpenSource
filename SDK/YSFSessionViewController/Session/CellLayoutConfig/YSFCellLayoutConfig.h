@@ -45,6 +45,10 @@
  */
 - (BOOL)shouldShowNickName:(YSFMessageModel *)model;
 
+/**
+ *  是否显示点赞视图
+ */
+- (BOOL)shouldShowDianZan:(YSFMessageModel *)model;
 
 /**
  *  格式化消息文本

@@ -31,6 +31,7 @@ NSString *const YSFKitEventNameTapPushMessageActionUrl = @"YSFKitEventNameTapPus
 NSString *const YSFKitEventNameOpenUrl = @"YSFKitEventNameOpenUrl";
 NSString *const YSFKitEventNameSendCommdityInfo = @"YSFKitEventNameSendMessage";
 NSString *const YSFKitEventNameTapCommdityAction = @"YSFKitEventNameTapCommdityAction";
+NSString *const YSFKitEventNameTapDianZanAction = @"YSFKitEventNameTapDianZanAction";
 
 @implementation YSFKitEvent
 

@@ -53,7 +53,7 @@ typedef enum : NSUInteger {
 
 - (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId;
 
-- (void)requestServicewithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId;
+- (void)requestServiceWithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId;
 
 - (YSFSessionStateType)getSessionStateType:(NSString *)shopId;
 - (YSFServiceSession *)getOnlineSession:(NSString *)shopId;

@@ -38,6 +38,7 @@
 #import "YSFFlightDetail.h"
 #import "YSFBotCustomObject.h"
 #import "YSFMixReply.h"
+#import "YSFMiniProgramPage.h"
 
 @implementation YSFCustomObjectParser
 - (id<YSF_NIMCustomAttachment>)decodeAttachment:(NSString *)content
@@ -232,6 +233,9 @@
                 break;
             case YSFCommandReportQuestion:
                 object = [YSFReportQuestion objectByDict:dict];
+                break;
+            case YSFCommandMiniProgramPage:
+                object = [YSFMiniProgramPage objectByDict:dict];
                 break;
             default:
                 //assert(false);
