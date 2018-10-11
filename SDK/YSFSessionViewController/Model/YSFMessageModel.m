@@ -12,119 +12,100 @@
 
 @interface YSFMessageModel()
 
-@property (nonatomic,strong) id<YSFCellLayoutConfig> layoutConfig;
-@property (nonatomic, strong, readwrite) id<YSFDianZanViewLayoutConfig> dianZanLayoutConfig;
+@property (nonatomic, strong) id<YSFCellLayoutConfig> layoutConfig;
+@property (nonatomic, strong, readwrite) id<YSFExtraCellLayoutConfig> extraLayoutConfig;
+
 @end
 
 
 @implementation YSFMessageModel
 
-@synthesize layoutConfig        = _layoutConfig;
-@synthesize contentSize        = _contentSize;
-@synthesize contentViewInsets  = _contentViewInsets;
-@synthesize bubbleViewInsets   = _bubbleViewInsets;
-@synthesize shouldShowAvatar   = _shouldShowAvatar;
+@synthesize layoutConfig = _layoutConfig;
+@synthesize contentSize = _contentSize;
+@synthesize contentViewInsets = _contentViewInsets;
+@synthesize bubbleViewInsets = _bubbleViewInsets;
+@synthesize shouldShowAvatar = _shouldShowAvatar;
 @synthesize shouldShowNickName = _shouldShowNickName;
 
-@synthesize dianZanViewSize = _dianZanViewSize;
-@synthesize dianZanViewInsets = _dianZanViewInsets;
-@synthesize shouldShowDianZan = _shouldShowDianZan;
+@synthesize extraViewSize = _extraViewSize;
+@synthesize extraViewInsets = _extraViewInsets;
+@synthesize shouldShowExtraView = _shouldShowExtraView;
 
-- (instancetype)initWithMessage:(YSF_NIMMessage*)message
-{
-    if (self = [self init])
-    {
+- (instancetype)initWithMessage:(YSF_NIMMessage *)message {
+    if (self = [self init]) {
         _message = message;
     }
     return self;
 }
 
-- (void)cleanLayoutConfig
-{
+- (void)cleanLayoutConfig {
     self.layoutConfig = nil;
-    self.dianZanLayoutConfig = nil;
+    self.extraLayoutConfig = nil;
 }
 
-- (void)cleanCache
-{
+- (void)cleanCache {
     _contentSize = CGSizeZero;
     _bubbleViewInsets = UIEdgeInsetsZero;
     _contentViewInsets = UIEdgeInsetsZero;
     
-    _dianZanViewSize = CGSizeZero;
-    _dianZanViewInsets = UIEdgeInsetsZero;
+    _extraViewSize = CGSizeZero;
+    _extraViewInsets = UIEdgeInsetsZero;
 }
 
-- (NSString*)description{
+- (NSString *)description {
     return self.message.text;
 }
 
-- (BOOL)isEqual:(id)object
-{
-    if (![object isKindOfClass:[YSFMessageModel class]])
-    {
+- (BOOL)isEqual:(id)object {
+    if (![object isKindOfClass:[YSFMessageModel class]]) {
         return NO;
-    }
-    else
-    {
+    } else {
         YSFMessageModel *model = object;
         return [self.message isEqual:model.message];
     }
 }
 
-- (void)calculateContent:(CGFloat)width{
-    if (CGSizeEqualToSize(_dianZanViewSize, CGSizeZero))
-    {
-        _dianZanViewSize = [self.dianZanLayoutConfig dianZanViewSize:self];
+- (void)calculateContent:(CGFloat)width {
+    if (CGSizeEqualToSize(_extraViewSize, CGSizeZero)) {
+        _extraViewSize = [self.extraLayoutConfig extraViewSize:self];
     }
     
-    if (CGSizeEqualToSize(_contentSize, CGSizeZero))
-    {
+    if (CGSizeEqualToSize(_contentSize, CGSizeZero)) {
         _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
     }
 }
 
-- (void)reCalculateContent:(CGFloat)width{
-    _dianZanViewSize = [self.dianZanLayoutConfig dianZanViewSize:self];
+- (void)reCalculateContent:(CGFloat)width {
+    _extraViewSize = [self.extraLayoutConfig extraViewSize:self];
     
     if (_contentSize.width != width) {
         _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
     }
 }
 
-
-- (UIEdgeInsets)contentViewInsets{
-    if (UIEdgeInsetsEqualToEdgeInsets(_contentViewInsets, UIEdgeInsetsZero))
-    {
-        if ([self.layoutConfig respondsToSelector:@selector(contentViewInsets:)])
-        {
+- (UIEdgeInsets)contentViewInsets {
+    if (UIEdgeInsetsEqualToEdgeInsets(_contentViewInsets, UIEdgeInsetsZero)) {
+        if ([self.layoutConfig respondsToSelector:@selector(contentViewInsets:)]) {
             _contentViewInsets = [self.layoutConfig contentViewInsets:self];
-        }
-        else
-        {
+        } else {
             _contentViewInsets = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig contentViewInsets:self];
         }
     }
     return _contentViewInsets;
 }
 
-- (UIEdgeInsets)bubbleViewInsets{
-    if (UIEdgeInsetsEqualToEdgeInsets(_bubbleViewInsets, UIEdgeInsetsZero))
-    {
-        if ([self.layoutConfig respondsToSelector:@selector(cellInsets:)])
-        {
+- (UIEdgeInsets)bubbleViewInsets {
+    if (UIEdgeInsetsEqualToEdgeInsets(_bubbleViewInsets, UIEdgeInsetsZero)) {
+        if ([self.layoutConfig respondsToSelector:@selector(cellInsets:)]) {
             _bubbleViewInsets = [self.layoutConfig cellInsets:self];
-        }
-        else
-        {
+        } else {
             _bubbleViewInsets = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig cellInsets:self];
         }
     }
     return _bubbleViewInsets;
 }
 
-- (id<YSFCellLayoutConfig>)layoutConfig
-{
+- (id<YSFCellLayoutConfig>)layoutConfig {
     if (_layoutConfig == nil) {
         id<YSFCellLayoutConfig> layoutConfig;
         if ([[YSFSessionConfigImp sharedInstance] respondsToSelector:@selector(layoutConfigWithMessage:)]) {
@@ -135,57 +116,43 @@
         }
         self.layoutConfig = layoutConfig;
     }
-    
     return _layoutConfig;
 }
 
-- (void)setLayoutConfig:(id<YSFCellLayoutConfig>)layoutConfig
-{
+- (void)setLayoutConfig:(id<YSFCellLayoutConfig>)layoutConfig {
     _layoutConfig = layoutConfig;
-    if ([layoutConfig respondsToSelector:@selector(shouldShowAvatar:)])
-    {
+    if ([layoutConfig respondsToSelector:@selector(shouldShowAvatar:)]) {
         _shouldShowAvatar = [layoutConfig shouldShowAvatar:self];
-    }
-    else
-    {
+    } else {
         _shouldShowAvatar = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowAvatar:self];
     }
     
-    if ([layoutConfig respondsToSelector:@selector(shouldShowNickName:)])
-    {
+    if ([layoutConfig respondsToSelector:@selector(shouldShowNickName:)]) {
         _shouldShowNickName = [layoutConfig shouldShowNickName:self];
-    }
-    else
-    {
+    } else {
         _shouldShowNickName = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowNickName:self];
     }
     
-    if ([layoutConfig respondsToSelector:@selector(shouldShowDianZan:)]) {
-        _shouldShowDianZan = [layoutConfig shouldShowDianZan:self];
-    }
-    else {
-        _shouldShowDianZan = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowDianZan:self];
+    if ([layoutConfig respondsToSelector:@selector(shouldShowExtraView:)]) {
+        _shouldShowExtraView = [layoutConfig shouldShowExtraView:self];
+    } else {
+        _shouldShowExtraView = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowExtraView:self];
     }
 }
 
-#pragma mark 点赞视图布局参数
-
-- (id<YSFDianZanViewLayoutConfig>)dianZanLayoutConfig
-{
-    if (!_dianZanLayoutConfig) {
-        _dianZanLayoutConfig = [YSFDefaultValueMaker sharedMaker].dianZanViewLayoutConfig;
+#pragma mark - ExtraView Layout
+- (id<YSFExtraCellLayoutConfig>)extraLayoutConfig {
+    if (!_extraLayoutConfig) {
+        _extraLayoutConfig = [YSFDefaultValueMaker sharedMaker].extraCellLayoutConfig;
     }
-    
-    return _dianZanLayoutConfig;
+    return _extraLayoutConfig;
 }
 
-- (UIEdgeInsets)dianZanViewInsets
-{
-    if (UIEdgeInsetsEqualToEdgeInsets(_dianZanViewInsets, UIEdgeInsetsZero)) {
-        _dianZanViewInsets = [self.dianZanLayoutConfig dianZanViewInsets:self];
+- (UIEdgeInsets)extraViewInsets {
+    if (UIEdgeInsetsEqualToEdgeInsets(_extraViewInsets, UIEdgeInsetsZero)) {
+        _extraViewInsets = [self.extraLayoutConfig extraViewInsets:self];
     }
-    
-    return _dianZanViewInsets;
+    return _extraViewInsets;
 }
 
 @end

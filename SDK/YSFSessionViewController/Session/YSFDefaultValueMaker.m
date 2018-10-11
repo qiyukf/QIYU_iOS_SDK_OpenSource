@@ -8,10 +8,9 @@
 
 #import "YSFDefaultValueMaker.h"
 #import "YSFKitUtil.h"
-#import "YSFDianZanViewLayoutDefaultConfig.h"
 
 @interface YSFDefaultValueMaker ()
-@property (nonatomic, strong) id<YSFDianZanViewLayoutConfig> dianZanViewLayoutConfig;
+@property (nonatomic, strong) id<YSFExtraCellLayoutConfig> extraCellLayoutConfig;
 @end
 
 @implementation YSFDefaultValueMaker
@@ -35,26 +34,21 @@
     return self;
 }
 
-- (id<YSFDianZanViewLayoutConfig>)dianZanViewLayoutConfig
-{
-    if (!_dianZanViewLayoutConfig) {
-        id<YSFDianZanViewLayoutConfig> dianZanViewTempLayoutConfig = nil;
-        
-        if (self.dianZanViewLayoutConfigBlock) {
-            dianZanViewTempLayoutConfig = self.dianZanViewLayoutConfigBlock();
+- (id<YSFExtraCellLayoutConfig>)extraCellLayoutConfig {
+    if (!_extraCellLayoutConfig) {
+        id<YSFExtraCellLayoutConfig> extraCellTempLayoutConfig = nil;
+        if (self.extraCellLayoutConfigBlock) {
+            extraCellTempLayoutConfig = self.extraCellLayoutConfigBlock();
         }
-        
-        if (!dianZanViewTempLayoutConfig) {
-            dianZanViewTempLayoutConfig = [[YSFDianZanViewLayoutDefaultConfig alloc] init];
+        if (!extraCellTempLayoutConfig) {
+            extraCellTempLayoutConfig = [[YSFExtraCellLayoutDefaultConfig alloc] init];
         }
-        
-        _dianZanViewLayoutConfig = dianZanViewTempLayoutConfig;
+        _extraCellLayoutConfig = extraCellTempLayoutConfig;
     }
-    
-    return _dianZanViewLayoutConfig;
+    return _extraCellLayoutConfig;
 }
 
-- (CGFloat)maxTipPadding{
+- (CGFloat)maxTipPadding {
     return 20.f;
 }
 

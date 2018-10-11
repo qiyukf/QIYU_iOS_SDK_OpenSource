@@ -68,11 +68,18 @@ typedef void (^QYRequestStaffCompletion)(BOOL needed);
 typedef void (^QYRequestStaffBlock)(QYRequestStaffScene scene, QYRequestStaffCompletion completion);
 
 /**
- 点赞回调
-
- @param isLike 是否喜欢或踩
+ *  扩展视图点击回调
+ *
+ *  @param extInfo 附带信息
  */
-typedef void (^QYDianZanBlock)(BOOL isLike,YSF_NIMMessage *parameter);
+typedef void (^QYExtraViewClickBlock)(NSString *extInfo);
+
+/**
+ *  系统消息点击回调
+ *
+ *  @param params 附带信息
+ */
+typedef void (^QYSystemNotificationClickBlock)(NSString *params);
 
 /**
  *  自定义行为配置类
@@ -127,9 +134,14 @@ typedef void (^QYDianZanBlock)(BOOL isLike,YSF_NIMMessage *parameter);
 @property (nonatomic, copy) QYRequestStaffBlock requestStaffBlock;
 
 /**
- 点赞回调
+ *  扩展视图点击
  */
-@property (nonatomic, copy) QYDianZanBlock dianZanBlock;
+@property (nonatomic, copy) QYExtraViewClickBlock extraClickBlock;
+
+/**
+ *  系统消息点击
+ */
+@property (nonatomic, copy) QYSystemNotificationClickBlock notificationClickBlock;
 
 @end
 

@@ -2,7 +2,6 @@
 #import "QYSDK_Private.h"
 #import "YSFOrderList.h"
 #import "YSFFlightList.h"
-#import "YSFFlightList.h"
 
 @implementation YSFBotQueryResponse
 

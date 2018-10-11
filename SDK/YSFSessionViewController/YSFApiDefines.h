@@ -233,6 +233,12 @@
 #define     YSFApiKeyThumbUrl           @"ThumbUrl"
 #define     YSFApiTolerantKeyThumbUrl   @"thumburl"
 #define     YSFApiKeyTransferTips       @"transfertips"
+#define     YSFApiKeyBotExtendInfo      @"extendInfo"
+#define     YSFApiKeyBotFlowID          @"flowId"
+#define     YSFApiKeyBotRequestID       @"requestId"
+#define     YSFApiKeyBotPreRequestID    @"preRequestId"
+#define     YSFApiKeyBotNodeID          @"nodeId"
+#define     YSFApiKeyBotShowUseful      @"showUseful"
 
 
 #define     YSFApiValueIOS              @"iOS"

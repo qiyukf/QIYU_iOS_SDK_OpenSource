@@ -22,6 +22,8 @@
 #import "YSFDARequestConfig.h"
 #import "YSFUploadLog.h"
 
+static NSInteger YSFMaxCreateAccountCount = 5;
+
 typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     YSFTrackHistoryTypeNone,
     YSFTrackHistoryTypePage,      //访问轨迹
@@ -42,6 +44,8 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
 @property (nonatomic, strong) NSMutableDictionary *cachedTextDict;
 @property (nonatomic, assign) BOOL isSendingTrackData;
 @property (nonatomic, assign) BOOL track;
+@property (nonatomic, assign) BOOL uploadedLog;
+@property (nonatomic, assign) NSInteger createAccountCount;
 
 @end
 
@@ -56,6 +60,8 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
         
         [[[YSF_NIMSDK sharedSDK] loginManager] addDelegate:self];
         [[[YSF_NIMSDK sharedSDK] systemNotificationManager] addDelegate:self];
+        
+        _createAccountCount = 0;
     }
     return self;
 }
@@ -81,6 +87,7 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     [self readUserInfo];
     
     if (![_accountInfo isValid]) {
+        _createAccountCount = 0;
         [self createAccount];
     } else {
         [self login];
@@ -233,37 +240,36 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     [self cleanAppSetting];
     [self cleanCurrentForeignUserIdAndCurrentUserInfo];
     [self cleanDeviceId];
+    _createAccountCount = 0;
     [self createAccount];
 }
 
 
 #pragma mark - 申请匿名账号
-- (void)createAccount
-{
+- (void)createAccount {
+    _createAccountCount++;
     YSFCreateAccountRequest *request = [[YSFCreateAccountRequest alloc] init];
     __weak typeof(self) weakSelf = self;
-    [YSFHttpApi post:request
-             completion:^(NSError *error, id returendObject) {
-             if (error == nil && [returendObject isKindOfClass:[YSFAccountInfo class]]) {
-                 weakSelf.accountInfo = returendObject;
-                 YSFLogApp(@"createAccount success accid: %@", weakSelf.accountInfo.accid);
-
-                 
-                 [self saveAccountInfo];
-                 [self login];
-                 //创建账号成功后回调
-                 if (weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(didCreateAccountSuccessfully)]) {
-                     [weakSelf.delegate didCreateAccountSuccessfully];
-                 }
-             }
-             else
-             {
-                 YSFLogErr(@"createAccount failed %@", error);
-                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                     [weakSelf createAccount];
-                 });
-             }
-         }];
+    [YSFHttpApi post:request completion:^(NSError *error, id returendObject) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!error && [returendObject isKindOfClass:[YSFAccountInfo class]]) {
+            strongSelf.accountInfo = returendObject;
+            YSFLogApp(@"createAccount success accid: %@", strongSelf.accountInfo.accid);
+            [strongSelf saveAccountInfo];
+            [strongSelf login];
+            //创建账号成功后回调
+            if (strongSelf.delegate && [strongSelf.delegate respondsToSelector:@selector(didCreateAccountSuccessfully)]) {
+                [strongSelf.delegate didCreateAccountSuccessfully];
+            }
+        } else {
+            if (strongSelf->_createAccountCount <= YSFMaxCreateAccountCount) {
+                YSFLogErr(@"createAccount failed %@", error);
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [strongSelf createAccount];
+                });
+            }
+        }
+    }];
 }
 
 #pragma mark - 汇报用户信息
@@ -570,8 +576,8 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
 
 
 #pragma mark - misc
-- (void)login
-{
+- (void)login {
+    _uploadedLog = NO;
     [_loginManager tryToLogin:_accountInfo];
 }
 
@@ -593,20 +599,24 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     [self cleanAccountInfo];
     [self cleanAppSetting];
     [self cleanDeviceId];
+    _createAccountCount = 0;
     [self createAccount];
     //日志上传节点：SDK初始化失败
     [self uploadLog];
 }
 
 - (void)uploadLog {
-    YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
-    uploadLog.version = [self version];
-    uploadLog.type = YSFUploadLogTypeSDKInitFail;
-    uploadLog.logString = YSF_GetMessage(1000000);
-    [YSFHttpApi post:uploadLog
-          completion:^(NSError *error, id returendObject) {
-              
-          }];
+    if (!_uploadedLog) {
+        YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
+        uploadLog.version = [self version];
+        uploadLog.type = YSFUploadLogTypeSDKInitFail;
+        uploadLog.logString = YSF_GetMessage(50000);
+        [YSFHttpApi post:uploadLog
+              completion:^(NSError *error, id returendObject) {
+                  
+              }];
+        _uploadedLog = YES;
+    }
 }
 
 #pragma mark - YSF_NIMLoginManagerDelegate

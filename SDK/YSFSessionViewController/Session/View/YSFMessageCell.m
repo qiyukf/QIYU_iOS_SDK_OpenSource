@@ -191,10 +191,10 @@
         }
     }
     
-    if ([self needShowDianZanView] && !_dianZanView) {
-        [self makeupDianZanView];
+    if ([self needShowExtraView] && !_extraView) {
+        [self makeupExtraView];
     }
-    [_dianZanView configWithMsgModel:self.model];
+    [_extraView configWithMsgModel:self.model];
     
     [self setNeedsLayout];
 }
@@ -245,7 +245,7 @@
     [self layoutRetryButton];
     [self layoutAudioPlayedIcon];
     [self layoutActivityIndicator];
-    [self layoutDianZanView];
+    [self layoutExtraView];
     
     _trashWordsTip.frame = CGRectMake(0, _bubbleView.ysf_frameBottom + 10, self.ysf_frameWidth - 112, 0);
     [_trashWordsTip sizeToFit];
@@ -325,15 +325,14 @@
     }
 }
 
-- (void)layoutDianZanView
-{
-    CGFloat dianZanContentRealW = self.model.dianZanViewSize.width + self.model.dianZanViewInsets.left + self.model.dianZanViewInsets.right;
-    BOOL showDianZan = [self needShowDianZanView] && (self.bubbleView.ysf_frameRight >= dianZanContentRealW);
-    self.dianZanView.hidden = !showDianZan;
+- (void)layoutExtraView {
+    CGFloat extraContentRealW = self.model.extraViewSize.width + self.model.extraViewInsets.left + self.model.extraViewInsets.right;
+    BOOL showExtra = [self needShowExtraView] && (self.bubbleView.ysf_frameRight >= extraContentRealW);
+    self.extraView.hidden = !showExtra;
     
-    self.dianZanView.ysf_frameSize = self.model.dianZanViewSize;
-    self.dianZanView.ysf_frameLeft = self.bubbleView.ysf_frameRight + self.model.dianZanViewInsets.left;
-    self.dianZanView.ysf_frameBottom = self.bubbleView.ysf_frameBottom + self.model.dianZanViewInsets.bottom;
+    self.extraView.ysf_frameSize = self.model.extraViewSize;
+    self.extraView.ysf_frameLeft = self.bubbleView.ysf_frameRight + self.model.extraViewInsets.left;
+    self.extraView.ysf_frameBottom = self.bubbleView.ysf_frameBottom + self.model.extraViewInsets.bottom;
 }
 
 #pragma mark - NIMMessageContentViewDelegate
@@ -392,9 +391,8 @@
     return self.model.shouldShowNickName;
 }
 
-- (BOOL)needShowDianZanView
-{
-    return self.model.shouldShowDianZan;
+- (BOOL)needShowExtraView {
+    return self.model.shouldShowExtraView;
 }
 
 - (BOOL)retryButtonHidden {
@@ -458,13 +456,12 @@
     return 10;
 }
 
-- (void)makeupDianZanView
-{
-    id<YSFDianZanViewLayoutConfig> dianZanConfig = self.model.dianZanLayoutConfig;
-    if (dianZanConfig.dianZanViewClass && [dianZanConfig.dianZanViewClass conformsToProtocol:@protocol(YSFDianZanViewParamConfig)]) {
-        _dianZanView = [[dianZanConfig.dianZanViewClass alloc] init];
-        _dianZanView.delegate = self;
-        [self.contentView addSubview:_dianZanView];
+- (void)makeupExtraView {
+    id<YSFExtraCellLayoutConfig> extraCellConfig = self.model.extraLayoutConfig;
+    if (extraCellConfig.extraViewClass && [extraCellConfig.extraViewClass conformsToProtocol:@protocol(YSFExtraViewParamConfig)]) {
+        _extraView = [[extraCellConfig.extraViewClass alloc] init];
+        _extraView.delegate = self;
+        [self.contentView addSubview:_extraView];
     }
 }
 

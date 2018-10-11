@@ -214,7 +214,7 @@ YSFServiceRequestDelegate>
             [strongSelf onSendRequest:shopId error:error];
         }
         //日志上传节点：请求客服失败
-        if (!error) {
+        if (error) {
             [strongSelf uploadLog];
         }
     }];
@@ -224,7 +224,7 @@ YSFServiceRequestDelegate>
     YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
     uploadLog.version = [[QYSDK sharedSDK].infoManager version];
     uploadLog.type = YSFUploadLogTypeRequestStaffFail;
-    uploadLog.logString = YSF_GetMessage(1000000);
+    uploadLog.logString = YSF_GetMessage(50000);
     [YSFHttpApi post:uploadLog
           completion:^(NSError *error, id returendObject) {
               

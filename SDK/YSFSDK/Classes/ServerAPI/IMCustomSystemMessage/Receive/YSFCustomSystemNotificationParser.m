@@ -83,7 +83,7 @@
                     YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
                     uploadLog.version = [[QYSDK sharedSDK].infoManager version];
                     uploadLog.type = YSFUploadLogTypeInvite;
-                    uploadLog.logString = YSF_GetMessage(1000000);
+                    uploadLog.logString = YSF_GetMessage(50000);
                     [YSFHttpApi post:uploadLog
                           completion:^(NSError *error, id returendObject) {
                               

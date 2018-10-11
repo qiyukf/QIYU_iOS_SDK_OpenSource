@@ -8,19 +8,20 @@
 
 #import "YSFCellLayoutConfig.h"
 #import "YSFCellLayoutDefaultConfig.h"
-#import "YSFDianZanViewLayoutConfig.h"
+#import "YSFExtraCellLayoutConfig.h"
+#import "YSFExtraCellLayoutDefaultConfig.h"
 
-typedef id<YSFDianZanViewLayoutConfig> (^YSFDianZanViewLayoutConfigBlock)();
+typedef id<YSFExtraCellLayoutConfig> (^YSFExtraCellLayoutConfigBlock)();
 
 @interface YSFDefaultValueMaker : NSObject
 
 + (instancetype)sharedMaker;
 
-@property (nonatomic,readonly) YSFCellLayoutDefaultConfig *cellLayoutDefaultConfig;
+@property (nonatomic, readonly) YSFCellLayoutDefaultConfig *cellLayoutDefaultConfig;
 
-@property (nonatomic, readonly) id<YSFDianZanViewLayoutConfig> dianZanViewLayoutConfig;
+@property (nonatomic, readonly) id<YSFExtraCellLayoutConfig> extraCellLayoutConfig;
 
-@property (nonatomic, copy) YSFDianZanViewLayoutConfigBlock dianZanViewLayoutConfigBlock;
+@property (nonatomic, copy) YSFExtraCellLayoutConfigBlock extraCellLayoutConfigBlock;
 
 - (CGFloat)maxTipPadding;
 

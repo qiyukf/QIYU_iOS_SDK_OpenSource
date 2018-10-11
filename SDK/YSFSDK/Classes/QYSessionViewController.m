@@ -770,12 +770,12 @@ static long long g_sessionId;
 {
     if ([QYCustomUIConfig sharedInstance].sessionListEntrancePosition) {
         //YES是在右上角
-        _sessionListImageView.frame = CGRectMake(YSFUIScreenWidth - 42, YSFNormalNavigationbarHeight + 20, 42, 42);
-        _sessionListButton.frame = CGRectMake(YSFUIScreenWidth - 42, YSFNormalNavigationbarHeight + 20, 42, 42);
+        _sessionListImageView.frame = CGRectMake(YSFUIScreenWidth - 42, YSFNavigationBarHeight + 20, 42, 42);
+        _sessionListButton.frame = CGRectMake(YSFUIScreenWidth - 42, YSFNavigationBarHeight + 20, 42, 42);
     } else {
         //NO是在左上角
-        _sessionListImageView.frame = CGRectMake(0, YSFNormalNavigationbarHeight + 20, 42, 42);
-        _sessionListButton.frame = CGRectMake(0, YSFNormalNavigationbarHeight + 20, 42, 42);
+        _sessionListImageView.frame = CGRectMake(0, YSFNavigationBarHeight + 20, 42, 42);
+        _sessionListButton.frame = CGRectMake(0, YSFNavigationBarHeight + 20, 42, 42);
     }
 }
 
@@ -954,8 +954,11 @@ static long long g_sessionId;
         _changeEvaluationEnabledBlock(NO);
     }
     
-    if (![QYCustomUIConfig sharedInstance].showEvaluationEntry
-        || ![[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId].humanOrMachine) {
+    if (![QYCustomUIConfig sharedInstance].showEvaluationEntry) {
+        return;
+    }
+    YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
+    if (session && !session.humanOrMachine && !_humanService.hidden) {
         return;
     }
     _evaluation.hidden = NO;
@@ -2320,22 +2323,33 @@ static long long g_sessionId;
             [QYCustomActionConfig sharedInstance].commodityActionBlock(selectedGoods.goods);
         }
         handled = YES;
-    } else if ([eventName isEqualToString:YSFKitEventNameTapDianZanAction]){
-        /*
-         TODO 七鱼LSP
-         （1）点赞model更新记录已经点赞过，
-         （2）需要好上报的字段返回 BOT当次访问id botRequestId、BOT前一次访问id botPreRequestId、客服机器人节点id botNodeId
-         */
-        
-        BOOL isLike = [event.data boolValue];
-        if ([QYCustomActionConfig sharedInstance].dianZanBlock) {
-            [QYCustomActionConfig sharedInstance].dianZanBlock(isLike,message);
-        }
-        else {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapExtraViewAction]) {
+        if ([QYCustomActionConfig sharedInstance].extraClickBlock) {
+            if (event.message.ext.length) {
+                NSDictionary *dict = [event.message.ext ysf_toDict];
+                if (dict && dict.count) {
+                    BOOL needShow = [[dict objectForKey:YSFApiKeyBotShowUseful] boolValue];
+                    if (needShow) {
+                        [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES
+                                                                            message:event.message
+                                                                         forSession:_session
+                                                                         completion:nil];
+                        [QYCustomActionConfig sharedInstance].extraClickBlock(event.message.ext);
+                        
+                        //自定义行为
+                        
+                    }
+                }
+            }
+        } else {
             //SDK内部行为
         }
-        
+    
         handled = YES;
+    } else if ([eventName isEqualToString:YSFKitEventNameTapSystemNotification]) {
+        if ([QYCustomActionConfig sharedInstance].notificationClickBlock) {
+            [QYCustomActionConfig sharedInstance].notificationClickBlock(nil);
+        }
     }
     
     if (!handled) {
