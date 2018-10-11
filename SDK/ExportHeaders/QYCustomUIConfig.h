@@ -128,6 +128,16 @@ typedef void (^QYCustomInputItemBlock)();
 @property (nonatomic, copy) NSString *serviceHeadImageUrl;
 
 /**
+ *  人工客服头像
+ */
+@property (nonatomic, copy) NSString *humanServiceHeadImageUrl;
+
+/**
+ *  人工客服接入提示
+ */
+@property (nonatomic, copy) NSString *humanServiceName;
+
+/**
  *  访客消息气泡normal图片
  */
 @property (nonatomic, strong) UIImage *customerMessageBubbleNormalImage;

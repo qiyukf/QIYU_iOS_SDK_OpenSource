@@ -713,7 +713,13 @@ YSFServiceRequestDelegate>
 
     if (session) {
         if (session.staffId.length > 0) {
-            [self addStaffIdIconUrl:session.staffId icornUrl:session.iconUrl];
+            NSString *iconURL = session.iconUrl;
+            if (session.humanOrMachine) {
+                if ([QYCustomUIConfig sharedInstance].humanServiceHeadImageUrl.length) {
+                    iconURL = [QYCustomUIConfig sharedInstance].humanServiceHeadImageUrl;
+                }
+            }
+            [self addStaffIdIconUrl:session.staffId icornUrl:iconURL];
             [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
         }
     }

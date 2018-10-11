@@ -1643,6 +1643,27 @@ static long long g_sessionId;
                     }
                 }
             }
+            
+            if ([QYCustomUIConfig sharedInstance].humanServiceName.length
+                && [customObject isMemberOfClass:[YSF_NIMCustomObject class]]) {
+                id object = ((YSF_NIMCustomObject *)customObject).attachment;
+                if ([object isMemberOfClass:[YSFStartServiceObject class]]) {
+                    //update object staffName
+                    YSFStartServiceObject *staffObject = (YSFStartServiceObject *)object;
+                    staffObject.staffName = [QYCustomUIConfig sharedInstance].humanServiceName;
+                    //update rawAttachContent
+                    NSDictionary *contentDict = [message.rawAttachContent ysf_toDict];
+                    NSMutableDictionary *contentMutableDict = [NSMutableDictionary dictionaryWithDictionary:contentDict];
+                    [contentMutableDict setObject:[QYCustomUIConfig sharedInstance].humanServiceName forKey:YSFApiKeyStaffName];
+                    NSString *newContent = [contentMutableDict ysf_toUTF8String];
+                    message.rawAttachContent = newContent;
+                    
+                    [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES
+                                                                        message:message
+                                                                     forSession:_session
+                                                                     completion:nil];
+                }
+            }
         }
     }
 }
