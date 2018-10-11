@@ -133,9 +133,14 @@ typedef void (^QYCustomInputItemBlock)();
 @property (nonatomic, copy) NSString *humanServiceHeadImageUrl;
 
 /**
- *  人工客服接入提示
+ *  人工客服昵称
  */
 @property (nonatomic, copy) NSString *humanServiceName;
+
+/**
+ *  人工按钮文案
+ */
+@property (nonatomic, copy) NSString *humanButtonText;
 
 /**
  *  访客消息气泡normal图片

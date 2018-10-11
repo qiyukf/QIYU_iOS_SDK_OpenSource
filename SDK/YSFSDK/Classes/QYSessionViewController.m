@@ -446,7 +446,13 @@ static long long g_sessionId;
     [rightButtonView addSubview:_humanService];
     _humanServiceText = [[UIButton alloc] init];
     [rightButtonView addSubview:_humanServiceText];
-    [_humanServiceText setTitle:@"人工" forState:UIControlStateNormal];
+    
+    if ([QYCustomUIConfig sharedInstance].humanButtonText.length) {
+        [_humanServiceText setTitle:[QYCustomUIConfig sharedInstance].humanButtonText forState:UIControlStateNormal];
+    } else {
+        [_humanServiceText setTitle:@"人工" forState:UIControlStateNormal];
+    }
+    
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
     if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
         [_humanServiceText setTitleColor:YSFRGB(0x76838f) forState:UIControlStateNormal];
