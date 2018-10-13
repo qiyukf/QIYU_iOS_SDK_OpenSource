@@ -15,6 +15,7 @@
 @property (nonatomic, copy) NSString *staffName;
 @property (nonatomic, copy) NSString *groupName;
 @property (nonatomic, copy) NSString *message;
+@property (nonatomic, copy) NSString *accessTip;
 
 @property (nonatomic, copy) NSString *sessionId;
 @property (nonatomic, copy) NSString *serviceId;

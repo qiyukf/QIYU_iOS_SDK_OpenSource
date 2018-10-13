@@ -9,6 +9,7 @@
 
 @class QYSource;
 @class QYCommodityInfo;
+@class QYStaffInfo;
 
 /**
  *  右上角入口以及聊天内容区域的按钮 点击以后的回调
@@ -110,6 +111,11 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
  *  商品信息展示
  */
 @property (nonatomic, strong) QYCommodityInfo *commodityInfo;
+
+/**
+ *  人工客服信息
+ */
+@property (nonatomic, strong) QYStaffInfo *staffInfo;
 
 /**
  *  输入区域上方工具栏内的按钮信息

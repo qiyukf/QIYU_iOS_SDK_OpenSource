@@ -29,10 +29,8 @@
     NSString *messageFrom = message.from;
     if (message.isPushMessageType) {
         info.avatarUrlString = message.staffHeadImageUrl;
-    }
-    else
-    {
-        info.avatarUrlString = [sessionManager queryIconUrlFromStaffId:messageFrom];
+    } else {
+        info.avatarUrlString = [sessionManager getIconURLFromStaffId:messageFrom];
         if (info.avatarUrlString.length == 0) {
             info.avatarUrlString = [[QYCustomUIConfig sharedInstance] serviceHeadImageUrl];
         }

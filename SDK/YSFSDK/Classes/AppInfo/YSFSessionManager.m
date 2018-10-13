@@ -31,30 +31,29 @@
 #import "YSFRichText.h"
 #import "YSF_NIMMessage+YSF.h"
 #import "YSFUploadLog.h"
+#import "QYStaffInfo.h"
 
-@interface YSFSessionManager ()
-<YSF_NIMSystemNotificationManagerDelegate,
-YSF_NIMChatManagerDelegate,
-YSFServiceRequestDelegate>
+@interface YSFSessionManager () <YSF_NIMSystemNotificationManagerDelegate, YSF_NIMChatManagerDelegate, YSFServiceRequestDelegate>
 
-@property (nonatomic, strong)   NSMutableDictionary *sessionStateType;
-@property (nonatomic,strong)    NSMutableDictionary *sessions;          //当前会话列表
-@property (nonatomic,strong)    YSFServiceRequestManager    *requestManager;    //请求管理类
-@property (nonatomic,strong)    NSMutableDictionary *staffIdIconUrl;
-@property (nonatomic,strong)    NSMutableDictionary *shopInfo;
-@property (nonatomic,strong)    NSMutableDictionary *evaluationInfo;
-@property (nonatomic,strong)    NSMutableArray *unreadPushMessageSessionId;
-@property (nonatomic,strong)    NSMutableDictionary *longMessageDict;
+@property (nonatomic, strong) NSMutableDictionary *sessionStateType;
+@property (nonatomic, strong) NSMutableDictionary *sessions; //当前会话列表
+@property (nonatomic, strong) YSFServiceRequestManager *requestManager; //请求管理类
+
+@property (nonatomic, strong) NSMutableDictionary *shopInfo;
+@property (nonatomic, strong) NSMutableDictionary *evaluationInfo;
+
+@property (nonatomic, strong) NSMutableDictionary *staffIconURLs;
+
+@property (nonatomic, strong) NSMutableArray *unreadPushMessageSessionId;
+@property (nonatomic, strong) NSMutableDictionary *longMessageDict;
 
 @end
 
 
 @implementation YSFSessionManager
 
-- (instancetype)init
-{
-    if (self = [super init])
-    {
+- (instancetype)init {
+    if (self = [super init]) {
         _requestManager = [[YSFServiceRequestManager alloc] init];
         _requestManager.delegate = self;
         
@@ -67,50 +66,42 @@ YSFServiceRequestDelegate>
     return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [[[YSF_NIMSDK sharedSDK] systemNotificationManager] removeDelegate:self];
     [[[YSF_NIMSDK sharedSDK] chatManager] removeDelegate:self];
 }
 
-- (YSFSessionStateType)getSessionStateType:(NSString *)shopId
-{
-    if (!shopId) return YSFSessionStateTypeError;
+#pragma mark - session state
+- (YSFSessionStateType)getSessionStateType:(NSString *)shopId {
+    if (!shopId) {
+        return YSFSessionStateTypeError;
+    }
     return [self.sessionStateType[shopId] integerValue];
 }
 
-- (void)setSessionStateType:(NSString *)shopId type:(YSFSessionStateType)type
-{
-    if (!shopId) return ;
+- (void)setSessionStateType:(NSString *)shopId type:(YSFSessionStateType)type {
+    if (!shopId) {
+        return;
+    }
     self.sessionStateType[shopId] = @(type);
 }
 
-- (void)cleanSessionStateTypeByShopId:(NSString *)shopId
-{
-    if (!shopId) return;
+- (void)cleanSessionStateTypeByShopId:(NSString *)shopId {
+    if (!shopId) {
+        return;
+    }
     [self.sessionStateType removeObjectForKey:shopId];
 }
 
-- (void)readData
-{
-    [self readStaffIdIconUrl];
+#pragma mark - read data
+- (void)readData {
+    [self readStaffIconURLs];
     [self readShopInfo];
     [self readEvaluationInfo];
     [self readUnreadPushMessageSessionId];
 }
 
-- (void)readStaffIdIconUrl
-{
-    YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
-    _staffIdIconUrl = [[NSMutableDictionary alloc] init];
-    NSDictionary *dict = [infoManager dictByKey:YSFStaffIdIconUrl];
-    if (dict) {
-        [_staffIdIconUrl addEntriesFromDictionary:dict];
-    }    
-}
-
-- (void)readShopInfo
-{
+- (void)readShopInfo {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     _shopInfo = [[infoManager dictByKey:YSFShopInfoKey] mutableCopy];
     if (!_shopInfo) {
@@ -118,8 +109,7 @@ YSFServiceRequestDelegate>
     }
 }
 
-- (void)readEvaluationInfo
-{
+- (void)readEvaluationInfo {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     _evaluationInfo = [[infoManager dictByKey:YSFEvalution] mutableCopy];
     if (!_evaluationInfo) {
@@ -127,8 +117,7 @@ YSFServiceRequestDelegate>
     }
 }
 
-- (void)readUnreadPushMessageSessionId
-{
+- (void)readUnreadPushMessageSessionId {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     _unreadPushMessageSessionId = [[NSMutableArray alloc] init];
     NSArray *array = [infoManager arrayByKey:YSFUnreadPushMessageSessionId];
@@ -137,57 +126,37 @@ YSFServiceRequestDelegate>
     }
 }
 
-- (NSString *)queryIconUrlFromStaffId:(NSString *)staffId
-{
+#pragma mark - staff icon
+- (void)readStaffIconURLs {
+    YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
+    _staffIconURLs = [[NSMutableDictionary alloc] init];
+    NSDictionary *dict = [infoManager dictByKey:YSFStaffIdIconUrl];
+    if (dict) {
+        [_staffIconURLs addEntriesFromDictionary:dict];
+    }
+}
+
+- (NSString *)getIconURLFromStaffId:(NSString *)staffId {
     if ([staffId isEqualToString:@"-1"]) {
-        staffId = [[_staffIdIconUrl allKeys] lastObject];
+        staffId = [[_staffIconURLs allKeys] lastObject];
         if (!staffId) {
             staffId = @"-1";
         }
     }
-    return [_staffIdIconUrl objectForKey:staffId];
+    return [_staffIconURLs objectForKey:staffId];
 }
 
-- (BOOL)serviceOutOfDate:(NSString *)shopId
-{
-    BOOL result = YES;
-    if ([self getOnlineSession:shopId])
-    {
-        result = NO;
-    }
-    if (result)
-    {
-        YSFLogApp(@"@%: out of date", shopId);
-    }
-    return result;
-}
-
-- (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId {
-    /*
-     1、若没有会话session：
-     a.当前会话状态为正在排队或客服不在线，waitingOrNotExist=YES，若为初次请求会话则请求客服，若不是初次请求则不请求客服
-     b.当前会话状态为离线或正在服务，waitingOrNotExist=NO，则一律请求客服
-     2、若有会话session：
-     a.无论当前会话什么状态，waitingOrNotExist=NO，则一律不请求客服
-     */
-    BOOL waitingOrNotExist = false;
-    if (![self getOnlineSession:shopId]
-        && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
-            || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist
-            || [self getSessionStateType:shopId] == YSFSessionStateNotExistAndLeaveMessageClosed)) {
-        waitingOrNotExist = true;
-    }
-    YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
-    if ([self serviceOutOfDate:shopId] && (isInit || !waitingOrNotExist)) {
-        return true;
-    } else {
-        return false;
+- (void)addStaffIconURL:(NSString *)iconURL forStaffId:(NSString *)staffId {
+    YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
+    if (iconURL.length && staffId.length) {
+        iconURL = [iconURL ysf_https];
+        [_staffIconURLs setValue:iconURL forKey:staffId];
+        [infoManager saveDict:_staffIconURLs forKey:YSFStaffIdIconUrl];
     }
 }
 
 #pragma mark - 请求客服
-- (void)requestServiceWithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId
-{
+- (void)requestServiceWithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId {
     if ([_requestManager isInRequest:shopId]) {
         YSFLogWar(@"@%: in request service process", shopId);
         return;
@@ -231,11 +200,9 @@ YSFServiceRequestDelegate>
           }];
 }
 
-- (void)onSendRequest:(NSString*)shopId error:(NSError *)error
-{
+- (void)onSendRequest:(NSString*)shopId error:(NSError *)error {
     //收到云信回包后发现还没收到云商服回包就开启timer进行等待
-    if ([self serviceOutOfDate:shopId])
-    {
+    if ([self serviceOutOfDate:shopId]) {
         [[self requestManager] startWaitResponseTimer:shopId];
     }
     
@@ -248,26 +215,55 @@ YSFServiceRequestDelegate>
     }
 }
 
+- (BOOL)serviceOutOfDate:(NSString *)shopId {
+    BOOL result = YES;
+    if ([self getOnlineSession:shopId]) {
+        result = NO;
+    }
+    if (result) {
+        YSFLogApp(@"@%: out of date", shopId);
+    }
+    return result;
+}
+
+- (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId {
+    /*
+     1、若没有会话session：
+     a.当前会话状态为正在排队或客服不在线，waitingOrNotExist=YES，若为初次请求会话则请求客服，若不是初次请求则不请求客服
+     b.当前会话状态为离线或正在服务，waitingOrNotExist=NO，则一律请求客服
+     2、若有会话session：
+     a.无论当前会话什么状态，waitingOrNotExist=NO，则一律不请求客服
+     */
+    BOOL waitingOrNotExist = false;
+    if (![self getOnlineSession:shopId]
+        && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
+            || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist
+            || [self getSessionStateType:shopId] == YSFSessionStateNotExistAndLeaveMessageClosed)) {
+            waitingOrNotExist = true;
+        }
+    YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
+    if ([self serviceOutOfDate:shopId] && (isInit || !waitingOrNotExist)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 #pragma mark - 客服更新
-- (void)onGetNewServiceSession:(YSFServiceSession *)session shopId:(NSString *)shopId
-{
+- (void)onGetNewServiceSession:(YSFServiceSession *)session shopId:(NSString *)shopId {
     if (session.shopInfo) {
         [self addShopInfo:session.shopInfo];
     }
     [_requestManager stopWaitResponseTimer:shopId];
     [_requestManager updateRequestState:shopId inRequest:NO];
     
-    
     NSInteger code = session.code;
-    NSError *error = code == YSFCodeSuccess ? nil : [NSError errorWithDomain:YSFErrorDomain
-                                                                        code:code
-                                                                    userInfo:nil];
-    if (code == YSFCodeSuccess)
-    {
+    NSError *error = (code == YSFCodeSuccess) ? nil : [NSError errorWithDomain:YSFErrorDomain code:code userInfo:nil];
+    
+    if (code == YSFCodeSuccess) {
         [self setSessionStateType:shopId type:YSFSessionStateTypeOnline];
         [self addSession:session shopId:shopId];
-    }
-    else {
+    } else {
         [self removeSessionByShopId:shopId];
         if (code == YSFCodeServiceWaiting) {
             YSF_NIMSession *nimSession = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
@@ -282,34 +278,26 @@ YSFServiceRequestDelegate>
             }
             [self addSession:session shopId:shopId];
             [self setSessionStateType:shopId type:YSFSessionStateTypeWaiting];
-        }
-        else if (code == YSFCodeServiceNotExist)
-        {
+        } else if (code == YSFCodeServiceNotExist) {
             [self setSessionStateType:shopId type:YSFSessionStateTypeNotExist];
-        }
-        else if (code == YSFCodeServiceNotExistAndLeaveMessageClosed)
-        {
+        } else if (code == YSFCodeServiceNotExistAndLeaveMessageClosed) {
             [self setSessionStateType:shopId type:YSFSessionStateNotExistAndLeaveMessageClosed];
-        }
-        else {
+        } else {
             [self setSessionStateType:shopId type:YSFSessionStateTypeError];
         }
     }
 
     //发起回调
-    if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)])
-    {
+    if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)]) {
         [_delegate didReceiveSessionError:error session:session shopId:shopId];
     }
     
-    if (code == YSFCodeSuccess)
-    {
+    if (code == YSFCodeSuccess) {
         [self updateEvaluationDataStatusWithSession:session shopId:shopId];
     }
 }
 
-- (void)updateEvaluationDataStatusWithSession:(YSFServiceSession *)session shopId:(NSString *)shopId
-{
+- (void)updateEvaluationDataStatusWithSession:(YSFServiceSession *)session shopId:(NSString *)shopId {
     if (!session.humanOrMachine) {
         return;
     }
@@ -332,37 +320,184 @@ YSFServiceRequestDelegate>
     if (session.messageThanks) {
         [shopDict setValue:session.messageThanks forKey:YSFApiKeyEvaluationMessageThanks];
     }
-
     if (session.humanOrMachine) {
         [shopDict setValue:@(2) forKey:YSFSessionStatus];
-    }
-    else {
+    } else {
         [shopDict setValue:@(1) forKey:YSFSessionStatus];
     }
     [self setEvaluationInfo:shopDict shopId:shopId];
 }
 
-- (void)onUpdateSessionByMessage:(YSF_NIMMessage *)message
-{
+- (void)onUpdateSessionByMessage:(YSF_NIMMessage *)message {
     //每收到一条客服的消息就更新一把服务时间
 //    _sessions.lastServiceTime =  [NSDate dateWithTimeIntervalSince1970:message.timestamp];
 }
 
-- (void)clear
-{
+#pragma mark - clear
+- (void)clear {
     [_sessionStateType removeAllObjects];
     [_sessions removeAllObjects];
 }
 
-- (void)clearByShopId:(NSString *)shopId
-{
-    if (!shopId) return;
+- (void)clearByShopId:(NSString *)shopId {
+    if (!shopId) {
+        return;
+    }
     [self cleanSessionStateTypeByShopId:shopId];
     [self removeSessionByShopId:shopId];
 }
 
-- (void)onCloseSession:(YSFCloseServiceNotification *)object shopId:(NSString *)shopId
-{
+#pragma mark - YSFServiceRequestDelegate
+- (void)onServiceRequestTimeout:(NSString *)shopId {
+    [self setSessionStateType:shopId type:YSFSessionStateTypeError];
+    [_requestManager updateRequestState:shopId inRequest:NO];
+    
+    if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)])
+    {
+        NSError *error = [NSError errorWithDomain:YSFErrorDomain
+                                             code:YSFCodeServerTimeout
+                                         userInfo:nil];
+        
+        [_delegate didReceiveSessionError:error
+                              session:nil shopId:shopId];
+    }
+    
+}
+
+#pragma mark - YSF_NIMSystemNotificationManagerDelegate
+- (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification {
+    NSString *content = notification.content;
+    YSFLogApp(@"notification: %@", content);
+    //平台电商时sender就等于shopId，目前服务器这样处理
+    NSString *shopId = notification.sender;
+    if (!shopId) {
+        shopId = @"-1";
+    }
+    YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+    
+    //解析content
+    id object =  [YSFCustomSystemNotificationParser parse:content shopId:shopId];
+    
+    if ([object isKindOfClass:[YSFServiceSession class]]) {
+        [self onGetNewServiceSession:object shopId:shopId];
+        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
+    } else if ([object isKindOfClass:[YSFCloseServiceNotification class]]) {
+        [YSFSystemConfig sharedInstance:shopId].switchOpen = YES;
+        [self onCloseSession:(YSFCloseServiceNotification *)object shopId:shopId];
+        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
+    } else if ([object isKindOfClass:[YSFKFBypassNotification class]]) {
+        [self onGetKFBypassNotification:object shopId:shopId];
+    } else if ([object isKindOfClass:[YSFSessionStatusResponse class]]) {
+        [((YSFSessionStatusResponse *)object).shopSessionStatus enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            if ([obj integerValue] == YSFCodeSuccess) {
+                [self setSessionStateType:key type:YSFSessionStateTypeOnline];
+            } else if ([obj integerValue] == YSFCodeServiceWaiting) {
+                [self setSessionStateType:key type:YSFSessionStateTypeWaiting];
+            } else if ([obj integerValue] == YSFCodeServiceNotExist) {
+                [self setSessionStateType:key type:YSFSessionStateTypeNotExist];
+            } else if ([obj integerValue] == YSFCodeServiceNotExistAndLeaveMessageClosed) {
+                [self setSessionStateType:key type:YSFSessionStateNotExistAndLeaveMessageClosed];
+            }
+        }];
+        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
+    } else if ([object isKindOfClass:[YSFQueryWaitingStatusResponse class]]) {
+        if ([self getSessionStateType:shopId] == YSFSessionStateTypeOnline) {
+            return;
+        }
+        YSFQueryWaitingStatusResponse *wait_status = object;
+        if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:shopId] == YSFSessionStateTypeWaiting
+            && (wait_status.code == YSFCodeServiceWaitingToNotExsit
+                || wait_status.code == YSFCodeServiceWaitingToNotExsitAndLeaveMessageClosed)) {
+            YSFServiceSession *session = [YSFServiceSession new];
+            NSError *error = nil;
+            session.message = wait_status.message;
+            if (wait_status.code == YSFCodeServiceWaitingToNotExsit) {
+                [self setSessionStateType:shopId type:YSFSessionStateTypeNotExist];
+                session.code = YSFCodeServiceNotExist;
+                error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
+            } else if (wait_status.code == YSFCodeServiceWaitingToNotExsitAndLeaveMessageClosed) {
+                [self setSessionStateType:shopId type:YSFSessionStateNotExistAndLeaveMessageClosed];
+                session.code = YSFCodeServiceNotExistAndLeaveMessageClosed;
+                error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
+            }
+
+            if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)]) {
+                [_delegate didReceiveSessionError:error session:session shopId:shopId];
+            }
+            
+            [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
+        }
+    } else if ([object isKindOfClass:[YSFEvaluationNotification class]]) {
+        [self addEvaluationMessage:((YSFEvaluationNotification *)object).sessionId
+               evaluationAutoPopup:((YSFEvaluationNotification *)object).evaluationAutoPopup shopId:shopId];
+    } else if ([object isKindOfClass:[YSFSessionWillCloseNotification class]]) {
+        YSFNotification *notification = [[YSFNotification alloc] init];
+        notification.command = YSFCommandNotification;
+        notification.localCommand = YSFCommandSessionWillClose;
+        notification.message = ((YSFCloseServiceNotification *)object).message;
+        YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
+        YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
+    } else if ([object isKindOfClass:[YSFTrashWords class]]) {
+        YSFTrashWords *transWords = (YSFTrashWords *)object;
+        if (transWords.msgIdClient && transWords.trashWords) {
+            YSF_QYKFMessage * message = (YSF_QYKFMessage *)[[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:transWords.msgIdClient
+                                                                                                           forSession:session];
+            NSMutableDictionary *extMutDic = [[NSMutableDictionary alloc] init];
+            [extMutDic setValue:[transWords.trashWords ysf_toUTF8String] forKey:YSFApiKeyTrashWords];
+            [extMutDic setValue:@(transWords.auditResultType) forKey:YSFApiKeyAuditResult];
+            message.ext = [extMutDic ysf_toUTF8String];
+            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:session completion:nil];
+        } else {
+            assert(false);
+        }
+    } else if ([object isKindOfClass:[YSFLongMessage class]]) {
+        YSFLongMessage *longMessage = (YSFLongMessage *)object;
+        NSMutableArray *array = _longMessageDict[longMessage.splitId];
+        if (!array) {
+            array = [[NSMutableArray alloc] initWithCapacity:longMessage.splitCount];
+            for (int i = 0; i < longMessage.splitCount; i++) {
+                [array addObject:[NSNull null]];
+            }
+            _longMessageDict[longMessage.splitId] = array;
+        }
+        array[longMessage.splitIndex] = longMessage;
+        BOOL isCompleted = YES;
+        for (NSNull *message in array) {
+            if (message == [NSNull null]) {
+                isCompleted = NO;
+                break;
+            }
+        }
+        if (isCompleted) {
+            NSString *content = @"";
+            for (YSFLongMessage *message in array) {
+                content = [content stringByAppendingString:message.splitContent];
+            }
+            NSData *data = [[NSData alloc] initWithBase64EncodedString:content options:NSDataBase64DecodingIgnoreUnknownCharacters];
+            NSString *messageContent = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+            
+            if (longMessage.msgType == YSFLongMessageTypeCustomMessage) {
+                YSF_NIMCustomObject *customObject = [[YSF_NIMCustomObject alloc] init];
+                [customObject decodeWithContent:messageContent];
+                YSF_NIMMessage *customMessage = [[YSF_NIMMessage alloc] init];
+                customMessage.messageObject = customObject;
+                customMessage.messageId = longMessage.msgId;
+                customMessage.messageType = YSF_NIMMessageTypeCustom;
+                customMessage.rawAttachContent = messageContent;
+                [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage
+                                                               forSession:session addUnreadCount:NO completion:nil];
+            } else if (longMessage.msgType == YSFLongMessageTypeSystemNotification) {
+                YSF_NIMCustomSystemNotification *notification = [YSF_NIMCustomSystemNotification new];
+                notification.content = messageContent;
+                notification.sender = notification.sender;
+                [[[YSF_NIMSDK sharedSDK] systemNotificationManager] onReceiveCustomSystemNotification:notification];
+            }
+        }
+    }
+}
+
+- (void)onCloseSession:(YSFCloseServiceNotification *)object shopId:(NSString *)shopId {
     if (object.evaluate) {
         [self addEvaluationMessage:object.sessionId evaluationAutoPopup:object.evaluationAutoPopup shopId:shopId];
     }
@@ -381,8 +516,7 @@ YSFServiceRequestDelegate>
     [self clearByShopId:shopId];
 }
 
-- (void)addEvaluationMessage:(long long)sessionId evaluationAutoPopup:(BOOL)evaluationAutoPopup shopId:(NSString *)shopId
-{
+- (void)addEvaluationMessage:(long long)sessionId evaluationAutoPopup:(BOOL)evaluationAutoPopup shopId:(NSString *)shopId {
     YSFInviteEvaluationObject *inviteEvaluation = [[YSFInviteEvaluationObject alloc] init];
     inviteEvaluation.command = YSFCommandInviteEvaluation;
     inviteEvaluation.sessionId = sessionId;
@@ -392,7 +526,7 @@ YSFServiceRequestDelegate>
         inviteEvaluation.evaluationMessageInvite = [dict objectForKey:YSFApiKeyEvaluationMessageInvite];
         inviteEvaluation.evaluationMessageThanks = [dict objectForKey:YSFApiKeyEvaluationMessageThanks];
     }
-
+    
     YSF_NIMMessage *currentInviteEvaluationMessage = [YSFMessageMaker msgWithCustom:inviteEvaluation];
     YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
     [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES
@@ -434,25 +568,7 @@ YSFServiceRequestDelegate>
     }
 }
 
-- (void)onServiceRequestTimeout:(NSString *)shopId
-{
-    [self setSessionStateType:shopId type:YSFSessionStateTypeError];
-    [_requestManager updateRequestState:shopId inRequest:NO];
-    
-    if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)])
-    {
-        NSError *error = [NSError errorWithDomain:YSFErrorDomain
-                                             code:YSFCodeServerTimeout
-                                         userInfo:nil];
-        
-        [_delegate didReceiveSessionError:error
-                              session:nil shopId:shopId];
-    }
-    
-}
-
-- (void)onGetKFBypassNotification:(YSFKFBypassNotification *)object shopId:(NSString *)shopId
-{
+- (void)onGetKFBypassNotification:(YSFKFBypassNotification *)object shopId:(NSString *)shopId {
     YSFKFBypassNotification *notification = (YSFKFBypassNotification *)object;
     if (notification.shopInfo) {
         [self addShopInfo:object.shopInfo];
@@ -461,13 +577,12 @@ YSFServiceRequestDelegate>
     [_requestManager stopWaitResponseTimer:shopId];
     [_requestManager updateRequestState:shopId inRequest:NO];
     //发起回调
-    if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)])
-    {
+    if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)]) {
         [_delegate didReceiveSessionError:nil session:nil shopId:shopId];
     }
     
     notification.disable = NO;
-    [self addStaffIdIconUrl:@"YSFKFBypassNotification" icornUrl:notification.iconUrl];
+    [self addStaffIconURL:notification.iconUrl forStaffId:@"YSFKFBypassNotification"];
     
     YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
     YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
@@ -477,166 +592,8 @@ YSFServiceRequestDelegate>
     [self clearByShopId:shopId];
 }
 
-#pragma mark - YSF_NIMSystemNotificationManagerDelegate
-- (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification
-{
-    NSString *content = notification.content;
-    YSFLogApp(@"notification: %@",content);
-    
-    //平台电商时sender就等于shopId，目前服务器这样处理
-    NSString *shopId = notification.sender;
-    if (!shopId) {
-        shopId = @"-1";
-    }
-    YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
-
-    id object =  [YSFCustomSystemNotificationParser parse:content shopId:shopId];
-    if ([object isKindOfClass:[YSFServiceSession class]])
-    {
-        [self onGetNewServiceSession:object shopId:shopId];
-        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
-    }
-    else if ([object isKindOfClass:[YSFCloseServiceNotification class]])
-    {
-        [YSFSystemConfig sharedInstance:shopId].switchOpen = YES;
-        [self onCloseSession:(YSFCloseServiceNotification *)object shopId:shopId];
-        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
-    }
-    else if ([object isKindOfClass:[YSFKFBypassNotification class]])
-    {
-        [self onGetKFBypassNotification:object shopId:shopId];
-    }
-    else if ([object isKindOfClass:[YSFSessionStatusResponse class]])
-    {
-        [((YSFSessionStatusResponse *)object).shopSessionStatus enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            if ([obj integerValue] == YSFCodeSuccess) {
-                [self setSessionStateType:key type:YSFSessionStateTypeOnline];
-            }
-            else if ([obj integerValue] == YSFCodeServiceWaiting) {
-                [self setSessionStateType:key type:YSFSessionStateTypeWaiting];
-            }
-            else if ([obj integerValue] == YSFCodeServiceNotExist) {
-                [self setSessionStateType:key type:YSFSessionStateTypeNotExist];
-            }
-            else if ([obj integerValue] == YSFCodeServiceNotExistAndLeaveMessageClosed) {
-                [self setSessionStateType:key type:YSFSessionStateNotExistAndLeaveMessageClosed];
-            }
-        }];
-        [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
-    }
-    else if ([object isKindOfClass:[YSFQueryWaitingStatusResponse class]])
-    {
-        if ([self getSessionStateType:shopId] == YSFSessionStateTypeOnline) {
-            return;
-        }
-        YSFQueryWaitingStatusResponse *wait_status = object;
-        if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:shopId] == YSFSessionStateTypeWaiting
-            && (wait_status.code == YSFCodeServiceWaitingToNotExsit
-                || wait_status.code == YSFCodeServiceWaitingToNotExsitAndLeaveMessageClosed)) {
-            YSFServiceSession *session = [YSFServiceSession new];
-            NSError *error = nil;
-            session.message = wait_status.message;
-            if (wait_status.code == YSFCodeServiceWaitingToNotExsit) {
-                [self setSessionStateType:shopId type:YSFSessionStateTypeNotExist];
-                session.code = YSFCodeServiceNotExist;
-                error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
-            }
-            else if (wait_status.code == YSFCodeServiceWaitingToNotExsitAndLeaveMessageClosed) {
-                [self setSessionStateType:shopId type:YSFSessionStateNotExistAndLeaveMessageClosed];
-                session.code = YSFCodeServiceNotExistAndLeaveMessageClosed;
-                error = [NSError errorWithDomain:YSFErrorDomain code:YSFCodeServiceNotExist userInfo:nil];
-            }
-
-            if (_delegate && [_delegate respondsToSelector:@selector(didReceiveSessionError:session:shopId:)])
-            {
-                [_delegate didReceiveSessionError:error session:session shopId:shopId];
-            }
-            
-            [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
-        }
-    }
-    else if ([object isKindOfClass:[YSFEvaluationNotification class]])
-    {
-        [self addEvaluationMessage:((YSFEvaluationNotification *)object).sessionId
-               evaluationAutoPopup:((YSFEvaluationNotification *)object).evaluationAutoPopup shopId:shopId];
-    }
-    else if ([object isKindOfClass:[YSFSessionWillCloseNotification class]])
-    {
-        YSFNotification *notification = [[YSFNotification alloc] init];
-        notification.command = YSFCommandNotification;
-        notification.localCommand = YSFCommandSessionWillClose;
-        notification.message = ((YSFCloseServiceNotification *)object).message;
-        YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
-        YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
-        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage forSession:session addUnreadCount:NO completion:nil];
-        
-    }
-    else if ([object isKindOfClass:[YSFTrashWords class]])
-    {
-        YSFTrashWords *transWords = (YSFTrashWords *)object;
-        if (transWords.msgIdClient && transWords.trashWords) {
-            YSF_QYKFMessage * message = (YSF_QYKFMessage *)[[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:transWords.msgIdClient forSession:session];
-            NSMutableDictionary *extMutDic = [[NSMutableDictionary alloc] init];
-            [extMutDic setValue:[transWords.trashWords ysf_toUTF8String] forKey:YSFApiKeyTrashWords];
-            [extMutDic setValue:@(transWords.auditResultType) forKey:YSFApiKeyAuditResult];
-            message.ext = [extMutDic ysf_toUTF8String];
-            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:session completion:nil];
-        }
-        else {
-            assert(false);
-        }
-    }
-    else if ([object isKindOfClass:[YSFLongMessage class]])
-    {
-        YSFLongMessage *longMessage = (YSFLongMessage *)object;
-        NSMutableArray *array = _longMessageDict[longMessage.splitId];
-        if (!array) {
-            array = [[NSMutableArray alloc] initWithCapacity:longMessage.splitCount];
-            for (int i = 0; i < longMessage.splitCount; i++) {
-                [array addObject:[NSNull null]];
-            }
-            _longMessageDict[longMessage.splitId] = array;
-        }
-        array[longMessage.splitIndex] = longMessage;
-        BOOL isCompleted = YES;
-        for (NSNull *message in array) {
-            if (message == [NSNull null]) {
-                isCompleted = NO;
-                break;
-            }
-        }
-        if (isCompleted) {
-            NSString *content = @"";
-            for (YSFLongMessage *message in array) {
-                content = [content stringByAppendingString:message.splitContent];
-            }
-            NSData *data = [[NSData alloc] initWithBase64EncodedString:content options:NSDataBase64DecodingIgnoreUnknownCharacters];
-            NSString *messageContent = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-            
-            if (longMessage.msgType == YSFLongMessageTypeCustomMessage) {
-                YSF_NIMCustomObject *customObject = [[YSF_NIMCustomObject alloc] init];
-                [customObject decodeWithContent:messageContent];
-                YSF_NIMMessage *customMessage = [[YSF_NIMMessage alloc] init];
-                customMessage.messageObject = customObject;
-                customMessage.messageId = longMessage.msgId;
-                customMessage.messageType = YSF_NIMMessageTypeCustom;
-                customMessage.rawAttachContent = messageContent;
-                [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES message:customMessage
-                                                               forSession:session addUnreadCount:NO completion:nil];
-            }
-            else if (longMessage.msgType == YSFLongMessageTypeSystemNotification) {
-                YSF_NIMCustomSystemNotification *notification = [YSF_NIMCustomSystemNotification new];
-                notification.content = messageContent;
-                notification.sender = notification.sender;
-                [[[YSF_NIMSDK sharedSDK] systemNotificationManager] onReceiveCustomSystemNotification:notification];
-            }
-        }
-    }
-}
-
 #pragma mark - YSF_NIMChatManagerDelegate
-- (void)onRecvMessages:(NSArray *)messages
-{
+- (void)onRecvMessages:(NSArray *)messages {
     for (YSF_NIMMessage *message in messages) {
         if (message.isPushMessageType) {
             QYPushMessageBlock pushMessageBlock = [QYSDK sharedSDK].pushMessageBlock;
@@ -645,19 +602,14 @@ YSFServiceRequestDelegate>
                 pushMessage.headImageUrl = message.staffHeadImageUrl;
                 pushMessage.actionText = message.actionText;
                 pushMessage.actionUrl = message.actionUrl;
-                if (message.messageType == YSF_NIMMessageTypeText)
-                {
+                if (message.messageType == YSF_NIMMessageTypeText) {
                     pushMessage.text = message.text;
                     pushMessage.type = QYPushMessageTypeText;
-                }
-                else if (message.messageType == YSF_NIMMessageTypeImage)
-                {
+                } else if (message.messageType == YSF_NIMMessageTypeImage) {
                     YSF_NIMImageObject *object = message.messageObject;
                     pushMessage.imageUrl = object.url;
                     pushMessage.type = QYPushMessageTypeImage;
-                }
-                else if (message.messageType == YSF_NIMMessageTypeCustom)
-                {
+                } else if (message.messageType == YSF_NIMMessageTypeCustom) {
                     YSF_NIMCustomObject *customObject = message.messageObject;
                     if ([customObject.attachment isKindOfClass:[YSFRichText class]]) {
                         YSFRichText *richText = (YSFRichText *)customObject.attachment;
@@ -684,103 +636,95 @@ YSFServiceRequestDelegate>
     [self onUpdateSessionByMessage:message];
 }
 
-#pragma mark - ServiceSession操作
-
-- (YSFServiceSession *)getOnlineSession:(NSString *)shopId
-{
-    if (!shopId) return nil;
+#pragma mark - service session
+- (YSFServiceSession *)getOnlineSession:(NSString *)shopId {
+    if (!shopId) {
+        return nil;
+    }
     YSFServiceSession *session = _sessions[shopId];
     if (session && session.code == YSFCodeSuccess) {
         return session;
-    }
-    else {
+    } else {
         return nil;
     }
 }
 
-- (YSFServiceSession *)getOnlineOrWaitingSession:(NSString *)shopId
-{
-    if (!shopId) return nil;
+- (YSFServiceSession *)getOnlineOrWaitingSession:(NSString *)shopId {
+    if (!shopId) {
+        return nil;
+    }
     YSFServiceSession *session = _sessions[shopId];
     return session;
 }
 
-- (void)addSession:(YSFServiceSession *)session shopId:(NSString *)shopId
-{
-    if (!session || !shopId) return;
-    
+- (void)addSession:(YSFServiceSession *)session shopId:(NSString *)shopId {
+    if (!session || !shopId) {
+        return;
+    }
     _sessions[shopId] = session;
 
     if (session) {
         if (session.staffId.length > 0) {
-            NSString *iconURL = session.iconUrl;
             if (session.humanOrMachine) {
-                if ([QYCustomUIConfig sharedInstance].humanServiceHeadImageUrl.length) {
-                    iconURL = [QYCustomUIConfig sharedInstance].humanServiceHeadImageUrl;
+                if (self.staffInfo && self.staffInfo.staffId.length && self.staffInfo.iconURL.length) {
+                    [self addStaffIconURL:self.staffInfo.iconURL forStaffId:self.staffInfo.staffId];
+                    [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:self.staffInfo.staffId];
+                } else {
+                    [self addStaffIconURL:session.iconUrl forStaffId:session.staffId];
+                    [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
                 }
+            } else {
+                [self addStaffIconURL:session.iconUrl forStaffId:session.staffId];
+                [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
             }
-            [self addStaffIdIconUrl:session.staffId icornUrl:iconURL];
-            [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
         }
-    }
-    else {
+    } else {
         [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:nil];
     }
-    
 }
 
-- (void)removeSessionByShopId:(NSString *)shopId
-{
-    if(!shopId) return;
+- (void)removeSessionByShopId:(NSString *)shopId {
+    if(!shopId) {
+        return;
+    }
     if (_sessions) {
         [_sessions removeObjectForKey:shopId];
     }
 }
 
-- (NSDictionary *)getShopInfo
-{
-    return _shopInfo;
-}
-
-- (NSDictionary *)getEvaluationInfoByShopId:(NSString *)shopId
-{
-    if(!shopId) return nil;
+#pragma mark - evaluation info
+- (NSDictionary *)getEvaluationInfoByShopId:(NSString *)shopId {
+    if(!shopId) {
+        return nil;
+    }
     return [_evaluationInfo objectForKey:shopId];
 }
 
-- (void)setEvaluationInfo:(NSDictionary *)evaluation shopId:(NSString *)shopId
-{
+- (void)setEvaluationInfo:(NSDictionary *)evaluation shopId:(NSString *)shopId {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     [_evaluationInfo setValue:evaluation forKey:shopId];
     [infoManager saveDict:_evaluationInfo forKey:YSFEvalution];
 }
 
-- (void)addShopInfo:(YSFShopInfo *)shop
-{
+#pragma mark - shop info
+- (NSDictionary *)getShopInfo {
+    return _shopInfo;
+}
+
+- (void)addShopInfo:(YSFShopInfo *)shop {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     [_shopInfo setValue:[shop toDict] forKey:shop.shopId];
     [infoManager saveDict:_shopInfo forKey:YSFShopInfoKey];
 }
 
-- (void)removeShopInfo:(NSString *)shopId;
-{
+- (void)removeShopInfo:(NSString *)shopId; {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     [_shopInfo removeObjectForKey:shopId];
     [infoManager saveDict:_shopInfo forKey:YSFShopInfoKey];
 }
 
-- (void)addStaffIdIconUrl:(NSString *)staffId icornUrl:(NSString *)iconUrl
-{
-    YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
-    if (staffId && iconUrl) {
-        iconUrl = [iconUrl ysf_https];
-        [_staffIdIconUrl setValue:iconUrl forKey:staffId];
-        [infoManager saveDict:_staffIdIconUrl forKey:YSFStaffIdIconUrl];
-    }
-}
-
-- (void)reportPushMessageReadedStatus
-{
+#pragma mark - push message
+- (void)reportPushMessageReadedStatus {
     for (NSNumber *sessionId in _unreadPushMessageSessionId) {
         long long llSessionId = [sessionId longLongValue];
         YSFPushMessageStatusChangeRequest *request = [[YSFPushMessageStatusChangeRequest alloc] init];
@@ -797,13 +741,11 @@ YSFServiceRequestDelegate>
     }
 }
 
-- (long long)getLastUnreadPushMessageSessionId
-{
+- (long long)getLastUnreadPushMessageSessionId {
     return [[_unreadPushMessageSessionId lastObject] longLongValue];
 }
 
-- (void)addUnreadPushMessageSessionId:(long long)msgSessionId
-{
+- (void)addUnreadPushMessageSessionId:(long long)msgSessionId {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     if (msgSessionId) {
         [_unreadPushMessageSessionId addObject:@(msgSessionId)];

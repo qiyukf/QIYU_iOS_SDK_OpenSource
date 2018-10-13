@@ -68,6 +68,7 @@
 #import "YSFBotCustomObject.h"
 #import "YSFBotEntry.h"
 #import "QYCommodityInfo_private.h"
+#import "QYStaffInfo.h"
 
 #import "YSFViewControllerTransitionAnimation.h"
 #import "YSFCameraViewController.h"
@@ -134,6 +135,11 @@ static long long g_sessionId;
 - (void)setShopId:(NSString *)shopId
 {
     _shopId = [shopId lowercaseString];
+}
+
+- (void)setStaffInfo:(QYStaffInfo *)staffInfo {
+    _staffInfo = staffInfo;
+    [[QYSDK sharedSDK] sessionManager].staffInfo = staffInfo;
 }
 
 - (instancetype)init
@@ -271,6 +277,10 @@ static long long g_sessionId;
     BOOL autoPopUp = [self showEvaluaViewController];
     if (!autoPopUp && [QYCustomUIConfig sharedInstance].autoShowKeyboard && g_inputStatus != YSFInputStatusAudio) {
         [self.sessionInputView.toolBar.inputTextView becomeFirstResponder];
+    }
+    
+    if (!self.staffInfo) {
+        [QYSDK sharedSDK].sessionManager.staffInfo = nil;
     }
 }
 
@@ -1650,20 +1660,24 @@ static long long g_sessionId;
                 }
             }
             
-            if ([QYCustomUIConfig sharedInstance].humanServiceName.length
-                && [customObject isMemberOfClass:[YSF_NIMCustomObject class]]) {
+            if (self.staffInfo && [customObject isMemberOfClass:[YSF_NIMCustomObject class]]) {
                 id object = ((YSF_NIMCustomObject *)customObject).attachment;
                 if ([object isMemberOfClass:[YSFStartServiceObject class]]) {
-                    //update object staffName
                     YSFStartServiceObject *staffObject = (YSFStartServiceObject *)object;
-                    staffObject.staffName = [QYCustomUIConfig sharedInstance].humanServiceName;
-                    //update rawAttachContent
-                    NSDictionary *contentDict = [message.rawAttachContent ysf_toDict];
-                    NSMutableDictionary *contentMutableDict = [NSMutableDictionary dictionaryWithDictionary:contentDict];
-                    [contentMutableDict setObject:[QYCustomUIConfig sharedInstance].humanServiceName forKey:YSFApiKeyStaffName];
-                    NSString *newContent = [contentMutableDict ysf_toUTF8String];
-                    message.rawAttachContent = newContent;
-                    
+                    if (self.staffInfo.nickName.length) {
+                        //update object staffName
+                        staffObject.staffName = self.staffInfo.nickName;
+                        //update rawAttachContent
+                        NSDictionary *contentDict = [message.rawAttachContent ysf_toDict];
+                        NSMutableDictionary *contentMutableDict = [NSMutableDictionary dictionaryWithDictionary:contentDict];
+                        [contentMutableDict setObject:self.staffInfo.nickName forKey:YSFApiKeyStaffName];
+                        NSString *newContent = [contentMutableDict ysf_toUTF8String];
+                        message.rawAttachContent = newContent;
+                    }
+                    if (self.staffInfo.accessTip.length) {
+                        staffObject.accessTip = self.staffInfo.accessTip;
+                    }
+
                     [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES
                                                                         message:message
                                                                      forSession:_session

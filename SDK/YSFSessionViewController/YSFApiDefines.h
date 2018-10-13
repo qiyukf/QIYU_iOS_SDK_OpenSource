@@ -76,6 +76,7 @@
 #define     YSFApiKeyTagList            @"tagList"
 #define     YSFApiKeyList               @"list"
 #define     YSFApiKeyMessage            @"message"
+#define     YSFApiKeyAccessTip          @"accessTip"
 #define     YSFApiKeyOriginalQuestion   @"original_question"
 #define     YSFApiKeyMatchedQuestion    @"matched_question"
 #define     YSFApiKeyTipContent         @"tip_content"

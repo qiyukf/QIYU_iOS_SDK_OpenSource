@@ -67,6 +67,9 @@
     }
     else if ([object.attachment isKindOfClass:[YSFStartServiceObject class]]) {
         YSFStartServiceObject *attachment = (YSFStartServiceObject *)object.attachment;
+        if (attachment.accessTip.length) {
+            return attachment.accessTip;
+        }
         NSString *group = @"";
         if (attachment.message.length > 0 && attachment.humanOrMachine) {
             group = [NSString stringWithFormat:@"%@",attachment.message];
