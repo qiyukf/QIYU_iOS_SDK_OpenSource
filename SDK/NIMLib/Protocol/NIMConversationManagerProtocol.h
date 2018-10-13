@@ -159,7 +159,24 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  *  @param completion 完成后的回调
  *  @discussion 目前只支持自定义消息(NIMMessageTypeCustom)
  */
-- (void)updateMessage:(BOOL)updateUI message:(YSF_NIMMessage *)message
+- (void)updateMessage:(BOOL)updateUI
+              message:(YSF_NIMMessage *)message
+           forSession:(YSF_NIMSession *)session
+           completion:(YSF_NIMUpdateMessageBlock)completion;
+
+/**
+ *  更新本地已存的消息记录
+ *
+ *  @param updateUI 是否刷新UI
+ *  @param updateAttach 是否x更新附件信息
+ *  @param message 需要更新的消息
+ *  @param session 需要更新的会话
+ *  @param completion 完成后的回调
+ *  @discussion 目前只支持自定义消息(NIMMessageTypeCustom)
+ */
+- (void)updateMessage:(BOOL)updateUI
+           attachment:(BOOL)updateAttach
+              message:(YSF_NIMMessage *)message
            forSession:(YSF_NIMSession *)session
            completion:(YSF_NIMUpdateMessageBlock)completion;
 
