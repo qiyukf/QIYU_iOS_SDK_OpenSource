@@ -324,6 +324,7 @@ typedef enum : NSUInteger {
     YSFCommandNewMessage                =   10003,  //新消息提示
     YSFCommandInviteEvaluation          =   10004,  //邀请评价
     YSFCommandMiniAppTip                =   10005,  //小程序提醒
+    YSFCommandClickNotification         =   10006,  //可点击的通知
 
 
 } YSFCommand;

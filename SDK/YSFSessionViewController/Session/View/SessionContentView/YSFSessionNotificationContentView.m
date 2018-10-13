@@ -68,9 +68,7 @@
             YSFNotification *notification = (YSFNotification *)object.attachment;
             _label.text = [model.layoutConfig formatedMessage:model];
             
-            if (notification.clickRange.location >= 0
-                && notification.clickRange.length
-                && notification.clickColor) {
+            if (notification.clickRange.length && notification.clickColor) {
                 [_label addCustomLink:@"YSFClickAttributedString" forRange:notification.clickRange linkColor:notification.clickColor];
             }
             
