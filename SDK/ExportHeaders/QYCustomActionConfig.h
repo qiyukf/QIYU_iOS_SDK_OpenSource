@@ -77,9 +77,9 @@ typedef void (^QYExtraViewClickBlock)(NSString *extInfo);
 /**
  *  系统消息点击回调
  *
- *  @param params 附带信息
+ *  @param message 消息对象
  */
-typedef void (^QYSystemNotificationClickBlock)(NSString *params);
+typedef void (^QYSystemNotificationClickBlock)(id message);
 
 /**
  *  自定义行为配置类

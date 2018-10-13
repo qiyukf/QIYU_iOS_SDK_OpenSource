@@ -2389,12 +2389,7 @@ static long long g_sessionId;
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapSystemNotification]) {
         if ([QYCustomActionConfig sharedInstance].notificationClickBlock) {
-            YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)event.message.messageObject;
-            YSFNotification *notification = (YSFNotification *)object.attachment;
-            //自定义行为
-            
-            NSString *params = [[notification encodeAttachment] ysf_toUTF8String];
-            [QYCustomActionConfig sharedInstance].notificationClickBlock(params);
+            [QYCustomActionConfig sharedInstance].notificationClickBlock(event.message);
         }
     }
     
