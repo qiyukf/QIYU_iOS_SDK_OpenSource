@@ -2372,6 +2372,7 @@ static long long g_sessionId;
                     BOOL needShow = [[dict objectForKey:YSFApiKeyBotShowUseful] boolValue];
                     if (needShow) {
                         [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES
+                                                                         attachment:NO
                                                                             message:event.message
                                                                          forSession:_session
                                                                          completion:nil];
