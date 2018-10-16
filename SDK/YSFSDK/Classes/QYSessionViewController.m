@@ -415,6 +415,7 @@ static long long g_sessionId;
     [[YSF_NIMSDK sharedSDK].chatManager removeDelegate:self];
     [[[YSF_NIMSDK sharedSDK] systemNotificationManager] removeDelegate:self];
     g_inputStatus = _sessionInputView.inputStatus;
+    [QYCustomUIConfig sharedInstance].humanButtonText = nil;
 }
 
 - (void)viewWillDisappear:(BOOL)animated
