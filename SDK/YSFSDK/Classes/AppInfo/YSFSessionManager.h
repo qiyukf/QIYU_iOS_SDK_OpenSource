@@ -58,6 +58,7 @@ typedef enum : NSUInteger {
 
 - (void)addStaffIconURL:(NSString *)iconURL forStaffId:(NSString *)staffId;
 - (NSString *)getIconURLFromStaffId:(NSString *)staffId;
+- (void)updateStaffInfoForOnlineSession:(NSString *)shopId;
 
 - (void)clear;
 - (void)clearByShopId:(NSString *)shopId;

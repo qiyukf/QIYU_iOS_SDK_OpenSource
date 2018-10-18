@@ -127,6 +127,28 @@
 }
 
 #pragma mark - staff icon
+- (void)setStaffInfo:(QYStaffInfo *)staffInfo {
+    _staffInfo = staffInfo;
+    if (staffInfo) {
+        [[YSF_NIMSDK sharedSDK].chatManager setUniqueMessageFrom:staffInfo.staffId];
+    } else {
+        [[YSF_NIMSDK sharedSDK].chatManager setUniqueMessageFrom:nil];
+    }
+}
+
+- (void)updateStaffInfoForOnlineSession:(NSString *)shopId {
+    if (![self shouldRequestService:YES shopId:shopId]) {
+        YSFServiceSession *session = [self getOnlineSession:shopId];
+        if (session && session.humanOrMachine) {
+            if (self.staffInfo && self.staffInfo.staffId) {
+                [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:self.staffInfo.staffId];
+            } else {
+                [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
+            }
+        }
+    }
+}
+
 - (void)readStaffIconURLs {
     YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
     _staffIconURLs = [[NSMutableDictionary alloc] init];
@@ -263,6 +285,7 @@
     if (code == YSFCodeSuccess) {
         [self setSessionStateType:shopId type:YSFSessionStateTypeOnline];
         [self addSession:session shopId:shopId];
+        [self sendInvisibleStaffInfoWithShopId:shopId];
     } else {
         [self removeSessionByShopId:shopId];
         if (code == YSFCodeServiceWaiting) {
@@ -331,6 +354,17 @@
 - (void)onUpdateSessionByMessage:(YSF_NIMMessage *)message {
     //每收到一条客服的消息就更新一把服务时间
 //    _sessions.lastServiceTime =  [NSDate dateWithTimeIntervalSince1970:message.timestamp];
+}
+
+- (void)sendInvisibleStaffInfoWithShopId:(NSString *)shopId {
+    if (self.staffInfo && self.staffInfo.infoDesc.length) {
+        YSFServiceSession *onlineSession = [self getOnlineSession:shopId];
+        if (onlineSession.humanOrMachine) {
+            YSF_NIMMessage *message = [YSFMessageMaker msgWithText:self.staffInfo.infoDesc];
+            YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+            [[[YSF_NIMSDK sharedSDK] chatManager] sendMessage:message toSession:session visible:NO error:nil];
+        }
+    }
 }
 
 #pragma mark - clear
@@ -667,6 +701,7 @@
         if (session.staffId.length > 0) {
             if (session.humanOrMachine) {
                 if (self.staffInfo && self.staffInfo.staffId.length && self.staffInfo.iconURL.length) {
+                    [self addStaffIconURL:session.iconUrl forStaffId:session.staffId];
                     [self addStaffIconURL:self.staffInfo.iconURL forStaffId:self.staffInfo.staffId];
                     [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:self.staffInfo.staffId];
                 } else {

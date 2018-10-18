@@ -33,5 +33,10 @@
  */
 @property (nonatomic, copy) NSString *accessTip;
 
+/**
+ *  客服信息描述
+ */
+@property (nonatomic, copy) NSString *infoDesc;
+
 @end
 

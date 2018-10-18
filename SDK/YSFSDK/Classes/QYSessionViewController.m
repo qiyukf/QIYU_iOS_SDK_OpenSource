@@ -171,6 +171,9 @@ static long long g_sessionId;
     if (_groupId || _staffId) {
         self.specifiedId = YES;
     }
+    if (!self.staffInfo) {
+        [[QYSDK sharedSDK] sessionManager].staffInfo = nil;
+    }
 
     [super viewDidLoad];
     [self initSession];
@@ -266,6 +269,7 @@ static long long g_sessionId;
     }
     
     if (shouldRequestService) {
+        [[[QYSDK sharedSDK] sessionManager] updateStaffInfoForOnlineSession:_shopId];
         [self requestServiceIfNeededInScene:QYRequestStaffSceneInit onlyManual:NO clearSession:NO];
     }
     
@@ -277,10 +281,6 @@ static long long g_sessionId;
     BOOL autoPopUp = [self showEvaluaViewController];
     if (!autoPopUp && [QYCustomUIConfig sharedInstance].autoShowKeyboard && g_inputStatus != YSFInputStatusAudio) {
         [self.sessionInputView.toolBar.inputTextView becomeFirstResponder];
-    }
-    
-    if (!self.staffInfo) {
-        [QYSDK sharedSDK].sessionManager.staffInfo = nil;
     }
 }
 
