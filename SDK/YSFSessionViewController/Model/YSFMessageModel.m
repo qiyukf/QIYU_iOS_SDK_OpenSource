@@ -132,12 +132,6 @@
     } else {
         _shouldShowNickName = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowNickName:self];
     }
-    
-    if ([layoutConfig respondsToSelector:@selector(shouldShowExtraView:)]) {
-        _shouldShowExtraView = [layoutConfig shouldShowExtraView:self];
-    } else {
-        _shouldShowExtraView = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowExtraView:self];
-    }
 }
 
 #pragma mark - ExtraView Layout
@@ -153,6 +147,14 @@
         _extraViewInsets = [self.extraLayoutConfig extraViewInsets:self];
     }
     return _extraViewInsets;
+}
+
+- (BOOL)shouldShowExtraView {
+    if ([self.layoutConfig respondsToSelector:@selector(shouldShowExtraView:)]) {
+        return [self.layoutConfig shouldShowExtraView:self];
+    }
+    
+    return NO;
 }
 
 @end
