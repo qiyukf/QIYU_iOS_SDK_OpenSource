@@ -141,6 +141,7 @@
         YSFServiceSession *session = [self getOnlineSession:shopId];
         if (session && session.humanOrMachine) {
             if (self.staffInfo && self.staffInfo.staffId) {
+                [self addStaffIconURL:self.staffInfo.iconURL forStaffId:self.staffInfo.staffId];
                 [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:self.staffInfo.staffId];
             } else {
                 [[YSF_NIMSDK sharedSDK].chatManager setReceiveMessageFrom:shopId receiveMessageFrom:session.staffId];
@@ -169,11 +170,10 @@
 }
 
 - (void)addStaffIconURL:(NSString *)iconURL forStaffId:(NSString *)staffId {
-    YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
-    if (iconURL.length && staffId.length) {
+    if (staffId.length && iconURL) {
         iconURL = [iconURL ysf_https];
         [_staffIconURLs setValue:iconURL forKey:staffId];
-        [infoManager saveDict:_staffIconURLs forKey:YSFStaffIdIconUrl];
+        [[QYSDK sharedSDK].infoManager saveDict:_staffIconURLs forKey:YSFStaffIdIconUrl];
     }
 }
 

@@ -14,12 +14,12 @@
 @interface QYStaffInfo : NSObject
 
 /**
- *  客服ID
+ *  客服ID，限制20字符
  */
 @property (nonatomic, copy) NSString *staffId;
 
 /**
- *  客服昵称
+ *  客服昵称，限制20字符
  */
 @property (nonatomic, copy) NSString *nickName;
 
@@ -29,7 +29,7 @@
 @property (nonatomic, copy) NSString *iconURL;
 
 /**
- *  接入提示
+ *  接入提示，限制50字符
  */
 @property (nonatomic, copy) NSString *accessTip;
 
