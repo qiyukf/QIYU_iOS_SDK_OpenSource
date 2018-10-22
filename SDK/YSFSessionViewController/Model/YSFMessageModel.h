@@ -7,6 +7,7 @@
 //
 
 #import "YSFCellLayoutConfig.h"
+#import "YSFExtraCellLayoutConfig.h"
 #import "NIMSDK.h"
 
 @interface YSFMessageModel : NSObject
@@ -17,29 +18,31 @@
 @property (nonatomic, strong) YSF_NIMMessage *message;
 
 /**
- *  YSF_NIMMessage封装成NIMMessageModel的方法
+ *  YSF_NIMMessage封装成YSFMessageModel的方法
  *
  *  @param  message 消息体
  *
- *  @return NIMMessageModel实例
+ *  @return YSFMessageModel实例
  */
-- (instancetype)initWithMessage:(YSF_NIMMessage*)message;
+- (instancetype)initWithMessage:(YSF_NIMMessage *)message;
 
 /**
  *  消息对应的布局配置
  */
-@property (nonatomic,strong,readonly) id<YSFCellLayoutConfig> layoutConfig;
-
-
-@property (nonatomic, readonly) CGSize     contentSize;
-
-@property (nonatomic, readonly) UIEdgeInsets  contentViewInsets;
-
-@property (nonatomic, readonly) UIEdgeInsets  bubbleViewInsets;
-
+@property (nonatomic, strong, readonly) id<YSFCellLayoutConfig> layoutConfig;
+@property (nonatomic, readonly) CGSize contentSize;
+@property (nonatomic, readonly) UIEdgeInsets contentViewInsets;
+@property (nonatomic, readonly) UIEdgeInsets bubbleViewInsets;
 @property (nonatomic, readonly) BOOL shouldShowAvatar;
-
 @property (nonatomic, readonly) BOOL shouldShowNickName;
+
+/**
+ *  扩展消息布局配置
+ */
+@property (nonatomic, strong, readonly) id<YSFExtraCellLayoutConfig> extraLayoutConfig;
+@property (nonatomic, readonly) CGSize extraViewSize;
+@property (nonatomic, readonly) UIEdgeInsets extraViewInsets;
+@property (nonatomic, readonly) BOOL shouldShowExtraView;
 
 /**
  *  计算内容大小

@@ -12,6 +12,7 @@
 @class YSFSessionMessageContentView;
 @class YSFAvatarImageView;
 @class YSFBadgeView;
+@protocol YSFExtraViewParamConfig;
 
 @interface YSFMessageCell : UITableViewCell
 
@@ -26,6 +27,7 @@
 @property (nonatomic, weak)   id<YSFMessageCellDelegate> messageDelegate;
 @property (nonatomic, strong) UILabel *trashWordsTip;
 @property (nonatomic, strong) UIButton *submitForm;
+@property (nonatomic, strong) UIView<YSFExtraViewParamConfig> *extraView;
 
 - (void)refreshData:(YSFMessageModel *)data;
 

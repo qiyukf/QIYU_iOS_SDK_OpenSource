@@ -76,7 +76,7 @@ static CGFloat const kCellHeight = 40.f;
         cell.searchText = self.searchText;
         cell.onlyMatchFirst = _onlyMatchFirst;
         YSFQuickReplyKeyWordAndContent *object = self.dataArray[indexPath.row];
-        [cell refresh:object.keyword showContent:object.content];
+        [cell refresh:object.keyword showContent:object.isContentRich ? object.showContent : object.content];
     }
     
     return cell;

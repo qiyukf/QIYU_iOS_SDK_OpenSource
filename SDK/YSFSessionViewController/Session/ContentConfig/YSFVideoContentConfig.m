@@ -7,33 +7,35 @@
 //
 
 #import "YSFVideoContentConfig.h"
+#import "YSF_NIMMessage+YSF.h"
 
 @implementation YSFVideoContentConfig
-- (CGSize)contentSize:(CGFloat)cellWidth
-{
+
+- (CGSize)contentSize:(CGFloat)cellWidth {
     CGFloat attachmentImageMinWidth  = (cellWidth / 4.0);
     CGFloat attachmentImageMinHeight = (cellWidth / 4.0);
     CGFloat attachmemtImageMaxWidth  = (cellWidth - 184);
     CGFloat attachmentImageMaxHeight = (cellWidth - 184);
     CGSize contentSize = CGSizeMake(attachmentImageMinWidth, attachmentImageMinHeight);
     
-    YSF_NIMVideoObject *videoObject = (YSF_NIMVideoObject*)[self.message messageObject];
+    YSF_NIMVideoObject *videoObject = (YSF_NIMVideoObject *)[self.message messageObject];
     if (!CGSizeEqualToSize(videoObject.coverSize, CGSizeZero)) {
-        //有封面就直接拿封面大小
         contentSize = [UIImage ysf_sizeWithImageOriginSize:videoObject.coverSize
-                                                      minSize:CGSizeMake(attachmentImageMinWidth, attachmentImageMinHeight)
-                                                      maxSize:CGSizeMake(attachmemtImageMaxWidth, attachmentImageMaxHeight)];
+                                                   minSize:CGSizeMake(attachmentImageMinWidth, attachmentImageMinHeight)
+                                                   maxSize:CGSizeMake(attachmemtImageMaxWidth, attachmentImageMaxHeight)];
+    }
+    if (self.message.isPushMessageType
+        && self.message.actionText.length) {
+        contentSize.height += 44;
     }
     return contentSize;
 }
 
-- (NSString *)cellContent
-{
+- (NSString *)cellContent {
     return @"YSFSessionVideoContentView";
 }
 
-- (UIEdgeInsets)contentViewInsets
-{
-    return self.message.isOutgoingMsg ? UIEdgeInsetsMake(3,3,3,8) : UIEdgeInsetsMake(3,8,3,3);
+- (UIEdgeInsets)contentViewInsets {
+    return UIEdgeInsetsMake(0,0,0,0);
 }
 @end

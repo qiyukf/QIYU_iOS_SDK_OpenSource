@@ -6,7 +6,7 @@
 //  Copyright (c) 2017 Netease. All rights reserved.
 //
 
-@class QYSelectedCommodityInfo;
+@class QYSelectedCommodityInfo,YSF_NIMMessage;
 
 /**
  *  退出排队结果类型
@@ -68,6 +68,20 @@ typedef void (^QYRequestStaffCompletion)(BOOL needed);
 typedef void (^QYRequestStaffBlock)(QYRequestStaffScene scene, QYRequestStaffCompletion completion);
 
 /**
+ *  扩展视图点击回调
+ *
+ *  @param extInfo 附带信息
+ */
+typedef void (^QYExtraViewClickBlock)(NSString *extInfo);
+
+/**
+ *  系统消息点击回调
+ *
+ *  @param message 消息对象
+ */
+typedef void (^QYSystemNotificationClickBlock)(id message);
+
+/**
  *  自定义行为配置类
  */
 @interface QYCustomActionConfig : NSObject
@@ -118,6 +132,16 @@ typedef void (^QYRequestStaffBlock)(QYRequestStaffScene scene, QYRequestStaffCom
  *  请求客服前调用
  */
 @property (nonatomic, copy) QYRequestStaffBlock requestStaffBlock;
+
+/**
+ *  扩展视图点击
+ */
+@property (nonatomic, copy) QYExtraViewClickBlock extraClickBlock;
+
+/**
+ *  系统消息点击
+ */
+@property (nonatomic, copy) QYSystemNotificationClickBlock notificationClickBlock;
 
 @end
 

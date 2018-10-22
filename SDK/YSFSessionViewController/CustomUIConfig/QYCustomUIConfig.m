@@ -59,6 +59,7 @@
     self.customerHeadImageUrl = nil;
     self.serviceHeadImage = [UIImage ysf_imageInKit:@"icon_service_avatar"];
     self.serviceHeadImageUrl = nil;
+    self.humanButtonText = nil;
     self.sessionMessageSpacing = 0;
     self.showHeadImage = YES;
     

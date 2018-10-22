@@ -1,31 +1,40 @@
 #import "YSFUploadLog.h"
 #import "NSDictionary+YSFJson.h"
 #import "YSFApiDefines.h"
+#import "YSFServerSetting.h"
 
 @implementation YSFUploadLog
 
-- (NSString *)apiPath
-{
-    NSString *urlString = [_apiAddress ysf_StringByAppendingApiPath:@"/swallow/log"];
+- (NSString *)apiPath {
+    NSString *apiAddress = [[YSFServerSetting sharedInstance] apiAddress];
+    NSString *urlString = [apiAddress ysf_StringByAppendingApiPath:@"/swallow/log"];
     return urlString;
 }
 
-- (NSDictionary *)params
-{
-    NSString *sign = [NSString stringWithFormat:@"ysfios3.5.0%@%@%lldqykf", _type, [[YSF_NIMSDK sharedSDK] appKey], _time];
+- (NSDictionary *)params {
+    NSString *timeStamp = [NSString stringWithFormat:@"%ld", (long)([[NSDate date] timeIntervalSince1970] * 1000)];
+    NSString *typeString = nil;
+    if (YSFUploadLogTypeInvite == self.type) {
+        typeString = @"invite";
+    } else if (YSFUploadLogTypeSDKInitFail == self.type) {
+        typeString = @"network";
+    } else if (YSFUploadLogTypeRequestStaffFail == self.type) {
+        typeString = @"network";
+    }
+    NSString *sign = [NSString stringWithFormat:@"ysfios%@%@%@%@qykf", YSFStrParam(_version), YSFStrParam(typeString), [[YSF_NIMSDK sharedSDK] appKey], timeStamp];
     sign = [sign ysf_md5];
+    
     return @{
-             
-             YSFApiKeyTerminal :           @"ios",
-             YSFApiKeyVersion :            _version,
-             YSFApiKeyPlatform :           [[UIDevice currentDevice] systemVersion],
-             YSFApiKeyType :               _type,
-             YSFApiKeyAppKey :             [[YSF_NIMSDK sharedSDK] appKey],
-             YSFApiKeyClientId :           [[[YSF_NIMSDK sharedSDK] loginManager] currentAccount],
-             YSFApiKeyLevel :              @"TRACE",
-             YSFApiKeyMessage :            _message,
-             YSFApiKeyTimestamp :          @(_time),
-             YSFApiKeySign :          sign,
+             YSFApiKeyTerminal :    @"ios",
+             YSFApiKeyVersion :     YSFStrParam(_version),
+             YSFApiKeyPlatform :    [[UIDevice currentDevice] systemVersion],
+             YSFApiKeyType :        YSFStrParam(typeString),
+             YSFApiKeyAppKey :      [[YSF_NIMSDK sharedSDK] appKey],
+             YSFApiKeyClientId :    [[[YSF_NIMSDK sharedSDK] loginManager] currentAccount],
+             YSFApiKeyLevel :       @"TRACE",
+             YSFApiKeyMessage :     YSFStrParam(_logString),
+             YSFApiKeyTimestamp :   timeStamp,
+             YSFApiKeySign :        sign,
             };
 }
 

@@ -13,4 +13,6 @@
 
 - (NSString *)sdkRootPath;
 - (NSString *)sdkGlobalPath;
+- (NSString *)sdkVideoPath;
+
 @end

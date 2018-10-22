@@ -45,6 +45,10 @@
  */
 - (BOOL)shouldShowNickName:(YSFMessageModel *)model;
 
+/**
+ *  是否显示扩展视图
+ */
+- (BOOL)shouldShowExtraView:(YSFMessageModel *)model;
 
 /**
  *  格式化消息文本

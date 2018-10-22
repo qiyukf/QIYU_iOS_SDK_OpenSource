@@ -25,6 +25,7 @@
 #import "YSFSendSearchQuestionResponse.h"
 #import "YSFSearchQuestionSetting.h"
 #import "YSFBotEntry.h"
+#import "QYSDK_Private.h"
 
 @implementation YSFCustomSystemNotificationParser
 
@@ -66,21 +67,6 @@
                 case YSFCommandTrashWords:
                     result = [YSFTrashWords dataByJson:dict];
                     break;
-//                case YSFCommandUploadLog:
-//                {
-//                    YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
-//                    uploadLog.apiAddress = [[YSFServerSetting sharedInstance] apiAddress];
-//                    uploadLog.version = @"sdk_3.5.5";
-//                    uploadLog.type = @"invite";
-//                    uploadLog.message = YSF_GetMessage(1000000);
-//                    uploadLog.time = [[NSDate date] timeIntervalSince1970] * 1000;
-//                    [YSFHttpApi post:uploadLog
-//                          completion:^(NSError *error, id returendObject) {
-//
-//                          }];
-//
-//                }
-//                    break;
                 case YSFCommandLongMessage:
                     result = [YSFLongMessage dataByJson:dict];
                     break;
@@ -92,6 +78,17 @@
                     break;
                 case YSFCommandBotEntry:
                     result = [YSFBotEntry dataByJson:dict];
+                    break;
+                case YSFCommandUploadLog: {
+                    YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
+                    uploadLog.version = [[QYSDK sharedSDK].infoManager version];
+                    uploadLog.type = YSFUploadLogTypeInvite;
+                    uploadLog.logString = YSF_GetMessage(50000);
+                    [YSFHttpApi post:uploadLog
+                          completion:^(NSError *error, id returendObject) {
+                              
+                          }];
+                }
                     break;
                 default:
                     break;

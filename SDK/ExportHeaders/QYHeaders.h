@@ -11,6 +11,7 @@
 
 #import "QYSource.h"
 #import "QYUserInfo.h"
+#import "QYStaffInfo.h"
 #import "QYSessionViewController.h"
 #import "QYConversationManager.h"
 #import "QYCustomUIConfig.h"

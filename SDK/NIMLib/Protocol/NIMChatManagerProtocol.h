@@ -93,6 +93,21 @@
               error:(NSError **)error;
 
 /**
+ *  发送消息（隐式）
+ *
+ *  @param message 消息
+ *  @param session 接受方
+ *  @param visible 消息是否可见
+ *  @param error   错误 如果在准备发送消息阶段发生错误,这个error会被填充相应的信息
+ *
+ *  @return 是否调用成功,这里返回的result只是表示当前这个函数调用是否成功,需要后续的回调才能够判断消息是否已经发送至服务器
+ */
+- (BOOL)sendMessage:(YSF_NIMMessage *)message
+          toSession:(YSF_NIMSession *)session
+            visible:(BOOL)visible
+              error:(NSError **)error;
+
+/**
  *  重发消息
  *
  *  @param message 重发消息
@@ -150,5 +165,7 @@
 
 //七鱼新增接口
 - (void)setReceiveMessageFrom:(NSString *)shopID receiveMessageFrom:(NSString *)receiveMessageFrom;
+- (void)setUniqueMessageFrom:(NSString *)uniqueFrom;
+- (NSString *)getUniqueMessageFrom;
 
 @end

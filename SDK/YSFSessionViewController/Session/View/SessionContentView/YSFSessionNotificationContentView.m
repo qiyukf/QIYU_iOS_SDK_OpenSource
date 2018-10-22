@@ -65,8 +65,13 @@
             }
         }
         else if ([object.attachment isKindOfClass:[YSFNotification class]]) {
+            YSFNotification *notification = (YSFNotification *)object.attachment;
             _label.text = [model.layoutConfig formatedMessage:model];
-            YSFNotification *notification = object.attachment;
+            
+            if (notification.clickRange.length && notification.clickColor) {
+                [_label addCustomLink:@"YSFClickAttributedString" forRange:notification.clickRange linkColor:notification.clickColor];
+            }
+            
             if (notification.localCommand == YSFCommandMiniAppTip) {
                 [_label addCustomLink:@"YSFCommandMiniAppTip" forRange:NSMakeRange(notification.message.length-6, 6)];
             }
@@ -94,6 +99,11 @@
         event.eventName = YSFKitEventNameOpenUrl;
         event.message = self.model.message;
         event.data = @"https://developers.weixin.qq.com/miniprogram/dev/api/custommsg/conversation.html";
+        [self.delegate onCatchEvent:event];
+    } else if ([data isEqualToString:@"YSFClickAttributedString"]) {
+        YSFKitEvent *event = [[YSFKitEvent alloc] init];
+        event.eventName = YSFKitEventNameTapSystemNotification;
+        event.message = self.model.message;
         [self.delegate onCatchEvent:event];
     }
 }

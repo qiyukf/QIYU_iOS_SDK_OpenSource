@@ -13,43 +13,40 @@
 
 @implementation YSFStartServiceObject
 
-- (NSString *)thumbText
-{
+- (NSString *)thumbText {
     NSString *text = [NSString stringWithFormat:@"[客服%@为您服务]", _staffName];
-    
     return text;
 }
 
-- (NSDictionary *)encodeAttachment
-{
-    NSMutableDictionary *dict   = [NSMutableDictionary dictionary];
-    
-    dict[YSFApiKeyCmd]          = @(_command);
-    dict[YSFApiKeyStaffId]      = YSFStrParam(_staffId);
-    dict[YSFApiKeyIconUrl]      = YSFStrParam(_iconUrl);
-    dict[YSFApiKeyStaffName]    = YSFStrParam(_staffName);
-    dict[YSFApiKeyGroupName]    = YSFStrParam(_groupName);
-    dict[YSFApiKeyMessage]      = YSFStrParam(_message);
-    dict[YSFApiKeySessionId]    = YSFStrParam(_sessionId);
-    dict[YSFApiKeyExchange]     = YSFStrParam(_serviceId);
-    dict[YSFApiKeyStaffType]     = @(!_humanOrMachine);
+- (NSDictionary *)encodeAttachment {
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    dict[YSFApiKeyCmd] = @(_command);
+    dict[YSFApiKeyStaffId] = YSFStrParam(_staffId);
+    dict[YSFApiKeyIconUrl] = YSFStrParam(_iconUrl);
+    dict[YSFApiKeyStaffName] = YSFStrParam(_staffName);
+    dict[YSFApiKeyGroupName] = YSFStrParam(_groupName);
+    dict[YSFApiKeyMessage] = YSFStrParam(_message);
+    dict[YSFApiKeyAccessTip] = YSFStrParam(_accessTip);
+    dict[YSFApiKeySessionId] = YSFStrParam(_sessionId);
+    dict[YSFApiKeyExchange] = YSFStrParam(_serviceId);
+    dict[YSFApiKeyStaffType] = @(!_humanOrMachine);
     
     return dict;
 }
 
-+ (YSFStartServiceObject *)objectByDict:(NSDictionary *)dict
-{
++ (YSFStartServiceObject *)objectByDict:(NSDictionary *)dict {
     YSFStartServiceObject *instance = [[YSFStartServiceObject alloc] init];
-    instance.command                = [dict ysf_jsonInteger:YSFApiKeyCmd];
-    instance.staffId                = [dict ysf_jsonString:YSFApiKeyStaffId];
-    instance.iconUrl                = [dict ysf_jsonString:YSFApiKeyIconUrl];
-    instance.staffName              = [dict ysf_jsonString:YSFApiKeyStaffName];
-    instance.groupName              = [dict ysf_jsonString:YSFApiKeyGroupName];
-    instance.message                = [dict ysf_jsonString:YSFApiKeyMessage];
-    instance.sessionId              = [dict ysf_jsonString:YSFApiKeySessionId];
-    instance.serviceId              = [dict ysf_jsonString:YSFApiKeyExchange];
-    instance.humanOrMachine         = ![dict ysf_jsonInteger:YSFApiKeyStaffType];
-
+    instance.command = [dict ysf_jsonInteger:YSFApiKeyCmd];
+    instance.staffId = [dict ysf_jsonString:YSFApiKeyStaffId];
+    instance.iconUrl = [dict ysf_jsonString:YSFApiKeyIconUrl];
+    instance.staffName = [dict ysf_jsonString:YSFApiKeyStaffName];
+    instance.groupName = [dict ysf_jsonString:YSFApiKeyGroupName];
+    instance.message = [dict ysf_jsonString:YSFApiKeyMessage];
+    instance.accessTip = [dict ysf_jsonString:YSFApiKeyAccessTip];
+    instance.sessionId = [dict ysf_jsonString:YSFApiKeySessionId];
+    instance.serviceId = [dict ysf_jsonString:YSFApiKeyExchange];
+    instance.humanOrMachine = ![dict ysf_jsonInteger:YSFApiKeyStaffType];
+    
     return instance;
 }
 @end

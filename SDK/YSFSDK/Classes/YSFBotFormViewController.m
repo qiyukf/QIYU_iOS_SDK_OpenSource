@@ -40,11 +40,14 @@ typedef enum : NSUInteger {
 
 @interface YSFBotFormViewController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, YSFKeyboardObserver, YSF_NIMSystemNotificationManagerDelegate>
 
-@property (nonatomic, strong) UIScrollView* scrollView;
+@property (nonatomic, strong) UIScrollView *scrollView;
+@property (nonatomic, strong) UIView *titleView;
 @property (nonatomic, strong) YSFAction *action;
+@property (nonatomic, assign) NTESImagePickerMode mode;
+@property (nonatomic, strong) UIButton *uploadImageButton;
+
 @property (nonatomic, assign) CGRect scrollViewFrame;
-@property (nonatomic, assign)    NTESImagePickerMode      mode;
-@property (nonatomic, assign)    UIButton      *uploadImageButton;
+@property (nonatomic, assign) CGFloat scrollContentHeight;
 
 @end
 
@@ -80,38 +83,38 @@ typedef enum : NSUInteger {
 
 -(void)makeMainView
 {
-    UIView *title = [UIView new];
-    title.backgroundColor = [UIColor whiteColor];
-    title.ysf_frameWidth = YSFUIScreenWidth;
-    [self.view addSubview:title];
+    _titleView = [UIView new];
+    _titleView.backgroundColor = [UIColor whiteColor];
+    _titleView.ysf_frameWidth = YSFUIScreenWidth;
+    [self.view addSubview:_titleView];
     
     UILabel *titleLabel = [UILabel new];
     titleLabel.numberOfLines = 0;
     titleLabel.text = _botForm.label;
     titleLabel.font = [UIFont systemFontOfSize:16];
     titleLabel.ysf_frameTop = 10;
-    titleLabel.ysf_frameWidth = title.ysf_frameWidth - 65;
+    titleLabel.ysf_frameWidth = _titleView.ysf_frameWidth - 65;
     titleLabel.ysf_frameLeft = 25;
     [titleLabel sizeToFit];
-    [title addSubview:titleLabel];
+    [_titleView addSubview:titleLabel];
     
-    title.ysf_frameHeight = titleLabel.ysf_frameHeight + 20;
+    _titleView.ysf_frameHeight = titleLabel.ysf_frameHeight + 20;
 
     UIView *splitLine = [UIView new];
     splitLine.backgroundColor = YSFRGB(0xdbdbdb);
-    splitLine.ysf_frameTop = title.ysf_frameHeight - 0.5;
+    splitLine.ysf_frameTop = _titleView.ysf_frameHeight - 0.5;
     splitLine.ysf_frameHeight = 0.5;
     splitLine.ysf_frameLeft = 0;
     splitLine.ysf_frameWidth = YSFUIScreenWidth;
-    [title addSubview:splitLine];
+    [_titleView addSubview:splitLine];
     
     UIButton *close = [UIButton new];
     [close setImage:[UIImage ysf_imageInKit:@"icon_evaluation_close"] forState:UIControlStateNormal];
-    close.ysf_frameHeight = title.ysf_frameHeight;
+    close.ysf_frameHeight = _titleView.ysf_frameHeight;
     close.ysf_frameWidth = 32;
     close.ysf_frameRight = YSFUIScreenWidth;
     [close addTarget:self action:@selector(onClose) forControlEvents:UIControlEventTouchUpInside];
-    [title addSubview:close];
+    [_titleView addSubview:close];
     
     _scrollView = [UIScrollView new];
     _scrollView.frame = CGRectMake(0, 0, YSFUIScreenWidth, 0);
@@ -271,21 +274,27 @@ typedef enum : NSUInteger {
     submit.backgroundColor = YSFRGB(0x529DF9);
     submit.layer.cornerRadius = 5;
     submit.titleLabel.font = [UIFont systemFontOfSize:16];
-    submit.ysf_frameWidth = title.ysf_frameWidth - 50;
+    submit.ysf_frameWidth = _titleView.ysf_frameWidth - 50;
     submit.ysf_frameHeight = 43;
     submit.ysf_frameLeft = 25;
     submit.ysf_frameBottom = bottom.ysf_frameHeight - 10;
     [bottom addSubview:submit];
     
     offsetY += 63;
-    _scrollView.contentSize = CGSizeMake(CGRectGetWidth(_scrollView.frame), offsetY);
-    CGFloat scrollViewHeight = self.view.bounds.size.height - 30 - title.ysf_frameHeight;
-    if (offsetY < self.view.bounds.size.height - 30 - title.ysf_frameHeight) {
+    offsetY += YSFSafeAreaBottomHeight;
+    
+    CGFloat scrollViewHeight = 0;
+    CGFloat MaxH = YSFUIScreenHeight - YSFStatusBarHeight;
+    if ((offsetY + _titleView.ysf_frameHeight) < MaxH) {
         scrollViewHeight = offsetY;
+    } else {
+        scrollViewHeight = MaxH;
     }
-    _scrollView.frame = CGRectMake(0, self.view.bounds.size.height - scrollViewHeight, YSFUIScreenWidth, scrollViewHeight);
+    _scrollView.frame = CGRectMake(0, YSFUIScreenHeight - scrollViewHeight, YSFUIScreenWidth, scrollViewHeight);
     _scrollViewFrame = _scrollView.frame;
-    title.ysf_frameBottom = _scrollView.ysf_frameTop;
+    _scrollContentHeight = offsetY;
+    _scrollView.contentSize = CGSizeMake(CGRectGetWidth(_scrollView.frame), _scrollContentHeight);
+    _titleView.ysf_frameBottom = _scrollView.ysf_frameTop;
 }
 
 - (void)onClose
@@ -385,19 +394,27 @@ typedef enum : NSUInteger {
 - (void)keyboardChangedWithTransition:(YSFKeyboardTransition)transition {
     __weak typeof(self) weakSelf = self;
     [UIView animateWithDuration:transition.animationDuration delay:0 options:transition.animationOption animations:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
         if (transition.toVisible) {
-            for (UIView * view in weakSelf.scrollView.subviews) {
+            for (UIView * view in strongSelf.scrollView.subviews) {
                 if (view.isFirstResponder && [view isKindOfClass:[UITextField class]]) {
-                    CGRect kbFrame = [[YSFKeyboardManager defaultManager] convertRect:transition.toFrame toView:weakSelf.scrollView];
-                    CGRect scrollViewFrame = weakSelf.scrollViewFrame;
-                    scrollViewFrame.size.height -= kbFrame.size.height;
-                    weakSelf.scrollView.frame = scrollViewFrame;
-                    [weakSelf.scrollView scrollRectToVisible:view.frame animated:YES];
+                    CGFloat contentH = CGRectGetHeight(strongSelf.titleView.frame) + CGRectGetHeight(strongSelf.scrollView.frame);
+                    CGFloat keyboardH = CGRectGetHeight(transition.toFrame);
+                    CGFloat MaxH = YSFUIScreenHeight - YSFStatusBarHeight;
+                    if ((contentH + keyboardH) < MaxH) {
+                        strongSelf.titleView.ysf_frameTop = YSFUIScreenHeight - keyboardH - contentH;
+                        strongSelf.scrollView.ysf_frameHeight = CGRectGetHeight(strongSelf.scrollViewFrame);
+                    } else {
+                        strongSelf.titleView.ysf_frameTop = YSFStatusBarHeight;
+                        strongSelf.scrollView.ysf_frameHeight = MaxH - keyboardH - strongSelf.titleView.ysf_frameHeight;
+                    }
+                    strongSelf.scrollView.ysf_frameTop = strongSelf.titleView.ysf_frameBottom;
+                    [strongSelf.scrollView scrollRectToVisible:view.frame animated:YES];
                 }
             }
-        }
-        else {
-            weakSelf.scrollView.frame = weakSelf.scrollViewFrame;
+        } else {
+            strongSelf.scrollView.frame = strongSelf.scrollViewFrame;
+            strongSelf.titleView.ysf_frameTop = CGRectGetMinY(strongSelf.scrollView.frame) - CGRectGetHeight(strongSelf.titleView.frame);
         }
     } completion:^(BOOL finished) {
         

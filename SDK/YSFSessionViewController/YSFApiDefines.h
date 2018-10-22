@@ -76,6 +76,7 @@
 #define     YSFApiKeyTagList            @"tagList"
 #define     YSFApiKeyList               @"list"
 #define     YSFApiKeyMessage            @"message"
+#define     YSFApiKeyAccessTip          @"accessTip"
 #define     YSFApiKeyOriginalQuestion   @"original_question"
 #define     YSFApiKeyMatchedQuestion    @"matched_question"
 #define     YSFApiKeyTipContent         @"tip_content"
@@ -226,6 +227,19 @@
 #define     YSFApiKeyErrorMsg           @"error_msg"
 #define     YSFApiKeyCustom             @"custom"
 #define     YSFApiKeyPictureLink        @"pictureLink"
+#define     YSFApiKeyHeadImage          @"headImg"
+#define     YSFApiTolerantKeyHeadImage  @"headimg"
+#define     YSFApiKeyMiniTitle          @"Title"
+#define     YSFApiTolerantKeyMiniTitle  @"title"
+#define     YSFApiKeyThumbUrl           @"ThumbUrl"
+#define     YSFApiTolerantKeyThumbUrl   @"thumburl"
+#define     YSFApiKeyTransferTips       @"transfertips"
+#define     YSFApiKeyBotExtendInfo      @"extendInfo"
+#define     YSFApiKeyBotFlowID          @"flowId"
+#define     YSFApiKeyBotRequestID       @"requestId"
+#define     YSFApiKeyBotPreRequestID    @"preRequestId"
+#define     YSFApiKeyBotNodeID          @"nodeId"
+#define     YSFApiKeyBotShowUseful      @"showUseful"
 
 
 #define     YSFApiValueIOS              @"iOS"
@@ -298,6 +312,7 @@ typedef enum : NSUInteger {
     YSFCommandSessionTransferOK         =   95,     //通知用户会话已经转接
     YSFCommandSessionTransferCanceled   =   96,     //通知接收者转接已被取消
     YSFCommandNewWorkOrder              =   115,    //有新的工单分配过来
+    YSFCommandMiniProgramPage           =   122,    //小程序卡片
     YSFCommandAudioToText               =   136,    //推送语音转文字结果
     YSFCommandLongMessage               =   405,    //超长消息
     YSFCommandWorkOrderGroupChanged     =   601,    //组内未受理工单工单所在组已被改变
@@ -309,6 +324,7 @@ typedef enum : NSUInteger {
     YSFCommandNewMessage                =   10003,  //新消息提示
     YSFCommandInviteEvaluation          =   10004,  //邀请评价
     YSFCommandMiniAppTip                =   10005,  //小程序提醒
+    YSFCommandClickNotification         =   10006,  //可点击的通知
 
 
 } YSFCommand;

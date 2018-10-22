@@ -792,9 +792,10 @@
 {
     if (_actionBar && !_actionBar.hidden) {
         _emoticonContainer.ysf_frameTop = _inputTextViewOlderHeight + YSFActionBarHeight;
-    }
-    else {
+        _moreContainer.ysf_frameTop = _inputTextViewOlderHeight + YSFActionBarHeight;
+    } else {
         _emoticonContainer.ysf_frameTop = _inputTextViewOlderHeight;
+        _moreContainer.ysf_frameTop = _inputTextViewOlderHeight;
     }
     _actionBar.ysf_frameTop = 0;
     _actionBar.ysf_frameWidth = self.ysf_frameWidth;

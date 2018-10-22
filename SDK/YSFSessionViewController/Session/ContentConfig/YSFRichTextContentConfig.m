@@ -64,10 +64,8 @@
                             range:NSMakeRange(0, [text length])
                        usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
                            NSString *rangeText = [text substringWithRange:result.range];
-                           if ([[YSFInputEmoticonManager sharedManager] emoticonByTag:rangeText])
-                           {
-                               if (result.range.location > index)
-                               {
+                           if ([[YSFInputEmoticonManager sharedManager] emoticonByTag:rangeText]) {
+                               if (result.range.location > index) {
                                    NSString *rawText = [text substringWithRange:NSMakeRange(index, result.range.location - index)];
                                    resultText = [resultText stringByAppendingString:rawText];
                                }
@@ -78,18 +76,22 @@
                            }
                        }];
     
-    if (index < [text length])
-    {
+    if (index < [text length]) {
         NSString *rawText = [text substringWithRange:NSMakeRange(index, [text length] - index)];
         resultText = [resultText stringByAppendingString:rawText];
     }
+    //处理富文本消息中的换行
+    if ([resultText containsString:@"\n"] || [resultText containsString:@"\r"]) {
+        resultText = [resultText stringByReplacingOccurrencesOfString:@"\n" withString:@"<br>"];
+        resultText = [resultText stringByReplacingOccurrencesOfString:@"\r" withString:@"<br>"];
+    }
+    
     resultText = [NSString stringWithFormat:@"<span>%@</span>", resultText];
     NSData *data = [resultText dataUsingEncoding:NSUTF8StringEncoding];
     
     // Create attributed string from HTML
     CGSize maxImageSize = CGSizeMake(239, 425);
     NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSValue valueWithCGSize:maxImageSize], YSFMaxImageSize, @(16), YSFDefaultFontSize, nil];
-    
     NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:options documentAttributes:NULL];
     
     return string;

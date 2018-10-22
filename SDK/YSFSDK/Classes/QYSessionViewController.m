@@ -29,7 +29,6 @@
 #import "YSFKFBypassNotification.h"
 #import "YSFSetCommodityInfoRequest.h"
 #import "QYCommodityInfo.h"
-#import "QYCommodityInfo.h"
 #import "YSFStartServiceObject.h"
 #import "YSFInviteEvaluationObject.h"
 #import "QYCustomActionConfig+Private.h"
@@ -66,10 +65,15 @@
 #import "KFQuickReplyContentView.h"
 #import "YSFSearchQuestionSetting.h"
 #import "KFNewMsgTipViewToDown.h"
-#import "YSFSearchQuestionSetting.h"
 #import "YSFBotCustomObject.h"
 #import "YSFBotEntry.h"
 #import "QYCommodityInfo_private.h"
+#import "QYStaffInfo.h"
+
+#import "YSFViewControllerTransitionAnimation.h"
+#import "YSFCameraViewController.h"
+#import "YSFVideoPlayerViewController.h"
+#import "YSFVideoDataManager.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -77,6 +81,7 @@
 typedef enum : NSUInteger {
     YSFImagePickerModePicture,
     YSFImagePickerModeShoot,
+    YSFImagePickerModeVideo,
 } YSFImagePickerMode;
 
 YSFInputStatus g_inputStatus = YSFInputStatusText;
@@ -92,7 +97,7 @@ static long long g_sessionId;
 @end
 
 @interface QYSessionViewController()
-<UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, YSF_NIMSystemNotificationManagerDelegate, YSFAppInfoManagerDelegate, YSFEvaluationReasonViewDelegate, YSFQuickReplyContentViewDelegate>
+<UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, YSF_NIMSystemNotificationManagerDelegate, YSFAppInfoManagerDelegate, YSFEvaluationReasonViewDelegate, YSFQuickReplyContentViewDelegate, UIViewControllerTransitioningDelegate, YSFCameraViewControllerDelegate>
 @property (nonatomic,assign)    YSFImagePickerMode      mode;
 @property (nonatomic,strong)    UIButton *humanService;
 @property (nonatomic,strong)    UIButton *humanServiceText;
@@ -116,6 +121,7 @@ static long long g_sessionId;
 @property (nonatomic,weak)      id<QYSessionViewDelegate> delegate;     //会话窗口回调
 @property (nonatomic,strong)    YSFPopTipView *popTipView;
 @property (nonatomic,strong)    YSFTimer *inputtingMessage;
+@property (nonatomic,strong)    YSFTimer *inputAssociateTimer;
 @property (nonatomic,copy)      NSString *lastMessageContent;
 @property (nonatomic,strong)    NSMutableArray<YSFActionInfo *> *ysfActionInfoArray;
 @property (nonatomic, strong)   YSFQuickReplyContentView *quickReplyView;
@@ -131,6 +137,11 @@ static long long g_sessionId;
     _shopId = [shopId lowercaseString];
 }
 
+- (void)setStaffInfo:(QYStaffInfo *)staffInfo {
+    _staffInfo = staffInfo;
+    [[QYSDK sharedSDK] sessionManager].staffInfo = staffInfo;
+}
+
 - (instancetype)init
 {
     self = [super initWithNibName:nil bundle:nil];
@@ -144,6 +155,7 @@ static long long g_sessionId;
         _openRobotInShuntMode = NO;
         _queryWaitingStatusTimer = [[YSFTimer alloc]init];
         _inputtingMessage = [[YSFTimer alloc]init];
+        _inputAssociateTimer = [[YSFTimer alloc] init];
     }
     return self;
 }
@@ -158,6 +170,9 @@ static long long g_sessionId;
 - (void)viewDidLoad {
     if (_groupId || _staffId) {
         self.specifiedId = YES;
+    }
+    if (!self.staffInfo) {
+        [[QYSDK sharedSDK] sessionManager].staffInfo = nil;
     }
 
     [super viewDidLoad];
@@ -254,6 +269,7 @@ static long long g_sessionId;
     }
     
     if (shouldRequestService) {
+        [[[QYSDK sharedSDK] sessionManager] updateStaffInfoForOnlineSession:_shopId];
         [self requestServiceIfNeededInScene:QYRequestStaffSceneInit onlyManual:NO clearSession:NO];
     }
     
@@ -399,6 +415,7 @@ static long long g_sessionId;
     [[YSF_NIMSDK sharedSDK].chatManager removeDelegate:self];
     [[[YSF_NIMSDK sharedSDK] systemNotificationManager] removeDelegate:self];
     g_inputStatus = _sessionInputView.inputStatus;
+    [QYCustomUIConfig sharedInstance].humanButtonText = nil;
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -440,7 +457,13 @@ static long long g_sessionId;
     [rightButtonView addSubview:_humanService];
     _humanServiceText = [[UIButton alloc] init];
     [rightButtonView addSubview:_humanServiceText];
-    [_humanServiceText setTitle:@"人工" forState:UIControlStateNormal];
+    
+    if ([QYCustomUIConfig sharedInstance].humanButtonText.length) {
+        [_humanServiceText setTitle:[QYCustomUIConfig sharedInstance].humanButtonText forState:UIControlStateNormal];
+    } else {
+        [_humanServiceText setTitle:@"人工" forState:UIControlStateNormal];
+    }
+    
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
     if (uiConfig.rightBarButtonItemColorBlackOrWhite) {
         [_humanServiceText setTitleColor:YSFRGB(0x76838f) forState:UIControlStateNormal];
@@ -764,12 +787,12 @@ static long long g_sessionId;
 {
     if ([QYCustomUIConfig sharedInstance].sessionListEntrancePosition) {
         //YES是在右上角
-        _sessionListImageView.frame = CGRectMake(YSFUIScreenWidth - 42, YSFNormalNavigationbarHeight + 20, 42, 42);
-        _sessionListButton.frame = CGRectMake(YSFUIScreenWidth - 42, YSFNormalNavigationbarHeight + 20, 42, 42);
+        _sessionListImageView.frame = CGRectMake(YSFUIScreenWidth - 42, YSFNavigationBarHeight + 20, 42, 42);
+        _sessionListButton.frame = CGRectMake(YSFUIScreenWidth - 42, YSFNavigationBarHeight + 20, 42, 42);
     } else {
         //NO是在左上角
-        _sessionListImageView.frame = CGRectMake(0, YSFNormalNavigationbarHeight + 20, 42, 42);
-        _sessionListButton.frame = CGRectMake(0, YSFNormalNavigationbarHeight + 20, 42, 42);
+        _sessionListImageView.frame = CGRectMake(0, YSFNavigationBarHeight + 20, 42, 42);
+        _sessionListButton.frame = CGRectMake(0, YSFNavigationBarHeight + 20, 42, 42);
     }
 }
 
@@ -947,7 +970,12 @@ static long long g_sessionId;
     if (_changeEvaluationEnabledBlock) {
         _changeEvaluationEnabledBlock(NO);
     }
+    
     if (![QYCustomUIConfig sharedInstance].showEvaluationEntry) {
+        return;
+    }
+    YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
+    if (session && !session.humanOrMachine && !_humanService.hidden) {
         return;
     }
     _evaluation.hidden = NO;
@@ -1093,8 +1121,10 @@ static long long g_sessionId;
     [_sessionInputView addKeyboardObserver];
     
     NSMutableDictionary *shopDict = [[[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId] mutableCopy];
-    [shopDict setValue:@(NO) forKey:YSFApiEvaluationAutoPopup];
-    [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
+    if (shopDict) {
+        [shopDict setValue:@(NO) forKey:YSFApiEvaluationAutoPopup];
+        [[[QYSDK sharedSDK] sessionManager] setEvaluationInfo:shopDict shopId:_shopId];
+    }
     
     if (!needShow) {
         return;
@@ -1500,6 +1530,7 @@ static long long g_sessionId;
 - (void)sendMessage:(YSF_NIMMessage *)message
 {
     [_inputtingMessage stop];
+    [_inputAssociateTimer stop];
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     if ([sessionManager getOnlineSession:_shopId] && [sessionManager getOnlineSession:_shopId].humanOrMachine) {
         NSMutableDictionary *shopDict = [[[[QYSDK sharedSDK] sessionManager] getEvaluationInfoByShopId:_shopId] mutableCopy];
@@ -1627,6 +1658,31 @@ static long long g_sessionId;
                             [_evaluation animation_shakeImageWithDuration];
                         }
                     }
+                }
+            }
+            
+            if (self.staffInfo && [customObject isMemberOfClass:[YSF_NIMCustomObject class]]) {
+                id object = ((YSF_NIMCustomObject *)customObject).attachment;
+                if ([object isMemberOfClass:[YSFStartServiceObject class]]) {
+                    YSFStartServiceObject *staffObject = (YSFStartServiceObject *)object;
+                    if (self.staffInfo.nickName.length) {
+                        //update object staffName
+                        staffObject.staffName = self.staffInfo.nickName;
+                        //update rawAttachContent
+                        NSDictionary *contentDict = [message.rawAttachContent ysf_toDict];
+                        NSMutableDictionary *contentMutableDict = [NSMutableDictionary dictionaryWithDictionary:contentDict];
+                        [contentMutableDict setObject:self.staffInfo.nickName forKey:YSFApiKeyStaffName];
+                        NSString *newContent = [contentMutableDict ysf_toUTF8String];
+                        message.rawAttachContent = newContent;
+                    }
+                    if (self.staffInfo.accessTip.length) {
+                        staffObject.accessTip = self.staffInfo.accessTip;
+                    }
+
+                    [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES
+                                                                        message:message
+                                                                     forSession:_session
+                                                                     completion:nil];
                 }
             }
         }
@@ -1974,10 +2030,12 @@ static long long g_sessionId;
         YSFServiceSession *session = [[[QYSDK sharedSDK] sessionManager] getOnlineOrWaitingSession:_shopId];
         CGFloat sendingRate = [YSFSearchQuestionSetting sharedInstance:_shopId].sendingRate;
         
-        if (session && (!session.humanOrMachine || session.robotInQueue) && _inputtingMessage.isStopped && self.lastMessageContent) {
+        if (session
+            && _inputAssociateTimer.isStopped
+            && self.lastMessageContent) {
             __weak typeof(self) weakSelf = self;
-            [_inputtingMessage start:dispatch_get_main_queue() interval:sendingRate repeats:NO block:^{
-                if (!weakSelf.inputtingMessage.isStopped && weakSelf.lastMessageContent) {
+            [_inputAssociateTimer start:dispatch_get_main_queue() interval:sendingRate repeats:NO block:^{
+                if (!weakSelf.inputAssociateTimer.isStopped && weakSelf.lastMessageContent) {
                     [weakSelf sendSearchQuestionRequest:weakSelf.lastMessageContent sessionId:session.sessionId sendingRate:sendingRate];
                 }
             }];
@@ -2072,8 +2130,7 @@ static long long g_sessionId;
     NSString *eventName = event.eventName;
     YSF_NIMMessage *message = event.message;
     
-    if ([eventName isEqualToString:YSFKitEventNameReloadData])
-    {
+    if ([eventName isEqualToString:YSFKitEventNameReloadData]) {
         YSFMessageModel *model = [self makeModel:message];
         BOOL shouldAutoScroll = NO;
         NSInteger index = [self.sessionDatasource indexAtModelArray:model];
@@ -2085,24 +2142,24 @@ static long long g_sessionId;
             [_tableView ysf_scrollToBottom:YES];
         }
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapContent])
-    {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapContent]) {
         switch (message.messageType) {
-            case YSF_NIMMessageTypeImage:
-            {
+            case YSF_NIMMessageTypeImage: {
                 [self showImage:message touchView:event.data];
                 handled = YES;
                 break;
             }
-            case YSF_NIMMessageTypeAudio:
-            {
+            case YSF_NIMMessageTypeAudio: {
                 [self onTapPlayAudio:event];
                 handled = YES;
                 break;
             }
-            case YSF_NIMMessageTypeFile:
-            {
+            case YSF_NIMMessageTypeVideo: {
+                [self onTapPlayVideo:message touchView:event.data];
+                handled = YES;
+                break;
+            }
+            case YSF_NIMMessageTypeFile: {
                 [self onTapFileMessage:message];
                 handled = YES;
                 break;
@@ -2110,16 +2167,15 @@ static long long g_sessionId;
             default:
                 break;
         }
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapRichTextImage])
-    {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapRichTextImage]) {
         [self showImage:message touchView:event.data];
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapLabelPhoneNumber])
-    {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapLabelPhoneNumber]) {
         UIAlertView *dialog = [[UIAlertView alloc] initWithTitle:event.data
-                                                         message:@"" delegate:self cancelButtonTitle:nil otherButtonTitles:nil,nil];
+                                                         message:@""
+                                                        delegate:self
+                                               cancelButtonTitle:nil
+                                               otherButtonTitles:nil,nil];
         [dialog addButtonWithTitle:@"取消"];
         [dialog addButtonWithTitle:@"呼叫"];
         [dialog ysf_showWithCompletion:^(NSInteger index) {
@@ -2130,9 +2186,7 @@ static long long g_sessionId;
         }];
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapMachineQuestion])
-    {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapMachineQuestion]) {
         NSDictionary *questionDict = event.data;
         NSString *question = [questionDict objectForKey:YSFApiKeyQuestion];
 
@@ -2155,9 +2209,7 @@ static long long g_sessionId;
         }
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapEvaluationSelection])
-    {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapEvaluationSelection]) {
         BOOL yesOrNo = [event.data boolValue];
         YSFEvaluationAnswerRequest *answer = [YSFEvaluationAnswerRequest new];
         answer.evaluation = yesOrNo ? 2 : 3;
@@ -2173,14 +2225,10 @@ static long long g_sessionId;
         }];
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapEvaluationReason])
-    {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapEvaluationReason]) {
         [self onTapEvaluationReasonWithMessage:message];
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapLabelLink])
-    {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapLabelLink]) {
         NSString *url = event.data;
         //判断邮箱
         if ([url matchEmailFormat]) {
@@ -2203,13 +2251,10 @@ static long long g_sessionId;
             [self openUrl:url];
             handled = YES;
         }
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapKFBypass])
-    {
+    } else if ([eventName isEqualToString:YSFKitEventNameTapKFBypass]) {
         [self requestByBypassDict:event.message entryDict:event.data];
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapCommodityInfo]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapCommodityInfo]) {
         YSF_NIMCustomObject *customObject = event.message.messageObject;
         QYCommodityInfo *commodityInfo = customObject.attachment;
         NSString *commodityUrl = commodityInfo.urlString;
@@ -2217,8 +2262,7 @@ static long long g_sessionId;
             [self openUrl:commodityUrl];
         }
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapEvaluation]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapEvaluation]) {
         YSF_NIMCustomObject *customObject = event.message.messageObject;
         YSFInviteEvaluationObject *object = customObject.attachment;
 
@@ -2231,8 +2275,7 @@ static long long g_sessionId;
         }
 
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapGoods]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapGoods]) {
         QYSelectedCommodityInfo *goods = event.data;
         YSFSelectedCommodityInfo *selectedGoods = [[YSFSelectedCommodityInfo alloc] init];
         selectedGoods.command = YSFCommandBotSend;
@@ -2243,8 +2286,7 @@ static long long g_sessionId;
         [self sendMessage:selectedGoodsMessage];
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapMoreOrders]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapMoreOrders]) {
         YSFOrderList *orderList = event.data;
         
         YSFMoreOrderListViewController *vc = [YSFMoreOrderListViewController new];
@@ -2265,29 +2307,24 @@ static long long g_sessionId;
         [self presentViewController:vc animated:YES completion:nil];
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapMoreFlight]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapMoreFlight]) {
         YSFFlightList *flightList = event.data;
         [self popUpMoreListNav:flightList];
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapBot]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapBot]) {
         [self onTapBotAction:event.data];
 
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapMixReply]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapMixReply]) {
         [self onTapMixReplyAction:event.data];
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapPushMessageActionUrl]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapPushMessageActionUrl]) {
         [self onTapPushMessageActionUrl:event.data];
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameTapFillInBotForm]){
+    } else if ([eventName isEqualToString:YSFKitEventNameTapFillInBotForm]) {
         long long sessionId = event.message.sessionIdFromMessageId;
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
         YSFServiceSession *session = [sessionManager getOnlineSession:_shopId];
@@ -2300,8 +2337,7 @@ static long long g_sessionId;
         }
         
         handled = YES;
-    }
-    else if ([eventName isEqualToString:YSFKitEventNameSendCommdityInfo]){
+    } else if ([eventName isEqualToString:YSFKitEventNameSendCommdityInfo]) {
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
         YSFServiceSession *session = [sessionManager getOnlineOrWaitingSession:_shopId];
         if (!session) {
@@ -2329,6 +2365,34 @@ static long long g_sessionId;
             [QYCustomActionConfig sharedInstance].commodityActionBlock(selectedGoods.goods);
         }
         handled = YES;
+    } else if ([eventName isEqualToString:YSFKitEventNameTapExtraViewAction]) {
+        if ([QYCustomActionConfig sharedInstance].extraClickBlock) {
+            if (event.message.ext.length) {
+                NSDictionary *dict = [event.message.ext ysf_toDict];
+                if (dict && dict.count) {
+                    BOOL needShow = [[dict objectForKey:YSFApiKeyBotShowUseful] boolValue];
+                    if (needShow) {
+                        [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES
+                                                                         attachment:NO
+                                                                            message:event.message
+                                                                         forSession:_session
+                                                                         completion:nil];
+                        [QYCustomActionConfig sharedInstance].extraClickBlock(event.message.ext);
+                        
+                        //自定义行为
+                        
+                    }
+                }
+            }
+        } else {
+            //SDK内部行为
+        }
+    
+        handled = YES;
+    } else if ([eventName isEqualToString:YSFKitEventNameTapSystemNotification]) {
+        if ([QYCustomActionConfig sharedInstance].notificationClickBlock) {
+            [QYCustomActionConfig sharedInstance].notificationClickBlock(event.message);
+        }
     }
     
     if (!handled) {
@@ -2741,20 +2805,42 @@ static long long g_sessionId;
     return result;
 }
 
-- (void)onRetryMessage:(YSF_NIMMessage *)message
-{
+- (void)onRetryMessage:(YSF_NIMMessage *)message {
+    if (message.messageType == YSF_NIMMessageTypeVideo) {
+        if (message.deliveryState == YSF_NIMMessageDeliveryStateFailed) {
+            if (message.isReceivedMsg) {
+                [[[YSF_NIMSDK sharedSDK] chatManager] fetchMessageAttachment:message
+                                                                       error:nil];
+            } else {
+                __weak typeof(self) weakSelf = self;
+                YSFAlertController * alertController = [YSFAlertController actionSheetWithTitle:@"重新发送本条消息"];
+                [alertController addAction:[YSFAlertAction actionWithTitle:@"确定" handler:^(YSFAlertAction * _Nonnull action) {
+                    [weakSelf onResendMessage:message];
+                }]];
+                [alertController addCancelActionWithHandler:nil];
+                [alertController showWithSender:nil
+                                 arrowDirection:UIPopoverArrowDirectionAny
+                                     controller:self
+                                       animated:YES
+                                     completion:nil];
+            }
+        }
+    } else {
+        [self onResendMessage:message];
+    }
+}
+
+- (void)onResendMessage:(YSF_NIMMessage *)message {
     if (message.isReceivedMsg) {
         [[[YSF_NIMSDK sharedSDK] chatManager] fetchMessageAttachment:message
-                                                           error:nil];
-    }
-    else {
+                                                               error:nil];
+    } else {
         [self uiDeleteMessage:message];
         if (message.messageType == YSF_NIMMessageTypeAudio) {
             [[[YSF_NIMSDK sharedSDK] conversationManager] deleteMessage:message];
             YSF_NIMAudioObject *audioObject =  (YSF_NIMAudioObject *)message.messageObject;
             [self sendAudio:audioObject.path];
-        }
-        else {
+        } else {
             [[[YSF_NIMSDK sharedSDK] chatManager] resendMessage:message
                                                           error:nil];
         }
@@ -2770,6 +2856,7 @@ static long long g_sessionId;
         UIMenuController *controller = [UIMenuController sharedMenuController];
         controller.menuItems = items;
         _messageForMenu = message;
+        _messageTouchView = view;
         
         if ([self.sessionInputView.toolBar.inputTextView isFirstResponder]) {
             self.sessionInputView.toolBar.inputTextView.overrideNextResponder = self;
@@ -2805,6 +2892,11 @@ static long long g_sessionId;
     } else if (message.messageType == YSF_NIMMessageTypeImage) {
         [items addObject:[[UIMenuItem alloc] initWithTitle:@"复制"
                                                     action:@selector(copyTextOrImage:)]];
+    } else if (message.messageType == YSF_NIMMessageTypeVideo) {
+        [items addObject:[[UIMenuItem alloc] initWithTitle:@"静音"
+                                                    action:@selector(playVideoWithSoundOff:)]];
+        [items addObject:[[UIMenuItem alloc] initWithTitle:@"保存"
+                                                    action:@selector(saveVideoToSystemLibrary:)]];
     } else if (message.messageType == YSF_NIMMessageTypeCustom) {
         YSF_NIMCustomObject *customObject = (YSF_NIMCustomObject *)message.messageObject;
         if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]
@@ -2814,6 +2906,9 @@ static long long g_sessionId;
             
             [items addObject:[[UIMenuItem alloc] initWithTitle:@"删除"
                                                         action:@selector(deleteMsg:)]];
+        } else if ([customObject.attachment isKindOfClass:[YSFRichText class]]) {
+            [items addObject:[[UIMenuItem alloc] initWithTitle:@"复制"
+                                                        action:@selector(copyTextOrImage:)]];
         }
     } else {
         [items addObject:[[UIMenuItem alloc] initWithTitle:@"删除"
@@ -2908,21 +3003,32 @@ static long long g_sessionId;
             YSFMachineResponse *machineResponse = (YSFMachineResponse *)customObject.attachment;
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             [pasteboard setString:YSFStrParam(machineResponse.rawStringForCopy)];
-        }
-        else if ([customObject.attachment isKindOfClass:[YSFKFBypassNotification class]]) {
+        } else if ([customObject.attachment isKindOfClass:[YSFKFBypassNotification class]]) {
             YSFKFBypassNotification *notification = (YSFKFBypassNotification *)customObject.attachment;
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             [pasteboard setString:YSFStrParam(notification.rawStringForCopy)];
-        }
-        else if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]) {
+        } else if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]) {
             YSFReportQuestion *notification = (YSFReportQuestion *)customObject.attachment;
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             [pasteboard setString:YSFStrParam(notification.question)];
-        }
-        else if ([customObject.attachment isKindOfClass:[QYCommodityInfo class]]){
+        } else if ([customObject.attachment isKindOfClass:[QYCommodityInfo class]]) {
             QYCommodityInfo *commodityInfoShow = (QYCommodityInfo *)customObject.attachment;
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             [pasteboard setString:YSFStrParam(commodityInfoShow.urlString)];
+        } else if ([customObject.attachment isKindOfClass:[YSFRichText class]]) {
+            YSFRichText *richText = (YSFRichText *)customObject.attachment;
+            NSString *copyText = nil;
+            if (richText.displayContent.length) {
+                copyText = richText.displayContent;
+                NSString *lastChar = [copyText substringWithRange:NSMakeRange((copyText.length - 1), 1)];
+                if ([lastChar isEqualToString:@"\n"]) {
+                    copyText = [copyText substringWithRange:NSMakeRange(0, (copyText.length - 1))];
+                }
+            } else if (richText.content.length) {
+                copyText = richText.content;
+            }
+            UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+            [pasteboard setString:YSFStrParam(copyText)];
         }
     }
 }
@@ -3029,7 +3135,7 @@ static long long g_sessionId;
     request.entryId = _entryId;
     request.commonQuestionTemplateId = _commonQuestionTemplateId;
     request.openRobotInShuntMode = _openRobotInShuntMode;
-    [[[QYSDK sharedSDK] sessionManager] requestServicewithSource:request shopId:_shopId];
+    [[[QYSDK sharedSDK] sessionManager] requestServiceWithSource:request shopId:_shopId];
     if (YSFSessionStateTypeNotExist == [[[QYSDK sharedSDK] sessionManager] getSessionStateType:_shopId]) {
         return YES;
     } else {
@@ -3273,8 +3379,7 @@ static long long g_sessionId;
     }
     
     id object =  [YSFCustomSystemNotificationParser parse:content shopId:shopId];
-    if ([object isKindOfClass:[YSFQueryWaitingStatusResponse class]])
-    {
+    if ([object isKindOfClass:[YSFQueryWaitingStatusResponse class]]) {
         YSFQueryWaitingStatusResponse *wait_status = object;
         NSError *error = wait_status.code == YSFCodeSuccess ? nil : [NSError errorWithDomain:YSFErrorDomain
                                                                                         code:wait_status.code
@@ -3282,13 +3387,10 @@ static long long g_sessionId;
         [self didReceiveWaitingStatus:error waitStatus:wait_status shopId:shopId];
         if (wait_status.code != YSFCodeSuccess) {
             [_queryWaitingStatusTimer stop];
-        }
-        else {
+        } else {
             [self queryWaitingStatus:shopId];
         }
-    }
-    else if ([object isKindOfClass:[YSFSendSearchQuestionResponse class]])
-    {
+    } else if ([object isKindOfClass:[YSFSendSearchQuestionResponse class]]) {
         if (_sessionInputView.toolBar.inputTextView.text.length == 0) {
             return;
         }
@@ -3298,7 +3400,7 @@ static long long g_sessionId;
         _quickReplyView.searchText = sendSearchQuestionResponse.content;
         for (YSFQuickReplyKeyWordAndContent *content in sendSearchQuestionResponse.questionContents) {
             content.content = content.content;
-            content.isContentRich = NO;
+            content.isContentRich = 0;
             [array addObject:content];
         }
 
@@ -3313,9 +3415,7 @@ static long long g_sessionId;
             }
             [self.view addSubview:self.quickReplyView];
         }
-    }
-    else if ([object isKindOfClass:[YSFBotEntry class]])
-    {
+    } else if ([object isKindOfClass:[YSFBotEntry class]]) {
         [_sessionInputView setActionInfoArray:((YSFBotEntry *)object).entryArray];
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
         if (sessionManager) {
@@ -3421,24 +3521,31 @@ static long long g_sessionId;
     [controller showWithSender:nil arrowDirection:UIPopoverArrowDirectionAny controller:self animated:YES completion:nil];
 }
 
+#pragma mark - send image & video
 - (void)showSelectImageAlertController
 {
     __weak typeof(self) weakSelf = self;
     YSFAlertController * alertController = [YSFAlertController actionSheetWithTitle:nil];
+    //相册：目前使用系统相册界面，无法多选
     [alertController addAction:[YSFAlertAction actionWithTitle:@"选择本地图片" handler:^(YSFAlertAction * _Nonnull action) {
-        //相册
         [weakSelf mediaPicturePressed];
     }]];
-    
+    //拍照：目前使用系统照相机界面，无法定制化
     [alertController addAction:[YSFAlertAction actionWithTitle:@"拍照" handler:^(YSFAlertAction * _Nonnull action) {
-        //拍照
         [weakSelf mediaShootPressed];
+    }]];
+    //视频：使用AVCapture相关库进行界面包装
+    [alertController addAction:[YSFAlertAction actionWithTitle:@"视频" handler:^(YSFAlertAction * _Nonnull action) {
+        [weakSelf showCameraViewController];
     }]];
     
     [alertController addCancelActionWithHandler:nil];
     
     [alertController showWithSender:_sessionInputView.toolBar.imageButton
-                     arrowDirection:UIPopoverArrowDirectionAny controller:self animated:YES completion:nil];
+                     arrowDirection:UIPopoverArrowDirectionAny
+                         controller:self
+                           animated:YES
+                         completion:nil];
 }
 
 - (void)mediaPicturePressed
@@ -3454,27 +3561,12 @@ static long long g_sessionId;
 
 - (UIImagePickerController *)cameraInit
 {
-    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-        [[[UIAlertView alloc] initWithTitle:nil
-                                    message:@"检测不到相机设备"
-                                   delegate:nil
-                          cancelButtonTitle:@"确定"
-                          otherButtonTitles:nil] show];
+    if (![self checkAvailableForCamera]) {
         return nil;
     }
-    NSString *mediaType = AVMediaTypeVideo;
-    
-    AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:mediaType];
-    if(authStatus == AVAuthorizationStatusRestricted || authStatus == AVAuthorizationStatusDenied){
-        [[[UIAlertView alloc] initWithTitle:@"没有相机权限"
-                                    message:@"请在iPhone的“设置-隐私-相机”选项中，允许访问你的相机。"
-                                   delegate:nil
-                          cancelButtonTitle:@"确定"
-                          otherButtonTitles:nil] show];
+    if (![self checkAuthorizationStatusForCamera]) {
         return nil;
-        
     }
-
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
     imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
@@ -3493,6 +3585,23 @@ static long long g_sessionId;
     }
 }
 
+- (void)showCameraViewController {
+    if (![self checkAvailableForCamera]) {
+        return;
+    }
+    if (![self checkAuthorizationStatusForCamera]) {
+        return;
+    }
+    if (![self checkAuthorizationStatusForAudio]) {
+        return;
+    }
+    self.mode = YSFImagePickerModeVideo;
+    YSFCameraViewController *cameraVC = [[YSFCameraViewController alloc] init];
+    cameraVC.videoDataPath = [[[QYSDK sharedSDK] pathManager] sdkVideoPath];
+    cameraVC.delegate = self;
+    [self presentViewController:cameraVC animated:YES completion:nil];
+}
+
 - (void)onPasteImage:(UIImage *)image
 {
     YSFImageConfirmedViewController *vc = [[YSFImageConfirmedViewController alloc] initWithImage:image];
@@ -3506,6 +3615,44 @@ static long long g_sessionId;
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     [self presentViewController:vc animated:YES completion:nil];
     [self.sessionInputView.toolBar.inputTextView resignFirstResponder];
+}
+
+- (BOOL)checkAvailableForCamera {
+    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+        [[[UIAlertView alloc] initWithTitle:nil
+                                    message:@"检测不到相机设备"
+                                   delegate:nil
+                          cancelButtonTitle:@"确定"
+                          otherButtonTitles:nil] show];
+        return NO;
+    }
+    return YES;
+}
+
+- (BOOL)checkAuthorizationStatusForCamera {
+    AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    if (authStatus == AVAuthorizationStatusRestricted || authStatus == AVAuthorizationStatusDenied) {
+        [[[UIAlertView alloc] initWithTitle:@"没有相机权限"
+                                    message:@"请在iPhone的“设置-隐私-相机”选项中，允许访问你的相机。"
+                                   delegate:nil
+                          cancelButtonTitle:@"确定"
+                          otherButtonTitles:nil] show];
+        return NO;
+    }
+    return YES;
+}
+
+- (BOOL)checkAuthorizationStatusForAudio {
+    AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
+    if (authStatus == AVAuthorizationStatusRestricted || authStatus == AVAuthorizationStatusDenied) {
+        [[[UIAlertView alloc] initWithTitle:@"没有麦克风权限"
+                                    message:@"请在iPhone的“设置-隐私-麦克风”选项中，允许访问你的麦克风。"
+                                   delegate:nil
+                          cancelButtonTitle:@"确定"
+                          otherButtonTitles:nil] show];
+        return NO;
+    }
+    return YES;
 }
 
 #pragma mark - ImagePicker初始化
@@ -3608,6 +3755,70 @@ static long long g_sessionId;
 - (void)sendPicture:(UIImage *)picture
 {
     [self sendMessage:[YSFMessageMaker msgWithImage:picture]];
+}
+
+#pragma mark - Video
+- (void)sendVideoMessage:(NSURL *)url {
+    [self sendMessage:[YSFMessageMaker msgWithVideo:url.path]];
+    [[YSFVideoDataManager sharedManager] saveVideoToSystemLibrary:url.path completion:nil];
+}
+
+- (void)playVideoWithSoundOff:(id)sender {
+    YSF_NIMMessage *message = [self messageForMenu];
+    if (YSF_NIMMessageTypeVideo == message.messageType) {
+        YSFVideoPlayerViewController *playerVC = [[YSFVideoPlayerViewController alloc] init];
+        playerVC.transitioningDelegate = self;
+        playerVC.message = message;
+        playerVC.soundOff = YES;
+        [self presentViewController:playerVC animated:YES completion:nil];
+    }
+}
+
+- (void)saveVideoToSystemLibrary:(id)sender {
+    YSF_NIMMessage *message = [self messageForMenu];
+    if (YSF_NIMMessageTypeVideo == message.messageType) {
+        YSF_NIMVideoObject *videoObject = (YSF_NIMVideoObject *)message.messageObject;
+        if (videoObject.path.length) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:videoObject.path]) {
+                [[YSFVideoDataManager sharedManager] saveVideoToSystemLibrary:videoObject.path completion:^(BOOL success) {}];
+            }
+        }
+    }
+}
+
+- (void)onTapPlayVideo:(YSF_NIMMessage *)message touchView:(UIView *)touchView {
+    if (YSF_NIMMessageTypeVideo == message.messageType) {
+        _messageTouchView = touchView;
+        YSFVideoPlayerViewController *playerVC = [[YSFVideoPlayerViewController alloc] init];
+        playerVC.transitioningDelegate = self;
+        playerVC.message = message;
+        playerVC.soundOff = NO;
+        [self presentViewController:playerVC animated:YES completion:nil];
+    }
+}
+
+#pragma mark - UIViewControllerTransitioningDelegate
+-(id<UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented
+                                                                 presentingController:(UIViewController *)presenting
+                                                                     sourceController:(UIViewController *)source {
+    if (_messageTouchView && [presented isKindOfClass:[YSFVideoPlayerViewController class]]) {
+        return [self makeAnimationForPresent:YES touchView:_messageTouchView];
+    }
+    return nil;
+}
+
+- (id<UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
+    if (_messageTouchView && [dismissed isKindOfClass:[YSFVideoPlayerViewController class]]) {
+        return [self makeAnimationForPresent:NO touchView:_messageTouchView];
+    }
+    return nil;
+}
+
+- (YSFViewControllerTransitionAnimation *)makeAnimationForPresent:(BOOL)present touchView:(UIView *)touchView {
+    YSFViewControllerTransitionAnimation *animation = [[YSFViewControllerTransitionAnimation alloc] init];
+    animation.present = present;
+    animation.originFrame = [touchView.superview convertRect:touchView.frame toView:self.view];
+    return animation;
 }
 
 @end

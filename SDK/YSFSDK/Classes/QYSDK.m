@@ -58,7 +58,7 @@
     } else if (YSFUseServerSettingPre == _serverSetting) {
         serverAddress = @"qiyukf.netease.com";
     } else if (YSFUseServerSettingTest == _serverSetting) {
-        serverAddress = @"ysf.space";
+        serverAddress = @"qytest.netease.com";
     } else if (YSFUseServerSettingDev == _serverSetting) {
         serverAddress = @"qydev.netease.com";
     }
@@ -70,10 +70,8 @@
               appName:(NSString *)appName
 {
     YSFLogApp(@"appKey: %@ appName: %@", appKey, appName);
-
     
-    [[YSF_NIMSDK sharedSDK] registerWithAppID:YES appKey:appKey
-                                  cerName:appName];
+    [[YSF_NIMSDK sharedSDK] registerWithAppID:YES appKey:appKey cerName:appName];
     
     /**
      * 去掉wfd.netease.im域名访问，云信已不采集此部分数据
@@ -86,7 +84,6 @@
     
     [_pathManager setup:appKey];
     [_infoManager checkAppInfo];
-    
     [_sessionManager readData];
 }
 
@@ -233,6 +230,13 @@
             completeBlock(error);
         }
     }];
+    //清理拍摄视频文件
+    BOOL isDir = NO;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    BOOL existed = [fileManager fileExistsAtPath:self.pathManager.sdkVideoPath isDirectory:&isDir];
+    if (existed && isDir) {
+        [fileManager removeItemAtPath:self.pathManager.sdkVideoPath error:nil];
+    }
 }
 
 #pragma mark - 内部接口

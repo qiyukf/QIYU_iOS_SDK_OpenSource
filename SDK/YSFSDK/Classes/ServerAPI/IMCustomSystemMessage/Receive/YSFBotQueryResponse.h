@@ -2,7 +2,7 @@
 
 @interface YSFBotQueryResponse : NSObject
 
-@property (nonatomic,strong)    id botQueryData;
+@property (nonatomic, strong) id botQueryData;
 
 + (instancetype)dataByJson:(NSDictionary *)dict;
 

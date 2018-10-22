@@ -62,6 +62,9 @@
     else if (instance.closeType == 8) {
         instance.message = @"会话超时关闭";       //由于产品未确定，文案是码农自己添加，不做参考，只做备用
     }
+    else if (instance.closeType == 9) {
+        instance.message = @"静默转接";
+    }
     else {
         NSAssert(NO, @"not handled this closeType %ld", instance.closeType);
     }

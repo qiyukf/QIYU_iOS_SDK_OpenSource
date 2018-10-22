@@ -9,6 +9,10 @@
 #import "YSFDefaultValueMaker.h"
 #import "YSFKitUtil.h"
 
+@interface YSFDefaultValueMaker ()
+@property (nonatomic, strong) id<YSFExtraCellLayoutConfig> extraCellLayoutConfig;
+@end
+
 @implementation YSFDefaultValueMaker
 
 + (instancetype)sharedMaker{
@@ -30,7 +34,21 @@
     return self;
 }
 
-- (CGFloat)maxTipPadding{
+- (id<YSFExtraCellLayoutConfig>)extraCellLayoutConfig {
+    if (!_extraCellLayoutConfig) {
+        id<YSFExtraCellLayoutConfig> extraCellTempLayoutConfig = nil;
+        if (self.extraCellLayoutConfigBlock) {
+            extraCellTempLayoutConfig = self.extraCellLayoutConfigBlock();
+        }
+        if (!extraCellTempLayoutConfig) {
+            extraCellTempLayoutConfig = [[YSFExtraCellLayoutDefaultConfig alloc] init];
+        }
+        _extraCellLayoutConfig = extraCellTempLayoutConfig;
+    }
+    return _extraCellLayoutConfig;
+}
+
+- (CGFloat)maxTipPadding {
     return 20.f;
 }
 

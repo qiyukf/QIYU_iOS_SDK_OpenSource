@@ -19,7 +19,7 @@
     instance.evaluate  = [dict ysf_jsonBool:YSFApiKeyEvaluate];
     instance.message = [dict ysf_jsonString:YSFApiKeyMessage];
     instance.closeReason = [dict ysf_jsonInteger:YSFApiKeyCloseReason];
-    instance.evaluationAutoPopup            = [dict ysf_jsonBool:YSFApiEvaluationAutoPopup];
+    instance.evaluationAutoPopup = [dict ysf_jsonBool:YSFApiEvaluationAutoPopup];
 
     return instance;
 }
