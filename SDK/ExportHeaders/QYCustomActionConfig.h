@@ -6,7 +6,11 @@
 //  Copyright (c) 2017 Netease. All rights reserved.
 //
 
-@class QYSelectedCommodityInfo,YSF_NIMMessage;
+/**
+ *  本类提供了所有自定义行为的接口;每个接口对应一个自定义行为的处理，如果设置了，则使用设置的处理，如果不设置，则采用默认处理
+ */
+
+@class QYSelectedCommodityInfo;
 
 /**
  *  退出排队结果类型
@@ -30,7 +34,7 @@ typedef NS_ENUM(NSInteger, QYRequestStaffScene) {
 };
 
 /**
- *  提供了所有自定义行为的接口;每个接口对应一个自定义行为的处理，如果设置了，则使用设置的处理，如果不设置，则采用默认处理
+ *  链接点击事件回调
  */
 typedef void (^QYLinkClickBlock)(NSString *linkAddress);
 
@@ -81,8 +85,9 @@ typedef void (^QYExtraViewClickBlock)(NSString *extInfo);
  */
 typedef void (^QYSystemNotificationClickBlock)(id message);
 
+
 /**
- *  自定义行为配置类
+ *  自定义行为配置类：QYCustomActionConfig，单例模式
  */
 @interface QYCustomActionConfig : NSObject
 
@@ -97,21 +102,6 @@ typedef void (^QYSystemNotificationClickBlock)(id message);
  *  bot相关点击
  */
 @property (nonatomic, copy) QYBotClickBlock botClick;
-
-/**
- *  设置录制或者播放语音完成以后是否自动deactivate AVAudioSession
- *
- *  @param deactivate 是否deactivate，默认为YES
- */
-- (void)setDeactivateAudioSessionAfterComplete:(BOOL)deactivate;
-
-/**
- *  显示退出排队提示
- *
- *  @param quitWaitingBlock 选择结果回调
- */
-- (void)showQuitWaiting:(QYQuitWaitingBlock)quitWaitingBlock;
-
 
 /**
  *  推送消息相关点击
@@ -142,6 +132,20 @@ typedef void (^QYSystemNotificationClickBlock)(id message);
  *  系统消息点击
  */
 @property (nonatomic, copy) QYSystemNotificationClickBlock notificationClickBlock;
+
+/**
+ *  设置录制或者播放语音完成以后是否自动deactivate AVAudioSession
+ *
+ *  @param deactivate 是否deactivate，默认为YES
+ */
+- (void)setDeactivateAudioSessionAfterComplete:(BOOL)deactivate;
+
+/**
+ *  显示退出排队提示
+ *
+ *  @param quitWaitingBlock 选择结果回调
+ */
+- (void)showQuitWaiting:(QYQuitWaitingBlock)quitWaitingBlock;
 
 @end
 

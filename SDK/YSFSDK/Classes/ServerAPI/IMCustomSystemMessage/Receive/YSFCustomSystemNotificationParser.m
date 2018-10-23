@@ -25,6 +25,7 @@
 #import "YSFSendSearchQuestionResponse.h"
 #import "YSFSearchQuestionSetting.h"
 #import "YSFBotEntry.h"
+#import "YSFRevokeMessageResult.h"
 #import "QYSDK_Private.h"
 
 @implementation YSFCustomSystemNotificationParser
@@ -78,6 +79,9 @@
                     break;
                 case YSFCommandBotEntry:
                     result = [YSFBotEntry dataByJson:dict];
+                    break;
+                case YSFCommandRevokeMessageResult:
+                    result = [YSFRevokeMessageResult dataByJson:dict];
                     break;
                 case YSFCommandUploadLog: {
                     YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];

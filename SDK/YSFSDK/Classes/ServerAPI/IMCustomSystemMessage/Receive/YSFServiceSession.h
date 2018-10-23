@@ -12,30 +12,33 @@
 
 @interface YSFServiceSession : NSObject
 
-@property (nonatomic,copy)      NSString        *serviceId;
-@property (nonatomic,assign)    long long       sessionId;
-@property (nonatomic,copy)      NSString        *staffId;
-@property (nonatomic,assign)    long long       realStaffId;
-@property (nonatomic,assign)    long long       groupId;
-@property (nonatomic,copy)      NSString        *staffName;
-@property (nonatomic,copy)      NSString        *iconUrl;
-@property (nonatomic,strong)    NSDate          *lastServiceTime;
-@property (nonatomic,assign)    NSInteger       before;
-@property (nonatomic,assign)    NSInteger       code;
-@property (nonatomic,assign)    BOOL            humanOrMachine;
-@property (nonatomic,assign)    BOOL            operatorEable;
-@property (nonatomic,copy)      NSString        *inQueeuNotify;
-@property (nonatomic,copy)      NSString        *message;
-@property (nonatomic,copy)      NSDictionary    *evaluation;
-@property (nonatomic,copy)      NSString    *messageInvite;
-@property (nonatomic,copy)      NSString    *messageThanks;
-@property (nonatomic,copy)      NSArray<YSFActionInfo *>         *actionInfoArray;
-@property (nonatomic,strong)    YSFShopInfo     *shopInfo;           //平台电商的商铺信息
-@property (nonatomic,assign)    BOOL showNumber;
-@property (nonatomic,assign)    BOOL robotInQueue;
-@property (nonatomic,assign)    long long robotSessionId;
+@property (nonatomic, assign) NSInteger code;
+@property (nonatomic, copy) NSString *serviceId;
+@property (nonatomic, strong) NSDate *lastServiceTime;
+@property (nonatomic, assign) long long sessionId;
+@property (nonatomic, strong) YSFShopInfo *shopInfo;  //商铺信息
+@property (nonatomic, assign) NSInteger before;
 
-- (BOOL)canOfferService;
+@property (nonatomic, assign) BOOL humanOrMachine;
+@property (nonatomic, assign) BOOL operatorEable;
+@property (nonatomic, assign) BOOL showNumber;
+@property (nonatomic, assign) BOOL robotInQueue;
+@property (nonatomic, assign) long long robotSessionId;
+
+@property (nonatomic, copy) NSString *staffId;
+@property (nonatomic, assign) long long realStaffId;
+@property (nonatomic, assign) long long groupId;
+@property (nonatomic, copy) NSString *staffName;
+@property (nonatomic, copy) NSString *iconUrl;
+
+@property (nonatomic, copy) NSString *message;
+@property (nonatomic, copy) NSString *inQueeuNotify;
+@property (nonatomic, copy) NSDictionary *evaluation;
+@property (nonatomic, copy) NSString *messageInvite;
+@property (nonatomic, copy) NSString *messageThanks;
+@property (nonatomic, copy) NSArray<YSFActionInfo *> *actionInfoArray;
 
 + (YSFServiceSession *)dataByJson:(NSDictionary *)dict;
+- (BOOL)canOfferService;
+
 @end

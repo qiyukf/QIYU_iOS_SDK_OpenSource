@@ -12,7 +12,7 @@
 @class QYStaffInfo;
 
 /**
- *  右上角入口以及聊天内容区域的按钮 点击以后的回调
+ *  QYSessionViewDelegate：右上角入口以及聊天内容区域的按钮点击后的回调
  */
 @protocol QYSessionViewDelegate <NSObject>
 
@@ -29,29 +29,33 @@
 @end
 
 
+/**
+ *  自定义商品信息类：QYSelectedCommodityInfo
+ */
 @interface QYSelectedCommodityInfo : NSObject
 
-@property (nonatomic,copy)    NSString *target;
-@property (nonatomic,copy)    NSString *params;
-@property (nonatomic,copy)    NSString *p_status;
-@property (nonatomic,copy)    NSString *p_img;
-@property (nonatomic,copy)    NSString *p_name;
-@property (nonatomic,copy)    NSString *p_price;
-@property (nonatomic,copy)    NSString *p_count;
-@property (nonatomic,copy)    NSString *p_stock;
-@property (nonatomic,copy)    NSString *p_action;
-@property (nonatomic,copy)    NSString *p_userData;
+@property (nonatomic, copy) NSString *target;
+@property (nonatomic, copy) NSString *params;
+@property (nonatomic, copy) NSString *p_status;
+@property (nonatomic, copy) NSString *p_img;
+@property (nonatomic, copy) NSString *p_name;
+@property (nonatomic, copy) NSString *p_price;
+@property (nonatomic, copy) NSString *p_count;
+@property (nonatomic, copy) NSString *p_stock;
+@property (nonatomic, copy) NSString *p_action;
+@property (nonatomic, copy) NSString *p_userData;
 
 @end
 
+
 /**
- *  输入区域上方工具栏内的按钮信息
+ *  输入区域上方工具栏内按钮信息类：QYButtonInfo
  */
 @interface QYButtonInfo : NSObject
 
-@property (nonatomic,strong)    id      buttonId;
-@property (nonatomic,copy)      NSString *title;
-@property (nonatomic,strong)    id      userData;
+@property (nonatomic, strong) id buttonId;
+@property (nonatomic, copy) NSString *title;
+@property (nonatomic, strong) id userData;
 
 @end
 
@@ -63,6 +67,7 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
 
 
 /**
+ *  会话类：QYSessionViewController
  *  客服会话ViewController,必须嵌入到UINavigationcontroller中
  */
 @interface QYSessionViewController : UIViewController
@@ -70,42 +75,42 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
 /**
  *  会话窗口标题
  */
-@property (nonatomic,copy)      NSString    *sessionTitle;
+@property (nonatomic, copy) NSString *sessionTitle;
 
 /**
  *  访客分流 分组Id
  */
-@property (nonatomic,assign)    int64_t groupId;
+@property (nonatomic, assign) int64_t groupId;
 
 /**
  *  访客分流 客服Id
  */
-@property (nonatomic,assign)    int64_t staffId;
+@property (nonatomic, assign) int64_t staffId;
 
 /**
  *  机器人Id
  */
-@property (nonatomic,assign)    int64_t robotId;
+@property (nonatomic, assign) int64_t robotId;
 
 /**
  *  vip等级
  */
-@property (nonatomic,assign)    NSInteger   vipLevel;
+@property (nonatomic, assign) NSInteger vipLevel;
 
 /**
  *  访客分流 是否开启机器人
  */
-@property (nonatomic,assign)    BOOL openRobotInShuntMode;
+@property (nonatomic, assign) BOOL openRobotInShuntMode;
 
 /**
  *  常见问题 模版Id
  */
-@property (nonatomic,assign)    int64_t commonQuestionTemplateId;
+@property (nonatomic, assign) int64_t commonQuestionTemplateId;
 
 /**
  *  会话窗口来源
  */
-@property (nonatomic,strong)    QYSource   *source;
+@property (nonatomic, strong) QYSource *source;
 
 /**
  *  商品信息展示
@@ -130,7 +135,7 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
 /**
  *  机器人自动发送商品信息功能
  */
-@property (nonatomic,assign) BOOL autoSendInRobot;
+@property (nonatomic, assign) BOOL autoSendInRobot;
 
 /**
  *  发送商品信息展示
