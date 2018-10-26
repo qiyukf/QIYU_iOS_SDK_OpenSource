@@ -1560,6 +1560,11 @@ YSFCameraViewControllerDelegate>
     //将session_status更新为3
     NSMutableDictionary *recentDict = [[[[QYSDK sharedSDK] sessionManager] getRecentEvaluationMemoryDataByShopId:_shopId] mutableCopy];
     if (recentDict) {
+        NSInteger status = [(NSNumber *)[recentDict objectForKey:YSFEvaluationSessionStatus] integerValue];
+        if (status == 3) {
+            return;
+        }
+        
         long long recentSessionId = [(NSNumber *)[recentDict objectForKey:YSFEvaluationSessionId] longLongValue];
         if (sessionId == recentSessionId) {
             [recentDict setValue:@(3) forKey:YSFEvaluationSessionStatus];
@@ -1587,6 +1592,7 @@ YSFCameraViewControllerDelegate>
     tipObject.sessionId = sessionId;
     tipObject.tipContent = thanksText;
     tipObject.tipResult = resultData.title;
+    tipObject.kaolaTipContent = kaolaTipContent;
     //判断是否显示“修改评价”
     if (modifyEnable) {
         tipObject.tipModify = @" 修改评价";
