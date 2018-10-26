@@ -34,11 +34,12 @@
 @property (nonatomic, copy) NSString *message;
 @property (nonatomic, copy) NSString *inQueeuNotify;
 @property (nonatomic, copy) NSDictionary *evaluation;
-@property (nonatomic, copy) NSString *messageInvite;
-@property (nonatomic, copy) NSString *messageThanks;
+@property (nonatomic, copy) NSString *inviteMsg;
+@property (nonatomic, copy) NSString *thanksMsg;
 @property (nonatomic, copy) NSArray<YSFActionInfo *> *actionInfoArray;
 
 + (YSFServiceSession *)dataByJson:(NSDictionary *)dict;
+- (NSDictionary *)toDict;
 - (BOOL)canOfferService;
 
 @end

@@ -26,6 +26,7 @@
 #import "YSFSearchQuestionSetting.h"
 #import "YSFBotEntry.h"
 #import "YSFRevokeMessageResult.h"
+#import "YSFEvaluationResult.h"
 #import "QYSDK_Private.h"
 
 @implementation YSFCustomSystemNotificationParser
@@ -58,6 +59,9 @@
                     break;
                 case YSFCommandEvaluationNotification:
                     result = [YSFEvaluationNotification dataByJson:dict];
+                    break;
+                case YSFCommandEvaluationResult:
+                    result = [YSFEvaluationResult dataByJson:dict];
                     break;
                 case YSFCommandSessionWillClose:
                     result = [YSFSessionWillCloseNotification dataByJson:dict];

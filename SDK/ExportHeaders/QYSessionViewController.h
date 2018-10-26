@@ -59,6 +59,10 @@
 
 @end
 
+/**
+ *  通用完成回调
+ */
+typedef void (^QYCompletion)(BOOL success, NSError *error);
 
 /**
  *  输入区域上方工具栏内的按钮点击回调
@@ -138,6 +142,25 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
 @property (nonatomic, assign) BOOL autoSendInRobot;
 
 /**
+ *  请求人工客服
+ */
+- (void)requestHumanStaff;
+
+/**
+ *  切换人工客服
+ *
+ *  @param staffId 客服ID
+ *  @param groupId 分组ID
+ *  @param tip 切换提示语
+ *  @param completetion 完成回调
+ */
+- (void)changeHumanStaffWithStaffId:(int64_t)staffId
+                            groupId:(int64_t)groupId
+                           closetip:(NSString *)closetip
+                    closeCompletion:(QYCompletion)closeCompletion
+                  requestCompletion:(QYCompletion)requestCompletion;
+
+/**
  *  发送商品信息展示
  */
 - (void)sendCommodityInfo:(QYCommodityInfo *)commodityInfo;
@@ -152,10 +175,6 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
  */
 - (void)sendPicture:(UIImage *)picture;
 
-/**
- *  请求人工客服
- */
-- (void)requestHumanStaff;
 
 @end
 

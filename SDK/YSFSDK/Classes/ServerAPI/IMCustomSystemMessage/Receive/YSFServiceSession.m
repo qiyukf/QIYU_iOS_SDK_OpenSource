@@ -59,8 +59,8 @@
                 [evaluationDict setValue:dict forKey:name];
             }
         }
-        instance.messageInvite = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationMessageInvite];
-        instance.messageThanks = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationMessageThanks];
+        instance.inviteMsg = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationInviteMsg];
+        instance.thanksMsg = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationThanksMsg];
     }
     instance.evaluation = evaluationDict;
     
@@ -85,6 +85,20 @@
     }
     
     return instance;
+}
+
+- (NSDictionary *)toDict {
+    NSDictionary *dict = @{
+                           YSFApiKeyCode : @(self.code),
+                           YSFApiKeySessionId : @(self.sessionId),
+                           YSFApiKeyStaffType : @(!self.humanOrMachine),
+                           YSFApiKeyGroupId : @(self.groupId),
+                           YSFApiKeyStaffId : YSFStrParam(self.staffId),
+                           YSFApiKeyRealStaffId : @(self.realStaffId),
+                           YSFApiKeyStaffName : YSFStrParam(self.staffName),
+                           YSFApiKeyIconUrl : YSFStrParam(self.iconUrl),
+                           };
+    return dict;
 }
 
 - (BOOL)canOfferService {

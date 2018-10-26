@@ -20,8 +20,8 @@
     setting.staffReadSwitch = [json ysf_jsonBool:YSFApiKeyStaffReadSwitch];
     setting.inputSwitch = [json ysf_jsonBool:YSFApiKeyInputSwitch];
     setting.sendingRate = [json ysf_jsonDouble:YSFApiKeySendingRate];
-    setting.multEvaluationEnable = [json ysf_jsonBool:YSFApiKeyMultEvaluateEnable];
-    setting.evaluationTimeLimit = [json ysf_jsonInteger:YSFApiKeyEvaluationTimeLimit];
+    setting.multEvaluationEnable = [json ysf_jsonBool:YSFApiKeyEvaluationModifyEnable];
+    setting.evaluationTimeLimit = [json ysf_jsonInteger:YSFApiKeyEvaluationModifyTimeout];
     return setting;
 }
 
@@ -33,8 +33,8 @@
                            YSFApiKeyStaffReadSwitch : @(self.staffReadSwitch),
                            YSFApiKeyInputSwitch : @(self.inputSwitch),
                            YSFApiKeySendingRate : @(self.sendingRate),
-                           YSFApiKeyMultEvaluateEnable : @(self.multEvaluationEnable),
-                           YSFApiKeyEvaluationTimeLimit : @(self.evaluationTimeLimit),
+                           YSFApiKeyEvaluationModifyEnable : @(self.multEvaluationEnable),
+                           YSFApiKeyEvaluationModifyTimeout : @(self.evaluationTimeLimit),
                            };
     return dict;
 }

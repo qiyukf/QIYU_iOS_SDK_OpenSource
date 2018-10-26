@@ -3,12 +3,10 @@
 
 @implementation YSFEvaluationNotification
 
-+ (instancetype)dataByJson:(NSDictionary *)dict
-{
-    YSFEvaluationNotification * response = [YSFEvaluationNotification new];
++ (instancetype)dataByJson:(NSDictionary *)dict {
+    YSFEvaluationNotification *response = [[YSFEvaluationNotification alloc] init];
     response.sessionId = [dict ysf_jsonLongLong:YSFApiKeySessionId];
-    response.evaluationAutoPopup = [dict ysf_jsonBool:YSFApiEvaluationAutoPopup];
-
+    response.autoPopup = [dict ysf_jsonBool:YSFApiKeyEvaluationAutoPopup];
     return response;
 }
 

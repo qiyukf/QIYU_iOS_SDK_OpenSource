@@ -35,6 +35,7 @@ extern NSString *const YSFKitEventNameTapMixReply;
 extern NSString *const YSFKitEventNameTapKFBypass;
 extern NSString *const YSFKitEventNameTapCommodityInfo;
 extern NSString *const YSFKitEventNameTapEvaluation;
+extern NSString *const YSFKitEventNameTapModifyEvaluation;
 extern NSString *const YSFKitEventNameTapRetryAudioToText;
 extern NSString *const YSFKitEventNameTapRichTextImage;
 extern NSString *const YSFKitEventNameTapSubmittedBotFormImage;
@@ -44,4 +45,3 @@ extern NSString *const YSFKitEventNameSendCommdityInfo;
 extern NSString *const YSFKitEventNameTapCommdityAction;
 extern NSString *const YSFKitEventNameTapExtraViewAction;
 extern NSString *const YSFKitEventNameTapSystemNotification;
-
