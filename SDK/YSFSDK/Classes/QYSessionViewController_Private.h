@@ -36,73 +36,65 @@ typedef void (^OnEvaluateBlock)(long long sessionId, YSF_NIMMessage *updatedMess
 
 @interface YSFKaolaTagInfo : NSObject
 
-@property (nonatomic,assign)                long long id;
-@property (nonatomic,copy)                NSString *name;
+@property (nonatomic, assign) long long id;
+@property (nonatomic, copy) NSString *name;
 
 @end
 
 
 @interface QYSessionViewController ()
-<UITableViewDataSource,
-UITableViewDelegate,
-YSF_NIMChatManagerDelegate,
-YSF_NIMConversationManagerDelegate,
-YSF_NIMLoginManagerDelegate,
-YSF_NIMMediaManagerDelgate,
-YSFMessageCellDelegate,
-YSFInputActionDelegate,
-YSFMessageCellDelegate,
-NIMSessionMsgDatasourceDelegate,
-YSFSessionProtocol,
-YSFSessionTipViewDelegate>
+<UITableViewDataSource, UITableViewDelegate,
+YSF_NIMChatManagerDelegate, YSF_NIMConversationManagerDelegate, YSF_NIMLoginManagerDelegate, YSF_NIMMediaManagerDelgate,
+YSFMessageCellDelegate, YSFInputActionDelegate, YSFMessageCellDelegate, YSFSessionProtocol, YSFSessionTipViewDelegate,
+NIMSessionMsgDatasourceDelegate>
 
-@property (nonatomic,strong)                UITableView *tableView;
-@property (nonatomic,strong)                UIImageView *sessionBackground;
-@property (nonatomic, strong,readonly)      UIRefreshControl *refreshControl;
+@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) UIImageView *sessionBackground;
+@property (nonatomic, strong, readonly) UIRefreshControl *refreshControl;
 
-@property (nonatomic,strong)                YSFInputView *sessionInputView;
-@property (nonatomic,strong)                YSFSessionViewLayoutManager *layoutManager;
-@property (nonatomic,strong)                YSFSessionMsgDatasource *sessionDatasource;
-@property (nonatomic,strong)                YSF_NIMMessage *messageForMenu;
-@property (nonatomic,strong)                UIView *messageTouchView;
-@property (nonatomic,strong,readonly)       YSF_NIMSession *session;
-@property (nonatomic,strong)                YSFSessionTipView *tipView;
-@property (nonatomic,strong)                YSFRecordTipView *recordTipView;
-@property (nonatomic,strong)                YSFReachability *reachability;
-@property (nonatomic,strong)                YSFCustomLeftBarView *leftBarView;
-@property (nonatomic,copy)                  ChangeHumanOrRobotBlock changeHumanOrRobotBlock;
-@property (nonatomic,copy)                  ChangeEvaluationEnabledBlock changeEvaluationEnabledBlock;
-@property (nonatomic,copy)                  OnEvaluateBlock onEvaluateBlock;
-@property (nonatomic,strong)                YSFEvaluationReasonView *evaluationResonView;
+@property (nonatomic, strong) YSFSessionViewLayoutManager *layoutManager;
+@property (nonatomic, strong) YSFSessionMsgDatasource *sessionDatasource;
+@property (nonatomic, strong) YSF_NIMMessage *messageForMenu;
+@property (nonatomic, strong, readonly) YSF_NIMSession *session;
 
+@property (nonatomic, strong) YSFInputView *sessionInputView;
+@property (nonatomic, strong) UIView *messageTouchView;
+@property (nonatomic, strong) YSFSessionTipView *tipView;
+@property (nonatomic, strong) YSFRecordTipView *recordTipView;
+@property (nonatomic, strong) YSFReachability *reachability;
+@property (nonatomic, strong) YSFCustomLeftBarView *leftBarView;
+@property (nonatomic, strong) YSFEvaluationReasonView *evaluationResonView;
 
-- (NSArray *)menusItems:(YSF_NIMMessage *)message;
+@property (nonatomic, copy) ChangeHumanOrRobotBlock changeHumanOrRobotBlock;
+@property (nonatomic, copy) ChangeEvaluationEnabledBlock changeEvaluationEnabledBlock;
+@property (nonatomic, copy) OnEvaluateBlock onEvaluateBlock;
+
 
 - (void)sendMessage:(YSF_NIMMessage *)message;
 
-- (void)onRecordFailed:(NSError *)error;
-
-- (BOOL)recordFileCanBeSend:(NSString *)filepath;
-
-- (void)showRecordFileNotSendReason;
-
 - (void)uiDeleteMessage:(YSF_NIMMessage *)message;
-
-
 - (void)uiUpdateMessage:(YSF_NIMMessage *)message;
 
 - (void)sendCloseSessionCustomMessage:(BOOL)quitWaitingOrCloseSession
                     completetionBlock:(void (^)(BOOL isSuccess))completetionBlock;
 
 - (void)evaluationViewControlerWillAppear;
-
-- (void)showEvaluationResult:(BOOL)needShow sessionId:(long long)sessionId
+- (void)showEvaluationResult:(BOOL)needShow
+                   sessionId:(long long)sessionId
              kaolaTipContent:(NSString *)kaolaTipContent
      evaluationMessageThanks:(NSString *)evaluationMessageThanks
               evaluationText:(NSString *)evaluationText
               updatedMessage:(YSF_NIMMessage *)updatedMessage;
+- (void)sendEvaluationRequest:(long long)sessionId
+                        score:(NSUInteger)score
+                      remarks:(NSString *)remarks
+                       tagIds:(NSArray<YSFKaolaTagInfo *> *)tagInfos
+                     callback:(void (^)(NSError *error))callback;
 
-- (void)sendEvaluationRequest:(long long)sessionId score:(NSUInteger)score remarks:(NSString *)remarks
-                       tagIds:(NSArray<YSFKaolaTagInfo *> *)tagInfos callback:(void (^)(NSError *error))callback;
+- (NSArray *)menusItems:(YSF_NIMMessage *)message;
+
+- (void)onRecordFailed:(NSError *)error;
+- (BOOL)recordFileCanBeSend:(NSString *)filepath;
+- (void)showRecordFileNotSendReason;
 
 @end

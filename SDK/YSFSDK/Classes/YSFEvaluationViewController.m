@@ -4,11 +4,34 @@
 #import "NSDictionary+YSFJson.h"
 #import "UIControl+BlocksKit.h"
 #import "UIScrollView+YSFKit.h"
+#import "NSArray+YSF.h"
+
+@implementation YSFEvaluationCommitData
+
++ (instancetype)instanceByDict:(NSDictionary *)dict {
+    YSFEvaluationCommitData *data = [[YSFEvaluationCommitData alloc] init];
+    data.title = [dict ysf_jsonString:YSFApiKeyTitle];
+    data.tagList = [dict ysf_jsonArray:YSFApiKeyTagList];
+    data.content = [dict ysf_jsonString:YSFApiKeyContent];
+    return data;
+}
+
+- (NSDictionary *)toDict {
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setValue:YSFStrParam(self.title) forKey:YSFApiKeyTitle];
+    if (self.tagList) {
+        [dict setValue:self.tagList forKey:YSFApiKeyTagList];
+    }
+    [dict setValue:YSFStrParam(self.content) forKey:YSFApiKeyContent];
+    return dict;
+}
+
+@end
 
 @interface YSFEvaluationViewController() <YSFKeyboardObserver, UIAlertViewDelegate, UITextViewDelegate>
 
 @property (nonatomic, strong) NSDictionary *evaluationDict;
-@property (nonatomic, copy) EvaluationCallback evaluationCallback;
+@property (nonatomic, copy) evaluationCallback evaluationCallback;
 @property (nonatomic, strong) UITextView *textView;
 @property (nonatomic,strong) UILabel* placeholderLabel;
 @property (nonatomic,strong) UIButton *selectedButton;
@@ -31,27 +54,32 @@
 @property (nonatomic,strong) UIButton *evaluationClose;
 @property (nonatomic,copy) NSString *shopId;
 
+@property (nonatomic, strong) YSFEvaluationCommitData *lastResult;
+@property (nonatomic, assign) BOOL modifyEnable;
+
 @end
 
 
 @implementation YSFEvaluationViewController
 
-- (instancetype)initWithEvaluationDict:(NSDictionary *)evaluationDict shopId:(NSString *)shopId sessionId:(long long)sessionId evaluationCallback:(EvaluationCallback)evaluationCallback
-{
-//    assert(evaluationDict && evaluationDict.count > 0);
-    
-    self  = [super init];
+- (instancetype)initWithEvaluationDict:(NSDictionary *)evaluationDict
+                      evaluationResult:(YSFEvaluationCommitData *)lastResult
+                                shopId:(NSString *)shopId
+                             sessionId:(long long)sessionId
+                          modifyEnable:(BOOL)modifyEnable
+                    evaluationCallback:(evaluationCallback)evaluationCallback {
+    self = [super init];
     if (self) {
         _evaluationDict = evaluationDict;
         if (!_evaluationDict || _evaluationDict.count == 0) {
             _evaluationDict = @{ @"满意":@{YSFApiKeyValue:@(100)}, @"不满意":@{YSFApiKeyValue:@(1)} };
         }
-        
+        _lastResult = lastResult;
         _shopId = shopId;
         _sessionId = sessionId;
+        _modifyEnable = modifyEnable;
         _evaluationCallback = evaluationCallback;
     }
-    
     return self;
 }
 
@@ -369,6 +397,8 @@
     _submit.titleLabel.font = [UIFont systemFontOfSize:16.0];;
     [_submit addTarget:self action:@selector(onSubmit:) forControlEvents:UIControlEventTouchUpInside];
     [_imagePanel addSubview:_submit];
+    
+    [self updateLastResult];
 }
 
 - (void)viewDidLayoutSubviews
@@ -595,15 +625,78 @@
     }
 }
 
+- (void)updateLastResult {
+    if ([self.lastResult.title isEqualToString:@"非常满意"]) {
+        [self onSelect:_satisfaction1 selectedTagListView:_tagList1];
+        for (NSString *selectTagString in self.lastResult.tagList) {
+            for (UIButton *tagButton in _tagList1.subviews) {
+                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                    tagButton.selected = YES;
+                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+            }
+        }
+    } else if ([self.lastResult.title isEqualToString:@"满意"]) {
+        [self onSelect:_satisfaction2 selectedTagListView:_tagList2];
+        for (NSString *selectTagString in self.lastResult.tagList) {
+            for (UIButton *tagButton in _tagList2.subviews) {
+                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                    tagButton.selected = YES;
+                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+            }
+        }
+    } else if ([self.lastResult.title isEqualToString:@"一般"]) {
+        [self onSelect:_satisfaction3 selectedTagListView:_tagList3];
+        for (NSString *selectTagString in self.lastResult.tagList) {
+            for (UIButton *tagButton in _tagList3.subviews) {
+                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                    tagButton.selected = YES;
+                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+            }
+        }
+    } else if ([self.lastResult.title isEqualToString:@"不满意"]) {
+        [self onSelect:_satisfaction4 selectedTagListView:_tagList4];
+        for (NSString *selectTagString in self.lastResult.tagList) {
+            for (UIButton *tagButton in _tagList4.subviews) {
+                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                    tagButton.selected = YES;
+                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+            }
+        }
+    } else if ([self.lastResult.title isEqualToString:@"非常不满意"]) {
+        [self onSelect:_satisfaction5 selectedTagListView:_tagList5];
+        for (NSString *selectTagString in self.lastResult.tagList) {
+            for (UIButton *tagButton in _tagList5.subviews) {
+                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                    tagButton.selected = YES;
+                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                }
+            }
+        }
+    }
+    if (self.lastResult.content.length) {
+        _textView.text = self.lastResult.content;
+        _placeholderLabel.hidden = YES;
+    }
+}
+
 - (void)onClose:(id)sender
 {
     if (_textView.text.length > 0 ) {
         //解决iOS键盘消失动画被打断后闪一下问题
+        __weak typeof(self) weakSelf = self;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.53 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            UIAlertView *dialog = [[UIAlertView alloc] initWithTitle:@"是否放弃评价，放弃后不可恢复"
-                                                             message:@"" delegate:self cancelButtonTitle:nil otherButtonTitles:nil,nil];
-            [dialog addButtonWithTitle:@"否"];
-            [dialog addButtonWithTitle:@"是"];
+            NSString *title = weakSelf.modifyEnable ? @"是否放弃当前评价" : @"是否放弃当前评价，放弃后不可恢复";
+            UIAlertView *dialog = [[UIAlertView alloc] initWithTitle:title
+                                                             message:@""
+                                                            delegate:weakSelf
+                                                   cancelButtonTitle:nil
+                                                   otherButtonTitles:nil, nil];
+            [dialog addButtonWithTitle:@"取消"];
+            [dialog addButtonWithTitle:@"确定"];
             [dialog show];
         });
     }
@@ -617,7 +710,7 @@
 {
     __weak typeof(self) weakSelf = self;
     [self dismissViewControllerAnimated:YES completion:^{
-        weakSelf.evaluationCallback(NO, @"");
+        weakSelf.evaluationCallback(NO, nil);
     }];
 }
 
@@ -712,6 +805,14 @@
         }
     }
     
+    YSFEvaluationCommitData *commitData = [[YSFEvaluationCommitData alloc] init];
+    commitData.title = selectString;
+    commitData.tagList = tagList;
+    commitData.content = _textView.text;
+    if (self.evaluationCallback) {
+        self.evaluationCallback(YES, commitData);
+    }
+    
     YSFEvaluationRequest *request = [[YSFEvaluationRequest alloc] init];
     request.score = selectScore;
     request.remarks = _textView.text;
@@ -724,11 +825,8 @@
             [weakSelf.submit setTitle:@"提 交" forState:UIControlStateNormal];
             weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
             [weakSelf.view ysf_makeToast:@"网络链接失败，请稍后再试" duration:2.0 position:YSFToastPositionCenter];
-        }
-        else {
-            [weakSelf dismissViewControllerAnimated:YES completion:^{
-                weakSelf.evaluationCallback(YES, selectString);
-            }];
+        } else {
+            [weakSelf dismissViewControllerAnimated:YES completion:nil];
         }
     }];
 }

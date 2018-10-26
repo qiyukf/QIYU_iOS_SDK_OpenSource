@@ -18,6 +18,7 @@
 @protocol QYConversationManagerDelegate <NSObject>
 
 @optional
+
 /**
  *  会话未读数变化
  *
@@ -37,8 +38,9 @@
 
 @end
 
+
 /**
- *  会话管理类
+ *  会话管理类：QYConversationManager
  */
 @interface QYConversationManager : NSObject
     
@@ -60,7 +62,7 @@
  *
  *  @return 包含SessionInfo的数组
  */
-- (NSArray<QYSessionInfo*> *)getSessionList;
+- (NSArray<QYSessionInfo *> *)getSessionList;
 
 /**
  *  设置会话委托
@@ -68,6 +70,7 @@
  *  @param delegate 会话委托
  */
 - (void)setDelegate:(id<QYConversationManagerDelegate>)delegate;
+
 
 @end
 

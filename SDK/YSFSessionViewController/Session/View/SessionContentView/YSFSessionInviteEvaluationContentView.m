@@ -69,10 +69,9 @@
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.model.message.messageObject;
     if ([object.attachment isKindOfClass:[YSFInviteEvaluationObject class]]) {
         YSFInviteEvaluationObject *attachment = (YSFInviteEvaluationObject *)object.attachment;
-        if (attachment.evaluationMessageInvite.length > 0) {
-            [_textLabel setText:attachment.evaluationMessageInvite];
-        }
-        else {
+        if (attachment.inviteText.length > 0) {
+            [_textLabel setText:attachment.inviteText];
+        } else {
             [_textLabel setText:@"感谢您的咨询，请对我们的服务作出评价"];
         }
     }
