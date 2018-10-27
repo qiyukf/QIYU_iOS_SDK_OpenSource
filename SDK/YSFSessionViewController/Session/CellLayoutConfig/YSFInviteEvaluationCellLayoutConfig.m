@@ -54,6 +54,10 @@
     return UIEdgeInsetsZero;
 }
 
+- (CGFloat)headBubbleSpace:(YSFMessageModel *)model {
+    return 0;
+}
+
 - (BOOL)shouldShowAvatar:(YSFMessageModel *)model
 {
     return NO;

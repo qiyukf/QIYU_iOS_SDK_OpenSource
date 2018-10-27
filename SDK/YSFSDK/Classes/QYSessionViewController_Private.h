@@ -79,7 +79,7 @@ NIMSessionMsgDatasourceDelegate>
                     completetionBlock:(void (^)(BOOL isSuccess))completetionBlock;
 
 - (void)evaluationViewControlerWillAppear;
-- (void)updateEvaluationMessageWithSessionId:(long long)sessionId kaolaTipContent:(NSString *)kaolaTipContent;
+- (void)updateEvaluationMessageWithSessionId:(long long)sessionId specialThanksTip:(NSString *)specialThanksTip;
 - (void)sendEvaluationRequest:(long long)sessionId
                         score:(NSUInteger)score
                       remarks:(NSString *)remarks

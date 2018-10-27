@@ -38,6 +38,10 @@
     return UIEdgeInsetsZero;
 }
 
+- (CGFloat)headBubbleSpace:(YSFMessageModel *)model {
+    return 0;
+}
+
 - (BOOL)shouldShowAvatar:(YSFMessageModel *)model {
     return NO;
 }
@@ -67,8 +71,9 @@
     } else if ([object.attachment isKindOfClass:[YSFEvaluationTipObject class]]) {
         YSFEvaluationTipObject *attachment = (YSFEvaluationTipObject *)object.attachment;
         NSString *text = nil;
-        if (attachment.kaolaTipContent.length > 0) {
-            text = attachment.kaolaTipContent;
+        if (attachment.specialThanksTip.length > 0) {
+            text = attachment.specialThanksTip;
+            text = [text stringByAppendingString:YSFStrParam(attachment.tipModify)];
         } else {
             if (!attachment.tipContent.length) {
                 //情况1：服务端返回的感谢文案为空，走原逻辑

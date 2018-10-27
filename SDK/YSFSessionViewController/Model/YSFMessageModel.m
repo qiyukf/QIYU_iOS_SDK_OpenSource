@@ -24,6 +24,7 @@
 @synthesize contentSize = _contentSize;
 @synthesize contentViewInsets = _contentViewInsets;
 @synthesize bubbleViewInsets = _bubbleViewInsets;
+@synthesize avatarBubbleSpace = _avatarBubbleSpace;
 @synthesize shouldShowAvatar = _shouldShowAvatar;
 @synthesize shouldShowNickName = _shouldShowNickName;
 
@@ -47,6 +48,7 @@
     _contentSize = CGSizeZero;
     _bubbleViewInsets = UIEdgeInsetsZero;
     _contentViewInsets = UIEdgeInsetsZero;
+    _avatarBubbleSpace = 0;
     
     _extraViewSize = CGSizeZero;
     _extraViewInsets = UIEdgeInsetsZero;
@@ -132,6 +134,17 @@
     } else {
         _shouldShowNickName = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowNickName:self];
     }
+}
+
+- (CGFloat)avatarBubbleSpace {
+    if (_avatarBubbleSpace == 0) {
+        if ([self.layoutConfig respondsToSelector:@selector(headBubbleSpace:)]) {
+            _avatarBubbleSpace = [self.layoutConfig headBubbleSpace:self];
+        } else {
+            _avatarBubbleSpace = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig headBubbleSpace:self];
+        }
+    }
+    return _avatarBubbleSpace;
 }
 
 #pragma mark - ExtraView Layout

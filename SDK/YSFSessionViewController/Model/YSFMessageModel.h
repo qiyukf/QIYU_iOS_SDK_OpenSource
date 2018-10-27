@@ -33,6 +33,7 @@
 @property (nonatomic, readonly) CGSize contentSize;
 @property (nonatomic, readonly) UIEdgeInsets contentViewInsets;
 @property (nonatomic, readonly) UIEdgeInsets bubbleViewInsets;
+@property (nonatomic, readonly) CGFloat avatarBubbleSpace;
 @property (nonatomic, readonly) BOOL shouldShowAvatar;
 @property (nonatomic, readonly) BOOL shouldShowNickName;
 

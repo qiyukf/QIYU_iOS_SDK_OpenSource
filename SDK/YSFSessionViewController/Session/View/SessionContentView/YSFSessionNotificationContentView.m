@@ -54,15 +54,23 @@
             _label.autoDetectNumber = NO;
             
             YSFEvaluationTipObject *attachment = (YSFEvaluationTipObject *)object.attachment;
-            if (attachment.kaolaTipContent.length > 0) {
-                _label.text = attachment.kaolaTipContent;
+            if (attachment.specialThanksTip.length > 0) {
+                _label.text = attachment.specialThanksTip;
+                if (attachment.tipModify.length) {
+                    NSMutableAttributedString *modifyAttrString = [[NSMutableAttributedString alloc] initWithString:attachment.tipModify];
+                    [modifyAttrString ysf_setFont:[UIFont systemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
+                    [_label appendAttributedText:modifyAttrString];
+                    [_label addCustomLink:@"YSFClickModifyAttributedString"
+                                 forRange:NSMakeRange(attachment.specialThanksTip.length, modifyAttrString.length)
+                                linkColor:YSFRGB(0x008fff)];
+                }
             } else {
                 NSInteger length = 0;
                 if (!attachment.tipContent.length) {
                     //情况1：服务端返回的感谢文案为空，走原逻辑
                     _label.text = @"您对我们的服务评价为：";
                     length += 11;
-                    NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:attachment.tipResult];
+                    NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:YSFStrParam(attachment.tipResult)];
                     [attributedstring ysf_setFont:[UIFont boldSystemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
                     [attributedstring ysf_setTextColor:[[QYCustomUIConfig sharedInstance] tipMessageTextColor]];
                     [_label appendAttributedText:attributedstring];
@@ -83,7 +91,7 @@
                         NSString *content_tail = [attachment.tipContent substringWithRange:NSMakeRange(range.location + range.length, attachment.tipContent.length - content_head.length - replaceStr.length)];
                         _label.text = content_head;
                         length += content_head.length;
-                        NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:attachment.tipResult];
+                        NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:YSFStrParam(attachment.tipResult)];
                         [attributedstring ysf_setFont:[UIFont boldSystemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
                         [attributedstring ysf_setTextColor:[[QYCustomUIConfig sharedInstance] tipMessageTextColor]];
                         [_label appendAttributedText:attributedstring];

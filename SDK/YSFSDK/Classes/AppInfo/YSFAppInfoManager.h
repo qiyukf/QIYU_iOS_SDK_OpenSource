@@ -40,6 +40,7 @@
 #define YSFEvaluationData                   @"evaluation_data"
 #define YSFEvaluationInviteText             @"invite_text"
 #define YSFEvaluationThanksText             @"thanks_text"
+#define YSFEvaluationSpecialThanksText      @"special_thanks_text"
 #define YSFEvaluationModifyEnable           @"modify_enable"
 #define YSFEvaluationModifyTime             @"modify_time"
 #define YSFEvaluationModifyLimit            @"modify_limit"

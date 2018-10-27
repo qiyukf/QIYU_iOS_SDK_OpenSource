@@ -14,7 +14,7 @@
 @property (nonatomic, copy) NSString *tipContent;
 @property (nonatomic, copy) NSString *tipResult;
 @property (nonatomic, copy) NSString *tipModify;
-@property (nonatomic, copy) NSString *kaolaTipContent;
+@property (nonatomic, copy) NSString *specialThanksTip;
 
 + (instancetype)objectByDict:(NSDictionary *)dict;
 

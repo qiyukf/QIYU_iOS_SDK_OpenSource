@@ -175,6 +175,11 @@ typedef NS_ENUM(NSInteger, QYBypassDisplayMode) {
 @property (nonatomic, assign) CGFloat sessionMessageSpacing;
 
 /**
+ *  头像与消息气泡间距，默认为5pt
+ */
+@property (nonatomic, assign) CGFloat headMessageSpacing;
+
+/**
  *  是否显示头像
  */
 @property (nonatomic, assign) BOOL showHeadImage;

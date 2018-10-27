@@ -1551,28 +1551,38 @@ YSFCameraViewControllerDelegate>
     }
     if (result) {
         NSMutableDictionary *sessionDict = [[[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:sessionId] mutableCopy];
-        [sessionDict setValue:[result toDict] forKey:YSFEvaluationResultData];
-        [[[QYSDK sharedSDK] sessionManager] setHistoryEvaluationData:sessionDict shopId:_shopId sessionId:sessionId];
+        if (sessionDict) {
+            [sessionDict setValue:[result toDict] forKey:YSFEvaluationResultData];
+            [[[QYSDK sharedSDK] sessionManager] setHistoryEvaluationData:sessionDict shopId:_shopId sessionId:sessionId];
+        }
     }
 }
 
-- (void)updateEvaluationMessageWithSessionId:(long long)sessionId kaolaTipContent:(NSString *)kaolaTipContent {
-    //将session_status更新为3
+- (void)updateEvaluationMessageWithSessionId:(long long)sessionId specialThanksTip:(NSString *)specialThanksTip {
+    //最近一通会话评价数据
+    BOOL saveRecent = NO;
     NSMutableDictionary *recentDict = [[[[QYSDK sharedSDK] sessionManager] getRecentEvaluationMemoryDataByShopId:_shopId] mutableCopy];
+    //sessionId对应的历史会话评价数据
+    BOOL saveHistory = NO;
+    NSMutableDictionary *sessionDict = [[[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:sessionId] mutableCopy];
+    
+    //若评价的会话为最近一通会话，则将右上角评价按钮置灰/session_status更新为3，表明已评价过/session_times更新为-1
+    long long recentSessionId = 0;
     if (recentDict) {
-        NSInteger status = [(NSNumber *)[recentDict objectForKey:YSFEvaluationSessionStatus] integerValue];
-        if (status == 3) {
-            return;
-        }
-        
-        long long recentSessionId = [(NSNumber *)[recentDict objectForKey:YSFEvaluationSessionId] longLongValue];
+        recentSessionId = [(NSNumber *)[recentDict objectForKey:YSFEvaluationSessionId] longLongValue];
         if (sessionId == recentSessionId) {
+            [self changeEvaluationButtonToDone];
             [recentDict setValue:@(3) forKey:YSFEvaluationSessionStatus];
-            [[[QYSDK sharedSDK] sessionManager] setRecentEvaluationData:recentDict shopId:_shopId];
+            [recentDict setValue:@(-1) forKey:YSFEvaluationSessionTimes];
+            saveRecent = YES;
         }
     }
-    //读出messageId/thanksText/resultData
-    NSDictionary *sessionDict = [[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:sessionId];
+    //若外部传入specialThanksTip则记录在历史会话数据中
+    if (sessionDict && specialThanksTip.length) {
+        [sessionDict setValue:specialThanksTip forKey:YSFEvaluationSpecialThanksText];
+        saveHistory = YES;
+    }
+    //读出历史会话评价数据中的messageId/thanksText/modifyEnable/resultData
     NSString *messageId = @"";
     NSString *thanksText = @"";
     BOOL modifyEnable = NO;
@@ -1586,25 +1596,16 @@ YSFCameraViewControllerDelegate>
             resultData = [YSFEvaluationCommitData instanceByDict:resultDict];
         }
     }
-    //构建评价结果消息体
+    //构建感谢评价消息Model
     YSFEvaluationTipObject *tipObject = [[YSFEvaluationTipObject alloc] init];
     tipObject.command = YSFCommandEvaluationTip;
     tipObject.sessionId = sessionId;
     tipObject.tipContent = thanksText;
     tipObject.tipResult = resultData.title;
-    tipObject.kaolaTipContent = kaolaTipContent;
+    tipObject.specialThanksTip = specialThanksTip;
     //判断是否显示“修改评价”
     if (modifyEnable) {
         tipObject.tipModify = @" 修改评价";
-    }
-    //若当前评价的会话就是最近一通会话，则将右上角评价按钮置灰，并将session_times修改为-1
-    long long recent_sessionId = [[recentDict objectForKey:YSFEvaluationSessionId] longLongValue];
-    if (sessionId == recent_sessionId) {
-        [self changeEvaluationButtonToDone];
-        if (recentDict) {
-            [recentDict setValue:@(-1) forKey:YSFEvaluationSessionTimes];
-            [[[QYSDK sharedSDK] sessionManager] setRecentEvaluationData:recentDict shopId:_shopId];
-        }
     }
     //取出_currentInviteEvaluationMessage评价消息的sessionId
     long long currentInviteSessionId = 0;
@@ -1615,7 +1616,7 @@ YSFCameraViewControllerDelegate>
     }
     NSString *newMsgId = nil;
     YSF_NIMMessage *updateMessage = [[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:messageId forSession:_session];
-    if (updateMessage || (_currentInviteEvaluationMessage && currentInviteSessionId == recent_sessionId)) {
+    if (updateMessage || (_currentInviteEvaluationMessage && currentInviteSessionId == recentSessionId)) {
         YSF_NIMMessage *message = updateMessage ? updateMessage : _currentInviteEvaluationMessage;
         YSF_NIMCustomObject *object = [[YSF_NIMCustomObject alloc] init];
         object.attachment = tipObject;
@@ -1637,10 +1638,17 @@ YSFCameraViewControllerDelegate>
                                                        completion:nil];
         newMsgId = message.messageId;
     }
+    //更新messageId
     if (newMsgId.length) {
-        NSMutableDictionary *m_sessionDict = [[[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:sessionId] mutableCopy];
-        [m_sessionDict setValue:newMsgId forKey:YSFEvaluationMessageID];
-        [[[QYSDK sharedSDK] sessionManager] setHistoryEvaluationData:m_sessionDict shopId:_shopId sessionId:sessionId];
+        [sessionDict setValue:newMsgId forKey:YSFEvaluationMessageID];
+        saveHistory = YES;
+    }
+    //保存数据
+    if (saveRecent) {
+        [[[QYSDK sharedSDK] sessionManager] setRecentEvaluationData:recentDict shopId:_shopId];
+    }
+    if (saveHistory) {
+        [[[QYSDK sharedSDK] sessionManager] setHistoryEvaluationData:sessionDict shopId:_shopId sessionId:sessionId];
     }
 }
 
@@ -2017,8 +2025,12 @@ YSFCameraViewControllerDelegate>
     } else if ([object isKindOfClass:[YSFEvaluationResult class]]) {
         YSFEvaluationResult *result = (YSFEvaluationResult *)object;
         if (result.code == YSFCodeServiceEvaluationAllow || result.code == YSFCodeServiceEvaluationAlreadyDone) {
-            //更新评价信息
-            [self updateEvaluationMessageWithSessionId:result.sessionId kaolaTipContent:@""];
+            NSDictionary *sessionDict = [[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:result.sessionId];
+            NSString *specialTip = @"";
+            if (sessionDict) {
+                specialTip = [sessionDict valueForKey:YSFEvaluationSpecialThanksText];
+            }
+            [self updateEvaluationMessageWithSessionId:result.sessionId specialThanksTip:specialTip];
         } else if (result.code == YSFCodeServiceEvaluationOverTime) {
             [self showToast:@"评价已超时，无法进行评价"];
         } else if (result.code == YSFCodeServiceEvaluationNotAllow) {
@@ -2382,24 +2394,24 @@ YSFCameraViewControllerDelegate>
     } else if ([eventName isEqualToString:YSFKitEventNameTapModifyEvaluation]) {
         YSF_NIMCustomObject *customObject = event.message.messageObject;
         YSFEvaluationTipObject *object = (YSFEvaluationTipObject *)customObject.attachment;
-        if (_onEvaluateBlock) {
-            _onEvaluateBlock(object.sessionId, event.message);
-        } else {
-            NSDictionary *sessionData = [[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:object.sessionId];
-            long long timestamp_limit = 0;
-            if (sessionData && sessionData.count) {
-                id timestamp = [sessionData objectForKey:YSFEvaluationModifyLimit];
-                if (timestamp) {
-                    timestamp_limit = [timestamp longLongValue];
-                }
+        NSDictionary *sessionData = [[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:object.sessionId];
+        long long timestamp_limit = 0;
+        if (sessionData && sessionData.count) {
+            id timestamp = [sessionData objectForKey:YSFEvaluationModifyLimit];
+            if (timestamp) {
+                timestamp_limit = [timestamp longLongValue];
             }
-            long long timestamp_now = round([[NSDate date] timeIntervalSince1970] * 1000);
-            if (timestamp_now < timestamp_limit || timestamp_limit == 0) {
-                //还未到达评价时效，可以评价
-                [self showEvaluationViewControllerWithSessionId:object.sessionId];
+        }
+        long long timestamp_now = round([[NSDate date] timeIntervalSince1970] * 1000);
+        if (timestamp_now < timestamp_limit || timestamp_limit == 0) {
+            //还未到达评价时效，可以评价
+            if (_onEvaluateBlock) {
+                _onEvaluateBlock(object.sessionId, event.message);
             } else {
-                [self showToast:@"评价已超时，无法进行评价"];
+                [self showEvaluationViewControllerWithSessionId:object.sessionId];
             }
+        } else {
+            [self showToast:@"评价已超时，无法进行评价"];
         }
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapGoods]) {

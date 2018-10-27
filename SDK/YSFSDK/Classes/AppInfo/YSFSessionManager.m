@@ -256,26 +256,23 @@
 }
 
 - (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId {
-    /*
-     1、若没有会话session：
-     a.当前会话状态为正在排队或客服不在线，waitingOrNotExist=YES，若为初次请求会话则请求客服，若不是初次请求则不请求客服
-     b.当前会话状态为离线或正在服务，waitingOrNotExist=NO，则一律请求客服
-     2、若有会话session：
-     a.无论当前会话什么状态，waitingOrNotExist=NO，则一律不请求客服
-     */
-    BOOL waitingOrNotExist = false;
-    if (![self getOnlineSession:shopId]
-        && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
-            || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist
-            || [self getSessionStateType:shopId] == YSFSessionStateNotExistAndLeaveMessageClosed)) {
-            waitingOrNotExist = true;
-        }
-    YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
-    if ([self serviceOutOfDate:shopId] && (isInit || !waitingOrNotExist)) {
-        return true;
+    //sessionExist表示当前会话是否存在
+    BOOL sessionExist = [self getOnlineSession:shopId] ? YES : NO;
+    //waitingOrNotExist表示当前会话因客服需排队或不在线而未申请到
+    YSFSessionStateType type = [self getSessionStateType:shopId];
+    BOOL waitingOrNotExist = (!sessionExist
+                              && (type == YSFSessionStateTypeWaiting
+                                  || type == YSFSessionStateTypeNotExist
+                                  || type == YSFSessionStateNotExistAndLeaveMessageClosed));
+    
+    if (waitingOrNotExist) {
+        //若当前会话因客服需排队或不在线而未申请到，即waitingOrNotExist=YES，则若初始进入会话界面需请求客服，否则一律不请求客服
+        return isInit;
     } else {
-        return false;
+        //若非上述需排队或不在线状况，则仅判断会话是否存在，若不存在则需请求客服，否则不请求
+        return !sessionExist;
     }
+    YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
 }
 
 #pragma mark - 客服更新

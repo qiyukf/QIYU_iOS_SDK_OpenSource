@@ -14,8 +14,8 @@
 @implementation YSFEvaluationTipObject
 - (NSString *)thumbText {
     NSString *text = @"";
-    if (_kaolaTipContent.length) {
-        text = _kaolaTipContent;
+    if (_specialThanksTip.length) {
+        text = _specialThanksTip;
     } else {
         text = [NSString stringWithFormat:@"[%@%@]", _tipContent, _tipResult];
     }
@@ -29,7 +29,7 @@
     dict[YSFApiKeyTipContent] = YSFStrParam(_tipContent);
     dict[YSFApiKeyTipResult] = YSFStrParam(_tipResult);
     dict[YSFApiKeyTipModify] = YSFStrParam(_tipModify);
-    dict[YSFApiKeyKaolaTipResult] = YSFStrParam(_kaolaTipContent);
+    dict[YSFApiKeyKaolaTipResult] = YSFStrParam(_specialThanksTip);
     return dict;
 }
 
@@ -40,7 +40,7 @@
     instance.tipContent = YSFStrParam([dict ysf_jsonString:YSFApiKeyTipContent]);
     instance.tipResult = YSFStrParam([dict ysf_jsonString:YSFApiKeyTipResult]);
     instance.tipModify = YSFStrParam([dict ysf_jsonString:YSFApiKeyTipModify]);
-    instance.kaolaTipContent = YSFStrParam([dict ysf_jsonString:YSFApiKeyKaolaTipResult]);
+    instance.specialThanksTip = YSFStrParam([dict ysf_jsonString:YSFApiKeyKaolaTipResult]);
     return instance;
 }
 @end
