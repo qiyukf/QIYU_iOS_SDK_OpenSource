@@ -50,12 +50,16 @@
 
 /**
  *  输入区域上方工具栏内按钮信息类：QYButtonInfo
+ *  注: actionType及index为button点击事件传递信息，仅可读
+ *  actionType为1表示发送文本消息title，2表示openURL或是自定义行为；index表示该button位置
  */
 @interface QYButtonInfo : NSObject
 
 @property (nonatomic, strong) id buttonId;
 @property (nonatomic, copy) NSString *title;
 @property (nonatomic, strong) id userData;
+@property (nonatomic, assign, readonly) NSUInteger actionType;
+@property (nonatomic, assign, readonly) NSUInteger index;
 
 @end
 

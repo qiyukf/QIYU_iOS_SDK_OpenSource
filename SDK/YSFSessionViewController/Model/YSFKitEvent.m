@@ -37,4 +37,11 @@ NSString *const YSFKitEventNameTapSystemNotification = @"YSFKitEventNameTapSyste
 
 @implementation YSFKitEvent
 
+- (NSString *)transferEventNameForExternal {
+    if (self.eventName.length) {
+        return [self.eventName stringByReplacingOccurrencesOfString:@"YSFKit" withString:@"QY"];
+    }
+    return @"";
+}
+
 @end

@@ -246,6 +246,7 @@
 #define     YSFApiPushKeySound          @"sound"
 #define     YSFApiPushKeyId             @"id"
 #define     YSFApiPushKeySessionId      @"sessionId"
+#define     YSFApiPushKeyMsg            @"msg"
 //shop
 #define     YSFApiKeyHasEmail               @"hasEmail"
 #define     YSFApiKeyHasMobile              @"hasMobile"

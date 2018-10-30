@@ -29,4 +29,17 @@
     return action;
 }
 
+- (NSString *)toJsonString {
+    NSDictionary *dict = @{
+                           YSFApiKeyStyle : YSFStrParam(self.style),
+                           YSFApiKeyType : YSFStrParam(self.type),
+                           YSFApiKeyUrl : YSFStrParam(self.url),
+                           YSFApiKeyParams : YSFStrParam(self.params),
+                           YSFApiKeyTarget : YSFStrParam(self.target),
+                           YSFApiKeyValidOperation : YSFStrParam(self.validOperation),
+                           YSFApiKeyTitle : YSFStrParam(self.title),
+                           };
+    return [dict ysf_toUTF8String];
+}
+
 @end

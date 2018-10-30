@@ -15,6 +15,8 @@
 
 @property (nonatomic,strong) id data;
 
+- (NSString *)transferEventNameForExternal;
+
 @end
 
 

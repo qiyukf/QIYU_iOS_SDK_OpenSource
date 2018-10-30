@@ -67,6 +67,14 @@ typedef void (^QYExtraViewClickBlock)(NSString *extInfo);
  */
 typedef void (^QYSystemNotificationClickBlock)(id message);
 
+/**
+ *  所有消息内事件点击回调
+ *
+ *  @param eventName 事件名称
+ *  @param eventData 数据
+ */
+typedef void (^QYEventBlock)(NSString *eventName, NSString *eventData);
+
 
 /**
  *  自定义行为配置类：QYCustomActionConfig，单例模式
@@ -114,6 +122,11 @@ typedef void (^QYSystemNotificationClickBlock)(id message);
  *  系统消息点击
  */
 @property (nonatomic, copy) QYSystemNotificationClickBlock notificationClickBlock;
+
+/**
+ *  消息内点击
+ */
+@property (nonatomic, copy) QYEventBlock eventClickBlock;
 
 /**
  *  设置录制或者播放语音完成以后是否自动deactivate AVAudioSession

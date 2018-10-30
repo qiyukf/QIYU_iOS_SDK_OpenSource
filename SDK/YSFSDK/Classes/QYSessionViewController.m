@@ -97,6 +97,13 @@ static long long g_sessionId;
 @implementation YSFKaolaTagInfo
 @end
 
+@interface QYButtonInfo()
+
+@property (nonatomic, assign) NSUInteger actionType;
+@property (nonatomic, assign) NSUInteger index;
+
+@end
+
 @implementation QYButtonInfo
 @end
 
@@ -595,14 +602,15 @@ YSFCameraViewControllerDelegate>
     [_sessionInputView setActionCallback:^(YSFActionInfo *action) {
         if (action.action == YSFActionTypeSend) {
             [weakSelf onSendText:action.title];
-        } else {
-            QYButtonInfo *qyActionInfo = [[QYButtonInfo alloc] init];
-            qyActionInfo.buttonId = action.buttonId;
-            qyActionInfo.title = action.title;
-            qyActionInfo.userData = action.userData;
-            if (weakSelf.buttonClickBlock) {
-                weakSelf.buttonClickBlock(qyActionInfo);
-            }
+        }
+        QYButtonInfo *qyActionInfo = [[QYButtonInfo alloc] init];
+        qyActionInfo.buttonId = action.buttonId;
+        qyActionInfo.title = action.title;
+        qyActionInfo.userData = action.userData;
+        qyActionInfo.actionType = action.action;
+        qyActionInfo.index = [weakSelf.sessionInputView.actionBar.actionInfoArray indexOfObjectIdenticalTo:action];
+        if (weakSelf.buttonClickBlock) {
+            weakSelf.buttonClickBlock(qyActionInfo);
         }
     }];
     [self.view addSubview:_sessionInputView];
@@ -2256,6 +2264,7 @@ YSFCameraViewControllerDelegate>
     __block BOOL handled = NO;
     NSString *eventName = event.eventName;
     YSF_NIMMessage *message = event.message;
+    __block NSString *eventData = @"";
     
     if ([eventName isEqualToString:YSFKitEventNameReloadData]) {
         YSFMessageModel *model = [self makeModel:message];
@@ -2311,26 +2320,26 @@ YSFCameraViewControllerDelegate>
                 [[UIApplication sharedApplication] openURL:telURL];
             }
         }];
+        eventData = [NSString stringWithFormat:@"tel://%@", YSFStrParam(event.data)];
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapMachineQuestion]) {
         NSDictionary *questionDict = event.data;
         NSString *question = [questionDict objectForKey:YSFApiKeyQuestion];
         YSFServiceSession *session = [[QYSDK sharedSDK].sessionManager getOnlineSession:_shopId];
-        if (session) {
-            if (!session.humanOrMachine) {
-                NSNumber *questionId = [questionDict objectForKey:YSFApiKeyId];
-                YSFReportQuestion *request = [[YSFReportQuestion alloc] init];
-                request.command = YSFCommandReportQuestion;
-                request.questionId = [questionId longLongValue];
-                request.question = question;
-                request.messageId = event.message.messageId;
-                YSF_NIMMessage *questionMessage = [YSFMessageMaker msgWithCustom:request];
-                [self sendMessage:questionMessage];
-            } else {
-                YSF_NIMMessage *message = [YSFMessageMaker msgWithText:question];
-                [self sendMessage:message];
-            }
+        if (session && !session.humanOrMachine) {
+            NSNumber *questionId = [questionDict objectForKey:YSFApiKeyId];
+            YSFReportQuestion *request = [[YSFReportQuestion alloc] init];
+            request.command = YSFCommandReportQuestion;
+            request.questionId = [questionId longLongValue];
+            request.question = question;
+            request.messageId = event.message.messageId;
+            YSF_NIMMessage *questionMessage = [YSFMessageMaker msgWithCustom:request];
+            [self sendMessage:questionMessage];
+        } else {
+            YSF_NIMMessage *message = [YSFMessageMaker msgWithText:question];
+            [self sendMessage:message];
         }
+        eventData = YSFStrParam(question);
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapEvaluationSelection]) {
         BOOL yesOrNo = [event.data boolValue];
@@ -2362,6 +2371,7 @@ YSFCameraViewControllerDelegate>
             NSString *commandStr = obj;
             if ([commandStr isEqualToString:@"applyHumanStaff"]) {
                 [self applyHumanStaff];
+                eventData = YSFStrParam(commandStr);
                 handled = YES;
             } else {
                 NSAssert(NO, @"not support command");
@@ -2369,6 +2379,7 @@ YSFCameraViewControllerDelegate>
         }];
         if (handled == NO) {
             [self openUrl:url];
+            eventData = YSFStrParam(url);
             handled = YES;
         }
     } else if ([eventName isEqualToString:YSFKitEventNameTapKFBypass]) {
@@ -2379,6 +2390,7 @@ YSFCameraViewControllerDelegate>
         QYCommodityInfo *commodityInfo = customObject.attachment;
         NSString *commodityUrl = commodityInfo.urlString;
         if (commodityUrl && ![commodityUrl isEqualToString:@""]) {
+            eventData = YSFStrParam(commodityUrl);
             [self openUrl:commodityUrl];
         }
         handled = YES;
@@ -2446,13 +2458,18 @@ YSFCameraViewControllerDelegate>
         [self popUpMoreListNav:flightList];
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapBot]) {
-        [self onTapBotAction:event.data];
+        YSFAction *action = (YSFAction *)event.data;
+        [self onTapBotAction:action];
+        eventData = YSFStrParam([action toJsonString]);
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapMixReply]) {
-        [self onTapMixReplyAction:event.data];
+        YSFAction *action = (YSFAction *)event.data;
+        [self onTapMixReplyAction:action];
+        eventData = YSFStrParam([action toJsonString]);
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapPushMessageActionUrl]) {
         [self onTapPushMessageActionUrl:event.data];
+        eventData = YSFStrParam(event.data);
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapFillInBotForm]) {
         long long sessionId = event.message.sessionIdFromMessageId;
@@ -2514,6 +2531,12 @@ YSFCameraViewControllerDelegate>
         if ([QYCustomActionConfig sharedInstance].notificationClickBlock) {
             [QYCustomActionConfig sharedInstance].notificationClickBlock(event.message);
         }
+    }
+    
+    //抛出所有消息内点击事件
+    if (event && [QYCustomActionConfig sharedInstance].eventClickBlock) {
+        NSString *extEventName = [event transferEventNameForExternal];
+        [QYCustomActionConfig sharedInstance].eventClickBlock(extEventName, eventData);
     }
     
     if (!handled) {
@@ -2588,32 +2611,26 @@ YSFCameraViewControllerDelegate>
         flightList.action = action;
         [self popUpMoreListNav:flightList];
     } else {
-        YSFServiceSession *session = [[QYSDK sharedSDK].sessionManager getOnlineSession:_shopId];
-        if (session) {
-            YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
-            orderOperation.command = YSFCommandBotSend;
-            orderOperation.target = action.target;
-            orderOperation.params = action.params;
-            orderOperation.templateInfo = @{@"id":@"qiyu_template_text", @"label":YSFStrParam(action.validOperation)};
-            YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
-            [self sendMessage:orderOperationMessage];
-        }
-    }
-}
-
-- (void)onTapMixReplyAction:(YSFAction *)action {
-    YSFServiceSession *session = [[QYSDK sharedSDK].sessionManager getOnlineSession:_shopId];
-    if (session) {
         YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
         orderOperation.command = YSFCommandBotSend;
         orderOperation.target = action.target;
         orderOperation.params = action.params;
-        orderOperation.label = action.validOperation;
-        orderOperation.type = action.type;
-        orderOperation.templateInfo = @{@"id":@"qiyu_template_mixReply", @"label":YSFStrParam(action.validOperation)};
+        orderOperation.templateInfo = @{@"id":@"qiyu_template_text", @"label":YSFStrParam(action.validOperation)};
         YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
         [self sendMessage:orderOperationMessage];
     }
+}
+
+- (void)onTapMixReplyAction:(YSFAction *)action {
+    YSFOrderOperation *orderOperation = [[YSFOrderOperation alloc] init];
+    orderOperation.command = YSFCommandBotSend;
+    orderOperation.target = action.target;
+    orderOperation.params = action.params;
+    orderOperation.label = action.validOperation;
+    orderOperation.type = action.type;
+    orderOperation.templateInfo = @{@"id":@"qiyu_template_mixReply", @"label":YSFStrParam(action.validOperation)};
+    YSF_NIMMessage *orderOperationMessage = [YSFMessageMaker msgWithCustom:orderOperation];
+    [self sendMessage:orderOperationMessage];
 }
 
 - (void)onTapPushMessageActionUrl:(NSString *)actionUrl {
