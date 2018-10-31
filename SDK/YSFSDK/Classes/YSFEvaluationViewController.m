@@ -100,6 +100,9 @@
     _imagePanel = [[UIImageView alloc] init];
     _imagePanel.userInteractionEnabled = YES;
     _imagePanel.backgroundColor = YSFColorFromRGB(0xffffff);
+    _imagePanel.ysf_frameWidth = self.view.ysf_frameWidth;
+    _imagePanel.ysf_frameHeight = 377;
+    _imagePanel.ysf_frameBottom = self.view.ysf_frameBottom;
     [self.view addSubview:_imagePanel];
     
     _tipLabel = [[UILabel alloc] init];
@@ -218,15 +221,18 @@
             [tagButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
             [tagButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
             tagButton.titleLabel.layer.masksToBounds = YES;
-
+            
             __weak typeof(tagButton) weakTagButton = tagButton;
             [tagButton ysf_addEventHandler:^(id  _Nonnull sender) {
                 weakTagButton.selected = !weakTagButton.selected;
                 if (weakTagButton.selected) {
                     weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-                else {
+                } else {
                     weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+                if (weakSelf.lastResult) {
+                    weakSelf.submit.enabled = YES;
+                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList1 addSubview:tagButton];
@@ -258,9 +264,12 @@
                 weakTagButton.selected = !weakTagButton.selected;
                 if (weakTagButton.selected) {
                     weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-                else {
+                } else {
                     weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+                if (weakSelf.lastResult) {
+                    weakSelf.submit.enabled = YES;
+                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList2 addSubview:tagButton];
@@ -292,9 +301,12 @@
                 weakTagButton.selected = !weakTagButton.selected;
                 if (weakTagButton.selected) {
                     weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-                else {
+                } else {
                     weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+                if (weakSelf.lastResult) {
+                    weakSelf.submit.enabled = YES;
+                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList3 addSubview:tagButton];
@@ -326,9 +338,12 @@
                 weakTagButton.selected = !weakTagButton.selected;
                 if (weakTagButton.selected) {
                     weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-                else {
+                } else {
                     weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+                if (weakSelf.lastResult) {
+                    weakSelf.submit.enabled = YES;
+                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList4 addSubview:tagButton];
@@ -360,9 +375,12 @@
                 weakTagButton.selected = !weakTagButton.selected;
                 if (weakTagButton.selected) {
                     weakTagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-                else {
+                } else {
                     weakTagButton.backgroundColor = [UIColor clearColor];
+                }
+                if (weakSelf.lastResult) {
+                    weakSelf.submit.enabled = YES;
+                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList5 addSubview:tagButton];
@@ -403,9 +421,6 @@
 
 - (void)viewDidLayoutSubviews
 {
-    _imagePanel.ysf_frameWidth = self.view.ysf_frameWidth;
-    _imagePanel.ysf_frameHeight = 377;
-    _imagePanel.ysf_frameBottom = self.view.ysf_frameBottom;
     _tipLabel.ysf_frameWidth = _imagePanel.ysf_frameWidth;
     _tipLabel.ysf_frameHeight = 40;
     _satisfaction1.ysf_frameTop = 20;
@@ -418,10 +433,6 @@
     _satisfaction4.ysf_frameWidth = 38;
     _satisfaction5.ysf_frameTop = 20;
     _satisfaction5.ysf_frameWidth = 60;
-
-    _scrollView.ysf_frameWidth = _imagePanel.ysf_frameWidth;
-    _scrollView.ysf_frameTop = _tipLabel.ysf_frameBottom;
-    _scrollView.ysf_frameHeight = 287 - _tipLabel.ysf_frameHeight;
     
     _tagList1.ysf_frameWidth = _imagePanel.ysf_frameWidth - 32;
     _tagList1.ysf_frameCenterX = _imagePanel.ysf_frameCenterX;
@@ -450,7 +461,11 @@
     _submit.ysf_frameWidth = _imagePanel.ysf_frameWidth - 32;
     _submit.ysf_frameCenterX = _imagePanel.ysf_frameCenterX;
     _submit.ysf_frameHeight = 42;
-    _submit.ysf_frameTop = 307;
+    _submit.ysf_frameTop = CGRectGetHeight(_imagePanel.frame) - 70;
+    
+    _scrollView.ysf_frameWidth = _imagePanel.ysf_frameWidth;
+    _scrollView.ysf_frameTop = _tipLabel.ysf_frameBottom;
+    _scrollView.ysf_frameHeight = CGRectGetHeight(_imagePanel.frame) - CGRectGetHeight(_tipLabel.frame) - 90;
     
     NSUInteger evaluationTypeCount = _evaluationDict.count;
     NSUInteger offset = 0;
@@ -626,69 +641,73 @@
 }
 
 - (void)updateLastResult {
-    if ([self.lastResult.title isEqualToString:@"非常满意"]) {
-        [self onSelect:_satisfaction1 selectedTagListView:_tagList1];
-        for (NSString *selectTagString in self.lastResult.tagList) {
-            for (UIButton *tagButton in _tagList1.subviews) {
-                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
-                    tagButton.selected = YES;
-                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+    if (self.lastResult) {
+        if ([self.lastResult.title isEqualToString:@"非常满意"]) {
+            [self onSelect:_satisfaction1 selectedTagListView:_tagList1];
+            for (NSString *selectTagString in self.lastResult.tagList) {
+                for (UIButton *tagButton in _tagList1.subviews) {
+                    if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                        tagButton.selected = YES;
+                        tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                    }
+                }
+            }
+        } else if ([self.lastResult.title isEqualToString:@"满意"]) {
+            [self onSelect:_satisfaction2 selectedTagListView:_tagList2];
+            for (NSString *selectTagString in self.lastResult.tagList) {
+                for (UIButton *tagButton in _tagList2.subviews) {
+                    if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                        tagButton.selected = YES;
+                        tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                    }
+                }
+            }
+        } else if ([self.lastResult.title isEqualToString:@"一般"]) {
+            [self onSelect:_satisfaction3 selectedTagListView:_tagList3];
+            for (NSString *selectTagString in self.lastResult.tagList) {
+                for (UIButton *tagButton in _tagList3.subviews) {
+                    if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                        tagButton.selected = YES;
+                        tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                    }
+                }
+            }
+        } else if ([self.lastResult.title isEqualToString:@"不满意"]) {
+            [self onSelect:_satisfaction4 selectedTagListView:_tagList4];
+            for (NSString *selectTagString in self.lastResult.tagList) {
+                for (UIButton *tagButton in _tagList4.subviews) {
+                    if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                        tagButton.selected = YES;
+                        tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                    }
+                }
+            }
+        } else if ([self.lastResult.title isEqualToString:@"非常不满意"]) {
+            [self onSelect:_satisfaction5 selectedTagListView:_tagList5];
+            for (NSString *selectTagString in self.lastResult.tagList) {
+                for (UIButton *tagButton in _tagList5.subviews) {
+                    if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
+                        tagButton.selected = YES;
+                        tagButton.backgroundColor = YSFColorFromRGB(0x999999);
+                    }
                 }
             }
         }
-    } else if ([self.lastResult.title isEqualToString:@"满意"]) {
-        [self onSelect:_satisfaction2 selectedTagListView:_tagList2];
-        for (NSString *selectTagString in self.lastResult.tagList) {
-            for (UIButton *tagButton in _tagList2.subviews) {
-                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
-                    tagButton.selected = YES;
-                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-            }
+        if (self.lastResult.content.length) {
+            _textView.text = self.lastResult.content;
+            _placeholderLabel.hidden = YES;
         }
-    } else if ([self.lastResult.title isEqualToString:@"一般"]) {
-        [self onSelect:_satisfaction3 selectedTagListView:_tagList3];
-        for (NSString *selectTagString in self.lastResult.tagList) {
-            for (UIButton *tagButton in _tagList3.subviews) {
-                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
-                    tagButton.selected = YES;
-                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-            }
-        }
-    } else if ([self.lastResult.title isEqualToString:@"不满意"]) {
-        [self onSelect:_satisfaction4 selectedTagListView:_tagList4];
-        for (NSString *selectTagString in self.lastResult.tagList) {
-            for (UIButton *tagButton in _tagList4.subviews) {
-                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
-                    tagButton.selected = YES;
-                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-            }
-        }
-    } else if ([self.lastResult.title isEqualToString:@"非常不满意"]) {
-        [self onSelect:_satisfaction5 selectedTagListView:_tagList5];
-        for (NSString *selectTagString in self.lastResult.tagList) {
-            for (UIButton *tagButton in _tagList5.subviews) {
-                if ([[tagButton titleForState:UIControlStateNormal] isEqualToString:selectTagString]) {
-                    tagButton.selected = YES;
-                    tagButton.backgroundColor = YSFColorFromRGB(0x999999);
-                }
-            }
-        }
-    }
-    if (self.lastResult.content.length) {
-        _textView.text = self.lastResult.content;
-        _placeholderLabel.hidden = YES;
+        _submit.enabled = NO;
+        _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 0.6);
     }
 }
 
 - (void)onClose:(id)sender
 {
-    if (_textView.text.length > 0 ) {
+    if (_submit.enabled) {
         //解决iOS键盘消失动画被打断后闪一下问题
         __weak typeof(self) weakSelf = self;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.53 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             NSString *title = weakSelf.modifyEnable ? @"是否放弃当前评价" : @"是否放弃当前评价，放弃后不可恢复";
             UIAlertView *dialog = [[UIAlertView alloc] initWithTitle:title
                                                              message:@""
@@ -699,8 +718,7 @@
             [dialog addButtonWithTitle:@"确定"];
             [dialog show];
         });
-    }
-    else {
+    } else {
         [self closeHandle];
     }
     [self.textView resignFirstResponder];   //否则close评价窗口键盘会抖动
@@ -780,6 +798,12 @@
         // Cannot animate with setContentOffset:animated: or caret will not appear
         [textView setContentOffset:offset];
     }
+    if (self.lastResult) {
+        if (![_textView.text isEqualToString:self.lastResult.content]) {
+            _submit.enabled = YES;
+            _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+        }
+    }
 }
 
 - (void)onSubmit:(id)sender
@@ -837,6 +861,10 @@
         CGRect imagePanleframe = self.imagePanel.frame;
         imagePanleframe.size.width = kbFrame.size.width;
         imagePanleframe.origin.y = kbFrame.origin.y - imagePanleframe.size.height;
+        if (imagePanleframe.origin.y < YSFStatusBarHeight) {
+            imagePanleframe.origin.y = YSFStatusBarHeight;
+            imagePanleframe.size.height = CGRectGetHeight([UIScreen mainScreen].bounds) - YSFStatusBarHeight - kbFrame.size.height;
+        }
         self.imagePanel.frame = imagePanleframe;
     } completion:^(BOOL finished) {
         

@@ -275,6 +275,7 @@ YSFCameraViewControllerDelegate>
     NSInteger count = [[[YSF_NIMSDK sharedSDK] conversationManager] unreadCountInSession:_session];
     if (count > 0) {
         shouldRequestService = NO;
+        [[[QYSDK sharedSDK] sessionManager] updateStaffInfoForOnlineSession:_shopId];
         NSDictionary *dict = [sessionManager getRecentEvaluationMemoryDataByShopId:_shopId];
         NSInteger status = [[dict objectForKey:YSFEvaluationSessionStatus] integerValue];
         if (status == 2) {
@@ -1077,6 +1078,16 @@ YSFCameraViewControllerDelegate>
             [self blockStartRequestStaff];
         } else {
             [self startRequestStaff];
+        }
+    } else {
+        if (isInit && [QYCustomActionConfig sharedInstance].actionBlock) {
+            QYAction *action = [[QYAction alloc] init];
+            action.type = QYActionTypeRequestStaffAfter;
+            [QYCustomActionConfig sharedInstance].actionBlock(action);
+            if (action.requestStaffAfterBlock) {
+                YSFServiceSession *onlineSession = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
+                action.requestStaffAfterBlock(onlineSession ? [onlineSession toDict] : nil, nil);
+            }
         }
     }
 }
