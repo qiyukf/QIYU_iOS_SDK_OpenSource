@@ -17,12 +17,11 @@
 /**
  *  平台电商店铺Id，不是平台电商不用管
  */
-@property (nonatomic, copy) NSString *shopId;
+@property (nonatomic,copy)    NSString *shopId;
 
 /**
  *  会话窗口回调
  */
 @property (nonatomic, weak) id<QYSessionViewDelegate> delegate;
-
 
 @end

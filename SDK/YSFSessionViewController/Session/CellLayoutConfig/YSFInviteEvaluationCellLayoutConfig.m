@@ -25,14 +25,16 @@
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)model.message.messageObject;
     if ([object.attachment isKindOfClass:[YSFInviteEvaluationObject class]]) {
         YSFInviteEvaluationObject *attachment = (YSFInviteEvaluationObject *)object.attachment;
-        if (attachment.inviteText.length > 0) {
-            [textLabel setText:attachment.inviteText];
-        } else {
+        if (attachment.evaluationMessageInvite.length > 0) {
+            [textLabel setText:attachment.evaluationMessageInvite];
+        }
+        else {
             [textLabel setText:@"感谢您的咨询，请对我们的服务作出评价"];
         }
     }
     
     [textLabel sizeToFit];
+
     
     return CGSizeMake(width, 90 + textLabel.ysf_frameHeight);
 }

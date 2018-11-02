@@ -48,9 +48,6 @@ typedef NS_ENUM(NSInteger, QYSessionStatus) {
  */
 @property (nonatomic, assign) NSTimeInterval lastMessageTimeStamp;
 
-/**
- *  是否存在垃圾词汇
- */
 @property (nonatomic, assign) BOOL hasTrashWords;
 
 @end

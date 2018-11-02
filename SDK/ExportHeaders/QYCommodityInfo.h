@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 /**
- *  QYCommodityTag：自定义商品信息卡片按钮信息
+ *  自定义商品信息按钮信息
  */
 @interface QYCommodityTag : NSObject
 
@@ -22,7 +22,7 @@
 
 
 /**
- *  商品信息类：QYCommodityInfo
+ *  商品详情信息展示
  */
 @interface QYCommodityInfo : NSObject
 

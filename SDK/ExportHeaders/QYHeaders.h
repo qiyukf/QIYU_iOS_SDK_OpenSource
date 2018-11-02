@@ -20,6 +20,5 @@
 #import "QYPushMessage.h"
 #import "QYMessageInfo.h"
 #import "QYSessionInfo.h"
-#import "QYAction.h"
 
 #endif

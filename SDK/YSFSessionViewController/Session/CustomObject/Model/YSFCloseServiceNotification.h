@@ -8,12 +8,11 @@
 
 @interface YSFCloseServiceNotification : NSObject
 
-@property (nonatomic, assign) long long sessionId;
-@property (nonatomic, copy) NSString *message;
-@property (nonatomic, assign) NSInteger closeReason;
-
-@property (nonatomic, assign) BOOL evaluate;
-@property (nonatomic, assign) BOOL autoPopup;
+@property (nonatomic,assign)  long long    sessionId;
+@property (nonatomic,assign)  BOOL evaluate;
+@property (nonatomic,copy)    NSString *message;
+@property (nonatomic,assign)    NSInteger closeReason;
+@property (nonatomic,assign)    BOOL evaluationAutoPopup;
 
 + (instancetype)dataByJson:(NSDictionary *)dict;
 

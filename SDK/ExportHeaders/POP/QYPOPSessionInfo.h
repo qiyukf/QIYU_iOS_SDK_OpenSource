@@ -8,7 +8,6 @@
 
 #import "QYSessionInfo.h"
 
-
 /**
  *  平台电商专用；会话列表中的会话详情信息
  */
@@ -28,6 +27,5 @@
  *  会话名称
  */
 @property (nonatomic, copy) NSString *sessionName;
-
 
 @end

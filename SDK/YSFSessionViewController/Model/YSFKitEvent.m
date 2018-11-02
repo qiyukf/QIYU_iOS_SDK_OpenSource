@@ -25,7 +25,6 @@ NSString *const YSFKitEventNameTapMixReply = @"YSFKitEventNameTapMixReply";
 NSString *const YSFKitEventNameTapKFBypass = @"YSFKitEventNameTapKFBypass";
 NSString *const YSFKitEventNameTapCommodityInfo = @"YSFKitEventNameTapCommodityInfo";
 NSString *const YSFKitEventNameTapEvaluation = @"YSFKitEventNameTapEvaluation";
-NSString *const YSFKitEventNameTapModifyEvaluation = @"YSFKitEventNameTapModifyEvaluation";
 NSString *const YSFKitEventNameTapRetryAudioToText = @"YSFKitEventNameTapRetryAudioToText";
 NSString *const YSFKitEventNameTapRichTextImage = @"YSFKitEventNameTapRichTextImage";
 NSString *const YSFKitEventNameTapPushMessageActionUrl = @"YSFKitEventNameTapPushMessageActionUrl";

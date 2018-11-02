@@ -1,26 +1,14 @@
 
+typedef void (^EvaluationCallback)(BOOL done, NSString *evaluationText);
 
-@interface YSFEvaluationCommitData : NSObject
+@interface EvaluationData : NSObject
 
-@property (nonatomic, copy) NSString *title;
-@property (nonatomic, strong) NSArray *tagList;
-@property (nonatomic, copy) NSString *content;
 
-+ (instancetype)instanceByDict:(NSDictionary *)dict;
-- (NSDictionary *)toDict;
 
 @end
 
-
-typedef void (^evaluationCallback)(BOOL done, YSFEvaluationCommitData *result);
-
 @interface YSFEvaluationViewController : UIViewController
 
-- (instancetype)initWithEvaluationDict:(NSDictionary *)evaluationDict
-                      evaluationResult:(YSFEvaluationCommitData *)lastResult
-                                shopId:(NSString *)shopId
-                             sessionId:(long long)sessionId
-                          modifyEnable:(BOOL)modifyEnable
-                    evaluationCallback:(evaluationCallback)evaluationCallback;
+- (instancetype)initWithEvaluationDict:(NSDictionary *)evaluationDict shopId:(NSString *)shopId sessionId:(long long)sessionId evaluationCallback:(EvaluationCallback)evaluationCallback;
 
 @end

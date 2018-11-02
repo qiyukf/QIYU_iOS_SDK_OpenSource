@@ -43,13 +43,16 @@
 #define     YSFApiKeyGroupName          @"groupname"
 #define     YSFApiKeyIconUrl            @"iconurl"
 #define     YSFApiKeyMessage            @"message"
+#define     YSFApiKeyEvaluation         @"evaluation"
+#define     YSFApiKeyEvaluationData     @"evaluation_data"
+#define     YSFApiKeyEvaluationMessageInvite      @"messageInvite"
+#define     YSFApiKeyEvaluationMessageThanks      @"messageThanks"
 #define     YSFApiKeyStaffType          @"stafftype"
 #define     YSFApiKeyVersion            @"version"
 #define     YSFApiKeyRealStaffId        @"realStaffid"
 #define     YSFApiKeyGroupId            @"groupid"
 #define     YSFApiKeyQuestion           @"question"
 #define     YSFApiKeyQuestionId         @"questionid"
-#define     YSFApiKeyQuestionMsgId      @"questionMsgidClient"
 #define     YSFApiKeyLabel              @"label"
 #define     YSFApiKeyId                 @"id"
 #define     YSFApiKeyEntryId            @"entryid"
@@ -78,7 +81,6 @@
 #define     YSFApiKeyMatchedQuestion    @"matched_question"
 #define     YSFApiKeyTipContent         @"tip_content"
 #define     YSFApiKeyTipResult          @"tip_result"
-#define     YSFApiKeyTipModify          @"tip_modify"
 #define     YSFApiKeyKaolaTipResult     @"kaola_tip_content"
 #define     YSFApiKeyStatus             @"status"
 #define     YSFApiKeyCount              @"count"
@@ -185,10 +187,12 @@
 #define     YSFApiKeyRight              @"right"
 #define     YSFApiKeyExt                @"ext"
 #define     YSFApiKeyEndTime            @"endTime"
+#define     YSFApiKeySendingRate        @"sendingRate"
 #define     YSFApiKeyConfig             @"config"
 #define     YSFApiKeySwitch             @"switch"
 #define     YSFApiKeyRobotId            @"robotId"
 #define     YSFApiKeyTransferId         @"transferid"
+#define     YSFApiEvaluationAutoPopup   @"evaluation_auto_popup"
 #define     YSFApiTagList               @"tagList"
 #define     YSFApiKeyMsgType            @"msg_type"
 #define     YSFApiKeyMsgId2             @"msg_id"
@@ -236,43 +240,13 @@
 #define     YSFApiKeyBotPreRequestID    @"preRequestId"
 #define     YSFApiKeyBotNodeID          @"nodeId"
 #define     YSFApiKeyBotShowUseful      @"showUseful"
-//推送相关key
-#define     YSFApiPushKeyCmd            @"cmd"
-#define     YSFApiPushKeyAps            @"aps"
-#define     YSFApiPushKeyAlert          @"alert"
-#define     YSFApiPushKeyTitle          @"title"
-#define     YSFApiPushKeyBody           @"body"
-#define     YSFApiPushKeyBadge          @"badge"
-#define     YSFApiPushKeySound          @"sound"
-#define     YSFApiPushKeyId             @"id"
-#define     YSFApiPushKeySessionId      @"sessionId"
-//shop
-#define     YSFApiKeyHasEmail               @"hasEmail"
-#define     YSFApiKeyHasMobile              @"hasMobile"
-#define     YSFApiKeyQYInfoSwitch           @"qiyuInfoSwitch"
-#define     YSFApiKeySetting                @"setting"
-#define     YSFApiKeySessionOpenSwitch      @"session_open_switch"
-#define     YSFApiKeySessionEndSwitch       @"session_end_switch"
-#define     YSFApiKeySessionTimeoutSwitch   @"session_timeout_switch"
-#define     YSFApiKeyStaffReadSwitch        @"staffReadSwitch"
-#define     YSFApiKeyInputSwitch            @"inputSwitch"
-#define     YSFApiKeySendingRate            @"sendingRate"
-//评价相关
-#define     YSFApiKeyEvaluation                 @"evaluation"
-#define     YSFApiKeyEvaluationData             @"evaluation_data"
-#define     YSFApiKeyEvaluationInviteMsg        @"messageInvite"
-#define     YSFApiKeyEvaluationThanksMsg        @"messageThanks"
-#define     YSFApiKeyEvaluationAutoPopup        @"evaluation_auto_popup"
-#define     YSFApiKeyEvaluationModifyEnable     @"enable_evaluation_muttimes"
-#define     YSFApiKeyEvaluationModifyTimeout    @"evaluation_timeout"
-#define     YSFApiKeyEvaluationModifyMaxTime    @"evaluation_modify_limit"
+
 
 #define     YSFApiValueIOS              @"iOS"
 
 typedef enum : NSUInteger {
     //公用
-    YSFCommandUploadLog                 =   163,    //服务端请求上传日志
-    YSFCommandRevokeMessageResult       =   28,     //撤回消息结果
+    YSFCommandUploadLog    =   163,      //服务端请求上传日志
 
     //访客端
     YSFCommandRequestServiceRequest     =   1,      //请求客服
@@ -292,7 +266,6 @@ typedef enum : NSUInteger {
     YSFCommandEvaluationNotification    =   50,     //主动邀请评价
     YSFCommandEvaluationRequest         =   51,     //满意度评价
     YSFCommandSetUserInfoRequest        =   52,     //轻量CRM
-    YSFCommandEvaluationResult          =   55,     //评价结果
     YSFCommandSystemConfig              =   57,     //系统配置
     YSFCommandSendInputtingMessageRequest = 58,       //发送正在输入的消息
     YSFCommandMachine                   =   60,     //机器人问答
@@ -322,8 +295,7 @@ typedef enum : NSUInteger {
     YSFCommandSetOnlineState            =   12,     //设置客服在线状态
     YSFCommandUserOffline               =   18,     //客户离线了
     YSFCommandWeChatMessage             =   20,     //微信消息
-    YSFCommandRevokeMessageResquest     =   27,     //请求撤回消息
-    YSFCommandOfflineTimeout            =   32,     //离线时间超时
+    YSFCommandOfflineTimeout            =   32,    //离线时间超时
     YSFCommandWelcome                   =   40,     //欢迎语
     YSFCommandTrashWords                =   42,     //消息匹配到敏感词、反垃圾
     YSFCommandMiniAppTimeout            =   44,     //小程序超时
@@ -365,14 +337,9 @@ typedef enum : NSUInteger {
     YSFCodeServiceWaiting       = 203,      //正在排队
     YSFCodeBundleIdInvalid      = 204,      //bundleid无效
     YSFCodeServiceNotExistAndLeaveMessageClosed = 205,      //没有客服在线，且留言功能已关闭
-    YSFCodeServiceWaitingToStartService         = 301,      //排队返回值，从排队状态进入服务状态
-    YSFCodeServiceWaitingToNotExsit             = 302,      //排队返回值，客服不在线
+    YSFCodeServiceWaitingToStartService = 301,      //排队返回值，从排队状态进入服务状态
+    YSFCodeServiceWaitingToNotExsit      = 302,      //排队返回值，客服不在线
     YSFCodeServiceWaitingToNotExsitAndLeaveMessageClosed      = 303,      //排队返回值，客服不在线，留言关闭
-    
-    YSFCodeServiceEvaluationAllow       = 413,  //允许评价
-    YSFCodeServiceEvaluationAlreadyDone = 411,  //修改评价
-    YSFCodeServiceEvaluationOverTime    = 412,  //评价超时
-    YSFCodeServiceEvaluationNotAllow    = 414,  //不能评价
 
 } YSFCode;
 

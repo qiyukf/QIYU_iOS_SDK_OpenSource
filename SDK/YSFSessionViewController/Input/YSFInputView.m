@@ -770,8 +770,8 @@
 
 - (void)onTouchImageBtn:(id)sender
 {
-    if ([self.actionDelegate respondsToSelector:@selector(onMediaPicturePressed)]) {
-        [self.actionDelegate onMediaPicturePressed];
+    if ([self.actionDelegate respondsToSelector:@selector(OnMediaPicturePressed)]) {
+        [self.actionDelegate OnMediaPicturePressed];
         self.inputStatus = YSFInputStatusText;
         _inputBottomViewHeight = 0;
         [_emoticonContainer setHidden:YES];
