@@ -1,10 +1,20 @@
 #import "YSFEvaluationViewController.h"
+#import "YSFCustomSystemNotificationParser.h"
+#import "YSFEvaluationResult.h"
 #import "YSFKeyboardManager.h"
 #import "YSFEvaluationRequest.h"
 #import "NSDictionary+YSFJson.h"
 #import "UIControl+BlocksKit.h"
 #import "UIScrollView+YSFKit.h"
 #import "NSArray+YSF.h"
+#import "QYSDK_Private.h"
+
+typedef NS_ENUM(NSInteger, YSFEvaluationSubmitType) {
+    YSFEvaluationSubmitTypeEnable = 0,  //提交，可点击
+    YSFEvaluationSubmitTypeUnable,      //提交，不可点击
+    YSFEvaluationSubmitTypeSubmitting,  //提交中，不可点击
+};
+
 
 @implementation YSFEvaluationCommitData
 
@@ -28,7 +38,7 @@
 
 @end
 
-@interface YSFEvaluationViewController() <YSFKeyboardObserver, UIAlertViewDelegate, UITextViewDelegate>
+@interface YSFEvaluationViewController() <YSFKeyboardObserver, UIAlertViewDelegate, UITextViewDelegate, YSF_NIMSystemNotificationManagerDelegate>
 
 @property (nonatomic, strong) NSDictionary *evaluationDict;
 @property (nonatomic, copy) evaluationCallback evaluationCallback;
@@ -85,6 +95,7 @@
 
 - (void)dealloc {
     [[YSFKeyboardManager defaultManager] removeObserver:self];
+    [[[YSF_NIMSDK sharedSDK] systemNotificationManager] removeDelegate:self];
 }
 
 - (void)viewDidLoad
@@ -92,6 +103,7 @@
     [super viewDidLoad];
     
     [[YSFKeyboardManager defaultManager] addObserver:self];
+    [[[YSF_NIMSDK sharedSDK] systemNotificationManager] addDelegate:self];
 
     UITapGestureRecognizer *singleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onSingleTap:)];
     [self.view addGestureRecognizer:singleTapRecognizer];
@@ -231,8 +243,7 @@
                     weakTagButton.backgroundColor = [UIColor clearColor];
                 }
                 if (weakSelf.lastResult) {
-                    weakSelf.submit.enabled = YES;
-                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+                    [weakSelf updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList1 addSubview:tagButton];
@@ -268,8 +279,7 @@
                     weakTagButton.backgroundColor = [UIColor clearColor];
                 }
                 if (weakSelf.lastResult) {
-                    weakSelf.submit.enabled = YES;
-                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+                    [weakSelf updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList2 addSubview:tagButton];
@@ -305,8 +315,7 @@
                     weakTagButton.backgroundColor = [UIColor clearColor];
                 }
                 if (weakSelf.lastResult) {
-                    weakSelf.submit.enabled = YES;
-                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+                    [weakSelf updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList3 addSubview:tagButton];
@@ -342,8 +351,7 @@
                     weakTagButton.backgroundColor = [UIColor clearColor];
                 }
                 if (weakSelf.lastResult) {
-                    weakSelf.submit.enabled = YES;
-                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+                    [weakSelf updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList4 addSubview:tagButton];
@@ -379,8 +387,7 @@
                     weakTagButton.backgroundColor = [UIColor clearColor];
                 }
                 if (weakSelf.lastResult) {
-                    weakSelf.submit.enabled = YES;
-                    weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+                    [weakSelf updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
                 }
             } forControlEvents:UIControlEventTouchUpInside];
             [_tagList5 addSubview:tagButton];
@@ -409,12 +416,10 @@
     
     _submit = [[UIButton alloc] initWithFrame:CGRectZero];
     _submit.layer.cornerRadius = 3.0;
-    _submit.enabled = NO;
-    _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 0.6);
-    [_submit setTitle:@"提 交" forState:UIControlStateNormal];
     _submit.titleLabel.font = [UIFont systemFontOfSize:16.0];;
     [_submit addTarget:self action:@selector(onSubmit:) forControlEvents:UIControlEventTouchUpInside];
     [_imagePanel addSubview:_submit];
+    [self updateSubmitButtonEnable:YSFEvaluationSubmitTypeUnable];
     
     [self updateLastResult];
 }
@@ -697,8 +702,7 @@
             _textView.text = self.lastResult.content;
             _placeholderLabel.hidden = YES;
         }
-        _submit.enabled = NO;
-        _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 0.6);
+        [self updateSubmitButtonEnable:YSFEvaluationSubmitTypeUnable];
     }
 }
 
@@ -735,8 +739,7 @@
 - (void)onSelect:(id)sender selectedTagListView:(UIView *)selectedTagListView
 {
     [self.view endEditing:YES];
-    _submit.enabled = YES;
-    _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+    [self updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
 
     _selectedTagListView.hidden = YES;
     _selectedTagListView = selectedTagListView;
@@ -800,25 +803,20 @@
     }
     if (self.lastResult) {
         if (![_textView.text isEqualToString:self.lastResult.content]) {
-            _submit.enabled = YES;
-            _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+            [self updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
         }
     }
 }
 
-- (void)onSubmit:(id)sender
-{
-    _submit.enabled = NO;
-    _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 0.6);
-    [_submit setTitle:@"提交中..." forState:UIControlStateNormal];
+- (void)onSubmit:(id)sender {
+    [self updateSubmitButtonEnable:YSFEvaluationSubmitTypeSubmitting];
     NSString *selectString = _selectedButton.titleLabel.text;
     NSDictionary *dict = [_evaluationDict objectForKey:selectString];
     NSUInteger selectScore = 0;
     //比较老的版本，存在本地的数据，dict是一个Number，所以这里需要判断一下
     if ([dict isKindOfClass:[NSNumber class]]) {
         selectScore = [(NSNumber *)dict unsignedIntegerValue];
-    }
-    else {
+    } else {
         selectScore = [dict ysf_jsonUInteger:YSFApiKeyValue];
     }
     NSMutableArray *tagList = [NSMutableArray new];
@@ -829,14 +827,6 @@
         }
     }
     
-    YSFEvaluationCommitData *commitData = [[YSFEvaluationCommitData alloc] init];
-    commitData.title = selectString;
-    commitData.tagList = tagList;
-    commitData.content = _textView.text;
-    if (self.evaluationCallback) {
-        self.evaluationCallback(YES, commitData);
-    }
-    
     YSFEvaluationRequest *request = [[YSFEvaluationRequest alloc] init];
     request.score = selectScore;
     request.remarks = _textView.text;
@@ -845,12 +835,8 @@
     __weak typeof(self) weakSelf = self;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error) {
         if (error) {
-            weakSelf.submit.enabled = YES;
-            [weakSelf.submit setTitle:@"提 交" forState:UIControlStateNormal];
-            weakSelf.submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
-            [weakSelf.view ysf_makeToast:@"网络链接失败，请稍后再试" duration:2.0 position:YSFToastPositionCenter];
-        } else {
-            [weakSelf dismissViewControllerAnimated:YES completion:nil];
+            [weakSelf updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
+            [weakSelf showToast:@"网络连接失败，请稍后再试"];
         }
     }];
 }
@@ -885,4 +871,78 @@
         [self closeHandle];
     }
 }
+
+- (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification {
+    NSString *content = notification.content;
+    YSFLogApp(@"notification: %@", content);
+    
+    //平台电商时sender等于shopId (目前服务器如此处理)
+    NSString *shopId = notification.sender;
+    if (![_shopId isEqualToString:shopId]) {
+        return;
+    }
+    //解析
+    id object =  [YSFCustomSystemNotificationParser parse:content shopId:shopId];
+    
+    if ([object isKindOfClass:[YSFEvaluationResult class]]) {
+        YSFEvaluationResult *result = (YSFEvaluationResult *)object;
+        if (result.code == YSFCodeServiceEvaluationAllow || result.code == YSFCodeServiceEvaluationAlreadyDone) {
+            if (result.sessionId == _sessionId) {
+                NSString *selectString = _selectedButton.titleLabel.text;
+                NSMutableArray *tagList = [NSMutableArray new];
+                for (UIButton *tagButton in _selectedTagListView.subviews) {
+                    if (tagButton.selected) {
+                        NSString *selectedTagText = tagButton.titleLabel.text;
+                        [tagList addObject:selectedTagText];
+                    }
+                }
+                YSFEvaluationCommitData *commitData = [[YSFEvaluationCommitData alloc] init];
+                commitData.title = selectString;
+                commitData.tagList = tagList;
+                commitData.content = _textView.text;
+                NSMutableDictionary *sessionDict = [[[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:_sessionId] mutableCopy];
+                if (sessionDict) {
+                    [sessionDict setValue:[commitData toDict] forKey:YSFEvaluationResultData];
+                    [[[QYSDK sharedSDK] sessionManager] setHistoryEvaluationData:sessionDict shopId:_shopId sessionId:_sessionId];
+                }
+                
+                if (self.evaluationCallback) {
+                    self.evaluationCallback(YES, result);
+                }
+                
+                [self dismissViewControllerAnimated:YES completion:nil];
+            }
+        } else if (result.code == YSFCodeServiceEvaluationOverTime) {
+            [self updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
+            [self showToast:@"评价已超时，无法进行评价"];
+        } else if (result.code == YSFCodeServiceEvaluationNotAllow) {
+            [self updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
+            [self showToast:@"评价失败"];
+        }
+    }
+}
+
+- (void)updateSubmitButtonEnable:(YSFEvaluationSubmitType)type {
+    if (type == YSFEvaluationSubmitTypeEnable) {
+        _submit.enabled = YES;
+        [_submit setTitle:@"提 交" forState:UIControlStateNormal];
+        _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
+    } else if (type == YSFEvaluationSubmitTypeUnable) {
+        _submit.enabled = NO;
+        [_submit setTitle:@"提 交" forState:UIControlStateNormal];
+        _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 0.6);
+    } else if (type == YSFEvaluationSubmitTypeSubmitting) {
+        _submit.enabled = NO;
+        [_submit setTitle:@"提交中..." forState:UIControlStateNormal];
+        _submit.backgroundColor = YSFColorFromRGBA(0x5e94e2, 0.6);
+    }
+}
+
+- (void)showToast:(NSString *)toast {
+    if (toast.length) {
+        UIWindow *topWindow = [[[UIApplication sharedApplication] windows] lastObject];
+        [topWindow ysf_makeToast:toast duration:2 position:YSFToastPositionCenter];
+    }
+}
+
 @end

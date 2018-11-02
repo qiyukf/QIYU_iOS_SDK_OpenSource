@@ -156,7 +156,8 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
  *  @param staffId 客服ID
  *  @param groupId 分组ID
  *  @param tip 切换提示语
- *  @param completetion 完成回调
+ *  @param closeCompletion 退出旧会话完成的回调
+ *  @param requestCompletion 请求新会话完成的回调
  */
 - (void)changeHumanStaffWithStaffId:(int64_t)staffId
                             groupId:(int64_t)groupId

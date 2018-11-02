@@ -12,7 +12,8 @@
 @end
 
 
-typedef void (^evaluationCallback)(BOOL done, YSFEvaluationCommitData *result);
+@class YSFEvaluationResult;
+typedef void (^evaluationCallback)(BOOL done, YSFEvaluationResult *result);
 
 @interface YSFEvaluationViewController : UIViewController
 

@@ -29,10 +29,10 @@
 /**
  *  会话列表变化；非平台电商用户，只有一个会话项，平台电商用户，有多个会话项
  */
-- (void)onSessionListChanged:(NSArray<QYSessionInfo*> *)sessionList;
+- (void)onSessionListChanged:(NSArray<QYSessionInfo *> *)sessionList;
 
 /**
- *  收到消息
+ *  接收消息
  */
 - (void)onReceiveMessage:(QYMessageInfo *)message;
 

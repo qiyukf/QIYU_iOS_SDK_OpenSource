@@ -174,7 +174,7 @@ YSFCameraViewControllerDelegate>
 
 #pragma mark - Dealloc
 -(void)dealloc {
-    YSFLogApp(@"QYSessionViewController dealloc");
+    YSFLogApp(@"");
     [_reachability stopNotifier];
     _tableView.delegate = nil;
     _tableView.dataSource = nil;
@@ -1538,7 +1538,7 @@ YSFCameraViewControllerDelegate>
                                                                                                    shopId:_shopId
                                                                                                 sessionId:sessionId
                                                                                              modifyEnable:modifyEnable
-                                                                                       evaluationCallback:^(BOOL done, YSFEvaluationCommitData *result) {
+                                                                                       evaluationCallback:^(BOOL done, YSFEvaluationResult *result) {
                                                                                            __strong typeof(weakSelf) strongSelf = weakSelf;
                                                                                            [strongSelf updateEvaluationResult:result sessionId:sessionId done:done];
                                                                                        }];
@@ -1554,7 +1554,7 @@ YSFCameraViewControllerDelegate>
     [_sessionInputView removeKeyboardObserver];
 }
 
-- (void)updateEvaluationResult:(YSFEvaluationCommitData *)result sessionId:(long long)sessionId done:(BOOL)done {
+- (void)updateEvaluationResult:(YSFEvaluationResult *)result sessionId:(long long)sessionId done:(BOOL)done {
     //修复bug#YSF-14096
     //evaluationViewControlerWillAppear中endEditing:在后台时不会触发键盘变更事件，导致键盘无法正常弹回
     [_sessionInputView inputBottomViewHeightToZero];
@@ -1568,13 +1568,13 @@ YSFCameraViewControllerDelegate>
     if (!done) {
         return;
     }
-    if (result) {
-        NSMutableDictionary *sessionDict = [[[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:sessionId] mutableCopy];
-        if (sessionDict) {
-            [sessionDict setValue:[result toDict] forKey:YSFEvaluationResultData];
-            [[[QYSDK sharedSDK] sessionManager] setHistoryEvaluationData:sessionDict shopId:_shopId sessionId:sessionId];
-        }
+    
+    NSDictionary *sessionDict = [[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:result.sessionId];
+    NSString *specialTip = @"";
+    if (sessionDict) {
+        specialTip = [sessionDict valueForKey:YSFEvaluationSpecialThanksText];
     }
+    [self updateEvaluationMessageWithSessionId:result.sessionId specialThanksTip:specialTip];
 }
 
 - (void)updateEvaluationMessageWithSessionId:(long long)sessionId specialThanksTip:(NSString *)specialThanksTip {
@@ -2040,20 +2040,6 @@ YSFCameraViewControllerDelegate>
                     }
                 }
             }
-        }
-    } else if ([object isKindOfClass:[YSFEvaluationResult class]]) {
-        YSFEvaluationResult *result = (YSFEvaluationResult *)object;
-        if (result.code == YSFCodeServiceEvaluationAllow || result.code == YSFCodeServiceEvaluationAlreadyDone) {
-            NSDictionary *sessionDict = [[[QYSDK sharedSDK] sessionManager] getHistoryEvaluationMemoryDataByShopId:_shopId sessionId:result.sessionId];
-            NSString *specialTip = @"";
-            if (sessionDict) {
-                specialTip = [sessionDict valueForKey:YSFEvaluationSpecialThanksText];
-            }
-            [self updateEvaluationMessageWithSessionId:result.sessionId specialThanksTip:specialTip];
-        } else if (result.code == YSFCodeServiceEvaluationOverTime) {
-            [self showToast:@"评价已超时，无法进行评价"];
-        } else if (result.code == YSFCodeServiceEvaluationNotAllow) {
-            [self showToast:@"评价失败"];
         }
     }
 }
@@ -2547,7 +2533,7 @@ YSFCameraViewControllerDelegate>
     //抛出所有消息内点击事件
     if (event && [QYCustomActionConfig sharedInstance].eventClickBlock) {
         NSString *extEventName = [event transferEventNameForExternal];
-        [QYCustomActionConfig sharedInstance].eventClickBlock(extEventName, eventData);
+        [QYCustomActionConfig sharedInstance].eventClickBlock(extEventName, eventData, event.message.messageId);
     }
     
     if (!handled) {

@@ -73,7 +73,7 @@ typedef void (^QYSystemNotificationClickBlock)(id message);
  *  @param eventName 事件名称
  *  @param eventData 数据
  */
-typedef void (^QYEventBlock)(NSString *eventName, NSString *eventData);
+typedef void (^QYEventBlock)(NSString *eventName, NSString *eventData, NSString *messageId);
 
 
 /**
