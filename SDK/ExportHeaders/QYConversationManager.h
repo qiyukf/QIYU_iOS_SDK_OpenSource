@@ -11,7 +11,6 @@
 @class QYMessageInfo;
 @class QYSessionInfo;
 
-
 /**
  *  会话委托
  */
@@ -70,7 +69,6 @@
  *  @param delegate 会话委托
  */
 - (void)setDelegate:(id<QYConversationManagerDelegate>)delegate;
-
 
 @end
 

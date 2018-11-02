@@ -50,6 +50,7 @@ typedef void (^QYRequestStaffBeforeBlock)(QYRequestStaffBeforeScene scene, QYCal
  *  请求客服后回调
  *
  *  @param info 会话相关信息
+ *  @param error 错误信息
  */
 typedef void (^QYRequestStaffAfterBlock)(NSDictionary *info, NSError *error);
 

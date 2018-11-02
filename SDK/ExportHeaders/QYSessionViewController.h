@@ -5,6 +5,7 @@
 //  Created by towik on 12/21/15.
 //  Copyright (c) 2017 Netease. All rights reserved.
 //
+
 #import <UIKit/UIKit.h>
 
 @class QYSource;
@@ -12,17 +13,17 @@
 @class QYStaffInfo;
 
 /**
- *  QYSessionViewDelegate：右上角入口以及聊天内容区域的按钮点击后的回调
+ *  QYSessionViewDelegate：右上角入口以及聊天内容区域按钮点击回调
  */
 @protocol QYSessionViewDelegate <NSObject>
 
 /**
- *  点击右上角（对于平台电商来说，这里可以考虑放“商铺入口”）按钮回调
+ *  点击右上角按钮回调（对于平台电商来说，这里可以考虑放“商铺入口”）
  */
 - (void)onTapShopEntrance;
 
 /**
- *  点击聊天内容区域的按钮（对于平台电商来说，这里可以考虑放置“会话列表入口“）回调
+ *  点击聊天内容区域的按钮回调（对于平台电商来说，这里可以考虑放置“会话列表入口“）
  */
 - (void)onTapSessionListEntrance;
 
@@ -69,7 +70,7 @@
 typedef void (^QYCompletion)(BOOL success, NSError *error);
 
 /**
- *  输入区域上方工具栏内的按钮点击回调
+ *  工具栏内按钮点击回调定义
  */
 typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
 
@@ -155,7 +156,7 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
  *
  *  @param staffId 客服ID
  *  @param groupId 分组ID
- *  @param tip 切换提示语
+ *  @param closetip 切换提示语
  *  @param closeCompletion 退出旧会话完成的回调
  *  @param requestCompletion 请求新会话完成的回调
  */
@@ -179,7 +180,6 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
  *  发送图片
  */
 - (void)sendPicture:(UIImage *)picture;
-
 
 @end
 

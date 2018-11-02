@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-
 /**
  *  个人信息
  */
@@ -23,6 +22,5 @@
  *  用户详细信息json数据
  */
 @property (nonatomic, copy) NSString *data;
-
 
 @end

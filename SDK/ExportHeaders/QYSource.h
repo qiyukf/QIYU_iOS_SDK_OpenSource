@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-
 /**
  *  会话窗口来源
  */
@@ -28,6 +27,5 @@
  *  来源自定义信息
  */
 @property (nonatomic, copy) NSString *customInfo;
-
 
 @end

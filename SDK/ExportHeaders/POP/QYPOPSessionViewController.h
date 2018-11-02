@@ -8,7 +8,6 @@
 
 #import "QYSessionViewController.h"
 
-
 /**
  *  平台电商专用
  */
@@ -23,6 +22,5 @@
  *  会话窗口回调
  */
 @property (nonatomic, weak) id<QYSessionViewDelegate> delegate;
-
 
 @end

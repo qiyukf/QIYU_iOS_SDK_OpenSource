@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-
 /**
  *  人工客服信息
  */
@@ -38,7 +37,6 @@
  *  客服信息描述
  */
 @property (nonatomic, copy) NSString *infoDesc;
-
 
 @end
 
