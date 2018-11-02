@@ -23,15 +23,29 @@
 #define YSFShopInfoKey      @"shopInfo"
 #define YSFUnreadPushMessageSessionId @"unreadPushMessageSessionId"
 
-#define YSFEvalution        @"evalution_2.0"
-#define YSFCurrentSessionId @"current_session_id"
-#define YSFSessionTimes     @"session_times"
-#define YSFEvaluationData   @"evaluation_data"
-#define YSFSessionStatus    @"session_status"
-#define     YSFApiEvaluationAutoPopupMessageID   @"evaluation_auto_popup_message_id"
-#define     YSFApiEvaluationAutoPopupSessionId   @"evaluation_auto_popup_session_id"
-#define     YSFApiEvaluationAutoPopupEvaluationMessageThanks   @"evaluation_auto_popup_evaluation_message_thanks"
-#define     YSFApiEvaluationAutoPopupEvaluationData   @"evaluation_auto_popup_evaluation_data"
+//Evaluation
+#define YSFEvaluation_2                     @"evalution_2.0"
+#define YSFEvaluation_3                     @"evalution_3.0"
+#define YSFEvaluationRecentData             @"recent_data"
+#define YSFEvaluationHistoryData            @"history_data"
+//recent data:仅保存最近会话评价数据
+#define YSFEvaluationSessionId              @"session_id"
+#define YSFEvaluationSessionStatus          @"session_status"
+#define YSFEvaluationSessionTimes           @"session_times"
+#define YSFEvaluationAutoPopup              @"evaluation_auto"
+#define YSFEvaluationAutoPopupSessionId     @"session_id_auto"
+#define YSFEvaluationAutoPopupMessageID     @"message_id_auto"
+//history data:保存了多个会话的评价数据
+#define YSFEvaluationMessageID              @"message_id"
+#define YSFEvaluationData                   @"evaluation_data"
+#define YSFEvaluationInviteText             @"invite_text"
+#define YSFEvaluationThanksText             @"thanks_text"
+#define YSFEvaluationSpecialThanksText      @"special_thanks_text"
+#define YSFEvaluationModifyEnable           @"modify_enable"
+#define YSFEvaluationModifyTime             @"modify_time"
+#define YSFEvaluationModifyLimit            @"modify_limit"
+#define YSFEvaluationResultData             @"evaluation_result"
+
 
 @protocol YSFAppInfoManagerDelegate <NSObject>
 

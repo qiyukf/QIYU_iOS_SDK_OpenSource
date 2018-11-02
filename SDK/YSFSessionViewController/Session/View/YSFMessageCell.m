@@ -276,13 +276,12 @@
 - (void)layoutBubbleView {
     UIEdgeInsets contentInsets = self.model.bubbleViewInsets;
     if (self.model.message.isOutgoingMsg) {
-        CGFloat protraitRightToBubble = 5.f;
-        CGFloat right = self.model.shouldShowAvatar ? (CGRectGetMinX(self.headImageView.frame)  - protraitRightToBubble) : self.ysf_frameWidth;
+        CGFloat right = self.model.shouldShowAvatar ? CGRectGetMinX(self.headImageView.frame) : self.ysf_frameWidth;
+        right -= self.model.avatarBubbleSpace;
         contentInsets.left = right - CGRectGetWidth(self.bubbleView.bounds);
     } else {
         if (!self.model.shouldShowAvatar) {
-            CGFloat right = CGRectGetMinX(self.headImageView.frame);
-            contentInsets.left = -right;
+            contentInsets.left = self.model.avatarBubbleSpace;
         }
     }
     _bubbleView.ysf_frameLeft = contentInsets.left;

@@ -3,8 +3,8 @@
 
 @interface YSFEvaluationNotification : NSObject
 
-@property (nonatomic,assign)    long long sessionId;
-@property (nonatomic,assign)    BOOL evaluationAutoPopup;
+@property (nonatomic, assign) long long sessionId;
+@property (nonatomic, assign) BOOL autoPopup;
 
 + (instancetype)dataByJson:(NSDictionary *)dict;
 

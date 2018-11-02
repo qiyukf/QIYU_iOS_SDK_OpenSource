@@ -10,5 +10,6 @@
 @property (nonatomic,copy)    NSString *title;
 
 + (instancetype)objectByDict:(NSDictionary *)dict;
+- (NSString *)toJsonString;
 
 @end

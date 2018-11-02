@@ -61,6 +61,7 @@
     self.serviceHeadImageUrl = nil;
     self.humanButtonText = nil;
     self.sessionMessageSpacing = 0;
+    self.headMessageSpacing = 5.0;
     self.showHeadImage = YES;
     
     self.customerMessageBubbleNormalImage = [[UIImage ysf_imageInKit:@"icon_sender_node_normal"]

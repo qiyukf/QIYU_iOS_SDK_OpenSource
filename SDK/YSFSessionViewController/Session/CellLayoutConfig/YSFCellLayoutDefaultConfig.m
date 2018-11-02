@@ -21,6 +21,10 @@
 @implementation YSFCellLayoutDefaultConfig
 
 - (CGSize)contentSize:(YSFMessageModel *)model cellWidth:(CGFloat)cellWidth {
+    if (![QYCustomUIConfig sharedInstance].showHeadImage) {
+        cellWidth += 40;
+    }
+    
     id<YSFSessionContentConfig>config = [[YSFSessionContentConfigFactory sharedFacotry] configBy:model.message];
     CGSize contentSize = [config contentSize:cellWidth];
     //适配气泡高度低于扩展视图高度
@@ -46,9 +50,9 @@
 
 
 - (UIEdgeInsets)cellInsets:(YSFMessageModel *)model {
-    CGFloat cellTopToBubbleTop           = 3;
-    CGFloat otherNickNameHeight          = 20;
-    CGFloat otherBubbleOriginX           = 55;
+    CGFloat cellTopToBubbleTop = 3;
+    CGFloat otherNickNameHeight = 20;
+    CGFloat otherBubbleOriginX = 48 + [QYCustomUIConfig sharedInstance].headMessageSpacing;
     CGFloat cellBubbleButtomToCellButtom = 13 + [QYCustomUIConfig sharedInstance].sessionMessageSpacing;
     if (model.message.isOutgoingMsg && [model.message hasTrashWords]) {
         UILabel *trashWordsTip = [UILabel new];
@@ -87,6 +91,10 @@
         return UIEdgeInsetsMake(cellTopToBubbleTop + otherNickNameHeight ,otherBubbleOriginX,cellBubbleButtomToCellButtom, 0);
     }
     return UIEdgeInsetsMake(cellTopToBubbleTop,otherBubbleOriginX,cellBubbleButtomToCellButtom, 0);
+}
+
+- (CGFloat)headBubbleSpace:(YSFMessageModel *)model {
+    return [QYCustomUIConfig sharedInstance].headMessageSpacing;
 }
 
 - (BOOL)shouldShowAvatar:(YSFMessageModel *)model

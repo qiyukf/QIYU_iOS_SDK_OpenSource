@@ -34,6 +34,10 @@
  */
 - (UIEdgeInsets)contentViewInsets:(YSFMessageModel *)model;
 
+/**
+ *  头像与气泡间距
+ */
+- (CGFloat)headBubbleSpace:(YSFMessageModel *)model;
 
 /**
  *  是否显示头像

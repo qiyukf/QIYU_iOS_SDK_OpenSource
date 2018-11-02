@@ -25,6 +25,7 @@ NSString *const YSFKitEventNameTapMixReply = @"YSFKitEventNameTapMixReply";
 NSString *const YSFKitEventNameTapKFBypass = @"YSFKitEventNameTapKFBypass";
 NSString *const YSFKitEventNameTapCommodityInfo = @"YSFKitEventNameTapCommodityInfo";
 NSString *const YSFKitEventNameTapEvaluation = @"YSFKitEventNameTapEvaluation";
+NSString *const YSFKitEventNameTapModifyEvaluation = @"YSFKitEventNameTapModifyEvaluation";
 NSString *const YSFKitEventNameTapRetryAudioToText = @"YSFKitEventNameTapRetryAudioToText";
 NSString *const YSFKitEventNameTapRichTextImage = @"YSFKitEventNameTapRichTextImage";
 NSString *const YSFKitEventNameTapPushMessageActionUrl = @"YSFKitEventNameTapPushMessageActionUrl";
@@ -35,5 +36,12 @@ NSString *const YSFKitEventNameTapExtraViewAction = @"YSFKitEventNameTapExtraVie
 NSString *const YSFKitEventNameTapSystemNotification = @"YSFKitEventNameTapSystemNotification";
 
 @implementation YSFKitEvent
+
+- (NSString *)transferEventNameForExternal {
+    if (self.eventName.length) {
+        return [self.eventName stringByReplacingOccurrencesOfString:@"YSFKit" withString:@"QY"];
+    }
+    return @"";
+}
 
 @end
