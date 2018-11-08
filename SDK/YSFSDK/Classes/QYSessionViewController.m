@@ -1069,15 +1069,13 @@ YSFCameraViewControllerDelegate>
     [[QYSDK sharedSDK] sessionManager].delegate = self;
     self.onlyManual = onlyManual;
     self.requestScene = scene;
-    if (clear) {
-        [[[QYSDK sharedSDK] sessionManager] clearByShopId:_shopId];
-    }
+    
     BOOL isInit = (QYRequestStaffBeforeSceneInit == scene);
     if ([[[QYSDK sharedSDK] sessionManager] shouldRequestService:isInit shopId:_shopId]) {
         if ([QYCustomActionConfig sharedInstance].actionBlock) {
-            [self blockStartRequestStaff];
+            [self blockStartRequestStaffWithClearSession:clear];
         } else {
-            [self startRequestStaff];
+            [self startRequestStaffWithClearSession:clear];
         }
     } else {
         if (isInit && [QYCustomActionConfig sharedInstance].actionBlock) {
@@ -1092,7 +1090,7 @@ YSFCameraViewControllerDelegate>
     }
 }
 
-- (void)blockStartRequestStaff {
+- (void)blockStartRequestStaffWithClearSession:(BOOL)clear {
     if ([QYCustomActionConfig sharedInstance].actionBlock) {
         QYAction *action = [[QYAction alloc] init];
         action.type = QYActionTypeRequestStaffBefore;
@@ -1102,14 +1100,17 @@ YSFCameraViewControllerDelegate>
             action.requestStaffBeforeBlock(self.requestScene, ^(BOOL continueIfNeeded) {
                 __strong typeof(weakSelf) strongSelf = weakSelf;
                 if (continueIfNeeded) {
-                    [strongSelf startRequestStaff];
+                    [strongSelf startRequestStaffWithClearSession:clear];
                 }
             });
         }
     }
 }
 
-- (void)startRequestStaff {
+- (void)startRequestStaffWithClearSession:(BOOL)clear {
+    if (clear) {
+        [[[QYSDK sharedSDK] sessionManager] clearByShopId:_shopId];
+    }
     [[YSFSearchQuestionSetting sharedInstance:_shopId] clear];
     self.hasRequested = YES;
     _evaluation.enabled = NO;
