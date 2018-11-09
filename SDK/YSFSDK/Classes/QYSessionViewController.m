@@ -311,6 +311,8 @@ YSFCameraViewControllerDelegate>
     if (shouldRequestService) {
         [[[QYSDK sharedSDK] sessionManager] updateStaffInfoForOnlineSession:_shopId];
         [self requestServiceIfNeededInScene:QYRequestStaffBeforeSceneInit onlyManual:NO clearSession:NO];
+    } else {
+        [self throwRequestStaffAfterBlock];
     }
     
     [[[YSF_NIMSDK sharedSDK] conversationManager] markAllMessageReadInSession:_session];
@@ -1079,14 +1081,18 @@ YSFCameraViewControllerDelegate>
         }
     } else {
         if (isInit && [QYCustomActionConfig sharedInstance].actionBlock) {
-            QYAction *action = [[QYAction alloc] init];
-            action.type = QYActionTypeRequestStaffAfter;
-            [QYCustomActionConfig sharedInstance].actionBlock(action);
-            if (action.requestStaffAfterBlock) {
-                YSFServiceSession *onlineSession = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
-                action.requestStaffAfterBlock(onlineSession ? [onlineSession toDict] : nil, nil);
-            }
+            [self throwRequestStaffAfterBlock];
         }
+    }
+}
+
+- (void)throwRequestStaffAfterBlock {
+    QYAction *action = [[QYAction alloc] init];
+    action.type = QYActionTypeRequestStaffAfter;
+    [QYCustomActionConfig sharedInstance].actionBlock(action);
+    if (action.requestStaffAfterBlock) {
+        YSFServiceSession *onlineSession = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
+        action.requestStaffAfterBlock(onlineSession ? [onlineSession toDict] : nil, nil);
     }
 }
 
