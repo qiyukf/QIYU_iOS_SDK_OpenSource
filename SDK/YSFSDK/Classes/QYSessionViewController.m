@@ -1071,7 +1071,7 @@ YSFCameraViewControllerDelegate>
     self.requestScene = scene;
     
     BOOL isInit = (QYRequestStaffBeforeSceneInit == scene);
-    if ([[[QYSDK sharedSDK] sessionManager] shouldRequestService:isInit shopId:_shopId]) {
+    if (clear || [[[QYSDK sharedSDK] sessionManager] shouldRequestService:isInit shopId:_shopId]) {
         if ([QYCustomActionConfig sharedInstance].actionBlock) {
             [self blockStartRequestStaffWithClearSession:clear];
         } else {
