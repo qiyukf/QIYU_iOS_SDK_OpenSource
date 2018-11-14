@@ -41,9 +41,10 @@ typedef NS_ENUM(NSInteger, QYRequestStaffBeforeScene) {
  *  请求客服前回调
  *
  *  @param scene 请求客服场景
+ *  @param onlyHuman 是否只请求人工客服
  *  @param callback 处理完成后的回调，若需继续请求客服，则调用callback(YES)；若需停止请求，调用callback(NO)
  */
-typedef void (^QYRequestStaffBeforeBlock)(QYRequestStaffBeforeScene scene, QYCallback callback);
+typedef void (^QYRequestStaffBeforeBlock)(QYRequestStaffBeforeScene scene, BOOL onlyHuman, QYCallback callback);
 
 // QYActionTypeRequestStaffAfter 定义
 /**

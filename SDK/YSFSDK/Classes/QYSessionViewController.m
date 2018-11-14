@@ -1089,7 +1089,7 @@ YSFCameraViewControllerDelegate>
     BOOL isInit = (QYRequestStaffBeforeSceneInit == scene);
     if (clear || [[[QYSDK sharedSDK] sessionManager] shouldRequestService:isInit shopId:_shopId]) {
         if ([QYCustomActionConfig sharedInstance].actionBlock) {
-            [self blockStartRequestStaffWithClearSession:clear];
+            [self blockStartRequestStaffOnlyManual:onlyManual clearSession:clear];
         } else {
             [self startRequestStaffWithClearSession:clear];
         }
@@ -1112,14 +1112,14 @@ YSFCameraViewControllerDelegate>
     }
 }
 
-- (void)blockStartRequestStaffWithClearSession:(BOOL)clear {
+- (void)blockStartRequestStaffOnlyManual:(BOOL)onlyManual clearSession:(BOOL)clear {
     if ([QYCustomActionConfig sharedInstance].actionBlock) {
         QYAction *action = [[QYAction alloc] init];
         action.type = QYActionTypeRequestStaffBefore;
         [QYCustomActionConfig sharedInstance].actionBlock(action);
         if (action.requestStaffBeforeBlock) {
             __weak typeof(self) weakSelf = self;
-            action.requestStaffBeforeBlock(self.requestScene, ^(BOOL continueIfNeeded) {
+            action.requestStaffBeforeBlock(self.requestScene, onlyManual, ^(BOOL continueIfNeeded) {
                 __strong typeof(weakSelf) strongSelf = weakSelf;
                 if (continueIfNeeded) {
                     [strongSelf startRequestStaffWithClearSession:clear];
