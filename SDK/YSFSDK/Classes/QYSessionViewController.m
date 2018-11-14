@@ -1080,19 +1080,21 @@ YSFCameraViewControllerDelegate>
             [self startRequestStaffWithClearSession:clear];
         }
     } else {
-        if (isInit && [QYCustomActionConfig sharedInstance].actionBlock) {
+        if (isInit) {
             [self throwRequestStaffAfterBlock];
         }
     }
 }
 
 - (void)throwRequestStaffAfterBlock {
-    QYAction *action = [[QYAction alloc] init];
-    action.type = QYActionTypeRequestStaffAfter;
-    [QYCustomActionConfig sharedInstance].actionBlock(action);
-    if (action.requestStaffAfterBlock) {
-        YSFServiceSession *onlineSession = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
-        action.requestStaffAfterBlock(onlineSession ? [onlineSession toDict] : nil, nil);
+    if ([QYCustomActionConfig sharedInstance].actionBlock) {
+        QYAction *action = [[QYAction alloc] init];
+        action.type = QYActionTypeRequestStaffAfter;
+        [QYCustomActionConfig sharedInstance].actionBlock(action);
+        if (action.requestStaffAfterBlock) {
+            YSFServiceSession *onlineSession = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
+            action.requestStaffAfterBlock(onlineSession ? [onlineSession toDict] : nil, nil);
+        }
     }
 }
 
