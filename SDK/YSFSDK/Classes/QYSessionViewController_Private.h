@@ -9,7 +9,7 @@
 #import "QYPOPSessionViewController.h"
 #import "YSFInputProtocol.h"
 #import "YSFMessageCellProtocol.h"
-#import "YSFSessionMsgDatasource.h"
+#import "YSFSessionMsgDataSource.h"
 #import "YSFInputView.h"
 #import "YSFInputTextView.h"
 #import "YSFSessionViewLayoutManager.h"
@@ -53,7 +53,7 @@ NIMSessionMsgDatasourceDelegate>
 @property (nonatomic, strong, readonly) UIRefreshControl *refreshControl;
 
 @property (nonatomic, strong) YSFSessionViewLayoutManager *layoutManager;
-@property (nonatomic, strong) YSFSessionMsgDatasource *sessionDatasource;
+@property (nonatomic, strong) YSFSessionMsgDataSource *sessionDataSource;
 @property (nonatomic, strong) YSF_NIMMessage *messageForMenu;
 @property (nonatomic, strong, readonly) YSF_NIMSession *session;
 

@@ -48,6 +48,8 @@
 @property (nonatomic, strong) NSMutableArray *unreadPushMessageSessionId;
 @property (nonatomic, strong) NSMutableDictionary *longMessageDict;
 
+@property (nonatomic, strong) NSMutableDictionary *lastSessionId;
+
 @end
 
 
@@ -63,6 +65,7 @@
         _sessionStateType = [NSMutableDictionary new];
         _sessions = [NSMutableDictionary new];
         _longMessageDict = [NSMutableDictionary new];
+        _lastSessionId = [NSMutableDictionary new];
     }
     return self;
 }
@@ -100,6 +103,7 @@
     [self readShopInfo];
     [self readEvaluationInfo];
     [self readUnreadPushMessageSessionId];
+    [self readLastSessionId];
 }
 
 - (void)readShopInfo {
@@ -131,6 +135,34 @@
     if (array) {
         [_unreadPushMessageSessionId addObjectsFromArray:array];
     }
+}
+
+#pragma mark - last session
+- (void)readLastSessionId {
+    _lastSessionId = [NSMutableDictionary dictionary];
+    NSDictionary *dict = [[[QYSDK sharedSDK] infoManager] dictByKey:YSFLastSessionIdKey];
+    if (dict && dict.count) {
+        [_lastSessionId addEntriesFromDictionary:dict];
+    }
+}
+
+- (void)setLastSessionId:(long long)sessionId forShopId:(NSString *)shopId {
+    if (!shopId.length) {
+        return;
+    }
+    [self.lastSessionId setValue:@(sessionId) forKey:shopId];
+    [[QYSDK sharedSDK].infoManager saveDict:self.lastSessionId forKey:YSFLastSessionIdKey];
+}
+
+- (long long)getLastSessionIdForShopId:(NSString *)shopId {
+    if (!shopId.length) {
+        return 0;
+    }
+    id obj = [self.lastSessionId objectForKey:shopId];
+    if (obj) {
+        return [obj longLongValue];
+    }
+    return 0;
 }
 
 #pragma mark - staff icon

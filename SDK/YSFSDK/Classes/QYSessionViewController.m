@@ -145,6 +145,8 @@ YSFCameraViewControllerDelegate>
 @property (nonatomic, assign) BOOL onlyManual;
 @property (nonatomic, copy) QYCompletion changeStaffCompletion;
 
+@property (nonatomic, assign) BOOL needShowHistoryTip;
+
 @end
 
 
@@ -198,6 +200,9 @@ YSFCameraViewControllerDelegate>
         _reachability = [YSFReachability reachabilityForInternetConnection];
         _hasRequested = NO;
         _openRobotInShuntMode = NO;
+        _messagePageLimit = 20;
+        _hideHistoryMessages = NO;
+        _historyMessagesTip = @"以上是历史消息";
         _queryWaitingStatusTimer = [[YSFTimer alloc]init];
         _inputtingMessageTimer = [[YSFTimer alloc]init];
         _inputAssociateTimer = [[YSFTimer alloc] init];
@@ -208,12 +213,16 @@ YSFCameraViewControllerDelegate>
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self initSession];
     
     if (!self.staffInfo) {
         [[QYSDK sharedSDK] sessionManager].staffInfo = nil;
     }
-
-    [self initSession];
+    //若当前会话有未读消息，则不收起历史消息
+    if ([[[YSF_NIMSDK sharedSDK] conversationManager] unreadCountInSession:_session]) {
+        self.hideHistoryMessages = NO;
+    }
+    
     [self makeUI];
     [self makeHandlerAndDataSource];
     
@@ -250,14 +259,11 @@ YSFCameraViewControllerDelegate>
     YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
     BOOL shouldRequestService = YES;
     //若最后一条消息是邀请评价消息，则记录该条消息
-    id model = [[_sessionDatasource modelArray] lastObject];
-    if ([model isKindOfClass:[YSFMessageModel class]]) {
-        YSF_NIMMessage *message = ((YSFMessageModel *)model).message;
-        if (message.messageType == YSF_NIMMessageTypeCustom) {
-            id<YSF_NIMCustomAttachment> attachment = [(YSF_NIMCustomObject *)(message.messageObject) attachment];
-            if ([attachment isMemberOfClass:[YSFInviteEvaluationObject class]]) {
-                _currentInviteEvaluationMessage = message;
-            }
+    YSF_NIMMessage *lastMessage = [self getLastMessage];
+    if (lastMessage && lastMessage.messageType == YSF_NIMMessageTypeCustom) {
+        id<YSF_NIMCustomAttachment> attachment = [(YSF_NIMCustomObject *)lastMessage.messageObject attachment];
+        if ([attachment isMemberOfClass:[YSFInviteEvaluationObject class]]) {
+            _currentInviteEvaluationMessage = lastMessage;
         }
     }
     
@@ -423,7 +429,7 @@ YSFCameraViewControllerDelegate>
         }
         _tableView.ysf_frameHeight -= safeAreaBottom;
         
-        for (id model in [_sessionDatasource modelArray]) {
+        for (id model in [_sessionDataSource modelArray]) {
             if ([model isKindOfClass:[YSFMessageModel class]]) {
                 [(YSFMessageModel *)model cleanCache];
             }
@@ -441,7 +447,7 @@ YSFCameraViewControllerDelegate>
 - (void)makeHandlerAndDataSource {
     _layoutManager = [[YSFSessionViewLayoutManager alloc] initWithInputView:self.sessionInputView tableView:self.tableView];
     
-    [self initSessionDatasource];
+    [self initSessionDataSource];
     [_reachability startNotifier];
     
     [[[YSF_NIMSDK sharedSDK] systemNotificationManager] addDelegate:self];
@@ -472,12 +478,20 @@ YSFCameraViewControllerDelegate>
                                                object:nil];
 }
 
-- (void)initSessionDatasource {
-    NSInteger limit = 20;
-    NSTimeInterval showTimestampInterval = 5 * 60.0;
-    _sessionDatasource = [[YSFSessionMsgDatasource alloc] initWithSession:_session showTimeInterval:showTimestampInterval limit:limit];
-    _sessionDatasource.delegate = self;
-    [_sessionDatasource resetMessages];
+- (void)initSessionDataSource {
+    _sessionDataSource = [[YSFSessionMsgDataSource alloc] initWithSession:_session showTimeInterval:(5 * 60.0)];
+    _sessionDataSource.delegate = self;
+    //reset
+    self.messagePageLimit = self.messagePageLimit > 0 ? self.messagePageLimit : 20;
+    NSInteger limit = self.messagePageLimit;
+    if (self.hideHistoryMessages) {
+        if ([[[QYSDK sharedSDK] sessionManager] shouldRequestService:YES shopId:_shopId]) {
+            if (![self isLastMessageKFBypassNotificationAndEnable]) {
+                limit = 0;
+            }
+        }
+    }
+    [_sessionDataSource resetMessagesWithLimit:limit];
 }
 
 - (void)makeUI {
@@ -1219,14 +1233,22 @@ YSFCameraViewControllerDelegate>
     }
 }
 
+//注：必须取本地存储的message，recentSession中的lastMesaage因异步存储存在问题导致不同步
 - (YSF_NIMMessage *)getLastMessage {
-    //注：必须取本地存储的message，recentSession中的lastMesaage因异步存储存在问题导致不同步
-    YSF_NIMMessage *lastMessage = [[YSF_NIMMessage alloc] init];
-    id model = [[_sessionDatasource modelArray] lastObject];
+    YSF_NIMMessage *lastMessage = nil;
+    id model = [[_sessionDataSource modelArray] lastObject];
     if ([model isKindOfClass:[YSFMessageModel class]]) {
         lastMessage = ((YSFMessageModel *)model).message;
     }
+    //若收起历史消息开关打开，且此时modelArray没有数据，取不到lastMessage，则需从DB中取最后一条消息
+    if (self.hideHistoryMessages && _sessionDataSource.modelArray.count == 0 && !lastMessage) {
+        lastMessage = [self getLastMessageFromDB];
+    }
     return lastMessage;
+}
+
+- (YSF_NIMMessage *)getLastMessageFromDB {
+    return [_sessionDataSource getLastMessageFromDB];
 }
 
 #pragma mark - 消息收发
@@ -1280,7 +1302,7 @@ YSFCameraViewControllerDelegate>
 - (void)sendMessage:(YSF_NIMMessage *)message didCompleteWithError:(NSError *)error {
     if ([message.session isEqual:_session]) {
         YSFMessageModel *model = [self makeModel:message];
-        NSInteger index = [self.sessionDatasource indexAtModelArray:model];
+        NSInteger index = [self.sessionDataSource indexAtModelArray:model];
         [self.layoutManager updateCellAtIndex:index model:model];
         if (error) {
             if (![[YSFReachability reachabilityForInternetConnection] isReachable]) {
@@ -1295,7 +1317,7 @@ YSFCameraViewControllerDelegate>
 -(void)sendMessage:(YSF_NIMMessage *)message progress:(CGFloat)progress {
     if ([message.session isEqual:_session]) {
         YSFMessageModel *model = [self makeModel:message];
-        [_layoutManager updateCellAtIndex:[self.sessionDatasource indexAtModelArray:model] model:model];
+        [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
     }
 }
 
@@ -1406,14 +1428,14 @@ YSFCameraViewControllerDelegate>
 - (void)fetchMessageAttachment:(YSF_NIMMessage *)message progress:(CGFloat)progress {
     if ([message.session isEqual:_session]) {
         YSFMessageModel *model = [self makeModel:message];
-        [_layoutManager updateCellAtIndex:[self.sessionDatasource indexAtModelArray:model] model:model];
+        [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
     }
 }
 
 - (void)fetchMessageAttachment:(YSF_NIMMessage *)message didCompleteWithError:(NSError *)error {
     if ([message.session isEqual:_session]) {
         YSFMessageModel *model = [self makeModel:message];
-        [_layoutManager updateCellAtIndex:[self.sessionDatasource indexAtModelArray:model] model:model];
+        [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
     }
 }
 
@@ -1822,7 +1844,7 @@ YSFCameraViewControllerDelegate>
     if (bid) {
         _shopId = bid;
         [self initSession];
-        [self initSessionDatasource];
+        [self initSessionDataSource];
     }
 }
 
@@ -1889,28 +1911,33 @@ YSFCameraViewControllerDelegate>
         }
         
         if (session && session.sessionId) {
-            NSString *key = @"lastSessionID";
-            if (self.commodityInfo) {
-                id obj = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-                if (obj && [obj isKindOfClass:[NSNumber class]]) {
-                    long long oldSessionID = [(NSNumber *)obj longLongValue];
-                    if (session.sessionId == oldSessionID) {
-                        //本次获取到的sessionId与保存的本地sessionId相等
-                        //说明本次会话是未断线的旧会话，不会收到欢迎语消息，故这里需要再次发送商品信息
-                        if (g_sessionId != session.sessionId) {
-                            g_sessionId = session.sessionId;
-                            if (session.humanOrMachine) {
+            long long oldSessionID = [[QYSDK sharedSDK].sessionManager getLastSessionIdForShopId:shopId];
+            if (session.sessionId == oldSessionID) {
+                //若请求到的会话sessionId与本地保存的上一通会话sessionId相等，说明本次会话为未结束的旧会话
+                //因该情况下不会收到欢迎语消息，故这里需要再次发送商品信息
+                if (self.commodityInfo) {
+                    if (g_sessionId != session.sessionId) {
+                        g_sessionId = session.sessionId;
+                        if (session.humanOrMachine) {
+                            [self sendCommodityInfoRequest:YES];
+                        } else {
+                            if (self.autoSendInRobot) {
                                 [self sendCommodityInfoRequest:YES];
-                            } else {
-                                if (self.autoSendInRobot) {
-                                    [self sendCommodityInfoRequest:YES];
-                                }
                             }
                         }
                     }
                 }
             }
-            [[NSUserDefaults standardUserDefaults] setObject:@(session.sessionId) forKey:key];
+            //若hideHistoryMessages为YES且已收起历史消息，则若为旧会话需加载出历史消息，否则一律收起历史消息
+            if (self.hideHistoryMessages && self.sessionDataSource.modelArray.count == 0) {
+                if (session.sessionId == oldSessionID) {
+                    [self.sessionDataSource resetMessagesWithLimit:self.messagePageLimit];
+                } else {
+                    self.needShowHistoryTip = YES;
+                }
+            }
+            
+            [[QYSDK sharedSDK].sessionManager setLastSessionId:session.sessionId forShopId:shopId];
         }
     } else {
         if (error.code == YSFCodeServiceNotExist) {
@@ -2073,7 +2100,7 @@ YSFCameraViewControllerDelegate>
 
 #pragma mark - YSF_NIMConversationManagerDelegate
 - (void)messagesDeletedInSession:(YSF_NIMSession *)session {
-    [self.sessionDatasource resetMessages];
+    [self.sessionDataSource resetMessagesWithLimit:self.messagePageLimit];
     [self.tableView reloadData];
 }
 
@@ -2135,12 +2162,12 @@ YSFCameraViewControllerDelegate>
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.sessionDatasource msgCount];
+    return [self.sessionDataSource msgCount];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = nil;
-    id model = [[_sessionDatasource modelArray] objectAtIndex:indexPath.row];
+    id model = [[_sessionDataSource modelArray] objectAtIndex:indexPath.row];
     if ([model isKindOfClass:[YSFMessageModel class]]) {
         cell = [YSFMessageCellMaker cellInTable:tableView forMessageMode:model];
         [(YSFMessageCell *)cell setMessageDelegate:self];
@@ -2155,7 +2182,7 @@ YSFCameraViewControllerDelegate>
 #pragma mark - UITableViewDelegate
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     CGFloat cellHeight = 0;
-    id modelInArray = [[_sessionDatasource modelArray] objectAtIndex:indexPath.row];
+    id modelInArray = [[_sessionDataSource modelArray] objectAtIndex:indexPath.row];
     if ([modelInArray isKindOfClass:[YSFMessageModel class]]) {
         YSFMessageModel *model = (YSFMessageModel *)modelInArray;
         
@@ -2199,7 +2226,7 @@ YSFCameraViewControllerDelegate>
 
 - (YSFMessageModel *)findModel:(YSF_NIMMessage *)message {
     YSFMessageModel *model;
-    for (YSFMessageModel *item in self.sessionDatasource.modelArray.reverseObjectEnumerator.allObjects) {
+    for (YSFMessageModel *item in self.sessionDataSource.modelArray.reverseObjectEnumerator.allObjects) {
         if ([item isKindOfClass:[YSFMessageModel class]] && [item.message isEqual:message]) {
             model = item;
             //防止进了会话又退出再进这种行为；防止SDK回调上来的message和会话持有的message不是一个，导致刷界面crash的情况
@@ -2224,16 +2251,28 @@ YSFCameraViewControllerDelegate>
 }
 
 - (void)headerRereshing:(id)sender {
+    YSF_NIMMessage *tipMessage = nil;
+    if (self.hideHistoryMessages && self.needShowHistoryTip && self.historyMessagesTip.length) {
+        YSFNotification *notification = [[YSFNotification alloc] init];
+        notification.command = YSFCommandNotification;
+        notification.localCommand = YSFCommandLineNotification;
+        notification.message = self.historyMessagesTip;
+        tipMessage = [YSFMessageMaker msgWithCustom:notification];
+    }
     __weak YSFSessionViewLayoutManager *layoutManager = self.layoutManager;
     __weak UIRefreshControl *refreshControl = self.refreshControl;
-    [self.sessionDatasource loadHistoryMessagesWithComplete:^(NSInteger index, NSError *error) {
-        [layoutManager reloadDataToIndex:index withAnimation:NO];
-        [refreshControl endRefreshing];
-    }];
+    __weak typeof(self) weakSelf = self;
+    [self.sessionDataSource loadHistoryMessagesWithLimit:self.messagePageLimit
+                                       historyTipMessage:tipMessage
+                                              completion:^(NSInteger index, NSError *error) {
+                                                  [layoutManager reloadDataToIndex:index withAnimation:NO];
+                                                  [refreshControl endRefreshing];
+                                                  weakSelf.needShowHistoryTip = NO;
+                                              }];
 }
 
 - (void)uiAddMessages:(NSArray *)messages {
-    NSArray *insert = [self.sessionDatasource addMessages:messages];
+    NSArray *insert = [self.sessionDataSource addMessages:messages];
     for (YSF_NIMMessage *message in messages) {
         YSFMessageModel *model = [[YSFMessageModel alloc] initWithMessage:message];
         [self layoutConfig:model];
@@ -2243,21 +2282,21 @@ YSFCameraViewControllerDelegate>
 
 - (void)uiDeleteMessage:(YSF_NIMMessage *)message {
     YSFMessageModel *model = [self makeModel:message];
-    NSArray *indexs = [self.sessionDatasource deleteMessageModel:model];
+    NSArray *indexs = [self.sessionDataSource deleteMessageModel:model];
     [self.layoutManager deleteCellAtIndexs:indexs];
 }
 
 - (void)uiUpdateMessage:(YSF_NIMMessage *)message {
     YSFMessageModel *model = [self makeModel:message];
-    NSInteger index = [self.sessionDatasource indexAtModelArray:model];
+    NSInteger index = [self.sessionDataSource indexAtModelArray:model];
     if (index > -1) {
         [model cleanLayoutConfig];
         [model cleanCache];
         model = [self makeModel:message];
-        [self.sessionDatasource.modelArray replaceObjectAtIndex:index withObject:model];
+        [self.sessionDataSource.modelArray replaceObjectAtIndex:index withObject:model];
         [self.layoutManager updateCellAtIndex:index model:model];
         
-        BOOL shouldAutoScroll = (index == [self.sessionDatasource msgCount] - 1) && [_tableView ysf_isInBottom];
+        BOOL shouldAutoScroll = (index == [self.sessionDataSource msgCount] - 1) && [_tableView ysf_isInBottom];
         [_tableView reloadData];
         if (shouldAutoScroll) {
             [_tableView ysf_scrollToBottom:YES];
@@ -2275,9 +2314,9 @@ YSFCameraViewControllerDelegate>
     if ([eventName isEqualToString:YSFKitEventNameReloadData]) {
         YSFMessageModel *model = [self makeModel:message];
         BOOL shouldAutoScroll = NO;
-        NSInteger index = [self.sessionDatasource indexAtModelArray:model];
+        NSInteger index = [self.sessionDataSource indexAtModelArray:model];
         if (index > -1) {
-            shouldAutoScroll = (index == [self.sessionDatasource msgCount] - 1) && [_tableView ysf_isInBottom];
+            shouldAutoScroll = (index == [self.sessionDataSource msgCount] - 1) && [_tableView ysf_isInBottom];
         }
         [_tableView reloadData];
         if (shouldAutoScroll) {
@@ -2713,7 +2752,7 @@ YSFCameraViewControllerDelegate>
 - (void)showImage:(YSF_NIMMessage *)message touchView:(UIView *)touchView {
     NSInteger imageViewIndex = touchView.tag;
     NSMutableArray *allGalleryItems = [NSMutableArray array];
-    NSMutableArray *allLoadedImages = [self.sessionDatasource queryAllImageMessages];
+    NSMutableArray *allLoadedImages = [self.sessionDataSource queryAllImageMessages];
     __block NSUInteger index = 0;
     __block NSUInteger currentIndex = 0;
     [allLoadedImages enumerateObjectsUsingBlock:^(YSF_NIMMessage *obj, NSUInteger idx, BOOL *stop) {
@@ -3187,7 +3226,7 @@ YSFCameraViewControllerDelegate>
 - (void)deleteMsg:(id)sender {
     YSF_NIMMessage *message = [self messageForMenu];
     YSFMessageModel *model = [self makeModel:message];
-    [self.layoutManager deleteCellAtIndexs:[self.sessionDatasource deleteMessageModel:model]];
+    [self.layoutManager deleteCellAtIndexs:[self.sessionDataSource deleteMessageModel:model]];
     [[[YSF_NIMSDK sharedSDK] conversationManager] deleteMessage:model.message];
     //文件消息删除的同时文件缓存也要删除
     if (message.messageType == YSF_NIMMessageTypeFile) {
@@ -3577,7 +3616,7 @@ YSFCameraViewControllerDelegate>
 
 #pragma mark - 旋转处理 (iOS7)
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    [self.sessionDatasource cleanCache];
+    [self.sessionDataSource cleanCache];
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {

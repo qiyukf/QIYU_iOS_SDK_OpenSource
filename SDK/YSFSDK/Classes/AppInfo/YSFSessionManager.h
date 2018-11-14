@@ -54,6 +54,9 @@ typedef enum : NSUInteger {
 - (NSDictionary *)getShopInfo;
 - (void)removeShopInfo:(NSString *)shopId;
 
+- (void)setLastSessionId:(long long)sessionId forShopId:(NSString *)shopId;
+- (long long)getLastSessionIdForShopId:(NSString *)shopId;
+
 - (NSDictionary *)getRecentEvaluationMemoryDataByShopId:(NSString *)shopId;
 - (NSDictionary *)getHistoryEvaluationMemoryDataByShopId:(NSString *)shopId sessionId:(long long)sessionId;
 - (NSDictionary *)getRecentEvaluationPersistDataByShopId:(NSString *)shopId;

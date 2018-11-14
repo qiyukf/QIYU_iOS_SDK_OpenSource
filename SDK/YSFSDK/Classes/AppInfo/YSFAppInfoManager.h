@@ -22,6 +22,7 @@
 #define YSFStaffIdIconUrl   @"staffid_iconrul"
 #define YSFShopInfoKey      @"shopInfo"
 #define YSFUnreadPushMessageSessionId @"unreadPushMessageSessionId"
+#define YSFLastSessionIdKey      @"last_session_id"
 
 //Evaluation
 #define YSFEvaluation_2                     @"evalution_2.0"

@@ -147,6 +147,21 @@ typedef void (^QYButtonClickBlock)(QYButtonInfo *action);
 @property (nonatomic, assign) BOOL autoSendInRobot;
 
 /**
+ *  每页消息加载的最大数量，默认为20条
+ */
+@property (nonatomic, assign) NSInteger messagePageLimit;
+
+/**
+ *  是否收起历史消息，默认为NO；若设置为YES，进入会话界面时若需创建新会话，则收起历史消息
+ */
+@property (nonatomic, assign) BOOL hideHistoryMessages;
+
+/**
+ *  历史消息提示文案，默认为“——以上是历史消息——”；仅在hideHistoryMessages为YES，首次下拉历史消息时展示
+ */
+@property (nonatomic, copy) NSString *historyMessagesTip;
+
+/**
  *  请求人工客服
  */
 - (void)requestHumanStaff;
