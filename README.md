@@ -224,6 +224,7 @@ sessionViewController.navigationItem.leftBarButtonItem = leftItem;
          return UIInterfaceOrientationMaskPortrait;
      }
      ```
+
 ## 注销（必须）
 
 ```objective-c
@@ -398,13 +399,13 @@ typedef NS_ENUM(NSInteger, QYSessionStatus) {
 
    - 检查证书的线上、测试环境是否跟管理后台配置的相同。请注意，若您想同时在 Debug 包和 Release 包中均接收推送消息，应添加两个 App，分别填入不同的名称并上传线上环境和测试环境的证书，同时在注册 AppKey 的地方这样写代码：
 
-   - ```objective-c
-     #if DEBUG
-         [[QYSDK sharedSDK] registerAppId:Appkey appName:Debug包App名称];
-     #else
-         [[QYSDK sharedSDK] registerAppId:Appkey appName:Release包App名称];
-     #endif
-     ```
+    ```objective-c
+    #if DEBUG
+        [[QYSDK sharedSDK] registerAppId:Appkey appName:Debug包App名称];
+    #else
+        [[QYSDK sharedSDK] registerAppId:Appkey appName:Release包App名称];
+    #endif
+    ```
 
    - 检查 provision profile 是否包含了推送证书。
 
@@ -417,6 +418,7 @@ typedef NS_ENUM(NSInteger, QYSessionStatus) {
    - 可以同时使用第三方推送工具和 SDK 的消息推送，两者可以共存，不会有任何冲突。
 3. 能否区分出哪些推送消息是来自七鱼的
    - 所有来自七鱼的推送消息中 payload 都带有 "nim:1"，通过这个可以判断出是七鱼的推送消息。
+
 ### 自定义聊天组件UI效果
 
 获取自定义UI类对象：
