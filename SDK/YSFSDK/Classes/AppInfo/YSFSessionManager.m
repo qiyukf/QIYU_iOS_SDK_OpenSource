@@ -40,7 +40,8 @@
 @property (nonatomic, strong) YSFServiceRequestManager *requestManager; //请求管理类
 
 @property (nonatomic, strong) NSMutableDictionary *shopInfo;
-@property (nonatomic, strong) NSMutableDictionary *evaluationInfo;
+@property (nonatomic, strong) NSMutableDictionary *evaluationRecentInfo;
+@property (nonatomic, strong) NSMutableDictionary *evaluationHistoryInfo;
 
 @property (nonatomic, strong) NSMutableDictionary *staffIconURLs;
 
@@ -110,10 +111,16 @@
 }
 
 - (void)readEvaluationInfo {
-    YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
-    _evaluationInfo = [[infoManager dictByKey:YSFEvalution] mutableCopy];
-    if (!_evaluationInfo) {
-        _evaluationInfo = [[NSMutableDictionary alloc] init];
+    //清除原有的评价信息
+    [self removeEvaluationInfoForKey:YSFEvaluation_2];
+    NSDictionary *total = [[[QYSDK sharedSDK] infoManager] dictByKey:YSFEvaluation_3];
+    _evaluationRecentInfo = [[total objectForKey:YSFEvaluationRecentData] mutableCopy];
+    if (!_evaluationRecentInfo) {
+        _evaluationRecentInfo = [[NSMutableDictionary alloc] init];
+    }
+    _evaluationHistoryInfo = [[total objectForKey:YSFEvaluationHistoryData] mutableCopy];
+    if (!_evaluationHistoryInfo) {
+        _evaluationHistoryInfo = [[NSMutableDictionary alloc] init];
     }
 }
 
@@ -249,26 +256,23 @@
 }
 
 - (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId {
-    /*
-     1、若没有会话session：
-     a.当前会话状态为正在排队或客服不在线，waitingOrNotExist=YES，若为初次请求会话则请求客服，若不是初次请求则不请求客服
-     b.当前会话状态为离线或正在服务，waitingOrNotExist=NO，则一律请求客服
-     2、若有会话session：
-     a.无论当前会话什么状态，waitingOrNotExist=NO，则一律不请求客服
-     */
-    BOOL waitingOrNotExist = false;
-    if (![self getOnlineSession:shopId]
-        && ([self getSessionStateType:shopId] == YSFSessionStateTypeWaiting
-            || [self getSessionStateType:shopId] == YSFSessionStateTypeNotExist
-            || [self getSessionStateType:shopId] == YSFSessionStateNotExistAndLeaveMessageClosed)) {
-            waitingOrNotExist = true;
-        }
-    YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
-    if ([self serviceOutOfDate:shopId] && (isInit || !waitingOrNotExist)) {
-        return true;
+    //sessionExist表示当前会话是否存在
+    BOOL sessionExist = [self getOnlineSession:shopId] ? YES : NO;
+    //waitingOrNotExist表示当前会话因客服需排队或不在线而未申请到
+    YSFSessionStateType type = [self getSessionStateType:shopId];
+    BOOL waitingOrNotExist = (!sessionExist
+                              && (type == YSFSessionStateTypeWaiting
+                                  || type == YSFSessionStateTypeNotExist
+                                  || type == YSFSessionStateNotExistAndLeaveMessageClosed));
+    
+    if (waitingOrNotExist) {
+        //若当前会话因客服需排队或不在线而未申请到，即waitingOrNotExist=YES，则若初始进入会话界面需请求客服，否则一律不请求客服
+        return isInit;
     } else {
-        return false;
+        //若非上述需排队或不在线状况，则仅判断会话是否存在，若不存在则需请求客服，否则不请求
+        return !sessionExist;
     }
+    YSFLogApp(@"@%: shouldRequestService isInit=%d  waitingOrNotExist=%d", shopId, isInit, waitingOrNotExist);
 }
 
 #pragma mark - 客服更新
@@ -316,39 +320,8 @@
     }
     
     if (code == YSFCodeSuccess) {
-        [self updateEvaluationDataStatusWithSession:session shopId:shopId];
+        [self updateEvaluationDataWithSession:session shopId:shopId];
     }
-}
-
-- (void)updateEvaluationDataStatusWithSession:(YSFServiceSession *)session shopId:(NSString *)shopId {
-    if (!session.humanOrMachine) {
-        return;
-    }
-    NSMutableDictionary *evalueDict = [[[[QYSDK sharedSDK] infoManager] dictByKey:YSFEvalution] mutableCopy];
-    if (!evalueDict) {
-        evalueDict = [[NSMutableDictionary alloc] init];
-    }
-    NSMutableDictionary *shopDict = [[evalueDict objectForKey:shopId] mutableCopy];
-    if (!shopDict) {
-        shopDict = [[NSMutableDictionary alloc] init];
-    }
-    [shopDict setValue:[[NSNumber alloc]initWithLongLong:session.sessionId] forKey:YSFCurrentSessionId];
-    [shopDict setValue:@"0" forKey:YSFSessionTimes];
-    if (session.evaluation) {
-        [shopDict setValue:session.evaluation forKey:YSFEvaluationData];
-    }
-    if (session.messageInvite) {
-        [shopDict setValue:session.messageInvite forKey:YSFApiKeyEvaluationMessageInvite];
-    }
-    if (session.messageThanks) {
-        [shopDict setValue:session.messageThanks forKey:YSFApiKeyEvaluationMessageThanks];
-    }
-    if (session.humanOrMachine) {
-        [shopDict setValue:@(2) forKey:YSFSessionStatus];
-    } else {
-        [shopDict setValue:@(1) forKey:YSFSessionStatus];
-    }
-    [self setEvaluationInfo:shopDict shopId:shopId];
 }
 
 - (void)onUpdateSessionByMessage:(YSF_NIMMessage *)message {
@@ -462,8 +435,11 @@
             [[[QYSDK sharedSDK] sdkConversationManager] onSessionListChanged];
         }
     } else if ([object isKindOfClass:[YSFEvaluationNotification class]]) {
-        [self addEvaluationMessage:((YSFEvaluationNotification *)object).sessionId
-               evaluationAutoPopup:((YSFEvaluationNotification *)object).evaluationAutoPopup shopId:shopId];
+        YSFEvaluationNotification *notification = (YSFEvaluationNotification *)object;
+        [self addInviteEvaluationMessageWithSessionId:notification.sessionId
+                                               shopId:shopId
+                                            autoPopup:notification.autoPopup
+                                         closeSession:NO];
     } else if ([object isKindOfClass:[YSFSessionWillCloseNotification class]]) {
         YSFNotification *notification = [[YSFNotification alloc] init];
         notification.command = YSFCommandNotification;
@@ -533,7 +509,26 @@
 
 - (void)onCloseSession:(YSFCloseServiceNotification *)object shopId:(NSString *)shopId {
     if (object.evaluate) {
-        [self addEvaluationMessage:object.sessionId evaluationAutoPopup:object.evaluationAutoPopup shopId:shopId];
+        [self addInviteEvaluationMessageWithSessionId:object.sessionId shopId:shopId autoPopup:object.autoPopup closeSession:YES];
+    } else {
+        BOOL needSave = NO;
+        NSMutableDictionary *sessionDict = [[self getHistoryEvaluationPersistDataByShopId:shopId sessionId:object.sessionId] mutableCopy];
+        if (!sessionDict) {
+            sessionDict = [[NSMutableDictionary alloc] init];
+        }
+        //若为关闭会话场景，需要计算出当前时间+时效=可评价的最大时间并存储，方便后续修改评价时做判断
+        BOOL modifyEnable = [sessionDict ysf_jsonBool:YSFEvaluationModifyEnable];
+        if (modifyEnable) {
+            NSInteger minutes = [sessionDict ysf_jsonInteger:YSFEvaluationModifyTime];
+            if (minutes >= 1 && minutes <= 480) {
+                long long timestamp_limit = round(([[NSDate date] timeIntervalSince1970] + minutes * 60) * 1000);
+                [sessionDict setValue:@(timestamp_limit) forKey:YSFEvaluationModifyLimit];
+                needSave = YES;
+            }
+        }
+        if (needSave && sessionDict) {
+            [self setHistoryEvaluationData:sessionDict shopId:shopId sessionId:object.sessionId];
+        }
     }
     
     if (object.closeReason == 2 && object.message.length > 0) {
@@ -548,58 +543,6 @@
     
     [_delegate didClose:object.evaluate session:[self getOnlineSession:shopId] shopId:shopId];
     [self clearByShopId:shopId];
-}
-
-- (void)addEvaluationMessage:(long long)sessionId evaluationAutoPopup:(BOOL)evaluationAutoPopup shopId:(NSString *)shopId {
-    YSFInviteEvaluationObject *inviteEvaluation = [[YSFInviteEvaluationObject alloc] init];
-    inviteEvaluation.command = YSFCommandInviteEvaluation;
-    inviteEvaluation.sessionId = sessionId;
-    NSDictionary *dict = [self getEvaluationInfoByShopId:shopId];
-    if (dict) {
-        inviteEvaluation.evaluationDict = [dict objectForKey:YSFEvaluationData];
-        inviteEvaluation.evaluationMessageInvite = [dict objectForKey:YSFApiKeyEvaluationMessageInvite];
-        inviteEvaluation.evaluationMessageThanks = [dict objectForKey:YSFApiKeyEvaluationMessageThanks];
-    }
-    
-    YSF_NIMMessage *currentInviteEvaluationMessage = [YSFMessageMaker msgWithCustom:inviteEvaluation];
-    YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
-    [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES
-                                                      message:currentInviteEvaluationMessage
-                                                   forSession:session
-                                               addUnreadCount:YES
-                                                   completion:nil];
-    
-    NSMutableDictionary *evalueDict = [[[[QYSDK sharedSDK] infoManager] dictByKey:YSFEvalution] mutableCopy];
-    if (!evalueDict) {
-        evalueDict = [[NSMutableDictionary alloc] init];
-    }
-    NSMutableDictionary *shopDict = [[evalueDict objectForKey:shopId] mutableCopy];
-    if (!shopDict) {
-        shopDict = [[NSMutableDictionary alloc] init];
-    }
-    
-    BOOL popup = NO;
-    id popupObj = [shopDict objectForKey:YSFApiEvaluationAutoPopup];
-    if (popupObj) {
-        popupObj = (NSNumber *)popupObj;
-        popup = [popupObj boolValue];
-    }
-    if (!popup) {
-        [shopDict setValue:@(evaluationAutoPopup) forKey:YSFApiEvaluationAutoPopup];
-        [shopDict setValue:@(inviteEvaluation.sessionId)  forKey:YSFApiEvaluationAutoPopupSessionId];
-        if (currentInviteEvaluationMessage.messageId) {
-            [shopDict setValue:currentInviteEvaluationMessage.messageId forKey:YSFApiEvaluationAutoPopupMessageID];
-        }
-        if (inviteEvaluation.evaluationMessageThanks) {
-            [shopDict setValue:inviteEvaluation.evaluationMessageThanks forKey:YSFApiEvaluationAutoPopupEvaluationMessageThanks];
-        }
-        if (inviteEvaluation.evaluationDict) {
-            [shopDict setValue:inviteEvaluation.evaluationDict forKey:YSFApiEvaluationAutoPopupEvaluationData];
-        }
-        if (shopDict) {
-            [self setEvaluationInfo:shopDict shopId:shopId];
-        }
-    }
 }
 
 - (void)onGetKFBypassNotification:(YSFKFBypassNotification *)object shopId:(NSString *)shopId {
@@ -727,18 +670,190 @@
     }
 }
 
-#pragma mark - evaluation info
-- (NSDictionary *)getEvaluationInfoByShopId:(NSString *)shopId {
-    if(!shopId) {
-        return nil;
+#pragma mark - 评价相关
+- (NSDictionary *)getRecentEvaluationMemoryDataByShopId:(NSString *)shopId {
+    if (shopId.length) {
+        return [_evaluationRecentInfo objectForKey:shopId];
     }
-    return [_evaluationInfo objectForKey:shopId];
+    return nil;
 }
 
-- (void)setEvaluationInfo:(NSDictionary *)evaluation shopId:(NSString *)shopId {
-    YSFAppInfoManager *infoManager = [QYSDK sharedSDK].infoManager;
-    [_evaluationInfo setValue:evaluation forKey:shopId];
-    [infoManager saveDict:_evaluationInfo forKey:YSFEvalution];
+- (NSDictionary *)getHistoryEvaluationMemoryDataByShopId:(NSString *)shopId sessionId:(long long)sessionId {
+    if (shopId.length && sessionId) {
+        NSDictionary *shopDict = [_evaluationHistoryInfo objectForKey:shopId];
+        if (shopDict && shopDict.count) {
+            return [shopDict objectForKey:[NSString stringWithFormat:@"%lld", sessionId]];
+        }
+    }
+    return nil;
+}
+
+- (NSDictionary *)getRecentEvaluationPersistDataByShopId:(NSString *)shopId {
+    if (shopId.length) {
+        NSDictionary *totalDict = [[[QYSDK sharedSDK] infoManager] dictByKey:YSFEvaluation_3];
+        if (totalDict && totalDict.count) {
+            NSDictionary *recentDict = [totalDict objectForKey:YSFEvaluationRecentData];
+            if (recentDict && recentDict.count) {
+                return [recentDict objectForKey:shopId];
+            }
+        }
+    }
+    return nil;
+}
+
+- (NSDictionary *)getHistoryEvaluationPersistDataByShopId:(NSString *)shopId sessionId:(long long)sessionId {
+    if (shopId.length && sessionId) {
+        NSDictionary *totalDict = [[[QYSDK sharedSDK] infoManager] dictByKey:YSFEvaluation_3];
+        if (totalDict && totalDict.count) {
+            NSDictionary *historyDict = [totalDict objectForKey:YSFEvaluationHistoryData];
+            if (historyDict && historyDict.count) {
+                NSDictionary *shopDict = [historyDict objectForKey:shopId];
+                return [shopDict objectForKey:[NSString stringWithFormat:@"%lld", sessionId]];
+            }
+        }
+    }
+    return nil;
+}
+
+- (void)setRecentEvaluationData:(NSDictionary *)data shopId:(NSString *)shopId {
+    if (shopId.length && data) {
+        [_evaluationRecentInfo setValue:data forKey:shopId];
+        NSDictionary *dict = @{YSFEvaluationRecentData : _evaluationRecentInfo,
+                               YSFEvaluationHistoryData : _evaluationHistoryInfo,
+                               };
+        [[[QYSDK sharedSDK] infoManager] saveDict:dict forKey:YSFEvaluation_3];
+    }
+}
+
+- (void)setHistoryEvaluationData:(NSDictionary *)data shopId:(NSString *)shopId sessionId:(long long)sessionId {
+    if (shopId.length && sessionId && data) {
+        NSMutableDictionary *shopDict = [[_evaluationHistoryInfo objectForKey:shopId] mutableCopy];
+        if (shopDict && shopDict.count) {
+            [shopDict setValue:data forKey:[NSString stringWithFormat:@"%lld", sessionId]];
+            [_evaluationHistoryInfo setValue:shopDict forKey:shopId];
+        } else {
+            NSDictionary *newShopDict = @{[NSString stringWithFormat:@"%lld", sessionId] : data};
+            [_evaluationHistoryInfo setValue:newShopDict forKey:shopId];
+        }
+        NSDictionary *dict = @{YSFEvaluationRecentData : _evaluationRecentInfo,
+                               YSFEvaluationHistoryData : _evaluationHistoryInfo,
+                               };
+        [[[QYSDK sharedSDK] infoManager] saveDict:dict forKey:YSFEvaluation_3];
+    }
+}
+
+- (void)removeEvaluationInfoForKey:(NSString *)key {
+    NSMutableDictionary *info = [[[[QYSDK sharedSDK] infoManager] dictByKey:key] mutableCopy];
+    if (info && info.count) {
+        [info removeAllObjects];
+        [[[QYSDK sharedSDK] infoManager] saveDict:info forKey:key];
+    }
+}
+
+- (void)updateEvaluationDataWithSession:(YSFServiceSession *)session shopId:(NSString *)shopId {
+    if (!session.humanOrMachine) {
+        return;
+    }
+    //remove old data
+    [self removeEvaluationInfoForKey:YSFEvaluation_2];
+    //update recent data
+    NSMutableDictionary *recentDict = [[self getRecentEvaluationPersistDataByShopId:shopId] mutableCopy];
+    if (!recentDict) {
+        recentDict = [[NSMutableDictionary alloc] init];
+    }
+    [recentDict setValue:[NSNumber numberWithLongLong:session.sessionId] forKey:YSFEvaluationSessionId];
+    if (session.humanOrMachine) {
+        [recentDict setValue:@(2) forKey:YSFEvaluationSessionStatus];
+    } else {
+        [recentDict setValue:@(1) forKey:YSFEvaluationSessionStatus];
+    }
+    [recentDict setValue:@(0) forKey:YSFEvaluationSessionTimes];
+    [self setRecentEvaluationData:recentDict shopId:shopId];
+    //update session data
+    NSMutableDictionary *sessionDict = [[self getHistoryEvaluationPersistDataByShopId:shopId sessionId:session.sessionId] mutableCopy];
+    if (!sessionDict) {
+        sessionDict = [[NSMutableDictionary alloc] init];
+    }
+    if (session.evaluation) {
+        [sessionDict setValue:session.evaluation forKey:YSFEvaluationData];
+    }
+    if (session.inviteMsg) {
+        [sessionDict setValue:session.inviteMsg forKey:YSFEvaluationInviteText];
+    }
+    if (session.thanksMsg) {
+        [sessionDict setValue:session.thanksMsg forKey:YSFEvaluationThanksText];
+    }
+    [sessionDict setValue:@(session.shopInfo.setting.multEvaluationEnable) forKey:YSFEvaluationModifyEnable];
+    [sessionDict setValue:@(session.shopInfo.setting.evaluationTimeLimit) forKey:YSFEvaluationModifyTime];
+    [self setHistoryEvaluationData:sessionDict shopId:shopId sessionId:session.sessionId];
+}
+
+- (void)addInviteEvaluationMessageWithSessionId:(long long)sessionId shopId:(NSString *)shopId autoPopup:(BOOL)autoPopup closeSession:(BOOL)isClose {
+    [self removeEvaluationInfoForKey:YSFEvaluation_2];
+    
+    YSFInviteEvaluationObject *inviteEvaluation = [[YSFInviteEvaluationObject alloc] init];
+    inviteEvaluation.command = YSFCommandInviteEvaluation;
+    inviteEvaluation.sessionId = sessionId;
+    NSDictionary *dict = [self getHistoryEvaluationMemoryDataByShopId:shopId sessionId:sessionId];
+    if (dict && dict.count) {
+        inviteEvaluation.evaluationData = [dict objectForKey:YSFEvaluationData];
+        inviteEvaluation.inviteText = [dict objectForKey:YSFEvaluationInviteText];
+        inviteEvaluation.thanksText = [dict objectForKey:YSFEvaluationThanksText];
+    }
+    YSF_NIMMessage *message = [YSFMessageMaker msgWithCustom:inviteEvaluation];
+    YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+    [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES
+                                                      message:message
+                                                   forSession:session
+                                               addUnreadCount:YES
+                                                   completion:nil];
+    BOOL needSave = NO;
+    NSMutableDictionary *sessionDict = [[self getHistoryEvaluationPersistDataByShopId:shopId sessionId:sessionId] mutableCopy];
+    if (!sessionDict) {
+        sessionDict = [[NSMutableDictionary alloc] init];
+    }
+    if (message.messageId) {
+        [sessionDict setValue:message.messageId forKey:YSFEvaluationMessageID];
+        needSave = YES;
+    }
+    //若为关闭会话场景，需要计算出当前时间+时效=可评价的最大时间并存储，方便后续修改评价时做判断
+    if (isClose) {
+        BOOL modifyEnable = [sessionDict ysf_jsonBool:YSFEvaluationModifyEnable];
+        if (modifyEnable) {
+            NSInteger minutes = [sessionDict ysf_jsonInteger:YSFEvaluationModifyTime];
+            if (minutes >= 1 && minutes <= 480) {
+                long long timestamp_limit = round(([[NSDate date] timeIntervalSince1970] + minutes * 60) * 1000);
+                [sessionDict setValue:@(timestamp_limit) forKey:YSFEvaluationModifyLimit];
+                needSave = YES;
+            }
+        }
+    }
+    if (needSave && sessionDict) {
+        [self setHistoryEvaluationData:sessionDict shopId:shopId sessionId:sessionId];
+    }
+    
+    needSave = NO;
+    NSMutableDictionary *recentDict = [[self getRecentEvaluationPersistDataByShopId:shopId] mutableCopy];
+    if (!recentDict) {
+        recentDict = [[NSMutableDictionary alloc] init];
+    }
+    BOOL popup = NO;
+    id popupObj = [sessionDict objectForKey:YSFEvaluationAutoPopup];
+    if (popupObj) {
+        popupObj = (NSNumber *)popupObj;
+        popup = [popupObj boolValue];
+    }
+    if (!popup) {
+        [recentDict setValue:@(autoPopup) forKey:YSFEvaluationAutoPopup];
+        [recentDict setValue:@(sessionId) forKey:YSFEvaluationAutoPopupSessionId];
+        if (message.messageId) {
+            [recentDict setValue:message.messageId forKey:YSFEvaluationAutoPopupMessageID];
+        }
+        needSave = YES;
+    }
+    if (recentDict && needSave) {
+        [self setRecentEvaluationData:recentDict shopId:shopId];
+    }
 }
 
 #pragma mark - shop info

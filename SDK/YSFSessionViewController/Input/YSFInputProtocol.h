@@ -17,7 +17,7 @@
 
 - (BOOL)onSendText:(NSString *)text;
 
-- (void)OnMediaPicturePressed;
+- (void)onMediaPicturePressed;
 
 - (void)onSelectChartlet:(NSString *)chartletId
                  catalog:(NSString *)catalogId;

@@ -21,9 +21,7 @@
 @end
 
 @implementation YSFSessionNotificationContentView
-
-- (instancetype)initSessionMessageContentView
-{
+- (instancetype)initSessionMessageContentView {
     if (self = [super initSessionMessageContentView]) {
         _label = [[YSFAttributedLabel alloc] initWithFrame:CGRectZero];
         _label.font = [UIFont systemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]];
@@ -39,32 +37,90 @@
     return self;
 }
 
-- (void)refresh:(YSFMessageModel *)model{
+- (void)refresh:(YSFMessageModel *)model {
     [super refresh:model];
+    _label.autoDetectLinks = YES;
+    _label.autoDetectNumber = YES;
+    
     id<YSFCellLayoutConfig> config = model.layoutConfig;
     if ([config respondsToSelector:@selector(formatedMessage:)]) {
         YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)model.message.messageObject;
         if (model.message.messageType == YSF_NIMMessageTypeTip) {
             _label.text = [model.layoutConfig formatedMessage:model];
-        }
-        else if ([object.attachment isKindOfClass:[YSFStartServiceObject class]]) {
+        } else if ([object.attachment isKindOfClass:[YSFStartServiceObject class]]) {
             _label.text = [model.layoutConfig formatedMessage:model];
-        }
-        else if ([object.attachment isKindOfClass:[YSFEvaluationTipObject class]]) {
+        } else if ([object.attachment isKindOfClass:[YSFEvaluationTipObject class]]) {
+            _label.autoDetectLinks = NO;
+            _label.autoDetectNumber = NO;
+            
             YSFEvaluationTipObject *attachment = (YSFEvaluationTipObject *)object.attachment;
-            if (attachment.kaolaTipContent.length > 0 ) {
-                _label.text = attachment.kaolaTipContent;
+            if (attachment.specialThanksTip.length > 0) {
+                _label.text = attachment.specialThanksTip;
+                if (attachment.tipModify.length) {
+                    NSMutableAttributedString *modifyAttrString = [[NSMutableAttributedString alloc] initWithString:attachment.tipModify];
+                    [modifyAttrString ysf_setFont:[UIFont systemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
+                    [_label appendAttributedText:modifyAttrString];
+                    [_label addCustomLink:@"YSFClickModifyAttributedString"
+                                 forRange:NSMakeRange(attachment.specialThanksTip.length, modifyAttrString.length)
+                                linkColor:YSFRGB(0x008fff)];
+                }
+            } else {
+                NSInteger length = 0;
+                if (!attachment.tipContent.length) {
+                    //情况1：服务端返回的感谢文案为空，走原逻辑
+                    _label.text = @"您对我们的服务评价为：";
+                    length += 11;
+                    NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:YSFStrParam(attachment.tipResult)];
+                    [attributedstring ysf_setFont:[UIFont boldSystemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
+                    [attributedstring ysf_setTextColor:[[QYCustomUIConfig sharedInstance] tipMessageTextColor]];
+                    [_label appendAttributedText:attributedstring];
+                    [_label appendText:@"。非常感谢！"];
+                    length += (attachment.tipResult.length + 6);
+                    if (attachment.tipModify.length) {
+                        NSMutableAttributedString *modifyAttrString = [[NSMutableAttributedString alloc] initWithString:attachment.tipModify];
+                        [modifyAttrString ysf_setFont:[UIFont systemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
+                        [_label appendAttributedText:modifyAttrString];
+                        [_label addCustomLink:@"YSFClickModifyAttributedString" forRange:NSMakeRange(length, modifyAttrString.length) linkColor:YSFRGB(0x008fff)];
+                    }
+                } else {
+                    NSString *replaceStr = @"#选择项#";
+                    NSRange range = [attachment.tipContent rangeOfString:replaceStr];
+                    if (range.location != NSNotFound) {
+                        //情况2：服务端返回的感谢文案中含有"#选择项#"，将此部分内容替换为结果
+                        NSString *content_head = [attachment.tipContent substringWithRange:NSMakeRange(0, range.location)];
+                        NSString *content_tail = [attachment.tipContent substringWithRange:NSMakeRange(range.location + range.length, attachment.tipContent.length - content_head.length - replaceStr.length)];
+                        _label.text = content_head;
+                        length += content_head.length;
+                        NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:YSFStrParam(attachment.tipResult)];
+                        [attributedstring ysf_setFont:[UIFont boldSystemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
+                        [attributedstring ysf_setTextColor:[[QYCustomUIConfig sharedInstance] tipMessageTextColor]];
+                        [_label appendAttributedText:attributedstring];
+                        length += attachment.tipResult.length;
+                        if (content_tail.length) {
+                            [_label appendText:content_tail];
+                            length += content_tail.length;
+                        }
+                        if (attachment.tipModify.length) {
+                            NSMutableAttributedString *modifyAttrString = [[NSMutableAttributedString alloc] initWithString:attachment.tipModify];
+                            [modifyAttrString ysf_setFont:[UIFont systemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
+                            [_label appendAttributedText:modifyAttrString];
+                            [_label addCustomLink:@"YSFClickModifyAttributedString" forRange:NSMakeRange(length, modifyAttrString.length) linkColor:YSFRGB(0x008fff)];
+                        }
+                    } else {
+                        //情况3：服务端返回的感谢文案中不含"#xxx#"，原样展示
+                        _label.text = attachment.tipContent;
+                        length += attachment.tipContent.length;
+                        if (attachment.tipModify.length) {
+                            NSMutableAttributedString *modifyAttrString = [[NSMutableAttributedString alloc] initWithString:attachment.tipModify];
+                            [modifyAttrString ysf_setFont:[UIFont systemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
+                            [_label appendAttributedText:modifyAttrString];
+                            [_label addCustomLink:@"YSFClickModifyAttributedString" forRange:NSMakeRange(length, modifyAttrString.length) linkColor:YSFRGB(0x008fff)];
+                        }
+                    }
+                }
             }
-            else {
-                _label.text = attachment.tipContent;
-                NSMutableAttributedString *attributedstring = [[NSMutableAttributedString alloc] initWithString:attachment.tipResult];
-                [attributedstring ysf_setFont:[UIFont boldSystemFontOfSize:[[QYCustomUIConfig sharedInstance] tipMessageTextFontSize]]];
-                [attributedstring ysf_setTextColor:[[QYCustomUIConfig sharedInstance] tipMessageTextColor]];
-                [_label appendAttributedText:attributedstring];
-                [_label appendText:@"。非常感谢！"];
-            }
-        }
-        else if ([object.attachment isKindOfClass:[YSFNotification class]]) {
+            
+        } else if ([object.attachment isKindOfClass:[YSFNotification class]]) {
             YSFNotification *notification = (YSFNotification *)object.attachment;
             _label.text = [model.layoutConfig formatedMessage:model];
             
@@ -79,9 +135,7 @@
     }
 }
 
-
-- (void)layoutSubviews
-{
+- (void)layoutSubviews {
     [super layoutSubviews];
     self.label.ysf_frameSize = [self.label sizeThatFits:CGSizeMake(self.ysf_frameWidth - 112 - 20, CGFLOAT_MAX)];
     self.label.ysf_frameCenterX = self.ysf_frameWidth * .5f;
@@ -91,9 +145,7 @@
 }
 
 #pragma mark - NIMAttributedLabelDelegate
-- (void)ysfAttributedLabel:(YSFAttributedLabel *)label
-             clickedOnLink:(id)data
-{
+- (void)ysfAttributedLabel:(YSFAttributedLabel *)label clickedOnLink:(id)data {
     if ([data isEqualToString:@"YSFCommandMiniAppTip"]) {
         YSFKitEvent *event = [[YSFKitEvent alloc] init];
         event.eventName = YSFKitEventNameOpenUrl;
@@ -103,6 +155,11 @@
     } else if ([data isEqualToString:@"YSFClickAttributedString"]) {
         YSFKitEvent *event = [[YSFKitEvent alloc] init];
         event.eventName = YSFKitEventNameTapSystemNotification;
+        event.message = self.model.message;
+        [self.delegate onCatchEvent:event];
+    } else if ([data isEqualToString:@"YSFClickModifyAttributedString"]) {
+        YSFKitEvent *event = [[YSFKitEvent alloc] init];
+        event.eventName = YSFKitEventNameTapModifyEvaluation;
         event.message = self.model.message;
         [self.delegate onCatchEvent:event];
     }

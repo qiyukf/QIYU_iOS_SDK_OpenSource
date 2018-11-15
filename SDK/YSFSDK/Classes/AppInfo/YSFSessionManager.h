@@ -40,15 +40,6 @@ typedef enum : NSUInteger {
 
 - (void)readData;
 
-- (NSDictionary *)getEvaluationInfoByShopId:(NSString *)shopId;
-- (void)setEvaluationInfo:(NSDictionary *)evaluation shopId:(NSString *)shopId;
-
-- (NSDictionary *)getShopInfo;
-- (void)removeShopInfo:(NSString *)shopId;
-
-- (void)reportPushMessageReadedStatus;
-- (long long)getLastUnreadPushMessageSessionId;
-
 - (BOOL)shouldRequestService:(BOOL)isInit shopId:(NSString *)shopId;
 - (void)requestServiceWithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId;
 
@@ -59,6 +50,19 @@ typedef enum : NSUInteger {
 - (void)addStaffIconURL:(NSString *)iconURL forStaffId:(NSString *)staffId;
 - (NSString *)getIconURLFromStaffId:(NSString *)staffId;
 - (void)updateStaffInfoForOnlineSession:(NSString *)shopId;
+
+- (NSDictionary *)getShopInfo;
+- (void)removeShopInfo:(NSString *)shopId;
+
+- (NSDictionary *)getRecentEvaluationMemoryDataByShopId:(NSString *)shopId;
+- (NSDictionary *)getHistoryEvaluationMemoryDataByShopId:(NSString *)shopId sessionId:(long long)sessionId;
+- (NSDictionary *)getRecentEvaluationPersistDataByShopId:(NSString *)shopId;
+- (NSDictionary *)getHistoryEvaluationPersistDataByShopId:(NSString *)shopId sessionId:(long long)sessionId;
+- (void)setRecentEvaluationData:(NSDictionary *)data shopId:(NSString *)shopId;
+- (void)setHistoryEvaluationData:(NSDictionary *)data shopId:(NSString *)shopId sessionId:(long long)sessionId;
+
+- (void)reportPushMessageReadedStatus;
+- (long long)getLastUnreadPushMessageSessionId;
 
 - (void)clear;
 - (void)clearByShopId:(NSString *)shopId;

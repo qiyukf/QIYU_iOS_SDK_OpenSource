@@ -26,39 +26,32 @@
 #import "YSF_NIMMessage+YSF.h"
 
 @interface YSFConversationManager ()<YSF_NIMConversationManagerDelegate, YSF_NIMChatManagerDelegate>
-@property (nonatomic,weak)  id<QYConversationManagerDelegate> delegate;
 
+@property (nonatomic, weak) id<QYConversationManagerDelegate> delegate;
 @property (nonatomic, strong) NSMutableArray<QYSessionInfo *> *sessionListArray;
+
 @end
 
 @implementation YSFConversationManager
-- (instancetype)init
-{
-    if (self = [super init])
-    {
+- (instancetype)init {
+    if (self = [super init]) {
         [[[YSF_NIMSDK sharedSDK] conversationManager] addDelegate:self];
         [[[YSF_NIMSDK sharedSDK] chatManager] addDelegate:self];
     }
     return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [[[YSF_NIMSDK sharedSDK] chatManager] removeDelegate:self];
     [[[YSF_NIMSDK sharedSDK] conversationManager] removeDelegate:self];
 }
 
-- (NSArray<QYSessionInfo *> *)getSessionList
-{
-//    if (!self.sessionListArray) {
-        [self updateSessionList];
-//    }
-    
+- (NSArray<QYSessionInfo *> *)getSessionList {
+    [self updateSessionList];
     return _sessionListArray;
 }
 
-- (void)updateSessionList
-{
+- (void)updateSessionList {
     NSArray *recentSessions = [[[YSF_NIMSDK sharedSDK] conversationManager] allRecentSession];
     NSMutableArray *sessionListArray = [NSMutableArray arrayWithCapacity:recentSessions.count];
     for (YSF_NIMRecentSession *item in recentSessions) {
@@ -76,17 +69,13 @@
         sessionInfo.hasTrashWords = [item.lastMessage hasTrashWords];
         if (item.lastMessage.messageType == YSF_NIMMessageTypeText) {
             sessionInfo.lastMessageType = QYMessageTypeText;
-        }
-        else if (item.lastMessage.messageType == YSF_NIMMessageTypeImage) {
+        } else if (item.lastMessage.messageType == YSF_NIMMessageTypeImage) {
             sessionInfo.lastMessageType = QYMessageTypeImage;
-        }
-        else if (item.lastMessage.messageType == YSF_NIMMessageTypeAudio) {
+        } else if (item.lastMessage.messageType == YSF_NIMMessageTypeAudio) {
             sessionInfo.lastMessageType = QYMessageTypeAudio;
-        }
-        else if (item.lastMessage.messageType == YSF_NIMMessageTypeVideo) {
+        } else if (item.lastMessage.messageType == YSF_NIMMessageTypeVideo) {
             sessionInfo.lastMessageType = QYMessageTypeVideo;
-        }
-        else {
+        } else {
             sessionInfo.lastMessageType = QYMessageTypeCustom;
         }
         
@@ -95,11 +84,9 @@
         YSFSessionStateType stateType = [[[QYSDK sharedSDK] sessionManager] getSessionStateType:sessionInfo.shopId];
         if (stateType == YSFSessionStateTypeOnline) {
             sessionInfo.status = QYSessionStatusInSession;
-        }
-        else if (stateType == YSFSessionStateTypeWaiting) {
+        } else if (stateType == YSFSessionStateTypeWaiting) {
             sessionInfo.status = QYSessionStatusWaiting;
-        }
-        else {
+        } else {
             sessionInfo.status = QYSessionStatusNone;
         }
         
@@ -109,9 +96,10 @@
     self.sessionListArray = sessionListArray;
 }
 
-- (void)deleteRecentSessionByShopId:(NSString *)shopId deleteMessages:(BOOL)isDelete
-{
-    if (!shopId) return;
+- (void)deleteRecentSessionByShopId:(NSString *)shopId deleteMessages:(BOOL)isDelete {
+    if (!shopId) {
+        return;
+    }
     YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
     YSF_NIMRecentSession *recentSession = [YSF_NIMRecentSession recentSessionWithSession:session];
     [[[YSF_NIMSDK sharedSDK] conversationManager] deleteRecentSession:recentSession];
@@ -120,24 +108,20 @@
     }
 }
 
-- (NSInteger)allUnreadCount
-{
+- (NSInteger)allUnreadCount {
     return MAX(0, [[[YSF_NIMSDK sharedSDK] conversationManager] allUnreadCount]);
 }
 
-- (void)clearUnreadCount
-{
+- (void)clearUnreadCount {
     [self clearUnreadCount:@"-1"];
 }
 
-- (void)clearUnreadCount:(NSString *)shopId
-{
+- (void)clearUnreadCount:(NSString *)shopId {
     YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
     [[[YSF_NIMSDK sharedSDK] conversationManager] cleanRecentSession:session];
 }
 
-- (QYMessageInfo *)getLastMessage
-{
+- (QYMessageInfo *)getLastMessage {
     NSArray *recentSessions = [[[YSF_NIMSDK sharedSDK] conversationManager] allRecentSession];
     for (YSF_NIMRecentSession *item in recentSessions) {
         if ([item.session.sessionId isEqualToString:@"-1"]) {
@@ -147,68 +131,55 @@
             messageInfo.timeStamp = message.timestamp;
             if (message.messageType == YSF_NIMMessageTypeText) {
                 messageInfo.type = QYMessageTypeText;
-            }
-            else if (message.messageType == YSF_NIMMessageTypeImage) {
+            } else if (message.messageType == YSF_NIMMessageTypeImage) {
                 messageInfo.type = QYMessageTypeImage;
-            }
-            else if (message.messageType == YSF_NIMMessageTypeAudio) {
+            } else if (message.messageType == YSF_NIMMessageTypeAudio) {
                 messageInfo.type = QYMessageTypeAudio;
-            }
-            else if (message.messageType == YSF_NIMMessageTypeVideo) {
+            } else if (message.messageType == YSF_NIMMessageTypeVideo) {
                 messageInfo.type = QYMessageTypeVideo;
-            }
-            else {
+            } else {
                 messageInfo.type = QYMessageTypeCustom;
             }
             
             return messageInfo;
         }
     }
-    
     return nil;
 }
 
 #pragma mark - YSF_NIMConversationManagerDelegate
 - (void)didAddRecentSession:(YSF_NIMRecentSession *)recentSession
-           totalUnreadCount:(NSInteger)totalUnreadCount
-{
+           totalUnreadCount:(NSInteger)totalUnreadCount {
     [self onUnreadCountChanged:totalUnreadCount];
     [self onSessionListChanged];
 }
 
-
 - (void)didUpdateRecentSession:(YSF_NIMRecentSession *)recentSession
-              totalUnreadCount:(NSInteger)totalUnreadCount
-{
+              totalUnreadCount:(NSInteger)totalUnreadCount {
     [self onUnreadCountChanged:totalUnreadCount];
     [self onSessionListChanged];
 }
 
 - (void)didRemoveRecentSession:(YSF_NIMRecentSession *)recentSession
-              totalUnreadCount:(NSInteger)totalUnreadCount
-{
+              totalUnreadCount:(NSInteger)totalUnreadCount {
     [self onUnreadCountChanged:totalUnreadCount];
     [self onSessionListChanged];
 }
 
-- (void)onUnreadCountChanged:(NSInteger)count
-{
-    if (_delegate && [_delegate respondsToSelector:@selector(onUnreadCountChanged:)])
-    {
+- (void)onUnreadCountChanged:(NSInteger)count {
+    if (_delegate && [_delegate respondsToSelector:@selector(onUnreadCountChanged:)]) {
         [_delegate onUnreadCountChanged:count];
     }
 }
 
-- (void)onSessionListChanged
-{
+- (void)onSessionListChanged {
     [self updateSessionList];
     if (_delegate && [_delegate respondsToSelector:@selector(onSessionListChanged:)]) {
         [_delegate onSessionListChanged:_sessionListArray];
     }
 }
 
-- (void)onRecvMessages:(NSArray *)messages
-{
+- (void)onRecvMessages:(NSArray *)messages {
     for (YSF_NIMMessage *message in messages) {
         NSDictionary *shopInfoDict = [[[[QYSDK sharedSDK] sessionManager] getShopInfo] objectForKey:message.session.sessionId];
         if (!shopInfoDict) {
@@ -223,17 +194,13 @@
         messageInfo.timeStamp = message.timestamp;
         if (message.messageType == YSF_NIMMessageTypeText) {
             messageInfo.type = QYMessageTypeText;
-        }
-        else if (message.messageType == YSF_NIMMessageTypeImage) {
+        } else if (message.messageType == YSF_NIMMessageTypeImage) {
             messageInfo.type = QYMessageTypeImage;
-        }
-        else if (message.messageType == YSF_NIMMessageTypeAudio) {
+        } else if (message.messageType == YSF_NIMMessageTypeAudio) {
             messageInfo.type = QYMessageTypeAudio;
-        }
-        else if (message.messageType == YSF_NIMMessageTypeVideo) {
+        } else if (message.messageType == YSF_NIMMessageTypeVideo) {
             messageInfo.type = QYMessageTypeVideo;
-        }
-        else {
+        } else {
             messageInfo.type = QYMessageTypeCustom;
         }
         
@@ -241,7 +208,6 @@
             [_delegate onReceiveMessage:messageInfo];
         }
     }
-
 }
 
 @end
