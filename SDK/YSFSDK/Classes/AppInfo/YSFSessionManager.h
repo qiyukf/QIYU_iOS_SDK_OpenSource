@@ -26,6 +26,7 @@ typedef enum : NSUInteger {
 - (void)didSendSessionRequest:(NSError *)error shopId:(NSString *)shopId;
 - (void)didReceiveSessionError:(NSError *)error
                        session:(YSFServiceSession *)session
+                        bypass:(BOOL)bypass
                         shopId:(NSString *)shopId;
 - (void)didClose:(BOOL)evaluate session:(YSFServiceSession *)session shopId:(NSString *)shopId;
 

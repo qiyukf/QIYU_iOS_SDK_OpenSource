@@ -10,6 +10,7 @@
 #define QYSDK_YSFHeaders_h
 
 #import "QYSessionViewController.h"
+#import "QYCustomSessionViewController.h"
 #import "QYCustomUIConfig.h"
 #import "QYCustomActionConfig.h"
 #import "QYConversationManager.h"

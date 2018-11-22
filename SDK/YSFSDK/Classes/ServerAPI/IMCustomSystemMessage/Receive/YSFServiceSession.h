@@ -23,6 +23,7 @@
 @property (nonatomic, assign) BOOL operatorEable;
 @property (nonatomic, assign) BOOL showNumber;
 @property (nonatomic, assign) BOOL robotInQueue;
+@property (nonatomic, assign) BOOL sessionTransfer;
 @property (nonatomic, assign) long long robotSessionId;
 
 @property (nonatomic, copy) NSString *staffId;
@@ -33,9 +34,7 @@
 
 @property (nonatomic, copy) NSString *message;
 @property (nonatomic, copy) NSString *inQueeuNotify;
-@property (nonatomic, copy) NSDictionary *evaluation;
-@property (nonatomic, copy) NSString *inviteMsg;
-@property (nonatomic, copy) NSString *thanksMsg;
+@property (nonatomic, copy) NSString *evaluationString;
 @property (nonatomic, copy) NSArray<YSFActionInfo *> *actionInfoArray;
 
 + (YSFServiceSession *)dataByJson:(NSDictionary *)dict;

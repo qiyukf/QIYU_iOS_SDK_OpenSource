@@ -546,12 +546,12 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
 
 - (NSString *)versionNumber
 {
-    return @"46";
+    return @"47";
 }
 
 - (NSString *)version
 {
-    return @"4.6.0";
+    return @"4.7.0";
 }
 
 #pragma mark - CachedText

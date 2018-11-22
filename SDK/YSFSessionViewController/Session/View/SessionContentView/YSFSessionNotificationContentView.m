@@ -134,7 +134,7 @@
             
             if (notification.localCommand == YSFCommandMiniAppTip) {
                 [_label addCustomLink:@"YSFCommandMiniAppTip" forRange:NSMakeRange(notification.message.length-6, 6)];
-            } else if (notification.localCommand == YSFCommandLineNotification) {
+            } else if (notification.localCommand == YSFCommandHistoryNotification) {
                 if (!_leftLineView) {
                     _leftLineView = [[UIView alloc] initWithFrame:CGRectZero];
                     _leftLineView.backgroundColor = [[QYCustomUIConfig sharedInstance] tipMessageTextColor];
@@ -164,7 +164,7 @@
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.model.message.messageObject;
     if ([object.attachment isKindOfClass:[YSFNotification class]]) {
         YSFNotification *notification = (YSFNotification *)object.attachment;
-        if (notification.localCommand == YSFCommandLineNotification) {
+        if (notification.localCommand == YSFCommandHistoryNotification) {
             _leftLineView.hidden = NO;
             _rightLineView.hidden = NO;
             self.bubbleImageView.hidden = YES;

@@ -8,16 +8,18 @@
 
 
 @protocol YSFSessionContentConfig <NSObject>
+
 - (CGSize)contentSize:(CGFloat)cellWidth;
-
 - (NSString *)cellContent;
-
 - (UIEdgeInsets)contentViewInsets;
 
 @end
 
+
 @interface YSFBaseSessionContentConfig : NSObject
-@property (nonatomic,strong)    YSF_NIMMessage  *message;
+
+@property (nonatomic, strong) YSF_NIMMessage *message;
+
 @end
 
 
@@ -25,8 +27,9 @@ typedef id<YSFSessionContentConfig>(^QueryCustomContentConifgBlock)(YSF_NIMMessa
 
 @interface YSFSessionContentConfigFactory : NSObject
 
-@property (nonatomic,copy)  QueryCustomContentConifgBlock queryCustomContentConifgBlock;
+@property (nonatomic, copy) QueryCustomContentConifgBlock queryCustomContentConifgBlock;
 
 + (instancetype)sharedFacotry;
 - (id<YSFSessionContentConfig>)configBy:(YSF_NIMMessage *)message;
+
 @end

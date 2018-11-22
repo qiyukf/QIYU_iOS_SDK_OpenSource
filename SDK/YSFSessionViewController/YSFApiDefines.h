@@ -255,6 +255,8 @@
 #define     YSFApiKeySessionOpenSwitch      @"session_open_switch"
 #define     YSFApiKeySessionEndSwitch       @"session_end_switch"
 #define     YSFApiKeySessionTimeoutSwitch   @"session_timeout_switch"
+#define     YSFApiKeySessionTransferSwitch  @"session_transfer_switch"
+#define     YSFApiKeySessionTransferMessage @"sessionTransferMessage"
 #define     YSFApiKeyStaffReadSwitch        @"staffReadSwitch"
 #define     YSFApiKeyInputSwitch            @"inputSwitch"
 #define     YSFApiKeySendingRate            @"sendingRate"
@@ -267,6 +269,11 @@
 #define     YSFApiKeyEvaluationModifyEnable     @"enable_evaluation_muttimes"
 #define     YSFApiKeyEvaluationModifyTimeout    @"evaluation_timeout"
 #define     YSFApiKeyEvaluationModifyMaxTime    @"evaluation_modify_limit"
+#define     YSFApiKeyEvaluationScoreType        @"scoreType"
+#define     YSFApiKeyEvaluationWebAppSort       @"webappSort"
+#define     YSFApiKeyEvaluationWxWbSort         @"wxwbSort"
+#define     YSFApiKeyEvaluationTagRequired      @"tagRequired"
+#define     YSFApiKeyEvaluationCommentRequired  @"commentRequired"
 
 #define     YSFApiValueIOS              @"iOS"
 
@@ -354,7 +361,7 @@ typedef enum : NSUInteger {
     YSFCommandInviteEvaluation          =   10004,  //邀请评价
     YSFCommandMiniAppTip                =   10005,  //小程序提醒
     YSFCommandClickNotification         =   10006,  //可点击的通知
-    YSFCommandLineNotification          =   10007,  //带横线的通知
+    YSFCommandHistoryNotification       =   10007,  //历史消息提示
 
 
 } YSFCommand;

@@ -9,8 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @class QYSource;
-@class QYCommodityInfo;
 @class QYStaffInfo;
+@class QYCommodityInfo;
+@class QYSelectedCommodityInfo;
+
 
 /**
  *  QYSessionViewDelegate：右上角入口以及聊天内容区域按钮点击回调
@@ -31,25 +33,6 @@
 
 
 /**
- *  自定义商品信息类：QYSelectedCommodityInfo
- */
-@interface QYSelectedCommodityInfo : NSObject
-
-@property (nonatomic, copy) NSString *target;
-@property (nonatomic, copy) NSString *params;
-@property (nonatomic, copy) NSString *p_status;
-@property (nonatomic, copy) NSString *p_img;
-@property (nonatomic, copy) NSString *p_name;
-@property (nonatomic, copy) NSString *p_price;
-@property (nonatomic, copy) NSString *p_count;
-@property (nonatomic, copy) NSString *p_stock;
-@property (nonatomic, copy) NSString *p_action;
-@property (nonatomic, copy) NSString *p_userData;
-
-@end
-
-
-/**
  *  输入区域上方工具栏内按钮信息类：QYButtonInfo
  *  注: actionType及index为button点击事件传递信息，仅可读
  *  actionType为1表示发送文本消息title，2表示openURL或是自定义行为；index表示该button位置
@@ -63,6 +46,7 @@
 @property (nonatomic, assign, readonly) NSUInteger index;
 
 @end
+
 
 /**
  *  通用完成回调

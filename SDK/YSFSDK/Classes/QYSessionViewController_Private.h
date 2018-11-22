@@ -64,6 +64,7 @@ NIMSessionMsgDatasourceDelegate>
 @property (nonatomic, strong) YSFReachability *reachability;
 @property (nonatomic, strong) YSFCustomLeftBarView *leftBarView;
 @property (nonatomic, strong) YSFEvaluationReasonView *evaluationResonView;
+@property (nonatomic, strong) UIView *topHoverView;
 
 @property (nonatomic, copy) ChangeHumanOrRobotBlock changeHumanOrRobotBlock;
 @property (nonatomic, copy) ChangeEvaluationEnabledBlock changeEvaluationEnabledBlock;

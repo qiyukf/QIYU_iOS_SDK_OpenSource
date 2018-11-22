@@ -14,6 +14,7 @@
 #import "YSFMachineResponse.h"
 #import "YSFStaticUnion.h"
 #import "YSFSubmittedBotForm.h"
+#import "YSFNotification.h"
 
 
 @implementation YSFSessionMsgDataSource
@@ -142,11 +143,15 @@
         NSArray *messages = [[[YSF_NIMSDK sharedSDK] conversationManager] messagesInSession:_currentSession
                                                                                     message:currentOldestMsg.message
                                                                                       limit:limit];
-        NSMutableArray *mutableMsgs = [NSMutableArray arrayWithArray:messages];
-        if (tipMsg) {
-            [mutableMsgs addObject:tipMsg];
+        if (messages) {
+            if ([messages count] && tipMsg) {
+                NSMutableArray *mutableMsgs = [NSMutableArray arrayWithArray:messages];
+                [mutableMsgs addObject:tipMsg];
+                index = [self insertMessages:mutableMsgs];
+            } else {
+                index = [self insertMessages:messages];
+            }
         }
-        index = [self insertMessages:mutableMsgs];
     }
     if (completion) {
         ysf_dispatch_async_main(^{
@@ -226,14 +231,22 @@
         return;
     }
     if (self.firstTimeInterval && (self.firstTimeInterval - model.message.timestamp < self.showTimeInterval)) {
-        //此时至少有一条时间戳和一条消息
-        //干掉时间戳
-        [self.modelArray removeObjectAtIndex:0];
+        //此时至少有一条时间戳和一条消息，移除掉时间戳
+        if ([self.modelArray count] > 0) {
+            id obj = [self.modelArray objectAtIndex:0];
+            if (obj && [obj isKindOfClass:[YSFTimestampModel class]]) {
+                [self.modelArray removeObjectAtIndex:0];
+            }
+        }
     }
     [self.modelArray insertObject:model atIndex:0];
-    YSFTimestampModel *timeModel = [[YSFTimestampModel alloc] init];
-    timeModel.messageTime = model.message.timestamp;
-    [self.modelArray insertObject:timeModel atIndex:0];
+    
+    if (![self isHistoryTipMessage:message]) {
+        YSFTimestampModel *timeModel = [[YSFTimestampModel alloc] init];
+        timeModel.messageTime = model.message.timestamp;
+        [self.modelArray insertObject:timeModel atIndex:0];
+    }
+    
     self.firstTimeInterval = model.message.timestamp;
     [self.msgIdDict setObject:model forKey:model.message.messageId];
 }
@@ -249,6 +262,19 @@
 
 - (BOOL)modelIsExist:(YSFMessageModel *)model {
     return ([_msgIdDict objectForKey:model.message.messageId] != nil);
+}
+
+- (BOOL)isHistoryTipMessage:(YSF_NIMMessage *)message {
+    if ([message.messageObject isKindOfClass:[YSF_NIMCustomObject class]]) {
+        YSF_NIMCustomObject *customObj = (YSF_NIMCustomObject *)message.messageObject;
+        if ([customObj.attachment isKindOfClass:[YSFNotification class]]) {
+            YSFNotification *notification = (YSFNotification *)customObj.attachment;
+            if (notification.localCommand == YSFCommandHistoryNotification) {
+                return YES;
+            }
+        }
+    }
+    return NO;
 }
 
 @end

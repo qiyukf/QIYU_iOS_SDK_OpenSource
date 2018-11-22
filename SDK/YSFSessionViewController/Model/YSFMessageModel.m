@@ -10,48 +10,35 @@
 #import "YSFDefaultValueMaker.h"
 #import "YSFSessionConfigImp.h"
 
+
 @interface YSFMessageModel()
 
-@property (nonatomic, strong) id<YSFCellLayoutConfig> layoutConfig;
+@property (nonatomic, strong, readwrite) id<YSFCellLayoutConfig> layoutConfig;
+@property (nonatomic, assign, readwrite) CGSize contentSize;
+@property (nonatomic, assign, readwrite) UIEdgeInsets contentViewInsets;
+@property (nonatomic, assign, readwrite) UIEdgeInsets bubbleViewInsets;
+@property (nonatomic, assign, readwrite) CGFloat avatarBubbleSpace;
+@property (nonatomic, assign, readwrite) BOOL shouldShowAvatar;
+@property (nonatomic, assign, readwrite) BOOL shouldShowNickName;
+
 @property (nonatomic, strong, readwrite) id<YSFExtraCellLayoutConfig> extraLayoutConfig;
+@property (nonatomic, assign, readwrite) CGSize extraViewSize;
+@property (nonatomic, assign, readwrite) UIEdgeInsets extraViewInsets;
+@property (nonatomic, assign, readwrite) BOOL shouldShowExtraView;
 
 @end
 
 
 @implementation YSFMessageModel
 
+//仅在同时重写了setter和getter时需要手动合成实例变量
 @synthesize layoutConfig = _layoutConfig;
-@synthesize contentSize = _contentSize;
-@synthesize contentViewInsets = _contentViewInsets;
-@synthesize bubbleViewInsets = _bubbleViewInsets;
-@synthesize avatarBubbleSpace = _avatarBubbleSpace;
-@synthesize shouldShowAvatar = _shouldShowAvatar;
-@synthesize shouldShowNickName = _shouldShowNickName;
-
-@synthesize extraViewSize = _extraViewSize;
-@synthesize extraViewInsets = _extraViewInsets;
-@synthesize shouldShowExtraView = _shouldShowExtraView;
 
 - (instancetype)initWithMessage:(YSF_NIMMessage *)message {
     if (self = [self init]) {
         _message = message;
     }
     return self;
-}
-
-- (void)cleanLayoutConfig {
-    self.layoutConfig = nil;
-    self.extraLayoutConfig = nil;
-}
-
-- (void)cleanCache {
-    _contentSize = CGSizeZero;
-    _bubbleViewInsets = UIEdgeInsetsZero;
-    _contentViewInsets = UIEdgeInsetsZero;
-    _avatarBubbleSpace = 0;
-    
-    _extraViewSize = CGSizeZero;
-    _extraViewInsets = UIEdgeInsetsZero;
 }
 
 - (NSString *)description {
@@ -67,22 +54,35 @@
     }
 }
 
-- (void)calculateContent:(CGFloat)width {
-    if (CGSizeEqualToSize(_extraViewSize, CGSizeZero)) {
-        _extraViewSize = [self.extraLayoutConfig extraViewSize:self];
+#pragma mark - setter method
+- (void)setLayoutConfig:(id<YSFCellLayoutConfig>)layoutConfig {
+    _layoutConfig = layoutConfig;
+    if ([layoutConfig respondsToSelector:@selector(shouldShowAvatar:)]) {
+        _shouldShowAvatar = [layoutConfig shouldShowAvatar:self];
+    } else {
+        _shouldShowAvatar = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowAvatar:self];
     }
     
-    if (CGSizeEqualToSize(_contentSize, CGSizeZero)) {
-        _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
+    if ([layoutConfig respondsToSelector:@selector(shouldShowNickName:)]) {
+        _shouldShowNickName = [layoutConfig shouldShowNickName:self];
+    } else {
+        _shouldShowNickName = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowNickName:self];
     }
 }
 
-- (void)reCalculateContent:(CGFloat)width {
-    _extraViewSize = [self.extraLayoutConfig extraViewSize:self];
-    
-    if (_contentSize.width != width) {
-        _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
+#pragma mark - getter method
+- (id<YSFCellLayoutConfig>)layoutConfig {
+    if (_layoutConfig == nil) {
+        id<YSFCellLayoutConfig> layoutConfig;
+        if ([[YSFSessionConfigImp sharedInstance] respondsToSelector:@selector(layoutConfigWithMessage:)]) {
+            layoutConfig = [[YSFSessionConfigImp sharedInstance] layoutConfigWithMessage:_message];
+        }
+        if (!layoutConfig) {
+            layoutConfig = [YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig;
+        }
+        self.layoutConfig = layoutConfig;
     }
+    return _layoutConfig;
 }
 
 - (UIEdgeInsets)contentViewInsets {
@@ -107,35 +107,6 @@
     return _bubbleViewInsets;
 }
 
-- (id<YSFCellLayoutConfig>)layoutConfig {
-    if (_layoutConfig == nil) {
-        id<YSFCellLayoutConfig> layoutConfig;
-        if ([[YSFSessionConfigImp sharedInstance] respondsToSelector:@selector(layoutConfigWithMessage:)]) {
-            layoutConfig = [[YSFSessionConfigImp sharedInstance] layoutConfigWithMessage:_message];
-        }
-        if (!layoutConfig) {
-            layoutConfig = [YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig;
-        }
-        self.layoutConfig = layoutConfig;
-    }
-    return _layoutConfig;
-}
-
-- (void)setLayoutConfig:(id<YSFCellLayoutConfig>)layoutConfig {
-    _layoutConfig = layoutConfig;
-    if ([layoutConfig respondsToSelector:@selector(shouldShowAvatar:)]) {
-        _shouldShowAvatar = [layoutConfig shouldShowAvatar:self];
-    } else {
-        _shouldShowAvatar = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowAvatar:self];
-    }
-    
-    if ([layoutConfig respondsToSelector:@selector(shouldShowNickName:)]) {
-        _shouldShowNickName = [layoutConfig shouldShowNickName:self];
-    } else {
-        _shouldShowNickName = [[YSFDefaultValueMaker sharedMaker].cellLayoutDefaultConfig shouldShowNickName:self];
-    }
-}
-
 - (CGFloat)avatarBubbleSpace {
     if (_avatarBubbleSpace == 0) {
         if ([self.layoutConfig respondsToSelector:@selector(headBubbleSpace:)]) {
@@ -147,7 +118,7 @@
     return _avatarBubbleSpace;
 }
 
-#pragma mark - ExtraView Layout
+#pragma mark - extra layout
 - (id<YSFExtraCellLayoutConfig>)extraLayoutConfig {
     if (!_extraLayoutConfig) {
         _extraLayoutConfig = [YSFDefaultValueMaker sharedMaker].extraCellLayoutConfig;
@@ -166,8 +137,42 @@
     if ([self.layoutConfig respondsToSelector:@selector(shouldShowExtraView:)]) {
         return [self.layoutConfig shouldShowExtraView:self];
     }
-    
     return NO;
+}
+
+#pragma mark - calculate
+- (void)calculateContent:(CGFloat)width {
+    if (CGSizeEqualToSize(_extraViewSize, CGSizeZero)) {
+        _extraViewSize = [self.extraLayoutConfig extraViewSize:self];
+    }
+    
+    if (CGSizeEqualToSize(_contentSize, CGSizeZero)) {
+        _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
+    }
+}
+
+- (void)reCalculateContent:(CGFloat)width {
+    _extraViewSize = [self.extraLayoutConfig extraViewSize:self];
+    
+    if (_contentSize.width != width) {
+        _contentSize = [self.layoutConfig contentSize:self cellWidth:width];
+    }
+}
+
+#pragma mark - clean
+- (void)cleanLayoutConfig {
+    self.layoutConfig = nil;
+    self.extraLayoutConfig = nil;
+}
+
+- (void)cleanCache {
+    _contentSize = CGSizeZero;
+    _contentViewInsets = UIEdgeInsetsZero;
+    _bubbleViewInsets = UIEdgeInsetsZero;
+    _avatarBubbleSpace = 0;
+    
+    _extraViewSize = CGSizeZero;
+    _extraViewInsets = UIEdgeInsetsZero;
 }
 
 @end

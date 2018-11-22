@@ -2,6 +2,7 @@
 
 @interface YSFEvaluationCommitData : NSObject
 
+@property (nonatomic, assign) NSInteger type;
 @property (nonatomic, copy) NSString *title;
 @property (nonatomic, strong) NSArray *tagList;
 @property (nonatomic, copy) NSString *content;
@@ -13,11 +14,12 @@
 
 
 @class YSFEvaluationResult;
+@class YSFEvaluationData;
 typedef void (^evaluationCallback)(BOOL done, YSFEvaluationResult *result);
 
 @interface YSFEvaluationViewController : UIViewController
 
-- (instancetype)initWithEvaluationDict:(NSDictionary *)evaluationDict
+- (instancetype)initWithEvaluationData:(YSFEvaluationData *)evaluationData
                       evaluationResult:(YSFEvaluationCommitData *)lastResult
                                 shopId:(NSString *)shopId
                              sessionId:(long long)sessionId
