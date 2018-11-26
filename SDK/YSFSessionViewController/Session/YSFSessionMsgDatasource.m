@@ -160,17 +160,19 @@
 - (NSArray*)deleteMessageModel:(YSFMessageModel *)msgModel
 {
     NSMutableArray *dels = [NSMutableArray array];
+    NSInteger count = _modelArray.count;
     NSInteger delTimeIndex = -1;
     NSInteger delMsgIndex = [_modelArray indexOfObject:msgModel];
-    if (delMsgIndex > 0) {
-        BOOL delMsgIsSingle = (delMsgIndex == _modelArray.count-1 || [_modelArray[delMsgIndex+1] isKindOfClass:[YSFTimestampModel class]]);
-        if ([_modelArray[delMsgIndex-1] isKindOfClass:[YSFTimestampModel class]] && delMsgIsSingle) {
-            delTimeIndex = delMsgIndex-1;
+    if (delMsgIndex > 0 && delMsgIndex < count) {
+        BOOL delMsgIsSingle = (delMsgIndex == (count - 1)
+                               || ((delMsgIndex < (count - 1)) && [_modelArray[delMsgIndex + 1] isKindOfClass:[YSFTimestampModel class]]));
+        if ([_modelArray[delMsgIndex - 1] isKindOfClass:[YSFTimestampModel class]] && delMsgIsSingle) {
+            delTimeIndex = delMsgIndex - 1;
             [_modelArray removeObjectAtIndex:delTimeIndex];
             [dels addObject:@(delTimeIndex)];
         }
     }
-    if (delMsgIndex > -1) {
+    if (delMsgIndex >= 0 && delMsgIndex < count) {
         [_modelArray removeObject:msgModel];
         [_msgIdDict removeObjectForKey:msgModel.message.messageId];
         [dels addObject:@(delMsgIndex)];
