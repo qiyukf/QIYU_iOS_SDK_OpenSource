@@ -7,7 +7,6 @@
 //
 
 @class YSFInputView;
-@class YSFMessageModel;
 
 @interface YSFSessionViewLayoutManager : NSObject
 
@@ -19,7 +18,7 @@
 
 - (void)insertTableViewCellAtRows:(NSArray*)addIndexs scrollToBottom:(BOOL)scrollToBottom;
 
-- (void)updateCellAtIndex:(NSInteger)index model:(YSFMessageModel *)model;
+- (void)updateCellAtIndex:(NSInteger)index model:(id)model;
 
 -(void)deleteCellAtIndexs:(NSArray*)delIndexs;
 

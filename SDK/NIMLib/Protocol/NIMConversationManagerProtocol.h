@@ -101,6 +101,7 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
 
 @end
 
+
 /**
  *  会话管理器
  */
@@ -119,7 +120,8 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  *  @param session 待删除会话
  *  @param removeRecentSession 是否移除对应的会话项  YES则移除,NO则不移除，但会将所有会话项设置成已删除状态
  */
-- (void)deleteAllmessagesInSession:(BOOL)onlyDelete session:(YSF_NIMSession *)session
+- (void)deleteAllmessagesInSession:(BOOL)onlyDelete
+                           session:(YSF_NIMSession *)session
                removeRecentSession:(BOOL)removeRecentSession;
 
 /**
@@ -130,7 +132,6 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  */
 - (void)deleteAllMessages:(BOOL)removeRecentSessions;
 
-
 /**
  *  删除某个最近会话
  *
@@ -139,7 +140,14 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  */
 - (void)deleteRecentSession:(YSF_NIMRecentSession *)recentSession;
 
+/**
+ *  获取session对应的RecentSession
+ */
 - (YSF_NIMRecentSession *)queryRecentSession:(YSF_NIMSession *)session;
+
+/**
+ *  增加RecentSession
+ */
 - (void)addRecentSession:(YSF_NIMRecentSession *)recentSession;
 
 /**
@@ -149,7 +157,6 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  *  @discussion 异步方法，消息会标记为设置的状态
  */
 - (void)markAllMessageReadInSession:(YSF_NIMSession *)session;
-
 
 /**
  *  更新本地已存的消息记录
@@ -168,7 +175,7 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  *  更新本地已存的消息记录
  *
  *  @param updateUI 是否刷新UI
- *  @param updateAttach 是否x更新附件信息
+ *  @param updateAttach 是否更新附件信息
  *  @param message 需要更新的消息
  *  @param session 需要更新的会话
  *  @param completion 完成后的回调
@@ -180,35 +187,40 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
            forSession:(YSF_NIMSession *)session
            completion:(YSF_NIMUpdateMessageBlock)completion;
 
-
 /**
  *  写入消息
  *
  *  @param message 需要更新的消息
- *  @param session 需要更新西消息
+ *  @param session 需要更新的会话
  *  @param completion 完成后的回调
  *  @discussion 目前只支持自定义消息(NIMMessageTypeCustom)。当保存消息成功之后，会收到 YSF_NIMChatManagerDelegate 中的 onRecvMessages: 回调。
  */
-- (void)saveMessage:(BOOL)updateUI message:(YSF_NIMMessage *)message
+- (void)saveMessage:(BOOL)updateUI
+            message:(YSF_NIMMessage *)message
          forSession:(YSF_NIMSession *)session
-         addUnreadCount:(BOOL)addUnreadCount
+     addUnreadCount:(BOOL)addUnreadCount
          completion:(YSF_NIMUpdateMessageBlock)completion;
-
 
 /**
  *  上报消息，此消息只存在内存中，不存到数据库
  *
  *  @param message 需要更新的消息
- *  @param session 需要更新西消息
+ *  @param session 需要更新的会话
  *  @param completion 完成后的回调
  *  @discussion 目前只支持自定义消息(NIMMessageTypeCustom)。当保存消息成功之后，会收到 YSF_NIMChatManagerDelegate 中的 onRecvMessages: 回调。
  */
 - (void)reportMessage:(YSF_NIMMessage *)message
-         forSession:(YSF_NIMSession *)session
-         completion:(YSF_NIMUpdateMessageBlock)completion;
+           forSession:(YSF_NIMSession *)session
+           completion:(YSF_NIMUpdateMessageBlock)completion;
 
+/**
+ *  取消息
+ *
+ *  @param messageId 消息唯一ID
+ *  @param session 会话
+ */
 - (YSF_NIMMessage *)queryMessage:(NSString *)messageId
-               forSession:(YSF_NIMSession *)session;
+                      forSession:(YSF_NIMSession *)session;
 
 /**
  *  从本地db读取一个会话里某条消息之前的若干条的消息
@@ -219,7 +231,7 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  *
  *  @return 消息列表
  */
-- (NSArray*)messagesInSession:(YSF_NIMSession *)session
+- (NSArray *)messagesInSession:(YSF_NIMSession *)session
                       message:(YSF_NIMMessage *)message
                         limit:(NSInteger)limit;
 
@@ -255,6 +267,9 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
  */
 - (NSArray*)allRecentSession;
 
+/**
+ *  清除最近会话
+ */
 - (void)cleanRecentSession:(YSF_NIMSession *)session;
 
 /**
@@ -269,8 +284,6 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
                      option:(YSF_NIMHistoryMessageSearchOption *)option
                      result:(YSF_NIMFetchMessageHistoryBlock)block;
 
-
-
 /**
  *  搜索本地消息
  *
@@ -282,8 +295,6 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
 - (void)searchMessages:(YSF_NIMSession *)session
                 option:(YSF_NIMMessageSearchOption *)option
                 result:(YSF_NIMSearchMessageBlock)block;
-
-
 
 /**
  *  删除服务器端最近会话

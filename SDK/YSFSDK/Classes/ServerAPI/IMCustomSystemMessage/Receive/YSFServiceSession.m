@@ -47,8 +47,11 @@
     instance.showNumber = [dict ysf_jsonBool:YSFApiKeyShowNum];
     instance.robotInQueue = [dict ysf_jsonBool:YSFApiKeyRobotInQueue];
     instance.robotSessionId = [dict ysf_jsonLongLong:YSFApiKeyRobotSessionId];
-    instance.sessionTransfer = [dict ysf_jsonBool:YSFApiKeySessionTransferMessage];
     instance.evaluationString = YSFStrParam([dict ysf_jsonString:YSFApiKeyEvaluation]);
+    
+    instance.oldSessionId = [dict ysf_jsonLongLong:YSFApiKeyTransferOldSessionId];
+    instance.transferSession = instance.oldSessionId ? YES : NO;
+    instance.transferMessage = [dict ysf_jsonString:YSFApiKeySessionTransferMessage];
     
     NSInteger staffType = [dict ysf_jsonInteger:YSFApiKeyStaffType];
     if (staffType == 0) {

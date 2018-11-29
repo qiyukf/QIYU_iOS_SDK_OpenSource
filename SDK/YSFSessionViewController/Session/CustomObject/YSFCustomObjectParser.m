@@ -39,6 +39,7 @@
 #import "YSFBotCustomObject.h"
 #import "YSFMixReply.h"
 #import "YSFMiniProgramPage.h"
+#import "YSFCustomMessageAttachment.h"
 
 @implementation YSFCustomObjectParser
 - (id<YSF_NIMCustomAttachment>)decodeAttachment:(NSString *)content
@@ -236,6 +237,9 @@
                 break;
             case YSFCommandMiniProgramPage:
                 object = [YSFMiniProgramPage objectByDict:dict];
+                break;
+            case YSFCommandCustomMessage:
+                object = [YSFCustomMessageAttachment objectByDict:dict];
                 break;
             default:
                 //assert(false);

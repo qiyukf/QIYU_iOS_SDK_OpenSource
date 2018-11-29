@@ -165,6 +165,7 @@
 
 //七鱼新增接口
 - (void)setReceiveMessageFrom:(NSString *)shopID receiveMessageFrom:(NSString *)receiveMessageFrom;
+- (NSString *)getReceiveMessageFrom:(NSString *)shopID;
 - (void)setUniqueMessageFrom:(NSString *)uniqueFrom;
 - (NSString *)getUniqueMessageFrom;
 

@@ -80,6 +80,12 @@
 #import "YSFVideoPlayerViewController.h"
 #import "YSFVideoDataManager.h"
 
+#import "QYCustomSDK.h"
+#import "QYCustomMessage_Private.h"
+#import "QYCustomModel_Private.h"
+#import "YSFCustomMessageAttachment.h"
+#import "YSFCustomMessageManager.h"
+
 @import MobileCoreServices;
 @import AVFoundation;
 
@@ -208,6 +214,8 @@ YSFCameraViewControllerDelegate>
         _inputtingMessageTimer = [[YSFTimer alloc]init];
         _inputAssociateTimer = [[YSFTimer alloc] init];
         _requestScene = QYRequestStaffBeforeSceneNone;
+        
+        [[YSFCustomMessageManager sharedManager] cleanCache];
     }
     return self;
 }
@@ -451,6 +459,8 @@ YSFCameraViewControllerDelegate>
         for (id model in [_sessionDataSource modelArray]) {
             if ([model isKindOfClass:[YSFMessageModel class]]) {
                 [(YSFMessageModel *)model cleanCache];
+            } else if ([model isKindOfClass:[QYCustomModel class]]) {
+                [(QYCustomModel *)model cleanCache];
             }
         }
         [_tableView reloadData];
@@ -1066,7 +1076,9 @@ YSFCameraViewControllerDelegate>
 }
 
 - (void)sendPicture:(UIImage *)picture {
-    [self sendMessage:[YSFMessageMaker msgWithImage:picture]];
+    if (picture) {
+        [self sendMessage:[YSFMessageMaker msgWithImage:picture]];
+    }
 }
 
 #pragma mark - 请求客服
@@ -1176,6 +1188,8 @@ YSFCameraViewControllerDelegate>
                     [strongSelf startRequestStaffWithClearSession:clear];
                 }
             });
+        } else {
+            [self startRequestStaffWithClearSession:clear];
         }
     }
 }
@@ -1291,6 +1305,8 @@ YSFCameraViewControllerDelegate>
     id model = [[_sessionDataSource modelArray] lastObject];
     if ([model isKindOfClass:[YSFMessageModel class]]) {
         lastMessage = ((YSFMessageModel *)model).message;
+    } else if ([model isKindOfClass:[QYCustomModel class]]) {
+        lastMessage = ((QYCustomModel *)model).ysfMessage;
     }
     //若收起历史消息开关打开，且此时modelArray没有数据，取不到lastMessage，则需从DB中取最后一条消息
     if (self.hideHistoryMessages && _sessionDataSource.modelArray.count == 0 && !lastMessage) {
@@ -1353,23 +1369,27 @@ YSFCameraViewControllerDelegate>
 
 - (void)sendMessage:(YSF_NIMMessage *)message didCompleteWithError:(NSError *)error {
     if ([message.session isEqual:_session]) {
-        YSFMessageModel *model = [self makeModel:message];
-        NSInteger index = [self.sessionDataSource indexAtModelArray:model];
-        [self.layoutManager updateCellAtIndex:index model:model];
-        if (error) {
-            if (![[YSFReachability reachabilityForInternetConnection] isReachable]) {
-                [_tipView setSessionTip:YSFSessionTipNetworkError];
+        id model = [self makeModel:message];
+        if (model && [model isKindOfClass:[YSFMessageModel class]]) {
+            NSInteger index = [self.sessionDataSource indexAtModelArray:model];
+            [self.layoutManager updateCellAtIndex:index model:model];
+            if (error) {
+                if (![[YSFReachability reachabilityForInternetConnection] isReachable]) {
+                    [_tipView setSessionTip:YSFSessionTipNetworkError];
+                }
+            } else {
+                [_tipView setSessionTip:YSFSessionTipNetworkOK];
             }
-        } else {
-            [_tipView setSessionTip:YSFSessionTipNetworkOK];
         }
     }
 }
 
 -(void)sendMessage:(YSF_NIMMessage *)message progress:(CGFloat)progress {
     if ([message.session isEqual:_session]) {
-        YSFMessageModel *model = [self makeModel:message];
-        [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
+        id model = [self makeModel:message];
+        if (model && [model isKindOfClass:[YSFMessageModel class]]) {
+            [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
+        }
     }
 }
 
@@ -1412,7 +1432,7 @@ YSFCameraViewControllerDelegate>
             //处理部分客服信息替换情况
             if (session.humanOrMachine && [object isMemberOfClass:[YSFStartServiceObject class]]) {
                 YSFStartServiceObject *staffObject = (YSFStartServiceObject *)object;
-                if (session.sessionTransfer && !session.shopInfo.setting.sessionTransferSwitch) {
+                if (session.transferSession && !session.shopInfo.setting.sessionTransferSwitch) {
                     [[[YSF_NIMSDK sharedSDK] conversationManager] deleteMessage:message];
                     [self uiDeleteMessage:message];
                 } else {
@@ -1461,6 +1481,15 @@ YSFCameraViewControllerDelegate>
     if (![message.session isEqual:self.session]){
         return;
     }
+    if (message.messageType == YSF_NIMMessageTypeCustom) {
+        id<YSF_NIMCustomAttachment> attachment = [(YSF_NIMCustomObject *)(message.messageObject) attachment];
+        if ([attachment isMemberOfClass:[YSFCustomMessageAttachment class]]) {
+            if (self.customMessageDelegate && [self.customMessageDelegate respondsToSelector:@selector(onUpdateMessageBeforeReload:)]) {
+                YSFCustomMessageAttachment *customAttach = (YSFCustomMessageAttachment *)attachment;
+                [self.customMessageDelegate onUpdateMessageBeforeReload:customAttach.message];
+            }
+        }
+    }
     [self uiUpdateMessage:message];
 }
 
@@ -1476,6 +1505,11 @@ YSFCameraViewControllerDelegate>
             [self popEvaluationViewControllerIfNeeded];
         } else if ([attachment isMemberOfClass:[YSFKFBypassNotification class]]) {
             [self showBypassViewController:message];
+        } else if ([attachment isMemberOfClass:[YSFCustomMessageAttachment class]]) {
+            if (self.customMessageDelegate && [self.customMessageDelegate respondsToSelector:@selector(onAddMessageBeforeReload:)]) {
+                YSFCustomMessageAttachment *customAttach = (YSFCustomMessageAttachment *)attachment;
+                [self.customMessageDelegate onAddMessageBeforeReload:customAttach.message];
+            }
         }
     }
     [self uiAddMessages:@[message]];
@@ -1484,33 +1518,271 @@ YSFCameraViewControllerDelegate>
 
 - (void)fetchMessageAttachment:(YSF_NIMMessage *)message progress:(CGFloat)progress {
     if ([message.session isEqual:_session]) {
-        YSFMessageModel *model = [self makeModel:message];
-        [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
+        id model = [self makeModel:message];
+        if (model && [model isKindOfClass:[YSFMessageModel class]]) {
+            [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
+        }
     }
 }
 
 - (void)fetchMessageAttachment:(YSF_NIMMessage *)message didCompleteWithError:(NSError *)error {
     if ([message.session isEqual:_session]) {
-        YSFMessageModel *model = [self makeModel:message];
-        [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
+        id model = [self makeModel:message];
+        if (model && [model isKindOfClass:[YSFMessageModel class]]) {
+            [_layoutManager updateCellAtIndex:[self.sessionDataSource indexAtModelArray:model] model:model];
+        }
+    }
+}
+
+#pragma mark - 自定义消息
+- (void)registerCustomMessageClass:(Class)messageClass
+                        modelClass:(Class)modelClass
+                  contentViewClass:(Class)contentViewClass {
+    [[YSFCustomMessageManager sharedManager] registerCustomMessageClass:messageClass
+                                                             modelClass:modelClass
+                                                       contentViewClass:contentViewClass];
+}
+
+- (void)addCustomMessage:(QYCustomMessage *)message
+            needSaveData:(BOOL)save
+          needReloadView:(BOOL)reload
+              completion:(QYCustomMessageCompletion)completion {
+    //若传入的message为空或不是QYCustomMessage的子类，返回错误
+    if (!message || ![message isKindOfClass:[QYCustomMessage class]]) {
+        if (completion) {
+            completion(QYCustomMessageError(QYCustomMessageErrorCodeInvalidMessage));
+        }
+        return;
+    }
+    //若既不需要持久化数据，也不需要刷新界面，操作无意义，返回错误
+    if (!save && !reload) {
+        if (completion) {
+            completion(QYCustomMessageError(QYCustomMessageErrorCodeInvalidParam));
+        }
+        return;
+    }
+    
+    YSF_NIMMessage *nimMessage = [YSFMessageMaker msgWithCustomMessage:message];
+    nimMessage.session = self.session;
+    nimMessage.from = [[[QYSDK sharedSDK] sessionManager] getOnlineStaffId:_shopId];
+    if (save) {
+        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:reload
+                                                          message:nimMessage
+                                                       forSession:_session
+                                                   addUnreadCount:NO
+                                                       completion:^(NSError *error) {
+                                                           if (completion) {
+                                                               if (error) {
+                                                                   if (error.code == YSF_NIMLocalErrorCodeSQLFailed) {
+                                                                       completion(QYCustomMessageError(QYCustomMessageErrorCodeSQLFailed));
+                                                                   } else {
+                                                                       completion(QYCustomMessageError(QYCustomMessageErrorCodeUnknown));
+                                                                   }
+                                                               } else {
+                                                                   completion(nil);
+                                                               }
+                                                           }
+                                                       }];
+    } else {
+        [self onAddMessage:nimMessage];
+        if (completion) {
+            completion(nil);
+        }
+    }
+}
+
+- (void)insertCustomMessage:(QYCustomMessage *)message {
+    //若传入的message为空或不是QYCustomMessage的子类，return
+    if (!message || ![message isKindOfClass:[QYCustomMessage class]]) {
+        return;
+    }
+    YSF_NIMMessage *nimMessage = [YSFMessageMaker msgWithCustomMessage:message];
+    nimMessage.session = self.session;
+    nimMessage.from = [[[QYSDK sharedSDK] sessionManager] getOnlineStaffId:_shopId];
+    [self uiInsertMessagesAt:0 message:nimMessage];
+}
+
+- (void)insertCustomMessage:(QYCustomMessage *)message index:(NSInteger)index {
+    //若传入的message为空或不是QYCustomMessage的子类，return
+    if (!message || ![message isKindOfClass:[QYCustomMessage class]]) {
+        return;
+    }
+    //若传入的index无效，return
+    if (index < 0 || index > self.sessionDataSource.modelArray.count) {
+        return;
+    }
+    YSF_NIMMessage *nimMessage = [YSFMessageMaker msgWithCustomMessage:message];
+    nimMessage.session = self.session;
+    nimMessage.from = [[[QYSDK sharedSDK] sessionManager] getOnlineStaffId:_shopId];
+    [self uiInsertMessagesAt:index message:nimMessage];
+}
+
+- (void)updateCustomMessage:(QYCustomMessage *)message
+               needSaveData:(BOOL)save
+             needReloadView:(BOOL)reload
+                 completion:(QYCustomMessageCompletion)completion {
+    //若传入的message为空或不是QYCustomMessage的子类，返回错误
+    if (!message || ![message isKindOfClass:[QYCustomMessage class]] || !message.messageId.length) {
+        if (completion) {
+            completion(QYCustomMessageError(QYCustomMessageErrorCodeInvalidMessage));
+        }
+        return;
+    }
+    //若既不需要持久化数据，也不需要刷新界面，操作无意义，返回错误
+    if (!save && !reload) {
+        if (completion) {
+            completion(QYCustomMessageError(QYCustomMessageErrorCodeInvalidParam));
+        }
+        return;
+    }
+    //取出该messageId对应的云信消息
+    YSF_NIMMessage *nimMessage = [[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:message.messageId forSession:self.session];
+    //若DB中没有，则从现有DataSource中寻找
+    if (!nimMessage) {
+        nimMessage = [self.sessionDataSource fetchCustomMessageForMessageId:message.messageId];
+    }
+    nimMessage.session = self.session;
+    //更新该messageId对应的云信消息
+    BOOL needUpdate = NO;
+    if (nimMessage && nimMessage.messageType == YSF_NIMMessageTypeCustom) {
+        if ([nimMessage.messageObject isKindOfClass:[YSF_NIMCustomObject class]]) {
+            YSF_NIMCustomObject *customObj = (YSF_NIMCustomObject *)nimMessage.messageObject;
+            if ([customObj.attachment isKindOfClass:[YSFCustomMessageAttachment class]]) {
+                YSFCustomMessageAttachment *attachment = (YSFCustomMessageAttachment *)customObj.attachment;
+                if ([attachment.message isKindOfClass:[QYCustomMessage class]]) {
+                    attachment.message = message;
+                    needUpdate = YES;
+                }
+            }
+        }
+    }
+    if (needUpdate) {
+        if (save) {
+            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:reload
+                                                                message:nimMessage
+                                                             forSession:self.session
+                                                             completion:^(NSError *error) {
+                                                                 if (completion) {
+                                                                     if (error) {
+                                                                         if (error.code == YSF_NIMLocalErrorCodeSQLFailed) {
+                                                                             completion(QYCustomMessageError(QYCustomMessageErrorCodeSQLFailed));
+                                                                         } else {
+                                                                             completion(QYCustomMessageError(QYCustomMessageErrorCodeUnknown));
+                                                                         }
+                                                                     } else {
+                                                                         completion(nil);
+                                                                     }
+                                                                 }
+                                                             }];
+        } else {
+            [self onUpdateMessage:nimMessage];
+            if (completion) {
+                completion(nil);
+            }
+        }
+    } else {
+        if (completion) {
+            completion(QYCustomMessageError(QYCustomMessageErrorCodeInvalidParam));
+        }
+    }
+}
+
+- (void)deleteCustomMessage:(QYCustomMessage *)message
+               needSaveData:(BOOL)save
+             needReloadView:(BOOL)reload {
+    //若传入的message为空或不是QYCustomMessage的子类，返回错误
+    if (!message || ![message isKindOfClass:[QYCustomMessage class]] || !message.messageId.length) {
+        return;
+    }
+    //若既不需要持久化数据，也不需要刷新界面，操作无意义，返回错误
+    if (!save && !reload) {
+        return;
+    }
+    //取出该messageId对应的云信消息
+    YSF_NIMMessage *nimMessage = [[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:message.messageId forSession:self.session];
+    //若DB中没有，则从现有DataSource中寻找
+    if (!nimMessage) {
+        nimMessage = [self.sessionDataSource fetchCustomMessageForMessageId:message.messageId];
+    }
+    nimMessage.session = self.session;
+    
+    if (save) {
+        [[[YSF_NIMSDK sharedSDK] conversationManager] deleteMessage:nimMessage];
+    }
+    if (reload) {
+        [self uiDeleteMessage:nimMessage];
+    }
+}
+- (QYCustomMessage *)fetchCustomMessageFromDatabaseForMessageId:(NSString *)messageId {
+    if (!messageId.length) {
+        return nil;
+    }
+    YSF_NIMMessage *message = [[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:messageId forSession:self.session];
+    return [self fetchCustomMessageFromNimMessage:message];
+}
+
+- (QYCustomMessage *)fetchCustomMessageFromDataSourceForMessageId:(NSString *)messageId {
+    if (!messageId.length) {
+        return nil;
+    }
+    YSF_NIMMessage *message = [self.sessionDataSource fetchCustomMessageForMessageId:messageId];
+    return [self fetchCustomMessageFromNimMessage:message];
+}
+
+- (QYCustomMessage *)fetchCustomMessageFromNimMessage:(YSF_NIMMessage *)message {
+    if (message && message.messageType == YSF_NIMMessageTypeCustom) {
+        if ([message.messageObject isKindOfClass:[YSF_NIMCustomObject class]]) {
+            YSF_NIMCustomObject *customObj = (YSF_NIMCustomObject *)message.messageObject;
+            if ([customObj.attachment isKindOfClass:[YSFCustomMessageAttachment class]]) {
+                YSFCustomMessageAttachment *attachment = (YSFCustomMessageAttachment *)customObj.attachment;
+                if ([attachment.message isKindOfClass:[QYCustomMessage class]]) {
+                    return attachment.message;
+                }
+            }
+        }
+    }
+    return nil;
+}
+
+- (void)addCustomMessageDelegate:(id<QYCustomMessageDelegate>)delegate {
+    self.customMessageDelegate = delegate;
+}
+
+- (void)addCustomContentViewDelegate:(id<QYCustomContentViewDelegate>)delegate {
+    self.customContentViewDelegate = delegate;
+}
+
+- (void)removeCustomMessageDelegate:(id<QYCustomMessageDelegate>)delegate {
+    if (delegate == self.customMessageDelegate) {
+        self.customMessageDelegate = nil;
+    }
+}
+
+- (void)removeCustomContentViewDelegate:(id<QYCustomContentViewDelegate>)delegate {
+    if (delegate == self.customContentViewDelegate) {
+        self.customContentViewDelegate = nil;
     }
 }
 
 #pragma mark - 商品信息
 - (void)sendCommodityInfo:(QYCommodityInfo *)commodityInfo {
-    self.commodityInfo = commodityInfo;
-    g_commodityInfo = _commodityInfo;
-    [self sendCommodityInfoRequest:NO];
+    if (commodityInfo) {
+        _commodityInfo = commodityInfo;
+        g_commodityInfo = _commodityInfo;
+        [self sendCommodityInfoRequest:NO];
+    }
 }
 
 - (void)sendSelectedCommodityInfo:(QYSelectedCommodityInfo *)commodityInfo {
-    YSFSelectedCommodityInfo *selectedGoods = [[YSFSelectedCommodityInfo alloc] init];
-    selectedGoods.command = YSFCommandBotSend;
-    selectedGoods.target = commodityInfo.target;
-    selectedGoods.params = commodityInfo.params;
-    selectedGoods.goods = commodityInfo;
-    YSF_NIMMessage *selectedGoodsMessage = [YSFMessageMaker msgWithCustom:selectedGoods];
-    [self sendMessage:selectedGoodsMessage];
+    if (commodityInfo) {
+        YSFSelectedCommodityInfo *selectedGoods = [[YSFSelectedCommodityInfo alloc] init];
+        selectedGoods.command = YSFCommandBotSend;
+        selectedGoods.target = commodityInfo.target;
+        selectedGoods.params = commodityInfo.params;
+        selectedGoods.goods = commodityInfo;
+        YSF_NIMMessage *selectedGoodsMessage = [YSFMessageMaker msgWithCustom:selectedGoods];
+        [self sendMessage:selectedGoodsMessage];
+    }
 }
 
 - (void)sendCommodityInfoRequest:(BOOL)bAuto {
@@ -2238,8 +2510,11 @@ YSFCameraViewControllerDelegate>
     UITableViewCell *cell = nil;
     id model = [[_sessionDataSource modelArray] objectAtIndex:indexPath.row];
     if ([model isKindOfClass:[YSFMessageModel class]]) {
-        cell = [YSFMessageCellMaker cellInTable:tableView forMessageMode:model];
+        cell = [YSFMessageCellMaker cellInTable:tableView forModel:model];
         [(YSFMessageCell *)cell setMessageDelegate:self];
+    } else if ([model isKindOfClass:[QYCustomModel class]]) {
+        cell = [YSFMessageCellMaker cellInTable:tableView forCustomModel:model];
+        [(YSFCustomMessageCell *)cell setMessageDelegate:self.customContentViewDelegate];
     } else if ([model isKindOfClass:[YSFTimestampModel class]]) {
         cell = [YSFMessageCellMaker cellInTable:tableView forTimeModel:model];
     } else {
@@ -2277,6 +2552,20 @@ YSFCameraViewControllerDelegate>
         UIEdgeInsets contentViewInsets = model.contentViewInsets;
         UIEdgeInsets bubbleViewInsets  = model.bubbleViewInsets;
         cellHeight = size.height + contentViewInsets.top + contentViewInsets.bottom + bubbleViewInsets.top + bubbleViewInsets.bottom;
+    } else if ([modelInArray isKindOfClass:[QYCustomModel class]]) {
+        QYCustomModel *model = (QYCustomModel *)modelInArray;
+        //layout
+        [self layoutConfig:model];
+        CGSize size = model.contentSize;
+        UIEdgeInsets contentInsets = model.contentInsets;
+        UIEdgeInsets bubbleInsets  = model.bubbleInsets;
+        //1、若显示气泡，则自定义contentView仅为气泡内部区域，cell高度需加上contentInsets及bubbleInsets
+        //2、若不显示气泡,则自定义contentView为头像右侧或是整个cell区域，cell高度只需加上contentInsets
+        if (model.shouldShowBubble) {
+            cellHeight = size.height + contentInsets.top + contentInsets.bottom + bubbleInsets.top + bubbleInsets.bottom;
+        } else {
+            cellHeight = size.height + contentInsets.top + contentInsets.bottom;
+        }
     } else if ([modelInArray isKindOfClass:[YSFTimestampModel class]]) {
         cellHeight = [(YSFTimestampModel *)modelInArray height];
     }
@@ -2284,25 +2573,39 @@ YSFCameraViewControllerDelegate>
 }
 
 #pragma mark - table-数据源
-- (YSFMessageModel *)makeModel:(YSF_NIMMessage *)message {
-    YSFMessageModel *model = [self findModel:message];
+- (id)makeModel:(YSF_NIMMessage *)message {
+    id model = [self findModel:message];
     if (!model) {
-        model = [[YSFMessageModel alloc] initWithMessage:message];
+        if ([[YSFCustomMessageManager sharedManager] isCustomMessage:message]) {
+            model = [[YSFCustomMessageManager sharedManager] makeModelForYSFMessage:message];
+        } else {
+            model = [[YSFMessageModel alloc] initWithMessage:message];
+        }
     }
-    [self layoutConfig:model];
+    if (model) {
+        [self layoutConfig:model];
+    }
     return model;
 }
 
-- (YSFMessageModel *)findModel:(YSF_NIMMessage *)message {
-    YSFMessageModel *model;
-    for (YSFMessageModel *item in self.sessionDataSource.modelArray.reverseObjectEnumerator.allObjects) {
-        if ([item isKindOfClass:[YSFMessageModel class]] && [item.message isEqual:message]) {
-            model = item;
-            //防止进了会话又退出再进这种行为；防止SDK回调上来的message和会话持有的message不是一个，导致刷界面crash的情况
-            model.message = message;
+- (id)findModel:(YSF_NIMMessage *)message {
+    //重设message原因：防止进了会话又退出再进这种行为；防止SDK回调上来的message和会话持有的message不是一个，导致刷界面crash的情况
+    for (id item in self.sessionDataSource.modelArray.reverseObjectEnumerator.allObjects) {
+        if ([item isKindOfClass:[YSFMessageModel class]]) {
+            YSFMessageModel *msgModel = (YSFMessageModel *)item;
+            if ([msgModel.message isEqual:message]) {
+                msgModel.message = message;
+                return msgModel;
+            }
+        } else if ([item isKindOfClass:[QYCustomModel class]]) {
+            QYCustomModel *msgModel = (QYCustomModel *)item;
+            if ([msgModel.ysfMessage isEqual:message]) {
+                msgModel.ysfMessage = message;
+                return msgModel;
+            }
         }
     }
-    return model;
+    return nil;
 }
 
 #pragma mark - table-UI更新
@@ -2311,12 +2614,14 @@ YSFCameraViewControllerDelegate>
     [self.tableView ysf_scrollToBottom:NO];
 }
 
-- (void)layoutConfig:(YSFMessageModel *)model {
-    CGFloat contentWidth = self.tableView.ysf_frameWidth;
-    if (@available(iOS 11, *)) {
-        contentWidth -= self.view.safeAreaInsets.left + self.view.safeAreaInsets.right;
+- (void)layoutConfig:(id)model {
+    if ([model isKindOfClass:[YSFMessageModel class]] || [model isKindOfClass:[QYCustomModel class]]) {
+        CGFloat contentWidth = self.tableView.ysf_frameWidth;
+        if (@available(iOS 11, *)) {
+            contentWidth -= self.view.safeAreaInsets.left + self.view.safeAreaInsets.right;
+        }
+        [model calculateContent:contentWidth];
     }
-    [model calculateContent:contentWidth];
 }
 
 - (void)headerRereshing:(id)sender {
@@ -2343,24 +2648,75 @@ YSFCameraViewControllerDelegate>
 - (void)uiAddMessages:(NSArray *)messages {
     NSArray *insert = [self.sessionDataSource addMessages:messages];
     for (YSF_NIMMessage *message in messages) {
-        YSFMessageModel *model = [[YSFMessageModel alloc] initWithMessage:message];
-        [self layoutConfig:model];
+        id model = nil;
+        if ([[YSFCustomMessageManager sharedManager] isCustomMessage:message]) {
+            model = [[YSFCustomMessageManager sharedManager] makeModelForYSFMessage:message];
+        } else {
+            model = [[YSFMessageModel alloc] initWithMessage:message];
+        }
+        if (model) {
+            [self layoutConfig:model];
+        }
     }
     [self.layoutManager insertTableViewCellAtRows:insert scrollToBottom:YES];
 }
 
+- (void)uiInsertMessagesAt:(NSInteger)position message:(YSF_NIMMessage *)message {
+    if (!message || position < 0) {
+        return;
+    }
+    
+    if (message.messageType == YSF_NIMMessageTypeCustom) {
+        id<YSF_NIMCustomAttachment> attachment = [(YSF_NIMCustomObject *)(message.messageObject) attachment];
+        if ([attachment isMemberOfClass:[YSFCustomMessageAttachment class]]) {
+            if (self.customMessageDelegate && [self.customMessageDelegate respondsToSelector:@selector(onUpdateMessageBeforeReload:)]) {
+                YSFCustomMessageAttachment *customAttach = (YSFCustomMessageAttachment *)attachment;
+                [self.customMessageDelegate onUpdateMessageBeforeReload:customAttach.message];
+            }
+        }
+    }
+    
+    NSInteger index = -1;
+    if (position > 0) {
+        index = [self.sessionDataSource insertMessagesAt:position messages:@[message]];
+    } else {
+        index = [self.sessionDataSource insertMessages:@[message]];
+    }
+    if (index >= 0 && index < self.sessionDataSource.modelArray.count) {
+        [self.layoutManager reloadDataToIndex:index withAnimation:YES];
+    }
+}
+
 - (void)uiDeleteMessage:(YSF_NIMMessage *)message {
-    YSFMessageModel *model = [self makeModel:message];
+    if (!message) {
+        return;
+    }
+    
+    if (message.messageType == YSF_NIMMessageTypeCustom) {
+        id<YSF_NIMCustomAttachment> attachment = [(YSF_NIMCustomObject *)(message.messageObject) attachment];
+        if ([attachment isMemberOfClass:[YSFCustomMessageAttachment class]]) {
+            if (self.customMessageDelegate && [self.customMessageDelegate respondsToSelector:@selector(onDeleteMessageBeforeReload:)]) {
+                YSFCustomMessageAttachment *customAttach = (YSFCustomMessageAttachment *)attachment;
+                [self.customMessageDelegate onDeleteMessageBeforeReload:customAttach.message];
+            }
+        }
+    }
+    
+    id model = [self makeModel:message];
     NSArray *indexs = [self.sessionDataSource deleteMessageModel:model];
     [self.layoutManager deleteCellAtIndexs:indexs];
 }
 
 - (void)uiUpdateMessage:(YSF_NIMMessage *)message {
-    YSFMessageModel *model = [self makeModel:message];
+    id model = [self makeModel:message];
     NSInteger index = [self.sessionDataSource indexAtModelArray:model];
     if (index > -1) {
-        [model cleanLayoutConfig];
-        [model cleanCache];
+        if ([model respondsToSelector:@selector(cleanLayoutConfig)]) {
+            [model cleanLayoutConfig];
+        }
+        if ([model respondsToSelector:@selector(cleanCache)]) {
+            [model cleanCache];
+        }
         model = [self makeModel:message];
         [self.sessionDataSource.modelArray replaceObjectAtIndex:index withObject:model];
         [self.layoutManager updateCellAtIndex:index model:model];
@@ -2381,7 +2737,7 @@ YSFCameraViewControllerDelegate>
     __block NSString *eventData = @"";
     
     if ([eventName isEqualToString:YSFKitEventNameReloadData]) {
-        YSFMessageModel *model = [self makeModel:message];
+        id model = [self makeModel:message];
         BOOL shouldAutoScroll = NO;
         NSInteger index = [self.sessionDataSource indexAtModelArray:model];
         if (index > -1) {
@@ -3294,13 +3650,16 @@ YSFCameraViewControllerDelegate>
 
 - (void)deleteMsg:(id)sender {
     YSF_NIMMessage *message = [self messageForMenu];
-    YSFMessageModel *model = [self makeModel:message];
-    [self.layoutManager deleteCellAtIndexs:[self.sessionDataSource deleteMessageModel:model]];
-    [[[YSF_NIMSDK sharedSDK] conversationManager] deleteMessage:model.message];
-    //文件消息删除的同时文件缓存也要删除
-    if (message.messageType == YSF_NIMMessageTypeFile) {
-        YSF_NIMFileObject *fileObject = (YSF_NIMFileObject *)message.messageObject;
-        [[NSFileManager defaultManager] removeItemAtPath:fileObject.path error:nil];
+    id model = [self makeModel:message];
+    if ([model isKindOfClass:[YSFMessageModel class]]) {
+        YSFMessageModel *msgModel = (YSFMessageModel *)model;
+        [self.layoutManager deleteCellAtIndexs:[self.sessionDataSource deleteMessageModel:msgModel]];
+        [[[YSF_NIMSDK sharedSDK] conversationManager] deleteMessage:msgModel.message];
+        //文件消息删除的同时文件缓存也要删除
+        if (message.messageType == YSF_NIMMessageTypeFile) {
+            YSF_NIMFileObject *fileObject = (YSF_NIMFileObject *)message.messageObject;
+            [[NSFileManager defaultManager] removeItemAtPath:fileObject.path error:nil];
+        }
     }
 }
 

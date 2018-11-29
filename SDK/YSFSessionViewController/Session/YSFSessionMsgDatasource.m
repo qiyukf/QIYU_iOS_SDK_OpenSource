@@ -16,10 +16,14 @@
 #import "YSFSubmittedBotForm.h"
 #import "YSFNotification.h"
 
+#import "QYCustomMessage.h"
+#import "QYCustomModel.h"
+#import "QYCustomModel_Private.h"
+#import "YSFCustomMessageManager.h"
+
 
 @implementation YSFSessionMsgDataSource
-- (instancetype)initWithSession:(YSF_NIMSession *)session
-               showTimeInterval:(NSTimeInterval)timeInterval {
+- (instancetype)initWithSession:(YSF_NIMSession *)session showTimeInterval:(NSTimeInterval)timeInterval {
     self = [super init];
     if (self) {
         _currentSession = session;
@@ -34,13 +38,13 @@
     return [_modelArray count];
 }
 
-- (NSInteger)indexAtModelArray:(YSFMessageModel *)model {
+- (NSInteger)indexAtModelArray:(id)model {
     __block NSInteger index = -1;
-    if (![_msgIdDict objectForKey:model.message.messageId]) {
+    if (![_msgIdDict objectForKey:[self messageIdForModel:model]]) {
         return index;
     }
     [_modelArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        if ([obj isKindOfClass:[YSFMessageModel class]]) {
+        if ([obj isKindOfClass:[YSFMessageModel class]] || [obj isKindOfClass:[QYCustomModel class]]) {
             if ([model isEqual:obj]) {
                 index = idx;
                 *stop = YES;
@@ -107,21 +111,26 @@
 }
 
 #pragma mark - 消息删除
-- (NSArray*)deleteMessageModel:(YSFMessageModel *)msgModel {
+- (NSArray*)deleteMessageModel:(id)msgModel {
     NSMutableArray *dels = [NSMutableArray array];
+    NSInteger count = _modelArray.count;
     NSInteger delTimeIndex = -1;
     NSInteger delMsgIndex = [_modelArray indexOfObject:msgModel];
-    if (delMsgIndex > 0) {
-        BOOL delMsgIsSingle = (delMsgIndex == (_modelArray.count - 1) || [_modelArray[delMsgIndex + 1] isKindOfClass:[YSFTimestampModel class]]);
+    if (delMsgIndex > 0 && delMsgIndex < count) {
+        BOOL delMsgIsSingle = (delMsgIndex == (count - 1)
+                               || ((delMsgIndex < (count - 1)) && [_modelArray[delMsgIndex + 1] isKindOfClass:[YSFTimestampModel class]]));
         if ([_modelArray[delMsgIndex - 1] isKindOfClass:[YSFTimestampModel class]] && delMsgIsSingle) {
             delTimeIndex = delMsgIndex - 1;
             [_modelArray removeObjectAtIndex:delTimeIndex];
             [dels addObject:@(delTimeIndex)];
         }
     }
-    if (delMsgIndex > -1) {
+    if (delMsgIndex >= 0 && delMsgIndex < count) {
         [_modelArray removeObject:msgModel];
-        [_msgIdDict removeObjectForKey:msgModel.message.messageId];
+        NSString *msgId = [self messageIdForModel:msgModel];
+        if (msgId.length) {
+            [_msgIdDict removeObjectForKey:msgId];
+        }
         [dels addObject:@(delMsgIndex)];
     }
     return dels;
@@ -131,17 +140,22 @@
 - (void)loadHistoryMessagesWithLimit:(NSInteger)limit
                    historyTipMessage:(YSF_NIMMessage *)tipMsg
                           completion:(void(^)(NSInteger index, NSError *error))completion {
-    __block YSFMessageModel *currentOldestMsg = nil;
+    __block YSF_NIMMessage *curOldestMsg = nil;
     [_modelArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         if ([obj isKindOfClass:[YSFMessageModel class]]) {
-            currentOldestMsg = (YSFMessageModel*)obj;
+            YSFMessageModel *msgModel = (YSFMessageModel *)obj;
+            curOldestMsg = msgModel.message;
+            *stop = YES;
+        } else if ([obj isKindOfClass:[QYCustomModel class]]) {
+            QYCustomModel *msgModel = (QYCustomModel *)obj;
+            curOldestMsg = msgModel.ysfMessage;
             *stop = YES;
         }
     }];
     NSInteger index = 0;
-    if (currentOldestMsg) {
+    if (curOldestMsg) {
         NSArray *messages = [[[YSF_NIMSDK sharedSDK] conversationManager] messagesInSession:_currentSession
-                                                                                    message:currentOldestMsg.message
+                                                                                    message:curOldestMsg
                                                                                       limit:limit];
         if (messages) {
             if ([messages count] && tipMsg) {
@@ -199,11 +213,26 @@
     return allImageMessage;
 }
 
+- (YSF_NIMMessage *)fetchCustomMessageForMessageId:(NSString *)messageId {
+    __block YSF_NIMMessage *message = nil;
+    [_modelArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        YSF_NIMMessage *objMsg = [self messageForModel:obj];
+        if (objMsg && [objMsg.messageId isEqualToString:messageId]) {
+            message = objMsg;
+            *stop = YES;
+        }
+    }];
+    return message;
+}
+
 #pragma mark - 清除缓存
 - (void)cleanCache {
     for (id item in _modelArray) {
         if ([item isKindOfClass:[YSFMessageModel class]]) {
             YSFMessageModel *model = (YSFMessageModel *)item;
+            [model cleanCache];
+        } else if ([item isKindOfClass:[QYCustomModel class]]) {
+            QYCustomModel *model = (QYCustomModel *)item;
             [model cleanCache];
         }
     }
@@ -211,26 +240,40 @@
 
 #pragma mark - private methods
 - (void)appendMessage:(YSF_NIMMessage *)message {
-    YSFMessageModel *model = [[YSFMessageModel alloc] initWithMessage:message];
-    if ([self modelIsExist:model]) {
+    id model = nil;
+    if ([[YSFCustomMessageManager sharedManager] isCustomMessage:message]) {
+        model = [[YSFCustomMessageManager sharedManager] makeModelForYSFMessage:message];
+    } else {
+        model = [[YSFMessageModel alloc] initWithMessage:message];
+    }
+    if (!model || [self modelIsExist:model]) {
         return;
     }
-    if (model.message.timestamp - self.lastTimeInterval > self.showTimeInterval) {
+    YSF_NIMMessage *modelMsg = [self messageForModel:model];
+    if (modelMsg.timestamp - self.lastTimeInterval > self.showTimeInterval) {
         YSFTimestampModel *timeModel = [[YSFTimestampModel alloc] init];
-        timeModel.messageTime = model.message.timestamp;
+        timeModel.messageTime = modelMsg.timestamp;
         [self.modelArray addObject:timeModel];
     }
     [self.modelArray addObject:model];
-    self.lastTimeInterval = model.message.timestamp;
-    [self.msgIdDict setObject:model forKey:model.message.messageId];
+    self.lastTimeInterval = modelMsg.timestamp;
+    if (modelMsg.messageId.length) {
+        [self.msgIdDict setObject:model forKey:modelMsg.messageId];
+    }
 }
 
 - (void)insertMessage:(YSF_NIMMessage *)message {
-    YSFMessageModel *model = [[YSFMessageModel alloc] initWithMessage:message];
-    if ([self modelIsExist:model]) {
+    id model = nil;
+    if ([[YSFCustomMessageManager sharedManager] isCustomMessage:message]) {
+        model = [[YSFCustomMessageManager sharedManager] makeModelForYSFMessage:message];
+    } else {
+        model = (YSFMessageModel *)[[YSFMessageModel alloc] initWithMessage:message];
+    }
+    if (!model || [self modelIsExist:model]) {
         return;
     }
-    if (self.firstTimeInterval && (self.firstTimeInterval - model.message.timestamp < self.showTimeInterval)) {
+    YSF_NIMMessage *modelMsg = [self messageForModel:model];
+    if (self.firstTimeInterval && (self.firstTimeInterval - modelMsg.timestamp < self.showTimeInterval)) {
         //此时至少有一条时间戳和一条消息，移除掉时间戳
         if ([self.modelArray count] > 0) {
             id obj = [self.modelArray objectAtIndex:0];
@@ -243,29 +286,50 @@
     
     if (![self isHistoryTipMessage:message]) {
         YSFTimestampModel *timeModel = [[YSFTimestampModel alloc] init];
-        timeModel.messageTime = model.message.timestamp;
+        timeModel.messageTime = modelMsg.timestamp;
         [self.modelArray insertObject:timeModel atIndex:0];
     }
     
-    self.firstTimeInterval = model.message.timestamp;
-    [self.msgIdDict setObject:model forKey:model.message.messageId];
+    self.firstTimeInterval = modelMsg.timestamp;
+    if (modelMsg.messageId.length) {
+        [self.msgIdDict setObject:model forKey:modelMsg.messageId];
+    }
 }
 
 - (void)insertMessageAt:(NSInteger)postion message:(YSF_NIMMessage *)message {
-    YSFMessageModel *model = [[YSFMessageModel alloc] initWithMessage:message];
-    if ([self modelIsExist:model]) {
-        return;
+    if (postion >= 0 && postion <= self.modelArray.count) {
+        id model = nil;
+        if ([[YSFCustomMessageManager sharedManager] isCustomMessage:message]) {
+            model = [[YSFCustomMessageManager sharedManager] makeModelForYSFMessage:message];
+        } else {
+            model = [[YSFMessageModel alloc] initWithMessage:message];
+        }
+        if (!model || [self modelIsExist:model]) {
+            return;
+        }
+        [self.modelArray insertObject:model atIndex:postion];
+        
+        NSString *msgId = [self messageIdForModel:model];
+        if (msgId.length) {
+            [self.msgIdDict setObject:model forKey:msgId];
+        }
     }
-    [self.modelArray insertObject:model atIndex:postion];
-    [self.msgIdDict setObject:model forKey:model.message.messageId];
 }
 
-- (BOOL)modelIsExist:(YSFMessageModel *)model {
-    return ([_msgIdDict objectForKey:model.message.messageId] != nil);
+- (BOOL)modelIsExist:(id)model {
+    if ([model isKindOfClass:[YSFMessageModel class]]) {
+        YSFMessageModel *msgModel = (YSFMessageModel *)model;
+        return ([_msgIdDict objectForKey:msgModel.message.messageId] != nil);
+    } else if ([model isKindOfClass:[QYCustomModel class]]) {
+        QYCustomModel *msgModel = (QYCustomModel *)model;
+        return ([_msgIdDict objectForKey:msgModel.message.messageId] != nil);
+    }
+    return NO;
 }
 
 - (BOOL)isHistoryTipMessage:(YSF_NIMMessage *)message {
-    if ([message.messageObject isKindOfClass:[YSF_NIMCustomObject class]]) {
+    if (message.messageType == YSF_NIMMessageTypeCustom
+        && [message.messageObject isKindOfClass:[YSF_NIMCustomObject class]]) {
         YSF_NIMCustomObject *customObj = (YSF_NIMCustomObject *)message.messageObject;
         if ([customObj.attachment isKindOfClass:[YSFNotification class]]) {
             YSFNotification *notification = (YSFNotification *)customObj.attachment;
@@ -275,6 +339,30 @@
         }
     }
     return NO;
+}
+
+- (YSF_NIMMessage *)messageForModel:(id)model {
+    YSF_NIMMessage *message = nil;
+    if ([model isKindOfClass:[YSFMessageModel class]]) {
+        YSFMessageModel *msgModel = (YSFMessageModel *)model;
+        message = msgModel.message;
+    } else if ([model isKindOfClass:[QYCustomModel class]]) {
+        QYCustomModel *msgModel = (QYCustomModel *)model;
+        message = msgModel.ysfMessage;
+    }
+    return message;
+}
+
+- (NSString *)messageIdForModel:(id)model {
+    NSString *msgId = @"";
+    if ([model isKindOfClass:[YSFMessageModel class]]) {
+        YSFMessageModel *msgModel = (YSFMessageModel *)model;
+        msgId = msgModel.message.messageId;
+    } else if ([model isKindOfClass:[QYCustomModel class]]) {
+        QYCustomModel *msgModel = (QYCustomModel *)model;
+        msgId = msgModel.ysfMessage.messageId;
+    }
+    return msgId;
 }
 
 @end

@@ -23,7 +23,6 @@
 @property (nonatomic, assign) BOOL operatorEable;
 @property (nonatomic, assign) BOOL showNumber;
 @property (nonatomic, assign) BOOL robotInQueue;
-@property (nonatomic, assign) BOOL sessionTransfer;
 @property (nonatomic, assign) long long robotSessionId;
 
 @property (nonatomic, copy) NSString *staffId;
@@ -31,6 +30,10 @@
 @property (nonatomic, assign) long long groupId;
 @property (nonatomic, copy) NSString *staffName;
 @property (nonatomic, copy) NSString *iconUrl;
+
+@property (nonatomic, assign) BOOL transferSession;
+@property (nonatomic, assign) long long oldSessionId;
+@property (nonatomic, copy) NSString *transferMessage;
 
 @property (nonatomic, copy) NSString *message;
 @property (nonatomic, copy) NSString *inQueeuNotify;

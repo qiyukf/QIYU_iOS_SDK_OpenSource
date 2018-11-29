@@ -217,6 +217,13 @@
     }
 }
 
+- (NSString *)getOnlineStaffId:(NSString *)shopId {
+    if (shopId.length) {
+        return [[YSF_NIMSDK sharedSDK].chatManager getReceiveMessageFrom:shopId];
+    }
+    return nil;
+}
+
 #pragma mark - 请求客服
 - (void)requestServiceWithSource:(YSFRequestServiceRequest *)request shopId:(NSString *)shopId {
     if ([_requestManager isInRequest:shopId]) {

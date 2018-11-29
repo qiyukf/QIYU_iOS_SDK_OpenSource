@@ -15,14 +15,11 @@ typedef id<YSFExtraCellLayoutConfig> (^YSFExtraCellLayoutConfigBlock)();
 
 @interface YSFDefaultValueMaker : NSObject
 
-+ (instancetype)sharedMaker;
-
 @property (nonatomic, readonly) YSFCellLayoutDefaultConfig *cellLayoutDefaultConfig;
-
 @property (nonatomic, readonly) id<YSFExtraCellLayoutConfig> extraCellLayoutConfig;
-
 @property (nonatomic, copy) YSFExtraCellLayoutConfigBlock extraCellLayoutConfigBlock;
 
++ (instancetype)sharedMaker;
 - (CGFloat)maxTipPadding;
 
 @end

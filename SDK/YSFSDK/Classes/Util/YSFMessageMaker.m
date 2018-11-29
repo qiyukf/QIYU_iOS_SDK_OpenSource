@@ -9,6 +9,10 @@
 #import "YSFMessageMaker.h"
 #import "QYCustomUIConfig+Private.h"
 
+#import "QYCustomMessage.h"
+#import "QYCustomMessage_Private.h"
+#import "YSFCustomMessageAttachment.h"
+
 @implementation YSFMessageMaker
 
 + (YSF_NIMMessage *)msgWithText:(NSString *)text {
@@ -60,6 +64,21 @@
     customObject.attachment = attachment;
     YSF_NIMMessage *message = [[YSF_NIMMessage alloc] init];
     message.messageObject = customObject;
+    return message;
+}
+
++ (YSF_NIMMessage *)msgWithCustomMessage:(QYCustomMessage *)customMessage {
+    //QYCustomMessage --> YSFCustomMessageAttachment
+    YSFCustomMessageAttachment *attachment = [[YSFCustomMessageAttachment alloc] init];
+    attachment.message = customMessage;
+    //YSFCustomMessageAttachment --> YSF_NIMCustomObject
+    YSF_NIMCustomObject *object = [[YSF_NIMCustomObject alloc] init];
+    object.attachment = attachment;
+    //YSF_NIMCustomObject --> YSF_NIMMessage
+    YSF_NIMMessage *message = [[YSF_NIMMessage alloc] init];
+    message.messageObject = object;
+    customMessage.messageId = message.messageId;
+    customMessage.sourceType = [customMessage messageSourceType];
     return message;
 }
 

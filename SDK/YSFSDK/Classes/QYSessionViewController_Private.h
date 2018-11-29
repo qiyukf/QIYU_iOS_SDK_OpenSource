@@ -29,6 +29,7 @@
 #import "YSFEvaluationReasonView.h"
 
 @class YSFReachability;
+@protocol QYCustomMessageDelegate;
 typedef void (^ChangeHumanOrRobotBlock)(BOOL humanOrRobot);
 typedef void (^ChangeEvaluationEnabledBlock)(BOOL evaluationEnabled);
 typedef void (^OnEvaluateBlock)(long long sessionId, YSF_NIMMessage *updatedMessage);
@@ -69,6 +70,9 @@ NIMSessionMsgDatasourceDelegate>
 @property (nonatomic, copy) ChangeHumanOrRobotBlock changeHumanOrRobotBlock;
 @property (nonatomic, copy) ChangeEvaluationEnabledBlock changeEvaluationEnabledBlock;
 @property (nonatomic, copy) OnEvaluateBlock onEvaluateBlock;
+
+@property (nonatomic, weak) id<QYCustomMessageDelegate> customMessageDelegate;
+@property (nonatomic, weak) id<QYCustomContentViewDelegate> customContentViewDelegate;
 
 
 - (void)sendMessage:(YSF_NIMMessage *)message;

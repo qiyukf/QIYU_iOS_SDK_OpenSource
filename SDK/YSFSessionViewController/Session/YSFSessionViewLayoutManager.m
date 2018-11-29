@@ -14,6 +14,9 @@
 #import "YSFMessageCell.h"
 #import "QYCustomUIConfig.h"
 
+#import "QYCustomSDK.h"
+#import "YSFCustomMessageCell.h"
+
 YSFNotification(kKFInputViewFrameChanged);
 YSFNotification(kKFInputViewInputTypeChanged);
 
@@ -76,13 +79,17 @@ YSFNotification(kKFInputViewInputTypeChanged);
     });
 }
 
-- (void)updateCellAtIndex:(NSInteger)index model:(YSFMessageModel *)model
+- (void)updateCellAtIndex:(NSInteger)index model:(id)model
 {
     if (index > -1) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-
-        YSFMessageCell *cell = (YSFMessageCell *)[_tableView cellForRowAtIndexPath:indexPath];
-        [cell refreshData:model];
+        if ([model isKindOfClass:[YSFMessageModel class]]) {
+            YSFMessageCell *cell = (YSFMessageCell *)[_tableView cellForRowAtIndexPath:indexPath];
+            [cell refreshData:model];
+        } else if ([model isKindOfClass:[QYCustomModel class]]) {
+            YSFCustomMessageCell *cell = (YSFCustomMessageCell *)[_tableView cellForRowAtIndexPath:indexPath];
+            [cell refreshData:model];
+        }
     }
 }
 

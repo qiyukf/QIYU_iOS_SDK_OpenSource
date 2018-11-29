@@ -6,8 +6,6 @@
 //  Copyright (c) 2015年 NetEase. All rights reserved.
 //
 
-@class YSFMessageModel;
-
 @protocol NIMSessionMsgDatasourceDelegate <NSObject>
 
 - (void)messageDataIsReady;
@@ -30,7 +28,7 @@
                showTimeInterval:(NSTimeInterval)timeInterval;
 
 - (NSInteger)msgCount;
-- (NSInteger)indexAtModelArray:(YSFMessageModel *)model;
+- (NSInteger)indexAtModelArray:(id)model;
 
 /**
  *  复位消息
@@ -65,7 +63,7 @@
  *  @param model 需删除的消息
  *  @return 删除消息的index集合（可能包含时间消息）
  */
-- (NSArray *)deleteMessageModel:(YSFMessageModel *)model;
+- (NSArray *)deleteMessageModel:(id)model;
 
 /**
  *  加载历史消息
@@ -86,6 +84,11 @@
  *  查询所有图片相关消息
  */
 - (NSMutableArray *)queryAllImageMessages;
+
+/**
+ *  查询消息
+ */
+- (YSF_NIMMessage *)fetchCustomMessageForMessageId:(NSString *)messageId;
 
 /**
  *  清除model缓存布局数据

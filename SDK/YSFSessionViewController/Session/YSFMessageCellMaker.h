@@ -10,13 +10,12 @@
 #import "YSFCellLayoutConfig.h"
 #import "YSFMessageCellProtocol.h"
 #import "YSFSessionTimestampCell.h"
+#import "YSFCustomMessageCell.h"
 
 @interface YSFMessageCellMaker : NSObject
 
-+ (YSFMessageCell *)cellInTable:(UITableView*)tableView
-                 forMessageMode:(YSFMessageModel *)model;
-
-+ (YSFSessionTimestampCell *)cellInTable:(UITableView *)tableView
-                            forTimeModel:(YSFTimestampModel *)model;
++ (YSFMessageCell *)cellInTable:(UITableView *)tableView forModel:(YSFMessageModel *)model;
++ (YSFCustomMessageCell *)cellInTable:(UITableView *)tableView forCustomModel:(QYCustomModel *)model;
++ (YSFSessionTimestampCell *)cellInTable:(UITableView *)tableView forTimeModel:(YSFTimestampModel *)model;
 
 @end

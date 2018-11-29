@@ -11,4 +11,5 @@
 
 + (instancetype)sharedInstance;
 - (id<YSFCellLayoutConfig>)layoutConfigWithMessage:(YSF_NIMMessage *)message;
+
 @end
