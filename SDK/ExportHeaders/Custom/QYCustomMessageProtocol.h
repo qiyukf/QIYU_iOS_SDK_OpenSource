@@ -46,6 +46,7 @@
 @optional
 /**
  *  自定义事件，通过QYCustomContentView的delegate去调用onCatchEvent:事件
+ *  若事件涉及到更新消息及视图则尽量使用onCatchEvent:抛出，若未涉及消息及视图更新，可直接响应事件，无需使用该方法抛出
  */
 - (void)onCatchEvent:(QYCustomEvent *)event;
 

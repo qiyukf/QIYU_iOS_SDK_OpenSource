@@ -20,6 +20,7 @@
 @property (nonatomic, strong) UILabel *descLabel;
 @property (nonatomic, strong) UILabel *noteLabel;
 @property (nonatomic, strong) UILabel *skuLabel;
+@property (nonatomic, strong) UILabel *priceLabel;
 @property (nonatomic, strong) UILabel *orderStatusLabel;
 @property (nonatomic, strong) UILabel *payMoney;
 @property (nonatomic, strong) UILabel *orderCount;
@@ -103,6 +104,15 @@
     _skuLabel.font = [UIFont systemFontOfSize:12.f];
     [_skuLabel sizeToFit];
     [_content addSubview:_skuLabel];
+    
+    _priceLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    _priceLabel.backgroundColor = [UIColor clearColor];
+    _priceLabel.numberOfLines = 1;
+    _priceLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    _priceLabel.textColor = YSFRGB(0xff611b);
+    _priceLabel.font = [UIFont systemFontOfSize:12.f];
+    [_priceLabel sizeToFit];
+    [_content addSubview:_priceLabel];
     
     _orderStatusLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     _orderStatusLabel.backgroundColor = [UIColor clearColor];
@@ -200,6 +210,7 @@
         
         [_noteLabel setText:attachment.note];
         [_skuLabel setText:attachment.orderSku];
+        [_priceLabel setText:attachment.price];
         [_orderStatusLabel setText:attachment.orderStatus];
         if (attachment.orderId.length > 0) {
             [_orderIdLabel setText:[NSString stringWithFormat:@"订单编号：%@", attachment.orderId]];
@@ -375,6 +386,10 @@
         _skuLabel.ysf_frameLeft = _productImageView.ysf_frameRight + 10;
         _skuLabel.ysf_frameTop = 77;
         
+        [_priceLabel sizeToFit];
+        _priceLabel.ysf_frameLeft = _productImageView.ysf_frameRight + 10;
+        _priceLabel.ysf_frameTop = 77;
+        
         [_orderStatusLabel sizeToFit];
         if (_orderStatusLabel.ysf_frameWidth > 70) {
             _orderStatusLabel.ysf_frameWidth = 70;
@@ -382,6 +397,7 @@
         _orderStatusLabel.ysf_frameRight = self.ysf_frameWidth - 10;
         _orderStatusLabel.ysf_frameTop = 77;
         _skuLabel.ysf_frameWidth = contentsize.width - _productImageView.ysf_frameWidth - 10 - _orderStatusLabel.ysf_frameWidth - 5;
+        _priceLabel.ysf_frameWidth = contentsize.width - _productImageView.ysf_frameWidth - 10 - _orderStatusLabel.ysf_frameWidth - 5;
         
         if (!_orderIdLabel.hidden) {
             _splitLine1.ysf_frameWidth = self.ysf_frameWidth - 5;

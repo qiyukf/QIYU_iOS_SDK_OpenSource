@@ -17,6 +17,9 @@ extern NSString * const QYCustomEventLongPressCell;
 
 @class QYCustomMessage;
 
+/**
+ *  消息事件
+ */
 @interface QYCustomEvent : NSObject
 
 /**

@@ -2330,6 +2330,10 @@ YSFCameraViewControllerDelegate>
     [_sessionInputView setActionInfoArray:nil];
 }
 
+- (void)didRevokeMessage:(YSF_NIMMessage *)message {
+    [self uiDeleteMessage:message];
+}
+
 #pragma mark - YSF_NIMSystemNotificationManagerDelegate
 - (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification {
     NSString *content = notification.content;
@@ -2382,41 +2386,6 @@ YSFCameraViewControllerDelegate>
         YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
         if (sessionManager) {
             [sessionManager getOnlineSession:_shopId].actionInfoArray = ((YSFBotEntry *)object).entryArray;
-        }
-    } else if ([object isKindOfClass:[YSFRevokeMessageResult class]]) {
-        YSFRevokeMessageResult *result = (YSFRevokeMessageResult *)object;
-        if (result.resultCode == YSFCodeSuccess) {
-            YSFServiceSession *onlineSession = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:shopId];
-            if (onlineSession.sessionId == result.sessionId) {
-                if (result.messageId.length) {
-                    YSF_NIMMessage *message = [[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:result.messageId
-                                                                                              forSession:_session];
-                    if (message) {
-                        if (!message.session) {
-                            message.session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
-                        }
-                        [[[YSF_NIMSDK sharedSDK] conversationManager] deleteMessage:message];
-                        [self uiDeleteMessage:message];
-                        
-                        YSFNotification *notification = [[YSFNotification alloc] init];
-                        notification.command = YSFCommandNotification;
-                        notification.localCommand = YSFCommandRevokeMessageResult;
-                        NSString *tip = [NSString stringWithFormat:@"\"%@\" ", onlineSession.staffName];
-                        if (result.message.length) {
-                            tip = [tip stringByAppendingString:result.message];
-                        } else {
-                            tip = [tip stringByAppendingString:@"撤回了一条消息"];
-                        }
-                        notification.message = tip;
-                        YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
-                        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES
-                                                                          message:customMessage
-                                                                       forSession:_session
-                                                                   addUnreadCount:NO
-                                                                       completion:nil];
-                    }
-                }
-            }
         }
     }
 }
@@ -2708,23 +2677,25 @@ YSFCameraViewControllerDelegate>
 }
 
 - (void)uiUpdateMessage:(YSF_NIMMessage *)message {
-    id model = [self makeModel:message];
-    NSInteger index = [self.sessionDataSource indexAtModelArray:model];
-    if (index > -1) {
-        if ([model respondsToSelector:@selector(cleanLayoutConfig)]) {
-            [model cleanLayoutConfig];
-        }
-        if ([model respondsToSelector:@selector(cleanCache)]) {
-            [model cleanCache];
-        }
-        model = [self makeModel:message];
-        [self.sessionDataSource.modelArray replaceObjectAtIndex:index withObject:model];
-        [self.layoutManager updateCellAtIndex:index model:model];
-        
-        BOOL shouldAutoScroll = (index == [self.sessionDataSource msgCount] - 1) && [_tableView ysf_isInBottom];
-        [_tableView reloadData];
-        if (shouldAutoScroll) {
-            [_tableView ysf_scrollToBottom:YES];
+    id model = [self findModel:message];
+    if (model) {
+        NSInteger index = [self.sessionDataSource indexAtModelArray:model];
+        if (index > -1) {
+            if ([model respondsToSelector:@selector(cleanLayoutConfig)]) {
+                [model cleanLayoutConfig];
+            }
+            if ([model respondsToSelector:@selector(cleanCache)]) {
+                [model cleanCache];
+            }
+            [self layoutConfig:message];
+            [self.sessionDataSource.modelArray replaceObjectAtIndex:index withObject:model];
+            [self.layoutManager updateCellAtIndex:index model:model];
+            
+            BOOL shouldAutoScroll = (index == [self.sessionDataSource msgCount] - 1) && [_tableView ysf_isInBottom];
+            [_tableView reloadData];
+            if (shouldAutoScroll) {
+                [_tableView ysf_scrollToBottom:YES];
+            }
         }
     }
 }

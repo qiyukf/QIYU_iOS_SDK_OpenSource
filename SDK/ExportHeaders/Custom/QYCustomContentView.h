@@ -12,6 +12,10 @@
 @protocol QYCustomContentViewDelegate;
 
 
+/**
+ *  QYCustomContentView：自定义消息视图基类
+ *  使用方法：针对需自定义的消息视图，写子类继承QYCustomContentView，并实现初始化和刷新方法
+ */
 @interface QYCustomContentView : UIView
 
 /**

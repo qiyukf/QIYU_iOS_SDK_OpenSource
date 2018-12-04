@@ -18,12 +18,16 @@
 
 @interface YSFActionBar()
 
-@property (nonatomic,strong)    UIView *splitLine;
-@property (nonatomic,strong)    UIScrollView *scrollView;
+@property (nonatomic, strong) UIView *splitLine;
 
 @end
 
 @implementation YSFActionBar
+
++ (CGFloat)heightForActionBar
+{
+    return YSFActionBarHeight;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame{
     self = [super initWithFrame:frame];
@@ -58,12 +62,12 @@
         button.titleLabel.font = [UIFont systemFontOfSize:12];
         button.layer.borderColor = [QYCustomUIConfig sharedInstance].actionButtonBorderColor.CGColor;
         button.layer.cornerRadius = 10;
-        button.layer.borderWidth = 0.5;
+        button.layer.borderWidth = 1. / [UIScreen mainScreen].scale;
         [button setTitleColor:[QYCustomUIConfig sharedInstance].actionButtonTextColor forState:UIControlStateNormal];
         [button setTitle:obj.title forState:UIControlStateNormal];
         [button sizeToFit];
         button.ysf_frameWidth += 20;
-        button.ysf_frameTop = 10;
+        button.ysf_frameTop = 11;
         button.ysf_frameLeft = right + 10;
         button.ysf_frameHeight = 22;
         button.tag = idx;
@@ -85,7 +89,7 @@
 
 - (void)layoutSubviews
 {
-    _splitLine.ysf_frameHeight = 1;
+    _splitLine.ysf_frameHeight = 1. / [UIScreen mainScreen].scale;
     _splitLine.ysf_frameWidth = self.ysf_frameWidth;
     _scrollView.ysf_frameWidth = self.ysf_frameWidth;
     _scrollView.ysf_frameHeight = self.ysf_frameHeight;

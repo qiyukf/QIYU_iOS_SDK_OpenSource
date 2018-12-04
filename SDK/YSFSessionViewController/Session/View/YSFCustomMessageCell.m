@@ -174,11 +174,12 @@ static CGFloat kAvatarVerticalMargin = 3.0f;
         }
     }
     if (showBubble) {
+        CGFloat bubbleMinMargin = showAvatar ? kBubbleViewMinMargin : (kBubbleViewMinMargin - kAvatarImageSize);
         if (self.model.message.sourceType == QYCustomMessageSourceTypeNone) {
             self.bubbleView.hidden = YES;
         } else if (self.model.message.sourceType == QYCustomMessageSourceTypeSend) {
             //访客气泡
-            CGSize size = [self bubbleViewSize:self.model maxWidth:(cellWidth - kBubbleViewMinMargin)];
+            CGSize size = [self bubbleViewSize:self.model maxWidth:(cellWidth - bubbleMinMargin)];
             CGFloat left = 0;
             if (showAvatar) {
                 left = CGRectGetMinX(self.avatarView.frame) - self.model.bubbleLeftSpace - size.width;
@@ -188,7 +189,7 @@ static CGFloat kAvatarVerticalMargin = 3.0f;
             self.bubbleView.frame = CGRectMake(left, self.model.bubbleInsets.top, size.width, size.height);
         } else if (self.model.message.sourceType == QYCustomMessageSourceTypeReceive) {
             //客服气泡
-            CGSize size = [self bubbleViewSize:self.model maxWidth:(cellWidth - kBubbleViewMinMargin)];
+            CGSize size = [self bubbleViewSize:self.model maxWidth:(cellWidth - bubbleMinMargin)];
             CGFloat left = 0;
             if (showAvatar) {
                 left = CGRectGetMaxX(self.avatarView.frame) + self.model.bubbleLeftSpace;

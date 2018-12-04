@@ -110,7 +110,7 @@ typedef void(^QYCustomMessageCompletion)(NSError *error);
 /**
  *  删除消息
  *  @param message  消息对象
- *  @param save     是否需要持久化消息数据
+ *  @param save     删除记录是否同步至数据库
  *  @param reload   是否需要刷新界面
  */
 - (void)deleteCustomMessage:(QYCustomMessage *)message

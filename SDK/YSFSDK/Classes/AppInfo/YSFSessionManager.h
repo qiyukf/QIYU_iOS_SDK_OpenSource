@@ -29,6 +29,7 @@ typedef enum : NSUInteger {
                         bypass:(BOOL)bypass
                         shopId:(NSString *)shopId;
 - (void)didClose:(BOOL)evaluate session:(YSFServiceSession *)session shopId:(NSString *)shopId;
+- (void)didRevokeMessage:(YSF_NIMMessage *)message;
 
 @end
 

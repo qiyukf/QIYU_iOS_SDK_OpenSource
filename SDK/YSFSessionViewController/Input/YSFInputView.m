@@ -30,13 +30,22 @@
 @property (nonatomic, weak) id<YSFInputDelegate> inputDelegate;
 @property (nonatomic, weak) id<YSFInputActionDelegate> actionDelegate;
 @property (nonatomic, assign) YSFInputStatus inputStatus;
-@property (nonatomic, assign) CGFloat bottomHeight;
 @property (strong, nonatomic)  YSFInputMoreContainerView *moreContainer;
 
 @end
 
 
 @implementation YSFInputView
+
++ (Class)actionBarClass
+{
+    return YSFActionBar.class;
+}
+
++ (Class)toolBarClass
+{
+    return YSFInputToolBar.class;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame inputType:(YSFInputStatus)inputStatus
 {
@@ -62,12 +71,13 @@
         
         [self addKeyboardObserver];
         
-        _actionBar = [[YSFActionBar alloc] init];
+        _actionBar = [[[self.class actionBarClass] alloc] init];
         _actionBar.hidden = YES;
-        _actionBar.ysf_frameHeight = YSFActionBarHeight;
+        _actionBarHeight = [[self.class actionBarClass] heightForActionBar];
+        _actionBar.ysf_frameHeight = _actionBarHeight;
         [self addSubview:_actionBar];
 
-        _toolBar = [[YSFInputToolBar alloc] initWithFrame:CGRectZero];
+        _toolBar = [[[self.class toolBarClass] alloc] initWithFrame:CGRectZero];
         [_toolBar.emoticonBtn addTarget:self action:@selector(onTouchEmoticonBtn:) forControlEvents:UIControlEventTouchUpInside];
         [_toolBar.moreMediaBtn addTarget:self action:@selector(onTouchMoreBtn:) forControlEvents:UIControlEventTouchUpInside];
         [_toolBar.voiceBtn addTarget:self action:@selector(onTouchVoiceBtn:) forControlEvents:UIControlEventTouchUpInside];
@@ -103,10 +113,10 @@
 - (void)setActionInfoArray:(NSArray<YSFActionInfo *> *)actionInfoArray
 {
     if (_actionBar.actionInfoArray.count == 0 && actionInfoArray.count > 0) {
-        self.ysf_frameHeight += YSFActionBarHeight;
+        self.ysf_frameHeight += self.actionBarHeight;
     }
     else if (_actionBar.actionInfoArray.count > 0 && actionInfoArray.count == 0) {
-        self.ysf_frameHeight -= YSFActionBarHeight;
+        self.ysf_frameHeight -= self.actionBarHeight;
     }
     _actionBar.actionInfoArray = actionInfoArray;
     _actionBar.hidden = actionInfoArray.count == 0;
@@ -791,8 +801,8 @@
 - (void)layoutSubviews
 {
     if (_actionBar && !_actionBar.hidden) {
-        _emoticonContainer.ysf_frameTop = _inputTextViewOlderHeight + YSFActionBarHeight;
-        _moreContainer.ysf_frameTop = _inputTextViewOlderHeight + YSFActionBarHeight;
+        _emoticonContainer.ysf_frameTop = _inputTextViewOlderHeight + _actionBarHeight;
+        _moreContainer.ysf_frameTop = _inputTextViewOlderHeight + _actionBarHeight;
     } else {
         _emoticonContainer.ysf_frameTop = _inputTextViewOlderHeight;
         _moreContainer.ysf_frameTop = _inputTextViewOlderHeight;

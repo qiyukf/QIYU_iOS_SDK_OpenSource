@@ -26,7 +26,7 @@
  * 视图大小
  * @discussion
  *  1. 若显示气泡，则contentView位于气泡内部，气泡有默认最大宽度bubbleMaxWidth
- *  2. 若不显示气泡，仅显示头像，则contentView位于头像右侧，宽度固定为table宽度减去头像视图maxX
+ *  2. 若不显示气泡，仅显示头像，则contentView位于头像另一侧
  *  3. 若不显示头像及气泡，则contentView为整个cell，宽度固定为table宽度
  *  @param bubbleMaxWidth 气泡最大宽度
  */
@@ -62,7 +62,7 @@
 
 /**
  *  QYCustomModel：自定义消息数据源基类（即用于消息列表刷新的数据源）
- *  使用方法：针对需自定义的消息数据源，写子类继承QYCustomModel，并实现QYCustomModelLayout协议
+ *  使用方法：针对需自定义的消息数据源，写子类继承QYCustomModel，并实现QYCustomModelLayoutDataSource协议
  */
 @interface QYCustomModel : NSObject <QYCustomModelLayoutDataSource>
 

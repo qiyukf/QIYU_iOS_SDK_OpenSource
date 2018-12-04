@@ -33,6 +33,7 @@
 #import "YSFUploadLog.h"
 #import "QYStaffInfo.h"
 #import "YSFEvaluationData.h"
+#import "YSFRevokeMessageResult.h"
 
 @interface YSFSessionManager () <YSF_NIMSystemNotificationManagerDelegate, YSF_NIMChatManagerDelegate, YSFServiceRequestDelegate>
 
@@ -538,6 +539,43 @@
                 notification.content = messageContent;
                 notification.sender = notification.sender;
                 [[[YSF_NIMSDK sharedSDK] systemNotificationManager] onReceiveCustomSystemNotification:notification];
+            }
+        }
+    } else if ([object isKindOfClass:[YSFRevokeMessageResult class]]) {
+        YSFRevokeMessageResult *result = (YSFRevokeMessageResult *)object;
+        if (result.resultCode == YSFCodeSuccess) {
+            YSFServiceSession *onlineSession = [self getOnlineSession:shopId];
+            if (onlineSession.sessionId == result.sessionId) {
+                if (result.messageId.length) {
+                    YSF_NIMMessage *message = [[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:result.messageId
+                                                                                              forSession:session];
+                    if (message) {
+                        if (!message.session) {
+                            message.session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+                        }
+                        [[[YSF_NIMSDK sharedSDK] conversationManager] deleteMessage:message];
+                        if (self.delegate && [self.delegate respondsToSelector:@selector(didRevokeMessage:)]) {
+                            [self.delegate didRevokeMessage:message];
+                        }
+                        
+                        YSFNotification *notification = [[YSFNotification alloc] init];
+                        notification.command = YSFCommandNotification;
+                        notification.localCommand = YSFCommandRevokeMessageResult;
+                        NSString *tip = [NSString stringWithFormat:@"\"%@\" ", onlineSession.staffName];
+                        if (result.message.length) {
+                            tip = [tip stringByAppendingString:result.message];
+                        } else {
+                            tip = [tip stringByAppendingString:@"撤回了一条消息"];
+                        }
+                        notification.message = tip;
+                        YSF_NIMMessage *customMessage = [YSFMessageMaker msgWithCustom:notification];
+                        [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES
+                                                                          message:customMessage
+                                                                       forSession:session
+                                                                   addUnreadCount:NO
+                                                                       completion:nil];
+                    }
+                }
             }
         }
     }
