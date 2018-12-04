@@ -47,22 +47,11 @@
     instance.showNumber = [dict ysf_jsonBool:YSFApiKeyShowNum];
     instance.robotInQueue = [dict ysf_jsonBool:YSFApiKeyRobotInQueue];
     instance.robotSessionId = [dict ysf_jsonLongLong:YSFApiKeyRobotSessionId];
-
-    NSMutableDictionary *evaluationDict = [NSMutableDictionary new];
-    NSString *evaluation = [dict ysf_jsonString:YSFApiKeyEvaluation];
-    if (evaluation) {
-        NSDictionary *dictEvaluation = [evaluation ysf_toDict];
-        NSArray *arrayEvaluation = [dictEvaluation ysf_jsonArray:YSFApiKeyList];
-        for (NSDictionary *dict in arrayEvaluation) {
-            NSString *name = [dict ysf_jsonString:YSFApiKeyName];
-            if (name) {
-                [evaluationDict setValue:dict forKey:name];
-            }
-        }
-        instance.inviteMsg = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationInviteMsg];
-        instance.thanksMsg = [dictEvaluation ysf_jsonString:YSFApiKeyEvaluationThanksMsg];
-    }
-    instance.evaluation = evaluationDict;
+    instance.evaluationString = YSFStrParam([dict ysf_jsonString:YSFApiKeyEvaluation]);
+    
+    instance.oldSessionId = [dict ysf_jsonLongLong:YSFApiKeyTransferOldSessionId];
+    instance.transferSession = instance.oldSessionId ? YES : NO;
+    instance.transferMessage = [dict ysf_jsonString:YSFApiKeySessionTransferMessage];
     
     NSInteger staffType = [dict ysf_jsonInteger:YSFApiKeyStaffType];
     if (staffType == 0) {

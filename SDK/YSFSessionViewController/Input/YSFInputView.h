@@ -16,7 +16,6 @@
 @class YSFInputEmoticonContainerView;
 @class YSFInputToolBar;
 
-#define YSFActionBarHeight 41.0
 #define YSFTopInputViewHeight 50.0
 #define YSFTopInputViewMaxHeight 82
 #define YSFBottomInputViewHeight 216.0
@@ -44,24 +43,31 @@ typedef NS_ENUM(NSInteger, NIMAudioRecordPhase) {
 - (void)inputViewSizeToHeight:(CGFloat)toHeight
                 showInputView:(BOOL)show;
 - (void)changeInputTypeTo:(YSFInputStatus)inputStatus;
+
 @end
+
 
 @interface YSFInputView : UIView
 
-@property (nonatomic, assign) NSInteger             maxTextLength;
-@property (nonatomic, assign) NSInteger             maxInputLines;
-@property (nonatomic, assign) CGFloat               inputBottomViewHeight;
-@property (nonatomic, assign, readonly)             YSFInputStatus inputStatus;
+@property (nonatomic, assign) NSInteger maxTextLength;
+@property (nonatomic, assign) NSInteger maxInputLines;
+@property (nonatomic, assign) CGFloat inputBottomViewHeight;
+@property (nonatomic, assign) CGFloat actionBarHeight;
+@property (nonatomic, assign) CGFloat bottomHeight;
+@property (nonatomic, assign, readonly) YSFInputStatus inputStatus;
 
-@property (nonatomic,assign) BOOL    humanOrMachine;
-@property (assign, nonatomic, getter=isRecording) BOOL recording;
+@property (nonatomic, assign) BOOL humanOrMachine;
+@property (assign, nonatomic, getter = isRecording) BOOL recording;
 
-@property (strong, nonatomic)  YSFInputToolBar *toolBar;
-@property (strong, nonatomic)  YSFActionBar *actionBar;
-@property (strong, nonatomic)  YSFInputEmoticonContainerView *emoticonContainer;
-@property (strong, nonatomic)  NSString *inputText;
+@property (strong, nonatomic) YSFInputToolBar *toolBar;
+@property (strong, nonatomic) YSFActionBar *actionBar;
+@property (strong, nonatomic) YSFInputEmoticonContainerView *emoticonContainer;
+@property (strong, nonatomic) NSString *inputText;
 
-@property (weak,nonatomic)UIViewController* containerController;
+@property (weak, nonatomic) UIViewController *containerController;
+
++ (Class)actionBarClass;
++ (Class)toolBarClass;
 
 - (instancetype)initWithFrame:(CGRect)frame inputType:(YSFInputStatus)inputStatus;
 

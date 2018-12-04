@@ -267,6 +267,21 @@
 #define     YSFApiKeyEvaluationModifyEnable     @"enable_evaluation_muttimes"
 #define     YSFApiKeyEvaluationModifyTimeout    @"evaluation_timeout"
 #define     YSFApiKeyEvaluationModifyMaxTime    @"evaluation_modify_limit"
+#define     YSFApiKeyEvaluationScoreType        @"scoreType"
+#define     YSFApiKeyEvaluationWebAppSort       @"webappSort"
+#define     YSFApiKeyEvaluationWxWbSort         @"wxwbSort"
+#define     YSFApiKeyEvaluationTagRequired      @"tagRequired"
+#define     YSFApiKeyEvaluationCommentRequired  @"commentRequired"
+//会话转接相关
+#define     YSFApiKeySessionTransferSwitch      @"session_transfer_switch"
+#define     YSFApiKeyTransferOldSessionId       @"old_sessionid"
+#define     YSFApiKeySessionTransferMessage     @"sessionTransferMessage"
+//自定义相关
+#define     YSFApiKeyCustomMessageClass         @"custom_message_class"
+#define     YSFApiKeyCustomMessageID            @"custom_message_id"
+#define     YSFApiKeyCustomMessageSourceType    @"custom_message_source_type"
+#define     YSFApiKeyCustomMessageData          @"custom_message_data"
+
 
 #define     YSFApiValueIOS              @"iOS"
 
@@ -354,6 +369,8 @@ typedef enum : NSUInteger {
     YSFCommandInviteEvaluation          =   10004,  //邀请评价
     YSFCommandMiniAppTip                =   10005,  //小程序提醒
     YSFCommandClickNotification         =   10006,  //可点击的通知
+    YSFCommandHistoryNotification       =   10007,  //历史消息提示
+    YSFCommandCustomMessage             =   10008,  //自定义消息
 
 
 } YSFCommand;

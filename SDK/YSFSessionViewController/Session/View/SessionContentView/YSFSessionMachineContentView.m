@@ -21,35 +21,38 @@
 
 
 @interface QuestionLink : NSObject
+
 @property (nonatomic, copy) NSDictionary *questionDict;
 
 @end
+
 
 @implementation QuestionLink
 
 @end
 
 
-@interface YSFSessionMachineContentView()<YSFAttributedLabelDelegate, YSFAttributedTextContentViewDelegate>
+@interface YSFSessionMachineContentView() <YSFAttributedLabelDelegate, YSFAttributedTextContentViewDelegate>
+
 @property (nonatomic, strong) UIView *content;
 @property (nonatomic, strong) NSMutableArray<UIImageView *> *imageViewsArray;
 @property (nonatomic, strong) UIView *reasonView;
+
 @end
 
 @implementation YSFSessionMachineContentView
-
--(instancetype)initSessionMessageContentView
-{
+-(instancetype)initSessionMessageContentView {
     if (self = [super initSessionMessageContentView]) {
-        _content = [UIView new];
+        _content = [[UIView alloc] init];
         [self addSubview:_content];
-        _imageViewsArray = [NSMutableArray new];
+        _imageViewsArray = [NSMutableArray array];
     }
     return self;
 }
 
-- (void)refresh:(YSFMessageModel *)data{
+- (void)refresh:(YSFMessageModel *)data {
     [super refresh:data];
+    CGFloat lineHeight = 1. / [UIScreen mainScreen].scale;
     __block CGFloat offsetY = self.model.contentViewInsets.top;
 
     [_content ysf_removeAllSubviews];
@@ -69,8 +72,7 @@
         offsetY += 15.5;
         answerLabel.ysf_frameWidth = self.model.contentSize.width;
         CGSize size = [answerLabel.attributedTextContentView sizeThatFits:CGSizeZero];
-        answerLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY,
-                                       self.model.contentSize.width, size.height);
+        answerLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY, self.model.contentSize.width, size.height);
         [answerLabel layoutSubviews];
         [_content addSubview:answerLabel];
         offsetY += size.height;
@@ -94,19 +96,15 @@
         questionLabel.ysf_frameWidth = self.model.contentSize.width;
         CGSize size = [questionLabel.attributedTextContentView sizeThatFits:CGSizeZero];
         offsetY += 15.5;
-        questionLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY,
-                                         self.model.contentSize.width, size.height);
+        questionLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY, self.model.contentSize.width, size.height);
         [questionLabel layoutSubviews];
         [_content addSubview:questionLabel];
         offsetY += size.height;
         offsetY += 13;
-    }
-    else if ((attachment.answerArray.count == 1 && attachment.isOneQuestionRelevant)
-             || attachment.answerArray.count > 1)
-    {
-        UIView *splitLine = [UIView new];
+    } else if ((attachment.answerArray.count == 1 && attachment.isOneQuestionRelevant) || attachment.answerArray.count > 1) {
+        UIView *splitLine = [[UIView alloc] init];
         splitLine.backgroundColor = YSFRGB(0xdbdbdb);
-        splitLine.ysf_frameHeight = 0.5;
+        splitLine.ysf_frameHeight = lineHeight;
         splitLine.ysf_frameLeft = 5;
         splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
         splitLine.ysf_frameTop = offsetY;
@@ -115,7 +113,7 @@
         [attachment.answerArray enumerateObjectsUsingBlock:^(NSDictionary *dict, NSUInteger idx, BOOL * _Nonnull stop) {
             NSString *question = [dict objectForKey:YSFApiKeyQuestion];
             if (question) {
-                UIView *point = [UIView new];
+                UIView *point = [[UIView alloc] init];
                 point.backgroundColor = YSFRGB(0xd6d6d6);
                 point.ysf_frameHeight = 7.5;
                 point.ysf_frameLeft = 18;
@@ -132,8 +130,7 @@
                 [questionLabel addCustomLink:questionLink forRange:NSMakeRange(0, question.length)];
                 CGSize size = [questionLabel sizeThatFits:CGSizeMake(self.model.contentSize.width - 15, CGFLOAT_MAX)];
                 offsetY += 15.5;
-                questionLabel.frame = CGRectMake(self.model.contentViewInsets.left + 15, offsetY,
-                                                 self.model.contentSize.width - 15, size.height);
+                questionLabel.frame = CGRectMake(self.model.contentViewInsets.left + 15, offsetY, self.model.contentSize.width - 15, size.height);
                 [self.content addSubview:questionLabel];
                 offsetY += size.height;
                 offsetY += -9;
@@ -144,9 +141,9 @@
     
     if (attachment.operatorHint && attachment.operatorHintDesc.length > 0) {
         if (_content.subviews.count > 0) {
-            UIView *splitLine = [UIView new];
+            UIView *splitLine = [[UIView alloc] init];
             splitLine.backgroundColor = YSFRGB(0xdbdbdb);
-            splitLine.ysf_frameHeight = 0.5;
+            splitLine.ysf_frameHeight = lineHeight;
             splitLine.ysf_frameLeft = 5;
             splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
             splitLine.ysf_frameTop = offsetY;
@@ -162,8 +159,7 @@
         questionLabel.ysf_frameWidth = self.model.contentSize.width;
         CGSize size = [questionLabel.attributedTextContentView sizeThatFits:CGSizeZero];
         offsetY += 15.5;
-        questionLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY,
-                                         self.model.contentSize.width, size.height);
+        questionLabel.frame = CGRectMake(self.model.contentViewInsets.left, offsetY, self.model.contentSize.width, size.height);
         [questionLabel layoutSubviews];
         [_content addSubview:questionLabel];
         offsetY += size.height;
@@ -171,30 +167,29 @@
     }
     
     if (attachment.evaluation != YSFEvaluationSelectionTypeInvisible && attachment.shouldShow) {
-        UIView *splitLine = [UIView new];
+        UIView *splitLine = [[UIView alloc] init];
         splitLine.backgroundColor = YSFRGB(0xdbdbdb);
-        splitLine.ysf_frameHeight = 0.5;
+        splitLine.ysf_frameHeight = lineHeight;
         splitLine.ysf_frameLeft = 5;
         splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
         splitLine.ysf_frameTop = offsetY;
         [_content addSubview:splitLine];
         
-        UIView *splitLine2 = [UIView new];
+        UIView *splitLine2 = [[UIView alloc] init];
         splitLine2.backgroundColor = YSFRGB(0xdbdbdb);
         splitLine2.ysf_frameHeight = 17;
         splitLine2.ysf_frameLeft = (self.ysf_frameWidth - 5) / 2;
-        splitLine2.ysf_frameWidth = 0.5;
+        splitLine2.ysf_frameWidth = 1. / [UIScreen mainScreen].scale;
         splitLine2.ysf_frameTop = offsetY + 14;
         [_content addSubview:splitLine2];
         
-        UIButton *yes = [UIButton new];
+        UIButton *yes = [[UIButton alloc] init];
         [yes setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
         [yes setTitle:@"有用" forState:UIControlStateNormal];
         if (attachment.evaluation == YSFEvaluationSelectionTypeYes) {
             yes.selected = YES;
             [yes setImage:[UIImage ysf_imageInKit:@"icon_yes_selected"] forState:UIControlStateNormal];
-        }
-        else {
+        } else {
             [yes setImage:[UIImage ysf_imageInKit:@"icon_yes_unselected"] forState:UIControlStateNormal];
         }
         yes.ysf_frameTop = offsetY + 2;
@@ -205,14 +200,13 @@
         [yes addTarget:self action:@selector(onSelectYes:) forControlEvents:UIControlEventTouchUpInside];
         [_content addSubview:yes];
         
-        UIButton *no = [UIButton new];
+        UIButton *no = [[UIButton alloc] init];
         [no setTitleColor:YSFRGB(0x666666) forState:UIControlStateNormal];
         [no setTitle:@"没用" forState:UIControlStateNormal];
         if (attachment.evaluation == YSFEvaluationSelectionTypeNo) {
             no.selected = YES;
             [no setImage:[UIImage ysf_imageInKit:@"icon_no_selected"] forState:UIControlStateNormal];
-        }
-        else {
+        } else {
             [no setImage:[UIImage ysf_imageInKit:@"icon_no_unselected"] forState:UIControlStateNormal];
         }
         no.ysf_frameTop = offsetY + 2;
@@ -225,17 +219,17 @@
         offsetY += yes.ysf_frameHeight;
         
         if (attachment.evaluationReason) {
-            UIView *reasonView = [UIView new];
+            UIView *reasonView = [[UIView alloc] init];
             self.reasonView = reasonView;
             reasonView.backgroundColor = YSFRGB(0xF9F9F9);
             reasonView.layer.cornerRadius = 2;
-            reasonView.layer.borderWidth = 0.5;
+            reasonView.layer.borderWidth = lineHeight;
             reasonView.layer.borderColor = YSFRGB(0xefefef).CGColor;
             reasonView.userInteractionEnabled = YES;
             reasonView.ysf_frameTop = offsetY;
             reasonView.ysf_frameLeft = 10+3;
             reasonView.ysf_frameWidth = self.ysf_frameWidth - 10*2;
-            UILabel *reasonLabel = [UILabel new];
+            UILabel *reasonLabel = [[UILabel alloc] init];
             reasonLabel.backgroundColor = YSFRGB(0xF9F9F9);
             reasonLabel.numberOfLines = 3;
             reasonLabel.textColor = YSFRGB(0x666666);
@@ -248,7 +242,7 @@
             } else {
                 reasonLabel.text = attachment.evaluationGuide;
             }
-            CGFloat height = [reasonLabel.text boundingRectWithSize:CGSizeMake(CGRectGetWidth(reasonLabel.bounds), 60) options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]} context:nil].size.height;
+            CGFloat height = [reasonLabel.text boundingRectWithSize:CGSizeMake(CGRectGetWidth(reasonLabel.bounds), 60)  options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]} context:nil].size.height;
             reasonView.ysf_frameHeight = height > 25 ? height : 25;
             reasonLabel.ysf_frameHeight = height > 25 ? height : 25;
             [reasonView addSubview:reasonLabel];
@@ -266,7 +260,7 @@
     }
     
     if (![YSF_NIMSDK sharedSDK].sdkOrKf && (attachment.evaluation == YSFEvaluationSelectionTypeYes || attachment.evaluation == YSFEvaluationSelectionTypeNo)) {
-        UIImageView *evaluationResult = [UIImageView new];
+        UIImageView *evaluationResult = [[UIImageView alloc] init];
         evaluationResult.backgroundColor = [UIColor whiteColor];
         evaluationResult.ysf_frameWidth = 28;
         evaluationResult.ysf_frameHeight = 28;
@@ -275,11 +269,10 @@
         evaluationResult.clipsToBounds=YES;
         evaluationResult.layer.cornerRadius = evaluationResult.frame.size.width/2;
         evaluationResult.layer.borderColor = YSFRGB(0xd3d3d3).CGColor;
-        evaluationResult.layer.borderWidth = 0.5;
+        evaluationResult.layer.borderWidth = lineHeight;
         if (attachment.evaluation == YSFEvaluationSelectionTypeYes) {
             evaluationResult.image = [UIImage ysf_imageInKit:@"icon_yes_selected"];
-        }
-        else {
+        } else {
             evaluationResult.image = [UIImage ysf_imageInKit:@"icon_no_selected"];
         }
         evaluationResult.contentMode = UIViewContentModeCenter;
@@ -287,16 +280,16 @@
         [_content addSubview:evaluationResult];
         
         if (![attachment.evaluationContent isEqualToString:@""] && (attachment.evaluation == YSFEvaluationSelectionTypeNo)) {
-            UIView *splitLine = [UIView new];
+            UIView *splitLine = [[UIView alloc] init];
             splitLine.backgroundColor = YSFRGB(0xdbdbdb);
-            splitLine.ysf_frameHeight = 0.5;
+            splitLine.ysf_frameHeight = lineHeight;
             splitLine.ysf_frameLeft = 0;
             splitLine.ysf_frameWidth = self.ysf_frameWidth - 5;
             splitLine.ysf_frameTop = offsetY;
             [_content addSubview:splitLine];
-            offsetY += 0.5;
+            offsetY += lineHeight;
             offsetY += 10;  //空白间隙
-            UILabel *noReasonLabel = [UILabel new];
+            UILabel *noReasonLabel = [[UILabel alloc] init];
             noReasonLabel.ysf_frameTop = offsetY;
             noReasonLabel.ysf_frameLeft = 10;
             noReasonLabel.ysf_frameWidth = self.ysf_frameWidth - 25;
@@ -311,15 +304,12 @@
             offsetY += height;
             offsetY += 10;  //空白间隙
         }
-        
     }
 }
 
 
 #pragma mark - NIMAttributedLabelDelegate
-- (void)ysfAttributedLabel:(YSFAttributedLabel *)label
-             clickedOnLink:(id)strQuestion
-{
+- (void)ysfAttributedLabel:(YSFAttributedLabel *)label clickedOnLink:(id)strQuestion {
     if ([strQuestion isKindOfClass:[QuestionLink class]]) {
         QuestionLink *questionLink = strQuestion;
         YSFKitEvent *event = [[YSFKitEvent alloc] init];
@@ -327,19 +317,16 @@
         event.message = self.model.message;
         event.data = questionLink.questionDict;
         [self.delegate onCatchEvent:event];
-    }
-    else {
+    } else {
         YSFKitEvent *event = [[YSFKitEvent alloc] init];
         event.eventName = YSFKitEventNameTapLabelLink;
         event.message = self.model.message;
         event.data = strQuestion;
         [self.delegate onCatchEvent:event];
     }
-
 }
 
-- (YSFAttributedLabel *)newAttrubutedLabel
-{
+- (YSFAttributedLabel *)newAttrubutedLabel {
     YSFAttributedLabel *answerLabel = [[YSFAttributedLabel alloc] initWithFrame:CGRectZero];
     answerLabel.delegate = self;
     answerLabel.numberOfLines = 0;
@@ -353,8 +340,7 @@
     if (self.model.message.isOutgoingMsg) {
         answerLabel.textColor = uiConfig.customMessageTextColor;
         answerLabel.linkColor = uiConfig.customMessageHyperLinkColor;
-    }
-    else {
+    } else {
         answerLabel.textColor = uiConfig.serviceMessageTextColor;
         answerLabel.linkColor = uiConfig.serviceMessageHyperLinkColor;
     }
@@ -363,7 +349,7 @@
     return answerLabel;
 }
 
-- (void)layoutSubviews{
+- (void)layoutSubviews {
     [super layoutSubviews];
     if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
         _content.ysf_frameLeft = -5;
@@ -372,8 +358,7 @@
     _content.ysf_frameHeight = self.ysf_frameHeight;
 }
 
-- (void)onSelectYes:(UIButton *)sender
-{
+- (void)onSelectYes:(UIButton *)sender {
     if (sender.selected) {
         return;
     }
@@ -384,8 +369,7 @@
     [self.delegate onCatchEvent:event];
 }
 
-- (void)onSelectNo:(UIButton *)sender
-{
+- (void)onSelectNo:(UIButton *)sender {
     if (sender.selected) {
         return;
     }
@@ -404,12 +388,12 @@
 }
 
 #pragma mark Private Methods
-
-
 #pragma mark Custom Views on Text
 
-- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView viewForLink:(NSURL *)url identifier:(NSString *)identifier2 frame:(CGRect)frame
-{
+- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView
+                          viewForLink:(NSURL *)url
+                           identifier:(NSString *)identifier2
+                                frame:(CGRect)frame {
     NSURL *URL = url;
     NSString *identifier = identifier2;
     
@@ -424,10 +408,10 @@
     return button;
 }
 
-- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView viewForAttachment:(YSFTextAttachment *)attachment frame:(CGRect)frame
-{
-    if ([attachment isKindOfClass:[YSFImageTextAttachment class]])
-    {
+- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView
+                    viewForAttachment:(YSFTextAttachment *)attachment
+                                frame:(CGRect)frame {
+    if ([attachment isKindOfClass:[YSFImageTextAttachment class]]) {
         // if the attachment has a hyperlinkURL then this is currently ignored
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:frame];
         imageView.backgroundColor = YSFRGB(0xebebeb);
@@ -471,9 +455,7 @@
         
         [_imageViewsArray addObject:imageView];
         return imageView;
-    }
-    else if ([attachment isKindOfClass:[YSFObjectTextAttachment class]])
-    {
+    } else if ([attachment isKindOfClass:[YSFObjectTextAttachment class]]) {
         UIImageView *someView = [[UIImageView alloc] initWithFrame:frame];
         NSInteger type = [[attachment.attributes objectForKey:@"type"] integerValue];
         if (type == 0) {    //emoji
@@ -482,18 +464,13 @@
             UIImage *image = [UIImage imageNamed:emoticon.filename];
             someView.image = image;
         }
-        
         return someView;
     }
-    
     return nil;
 }
 
-
 #pragma mark Actions
-
-- (void)tapImage:(UITapGestureRecognizer *)gesture
-{
+- (void)tapImage:(UITapGestureRecognizer *)gesture {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     event.eventName = YSFKitEventNameTapRichTextImage;
     event.message = self.model.message;
@@ -509,8 +486,7 @@
     [self.delegate onCatchEvent:event];
 }
 
-- (void)linkPushed:(YSFLinkButton *)button
-{
+- (void)linkPushed:(YSFLinkButton *)button {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     event.eventName = YSFKitEventNameTapLabelLink;
     event.message = self.model.message;

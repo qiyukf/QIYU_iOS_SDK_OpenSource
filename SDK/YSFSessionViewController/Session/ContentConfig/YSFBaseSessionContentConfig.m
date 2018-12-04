@@ -59,13 +59,13 @@
 
 
 @interface YSFSessionContentConfigFactory ()
-@property (nonatomic,strong)    NSDictionary                *dict;
+
+@property (nonatomic, strong) NSDictionary *dict;
+
 @end
 
 @implementation YSFSessionContentConfigFactory
-
-+ (instancetype)sharedFacotry
-{
++ (instancetype)sharedFacotry {
     static YSFSessionContentConfigFactory *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -74,22 +74,19 @@
     return instance;
 }
 
-- (instancetype)init
-{
-    if (self = [super init])
-    {
-        _dict = @{@(YSF_NIMMessageTypeText)         :       [YSFTextContentConfig new],
-                  @(YSF_NIMMessageTypeImage)        :       [YSFImageContentConfig new],
-                  @(YSF_NIMMessageTypeAudio)        :       [YSFAudioContentConfig new],
-                  @(YSF_NIMMessageTypeVideo)        :       [YSFVideoContentConfig new],
-                  @(YSF_NIMMessageTypeFile)         :       [YSFFileContentConfig new],
-                  @(YSF_NIMMessageTypeLocation)     :       [YSFLocationContentConfig new]};
+- (instancetype)init {
+    if (self = [super init]) {
+        _dict = @{@(YSF_NIMMessageTypeText) : [[YSFTextContentConfig alloc] init],
+                  @(YSF_NIMMessageTypeImage) : [[YSFImageContentConfig alloc] init],
+                  @(YSF_NIMMessageTypeAudio) : [[YSFAudioContentConfig alloc] init],
+                  @(YSF_NIMMessageTypeVideo) : [[YSFVideoContentConfig alloc] init],
+                  @(YSF_NIMMessageTypeFile) : [[YSFFileContentConfig alloc] init],
+                  @(YSF_NIMMessageTypeLocation) : [[YSFLocationContentConfig alloc] init]};
     }
     return self;
 }
 
-- (id<YSFSessionContentConfig>)configBy:(YSF_NIMMessage *)message
-{
+- (id<YSFSessionContentConfig>)configBy:(YSF_NIMMessage *)message {
     id<YSFSessionContentConfig> config = nil;
     if (_queryCustomContentConifgBlock) {
         config = _queryCustomContentConifgBlock(message);
@@ -107,21 +104,17 @@
                 YSFOrderOperation *orderOperation = (YSFOrderOperation *)customObject.attachment;
                 message.text = [orderOperation.templateInfo ysf_jsonString:@"label"];
                 config = [[YSFTextContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFSessionClose class]]) {
+            } else if ([customObject.attachment isKindOfClass:[YSFSessionClose class]]) {
                 config = [[YSFTextContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFWelcome class]]) {
+            } else if ([customObject.attachment isKindOfClass:[YSFWelcome class]]) {
                 YSFWelcome *welcome = (YSFWelcome *)customObject.attachment;
                 message.text = welcome.welcome;
                 config = [[YSFTextContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFBotText class]]) {
+            } else if ([customObject.attachment isKindOfClass:[YSFBotText class]]) {
                 YSFBotText *botText = (YSFBotText *)customObject.attachment;
                 message.text = botText.text;
                 config = [[YSFTextContentConfig alloc] init];
-            }
-            else if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]) {
+            } else if ([customObject.attachment isKindOfClass:[YSFReportQuestion class]]) {
                 YSFReportQuestion *reportQuestion = (YSFReportQuestion *)customObject.attachment;
                 message.text = reportQuestion.question;
                 config = [[YSFTextContentConfig alloc] init];
@@ -132,12 +125,10 @@
             }
         }
     }
-    if (config == nil)
-    {
+    if (config == nil) {
         config = [YSFUnsupportContentConfig sharedConfig];
     }
-    if ([config isKindOfClass:[YSFBaseSessionContentConfig class]])
-    {
+    if ([config isKindOfClass:[YSFBaseSessionContentConfig class]]) {
         [(YSFBaseSessionContentConfig *)config setMessage:message];
     }
     return config;

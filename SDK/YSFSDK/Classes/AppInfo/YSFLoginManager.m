@@ -44,7 +44,7 @@ static NSInteger YSFMaxRetryDelay = 64;
                     [weakSelf.delegate onLoginSuccess:account];
                 }
             } else {
-                [self runLoginErrorCallback:error];
+                [weakSelf runLoginErrorCallback:error];
             }
         }];
     }

@@ -26,8 +26,10 @@ typedef enum : NSUInteger {
 - (void)didSendSessionRequest:(NSError *)error shopId:(NSString *)shopId;
 - (void)didReceiveSessionError:(NSError *)error
                        session:(YSFServiceSession *)session
+                        bypass:(BOOL)bypass
                         shopId:(NSString *)shopId;
 - (void)didClose:(BOOL)evaluate session:(YSFServiceSession *)session shopId:(NSString *)shopId;
+- (void)didRevokeMessage:(YSF_NIMMessage *)message;
 
 @end
 
@@ -50,9 +52,13 @@ typedef enum : NSUInteger {
 - (void)addStaffIconURL:(NSString *)iconURL forStaffId:(NSString *)staffId;
 - (NSString *)getIconURLFromStaffId:(NSString *)staffId;
 - (void)updateStaffInfoForOnlineSession:(NSString *)shopId;
+- (NSString *)getOnlineStaffId:(NSString *)shopId;
 
 - (NSDictionary *)getShopInfo;
 - (void)removeShopInfo:(NSString *)shopId;
+
+- (void)setLastSessionId:(long long)sessionId forShopId:(NSString *)shopId;
+- (long long)getLastSessionIdForShopId:(NSString *)shopId;
 
 - (NSDictionary *)getRecentEvaluationMemoryDataByShopId:(NSString *)shopId;
 - (NSDictionary *)getHistoryEvaluationMemoryDataByShopId:(NSString *)shopId sessionId:(long long)sessionId;

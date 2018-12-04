@@ -17,6 +17,7 @@
     setting.sessionOpenSwitch = [json ysf_jsonBool:YSFApiKeySessionOpenSwitch];
     setting.sessionEndSwitch = [json ysf_jsonBool:YSFApiKeySessionEndSwitch];
     setting.sessionTimeoutSwitch = [json ysf_jsonBool:YSFApiKeySessionTimeoutSwitch];
+    setting.sessionTransferSwitch = [json ysf_jsonBool:YSFApiKeySessionTransferSwitch];
     setting.staffReadSwitch = [json ysf_jsonBool:YSFApiKeyStaffReadSwitch];
     setting.inputSwitch = [json ysf_jsonBool:YSFApiKeyInputSwitch];
     setting.sendingRate = [json ysf_jsonDouble:YSFApiKeySendingRate];
@@ -30,6 +31,7 @@
                            YSFApiKeySessionOpenSwitch : @(self.sessionOpenSwitch),
                            YSFApiKeySessionEndSwitch : @(self.sessionEndSwitch),
                            YSFApiKeySessionTimeoutSwitch : @(self.sessionTimeoutSwitch),
+                           YSFApiKeySessionTransferSwitch : @(self.sessionTransferSwitch),
                            YSFApiKeyStaffReadSwitch : @(self.staffReadSwitch),
                            YSFApiKeyInputSwitch : @(self.inputSwitch),
                            YSFApiKeySendingRate : @(self.sendingRate),

@@ -141,4 +141,8 @@ alpha:((float)((rgbaValue & 0xFF000000) >> 24))/255.0]
 #define RGBACOLOR(r,g,b,a)  [UIColor colorWithRed:(r)/255.0f green:(g)/255.0f blue:(b)/255.0f alpha:(a)]
 
 
+#pragma mark - NSError宏定义
+#define QYCustomMessageErrorDomain      @"QYCustomMessageErrorDomain"
+#define QYCustomMessageError(x)         [NSError errorWithDomain:QYCustomMessageErrorDomain code:(x) userInfo:nil]
+
 #endif

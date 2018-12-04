@@ -9,7 +9,7 @@
 #import "QYPOPSessionViewController.h"
 #import "YSFInputProtocol.h"
 #import "YSFMessageCellProtocol.h"
-#import "YSFSessionMsgDatasource.h"
+#import "YSFSessionMsgDataSource.h"
 #import "YSFInputView.h"
 #import "YSFInputTextView.h"
 #import "YSFSessionViewLayoutManager.h"
@@ -29,6 +29,7 @@
 #import "YSFEvaluationReasonView.h"
 
 @class YSFReachability;
+@protocol QYCustomMessageDelegate;
 typedef void (^ChangeHumanOrRobotBlock)(BOOL humanOrRobot);
 typedef void (^ChangeEvaluationEnabledBlock)(BOOL evaluationEnabled);
 typedef void (^OnEvaluateBlock)(long long sessionId, YSF_NIMMessage *updatedMessage);
@@ -53,7 +54,7 @@ NIMSessionMsgDatasourceDelegate>
 @property (nonatomic, strong, readonly) UIRefreshControl *refreshControl;
 
 @property (nonatomic, strong) YSFSessionViewLayoutManager *layoutManager;
-@property (nonatomic, strong) YSFSessionMsgDatasource *sessionDatasource;
+@property (nonatomic, strong) YSFSessionMsgDataSource *sessionDataSource;
 @property (nonatomic, strong) YSF_NIMMessage *messageForMenu;
 @property (nonatomic, strong, readonly) YSF_NIMSession *session;
 
@@ -64,10 +65,14 @@ NIMSessionMsgDatasourceDelegate>
 @property (nonatomic, strong) YSFReachability *reachability;
 @property (nonatomic, strong) YSFCustomLeftBarView *leftBarView;
 @property (nonatomic, strong) YSFEvaluationReasonView *evaluationResonView;
+@property (nonatomic, strong) UIView *topHoverView;
 
 @property (nonatomic, copy) ChangeHumanOrRobotBlock changeHumanOrRobotBlock;
 @property (nonatomic, copy) ChangeEvaluationEnabledBlock changeEvaluationEnabledBlock;
 @property (nonatomic, copy) OnEvaluateBlock onEvaluateBlock;
+
+@property (nonatomic, weak) id<QYCustomMessageDelegate> customMessageDelegate;
+@property (nonatomic, weak) id<QYCustomContentViewDelegate> customContentViewDelegate;
 
 
 - (void)sendMessage:(YSF_NIMMessage *)message;

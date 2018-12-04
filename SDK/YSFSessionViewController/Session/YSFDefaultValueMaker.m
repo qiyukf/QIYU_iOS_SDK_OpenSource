@@ -10,12 +10,14 @@
 #import "YSFKitUtil.h"
 
 @interface YSFDefaultValueMaker ()
+
 @property (nonatomic, strong) id<YSFExtraCellLayoutConfig> extraCellLayoutConfig;
+
 @end
 
-@implementation YSFDefaultValueMaker
 
-+ (instancetype)sharedMaker{
+@implementation YSFDefaultValueMaker
++ (instancetype)sharedMaker {
     static YSFDefaultValueMaker *maker;
     if (!maker) {
         static dispatch_once_t onceToken;
@@ -26,7 +28,7 @@
     return maker;
 }
 
-- (instancetype)init{
+- (instancetype)init {
     self = [super init];
     if (self) {
         _cellLayoutDefaultConfig = [[YSFCellLayoutDefaultConfig alloc] init];

@@ -9,11 +9,11 @@
 #import "YSFMessageCellMaker.h"
 #import "YSFMessageModel.h"
 #import "YSFTimestampModel.h"
+#import "QYCustomModel.h"
+
 @implementation YSFMessageCellMaker
 
-+ (YSFMessageCell *)cellInTable:(UITableView*)tableView
-                 forMessageMode:(YSFMessageModel *)model;
-{
++ (YSFMessageCell *)cellInTable:(UITableView *)tableView forModel:(YSFMessageModel *)model {
     id<YSFCellLayoutConfig> config = model.layoutConfig;
     NSString *identity = [config cellContent:model];
     YSFMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:identity];
@@ -26,9 +26,21 @@
     return (YSFMessageCell *)cell;
 }
 
-+ (YSFSessionTimestampCell *)cellInTable:(UITableView *)tableView
-                            forTimeModel:(YSFTimestampModel *)model
-{
++ (YSFCustomMessageCell *)cellInTable:(UITableView *)tableView forCustomModel:(QYCustomModel *)model {
+    NSString *identity = [model cellReuseIdentifier];
+    if (!identity.length) {
+        identity = NSStringFromClass([model class]);
+    }
+    YSFCustomMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:identity];
+    if (!cell) {
+        [tableView registerClass:[YSFCustomMessageCell class] forCellReuseIdentifier:identity];
+        cell = [tableView dequeueReusableCellWithIdentifier:identity];
+    }
+    [cell refreshData:model];
+    return cell;
+}
+
++ (YSFSessionTimestampCell *)cellInTable:(UITableView *)tableView forTimeModel:(YSFTimestampModel *)model {
     NSString *identity = @"time";
     YSFSessionTimestampCell *cell = [tableView dequeueReusableCellWithIdentifier:identity];
     if (!cell) {
@@ -38,7 +50,6 @@
     }
     [cell refreshData:model];
     return (YSFSessionTimestampCell *)cell;
-
 }
 
 

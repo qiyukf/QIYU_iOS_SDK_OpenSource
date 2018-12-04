@@ -31,11 +31,13 @@
 @property (nonatomic, copy) NSString *staffName;
 @property (nonatomic, copy) NSString *iconUrl;
 
+@property (nonatomic, assign) BOOL transferSession;
+@property (nonatomic, assign) long long oldSessionId;
+@property (nonatomic, copy) NSString *transferMessage;
+
 @property (nonatomic, copy) NSString *message;
 @property (nonatomic, copy) NSString *inQueeuNotify;
-@property (nonatomic, copy) NSDictionary *evaluation;
-@property (nonatomic, copy) NSString *inviteMsg;
-@property (nonatomic, copy) NSString *thanksMsg;
+@property (nonatomic, copy) NSString *evaluationString;
 @property (nonatomic, copy) NSArray<YSFActionInfo *> *actionInfoArray;
 
 + (YSFServiceSession *)dataByJson:(NSDictionary *)dict;

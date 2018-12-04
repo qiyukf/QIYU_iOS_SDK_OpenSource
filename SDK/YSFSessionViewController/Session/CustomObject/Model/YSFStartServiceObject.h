@@ -17,6 +17,10 @@
 @property (nonatomic, copy) NSString *message;
 @property (nonatomic, copy) NSString *accessTip;
 
+@property (nonatomic, assign) BOOL transferSession;
+@property (nonatomic, assign) long long oldSessionId;
+@property (nonatomic, copy) NSString *transferMessage;
+
 @property (nonatomic, copy) NSString *sessionId;
 @property (nonatomic, copy) NSString *serviceId;
 @property (nonatomic, assign) BOOL humanOrMachine;

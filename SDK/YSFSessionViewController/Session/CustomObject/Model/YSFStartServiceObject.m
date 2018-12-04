@@ -27,6 +27,10 @@
     dict[YSFApiKeyGroupName] = YSFStrParam(_groupName);
     dict[YSFApiKeyMessage] = YSFStrParam(_message);
     dict[YSFApiKeyAccessTip] = YSFStrParam(_accessTip);
+    
+    dict[YSFApiKeyTransferOldSessionId] = @(_oldSessionId);
+    dict[YSFApiKeySessionTransferMessage] = YSFStrParam(_transferMessage);
+    
     dict[YSFApiKeySessionId] = YSFStrParam(_sessionId);
     dict[YSFApiKeyExchange] = YSFStrParam(_serviceId);
     dict[YSFApiKeyStaffType] = @(!_humanOrMachine);
@@ -43,6 +47,11 @@
     instance.groupName = [dict ysf_jsonString:YSFApiKeyGroupName];
     instance.message = [dict ysf_jsonString:YSFApiKeyMessage];
     instance.accessTip = [dict ysf_jsonString:YSFApiKeyAccessTip];
+    
+    instance.oldSessionId = [dict ysf_jsonLongLong:YSFApiKeyTransferOldSessionId];
+    instance.transferSession = instance.oldSessionId ? YES : NO;
+    instance.transferMessage = [dict ysf_jsonString:YSFApiKeySessionTransferMessage];
+    
     instance.sessionId = [dict ysf_jsonString:YSFApiKeySessionId];
     instance.serviceId = [dict ysf_jsonString:YSFApiKeyExchange];
     instance.humanOrMachine = ![dict ysf_jsonInteger:YSFApiKeyStaffType];

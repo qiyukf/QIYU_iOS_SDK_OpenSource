@@ -12,114 +12,83 @@
 #import "YSFCoreText.h"
 #import "YSFMachineContentConfig.h"
 
+
 @interface YSFMachineResponse() <YSFAttributedTextContentViewDelegate>
 
 @property (nonatomic, strong) NSMutableArray<NSString *> *imageUrlStringArray;
 
 @end
 
-@implementation YSFMachineResponse
 
-- (NSString *)thumbText
-{
+@implementation YSFMachineResponse
+- (NSString *)thumbText {
     NSString *text = @"";
     if (_operatorHint) {
         text = [NSString stringWithFormat:@"%@", _operatorHintDesc];
-    }
-    else {
+    } else {
         text = [NSString stringWithFormat:@"%@", _answerLabel];
         for (NSDictionary *item in _answerArray) {
             NSString *answerText = item[@"answer"] ? : @"";
             text = [text stringByAppendingString:answerText];
         }
     }
-    
     return text;
 }
 
-- (YSFMachineContentConfig *)contentConfig
-{
-    return [YSFMachineContentConfig new];
+- (YSFMachineContentConfig *)contentConfig {
+    return [[YSFMachineContentConfig alloc] init];
 }
 
-- (NSDictionary *)encodeAttachment
-{
+- (NSDictionary *)encodeAttachment {
     NSMutableDictionary *dict   = [NSMutableDictionary dictionary];
     
-    dict[YSFApiKeyCmd]               = @(_command);
-    dict[YSFApiKeyQuestion]          = YSFStrParam(_originalQuestion);
+    dict[YSFApiKeyCmd] = @(_command);
+    dict[YSFApiKeyQuestion] = YSFStrParam(_originalQuestion);
     dict[YSFApiKeyEvaluation] = @(_evaluation);
     dict[YSFApiKeyEvaluationContent] = YSFStrParam(_evaluationContent);
-    dict[YSFApiKeyEvaluationReason]  = @(_evaluationReason);
-    dict[YSFApiKeyEvaluationGuide]   = YSFStrParam(_evaluationGuide);
-    dict[YSFApiKeyAnswerType]        = @(_answerType);
-    dict[YSFApiKeyOperatorHint]      = @(_operatorHint);
-    dict[YSFApiKeyOperatorHintDesc]  = YSFStrParam(_operatorHintDesc);
-
+    dict[YSFApiKeyEvaluationReason] = @(_evaluationReason);
+    dict[YSFApiKeyEvaluationGuide] = YSFStrParam(_evaluationGuide);
+    dict[YSFApiKeyAnswerType] = @(_answerType);
+    dict[YSFApiKeyOperatorHint] = @(_operatorHint);
+    dict[YSFApiKeyOperatorHintDesc] = YSFStrParam(_operatorHintDesc);
     if (_answerArray) {
-        NSData *arrayData = [NSJSONSerialization dataWithJSONObject:_answerArray
-                                                            options:0
-                                                              error:nil];
-        if (arrayData)
-        {
-            dict[YSFApiKeyAnswerList]  = [[NSString alloc] initWithData:arrayData
-                                                               encoding:NSUTF8StringEncoding];
+        NSData *arrayData = [NSJSONSerialization dataWithJSONObject:_answerArray options:0 error:nil];
+        if (arrayData) {
+            dict[YSFApiKeyAnswerList]  = [[NSString alloc] initWithData:arrayData encoding:NSUTF8StringEncoding];
         }
     }
-    
-    dict[YSFApiKeyAnswerLabel]  = YSFStrParam(_answerLabel);
+    dict[YSFApiKeyAnswerLabel] = YSFStrParam(_answerLabel);
     
     return dict;
 }
 
-+ (instancetype)objectByDict:(NSDictionary *)dict
-{
++ (instancetype)objectByDict:(NSDictionary *)dict {
     YSFMachineResponse *instance = [[YSFMachineResponse alloc] init];
-    instance.command             = [dict ysf_jsonInteger:YSFApiKeyCmd];
-    instance.originalQuestion = [dict ysf_jsonString:YSFApiKeyQuestion];
-    if (!instance.originalQuestion) {
-        instance.originalQuestion = @"";
-    }
+    instance.command = [dict ysf_jsonInteger:YSFApiKeyCmd];
+    instance.originalQuestion = YSFStrParam([dict ysf_jsonString:YSFApiKeyQuestion]);
     instance.evaluation = [dict ysf_jsonInteger:YSFApiKeyEvaluation];
-    instance.evaluationContent = [dict ysf_jsonString:YSFApiKeyEvaluationContent];
-    if (!instance.evaluationContent) {
-        instance.evaluationContent = @"";
-    }
+    instance.evaluationContent = YSFStrParam([dict ysf_jsonString:YSFApiKeyEvaluationContent]);
     instance.evaluationReason = [dict ysf_jsonBool:YSFApiKeyEvaluationReason];
-    instance.evaluationGuide = [dict ysf_jsonString:YSFApiKeyEvaluationGuide];
-    if (!instance.evaluationGuide) {
-        instance.evaluationGuide = @"";
-    }
-    
+    instance.evaluationGuide = YSFStrParam([dict ysf_jsonString:YSFApiKeyEvaluationGuide]);
     instance.answerType = [dict ysf_jsonInteger:YSFApiKeyAnswerType];
     instance.operatorHint = [dict ysf_jsonBool:YSFApiKeyOperatorHint];
-    instance.operatorHintDesc = [dict ysf_jsonString:YSFApiKeyOperatorHintDesc];
-    if (!instance.operatorHintDesc) {
-        instance.operatorHintDesc = @"";
-    }
+    instance.operatorHintDesc = YSFStrParam([dict ysf_jsonString:YSFApiKeyOperatorHintDesc]);
     NSString *answerList = [dict ysf_jsonString:YSFApiKeyAnswerList];
     if (answerList) {
         instance.answerArray = [answerList ysf_toArray];
     }
-    
-    instance.answerLabel = [dict ysf_jsonString:YSFApiKeyAnswerLabel];
-    if (!instance.answerLabel) {
-        instance.answerLabel = @"";
-    }
-    if (instance.answerArray && instance.answerArray.count == 1 && [instance.answerLabel isEqualToString:@""]) {
+    instance.answerLabel = YSFStrParam([dict ysf_jsonString:YSFApiKeyAnswerLabel]);
+    if (instance.answerArray && instance.answerArray.count == 1 && !instance.answerLabel.length) {
         instance.isOneQuestionRelevant = NO;
-    }
-    else {
+    } else {
         instance.isOneQuestionRelevant = YES;
     }
-    
     return instance;
 }
 
-- (NSMutableArray<NSString *> *)imageUrlStringArray
-{
+- (NSMutableArray<NSString *> *)imageUrlStringArray {
     if (_imageUrlStringArray == nil) {
-        self.imageUrlStringArray = [NSMutableArray new];
+        self.imageUrlStringArray = [NSMutableArray array];
         
         YSFAttributedTextView *textView = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
         textView.textDelegate = self;
@@ -143,14 +112,13 @@
         textView.attributedString = string;
         [textView layoutSubviews];
     }
-    
     return _imageUrlStringArray;
 }
 
-- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView viewForAttachment:(YSFTextAttachment *)attachment frame:(CGRect)frame
-{
-    if ([attachment isKindOfClass:[YSFImageTextAttachment class]])
-    {
+- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView
+                    viewForAttachment:(YSFTextAttachment *)attachment
+                                frame:(CGRect)frame {
+    if ([attachment isKindOfClass:[YSFImageTextAttachment class]]) {
         NSString *urlString = attachment.contentURL.relativeString;
         if (urlString.length) {
             [_imageUrlStringArray addObject:urlString];

@@ -8,14 +8,15 @@
 
 @interface YSFShopSettingInfo : NSObject
 
-@property (nonatomic, assign) BOOL sessionOpenSwitch;  //会话打开提示开关
-@property (nonatomic, assign) BOOL sessionEndSwitch;  //会话结束提示开关
-@property (nonatomic, assign) BOOL sessionTimeoutSwitch;  //会话超时提示开关
-@property (nonatomic, assign) BOOL staffReadSwitch;  //消息阅读状态开关
+@property (nonatomic, assign) BOOL sessionOpenSwitch;       //会话打开提示开关
+@property (nonatomic, assign) BOOL sessionEndSwitch;        //会话结束提示开关
+@property (nonatomic, assign) BOOL sessionTimeoutSwitch;    //会话超时提示开关
+@property (nonatomic, assign) BOOL sessionTransferSwitch;   //会话转接提示开关
+@property (nonatomic, assign) BOOL staffReadSwitch;         //消息阅读状态开关
 @property (nonatomic, assign) BOOL inputSwitch;
 @property (nonatomic, assign) double sendingRate;
-@property (nonatomic, assign) BOOL multEvaluationEnable;  //多次评价开关
-@property (nonatomic, assign) NSInteger evaluationTimeLimit;  //评价时效，单位：分钟
+@property (nonatomic, assign) BOOL multEvaluationEnable;    //多次评价开关
+@property (nonatomic, assign) NSInteger evaluationTimeLimit;    //评价时效，单位：分钟
 
 + (instancetype)instanceByJson:(NSDictionary *)json;
 - (NSDictionary *)toDict;

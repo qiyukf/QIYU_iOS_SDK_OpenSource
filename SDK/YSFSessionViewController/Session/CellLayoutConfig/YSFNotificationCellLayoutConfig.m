@@ -56,6 +56,9 @@
         return model.message.text;
     } else if ([object.attachment isKindOfClass:[YSFStartServiceObject class]]) {
         YSFStartServiceObject *attachment = (YSFStartServiceObject *)object.attachment;
+        if (attachment.transferSession && attachment.transferMessage.length) {
+            return attachment.transferMessage;
+        }
         if (attachment.accessTip.length) {
             return attachment.accessTip;
         }

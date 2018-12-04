@@ -18,9 +18,8 @@
 #import "NSString+FileTransfer.h"
 
 @implementation YSFMachineContentConfig
-- (CGSize)contentSize:(CGFloat)cellWidth
-{
-    CGFloat msgBubbleMaxWidth    = (cellWidth - 112);
+- (CGSize)contentSize:(CGFloat)cellWidth {
+    CGFloat msgBubbleMaxWidth = (cellWidth - 112);
     CGFloat msgContentMaxWidth = msgBubbleMaxWidth - self.contentViewInsets.left - self.contentViewInsets.right;
     CGFloat offsetX = 0;
     __block CGFloat offsetY = 0;
@@ -51,17 +50,13 @@
         if (size.width > msgContentMaxWidth) {
             size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth, CGFLOAT_HEIGHT_UNKNOWN)];
         }
-        
         if (offsetX == 0) {
             offsetX = size.width;
         }
         offsetY += 15.5;
         offsetY += size.height;
         offsetY += 13;
-    }
-    else if ((attachment.answerArray.count == 1 && attachment.isOneQuestionRelevant)
-             || attachment.answerArray.count > 1)
-    {
+    } else if ((attachment.answerArray.count == 1 && attachment.isOneQuestionRelevant) || attachment.answerArray.count > 1) {
         offsetX = msgContentMaxWidth;
         [attachment.answerArray enumerateObjectsUsingBlock:^(NSDictionary *dict, NSUInteger idx, BOOL * _Nonnull stop) {
             NSString *question = [dict objectForKey:YSFApiKeyQuestion];
@@ -78,17 +73,19 @@
     }
     
     if (attachment.operatorHint && attachment.operatorHintDesc.length > 0) {
-        offsetX = msgContentMaxWidth;
-        
         NSString *tmpOperatorHintDesc = attachment.operatorHintDesc; //[attachment.operatorHintDesc unescapeHtml];
         NSAttributedString *attributedString = [tmpOperatorHintDesc ysf_attributedString:self.message.isOutgoingMsg];
-        CGSize size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth, CGFLOAT_HEIGHT_UNKNOWN)];
-        
+        CGSize size = [attributedString intrinsicContentSizeWithin:CGSizeMake(CGFLOAT_WIDTH_UNKNOWN, CGFLOAT_HEIGHT_UNKNOWN)];
+        if (size.width > msgContentMaxWidth) {
+            size = [attributedString intrinsicContentSizeWithin:CGSizeMake(msgContentMaxWidth, CGFLOAT_HEIGHT_UNKNOWN)];
+            offsetX = msgContentMaxWidth;
+        } else {
+            offsetX = size.width;
+        }
         offsetY += 15.5;
         offsetY += size.height;
         offsetY += 13;
     }
-//    attachment.rawStringForCopy = label.attributedString.string;
     
     if (attachment.evaluation != YSFEvaluationSelectionTypeInvisible && attachment.shouldShow) {
         offsetY += 45;
@@ -102,26 +99,25 @@
             }
             CGFloat height = [showString boundingRectWithSize:CGSizeMake(msgContentMaxWidth, 60) options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]} context:nil].size.height;
             offsetY += height > 25 ? height : 25;
-            offsetY += 10;      //底部空白
+            offsetY += 10;
         }
     }
     //底部显示差评原因
-    if (![YSF_NIMSDK sharedSDK].sdkOrKf && (attachment.evaluation == YSFEvaluationSelectionTypeNo) && ![attachment.evaluationContent isEqualToString:@""]) {
+    if (![YSF_NIMSDK sharedSDK].sdkOrKf
+        && (attachment.evaluation == YSFEvaluationSelectionTypeNo)
+        && ![attachment.evaluationContent isEqualToString:@""]) {
         offsetY += 0.5;
         offsetX = msgContentMaxWidth;
         offsetY += 10;  //空白间隙高度
-        
         NSString *text = [NSString stringWithFormat:@"差评原因：%@", attachment.evaluationContent];
         CGFloat height = [text boundingRectWithSize:CGSizeMake(msgContentMaxWidth, MAXFLOAT) options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]} context:nil].size.height;
         offsetY += height;
         offsetY += 10;  //空白间隙高度
     }
-    
     return CGSizeMake(offsetX, offsetY);
 }
 
-- (NSString *)cellContent
-{
+- (NSString *)cellContent {
     return @"YSFSessionMachineContentView";
 }
 
@@ -129,9 +125,7 @@
     return UIEdgeInsetsMake(0, 18, 0, 12);
 }
 
-
-- (YSFAttributedLabel *)newAttrubutedLabel
-{
+- (YSFAttributedLabel *)newAttrubutedLabel {
     YSFAttributedLabel *answerLabel = [[YSFAttributedLabel alloc] initWithFrame:CGRectZero];
     answerLabel.numberOfLines = 0;
     answerLabel.underLineForLink = NO;
@@ -143,8 +137,7 @@
     if (self.message.isOutgoingMsg) {
         answerLabel.textColor = uiConfig.customMessageTextColor;
         answerLabel.linkColor = uiConfig.customMessageHyperLinkColor;
-    }
-    else {
+    } else {
         answerLabel.textColor = uiConfig.serviceMessageTextColor;
         answerLabel.linkColor = uiConfig.serviceMessageHyperLinkColor;
     }
@@ -152,7 +145,5 @@
     answerLabel.font = [UIFont systemFontOfSize:fontSize];
     return answerLabel;
 }
-
-
 
 @end

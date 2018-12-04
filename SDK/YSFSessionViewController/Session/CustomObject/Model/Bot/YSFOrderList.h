@@ -1,7 +1,7 @@
 #import "YSFIMCustomSystemMessageApi.h"
 #import "YSFAction.h"
 #import "YSFCustomAttachment.h"
-#import "QYSessionViewController.h"
+#import "QYCommodityInfo.h"
 
 @interface QYSelectedCommodityInfo()
 

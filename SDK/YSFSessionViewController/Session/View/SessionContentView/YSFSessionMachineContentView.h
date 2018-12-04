@@ -13,5 +13,4 @@
 
 @property (nonatomic, strong, readonly) NSArray<UIImageView *> *imageViewsArray;
 
-
 @end

@@ -18,6 +18,10 @@
 #import "YSFApiDefines.h"
 
 @interface YSFSessionNotificationContentView() <YSFAttributedLabelDelegate>
+
+@property (nonatomic, strong) UIView *leftLineView;
+@property (nonatomic, strong) UIView *rightLineView;
+
 @end
 
 @implementation YSFSessionNotificationContentView
@@ -130,6 +134,17 @@
             
             if (notification.localCommand == YSFCommandMiniAppTip) {
                 [_label addCustomLink:@"YSFCommandMiniAppTip" forRange:NSMakeRange(notification.message.length-6, 6)];
+            } else if (notification.localCommand == YSFCommandHistoryNotification) {
+                if (!_leftLineView) {
+                    _leftLineView = [[UIView alloc] initWithFrame:CGRectZero];
+                    _leftLineView.backgroundColor = [[QYCustomUIConfig sharedInstance] tipMessageTextColor];
+                    [self addSubview:_leftLineView];
+                }
+                if (!_rightLineView) {
+                    _rightLineView = [[UIView alloc] initWithFrame:CGRectZero];
+                    _rightLineView.backgroundColor = [[QYCustomUIConfig sharedInstance] tipMessageTextColor];
+                    [self addSubview:_rightLineView];
+                }
             }
         }
     }
@@ -142,6 +157,29 @@
     self.label.ysf_frameCenterY = self.ysf_frameHeight * .5f;
     self.bubbleImageView.frame = CGRectInset(self.label.frame, -8, 0);
     self.label.ysf_frameCenterY = self.label.ysf_frameCenterY + 2;
+    
+    _leftLineView.hidden = YES;
+    _rightLineView.hidden = YES;
+    self.bubbleImageView.hidden = NO;
+    YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.model.message.messageObject;
+    if ([object.attachment isKindOfClass:[YSFNotification class]]) {
+        YSFNotification *notification = (YSFNotification *)object.attachment;
+        if (notification.localCommand == YSFCommandHistoryNotification) {
+            _leftLineView.hidden = NO;
+            _rightLineView.hidden = NO;
+            self.bubbleImageView.hidden = YES;
+            CGFloat lineHeight = 1. / [UIScreen mainScreen].scale;
+            CGFloat space = 20;
+            _leftLineView.frame = CGRectMake(space,
+                                             roundf((self.ysf_frameHeight - lineHeight) / 2),
+                                             CGRectGetMinX(self.bubbleImageView.frame) - space,
+                                             lineHeight);
+            _rightLineView.frame = CGRectMake(CGRectGetMaxX(self.bubbleImageView.frame),
+                                             CGRectGetMinY(_leftLineView.frame),
+                                             CGRectGetWidth(_leftLineView.frame),
+                                             lineHeight);
+        }
+    }
 }
 
 #pragma mark - NIMAttributedLabelDelegate

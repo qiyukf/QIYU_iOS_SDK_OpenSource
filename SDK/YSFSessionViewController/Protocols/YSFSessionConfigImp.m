@@ -18,8 +18,7 @@
 
 @implementation YSFSessionConfigImp
 
-+ (instancetype)sharedInstance
-{
++ (instancetype)sharedInstance {
     static YSFSessionConfigImp *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -28,25 +27,19 @@
     return instance;
 }
 
-- (id<YSFCellLayoutConfig>)layoutConfigWithMessage:(YSF_NIMMessage *)message
-{
+- (id<YSFCellLayoutConfig>)layoutConfigWithMessage:(YSF_NIMMessage *)message {
     id layoutConfig = nil;
     id object = message.messageObject;
     if (message.messageType == YSF_NIMMessageTypeTip) {
         layoutConfig =  [YSFNotificationCellLayoutConfig new];
-    }
-    else if ([object isKindOfClass:[YSF_NIMCustomObject class]])
-    {
+    } else if ([object isKindOfClass:[YSF_NIMCustomObject class]]) {
         id attachment = [(YSF_NIMCustomObject *)object attachment];
         if ([attachment isKindOfClass:[YSFStartServiceObject class]]
             || [attachment isKindOfClass:[YSFEvaluationTipObject class]]
             || [attachment isKindOfClass:[YSFNotification class]]
-            || [attachment isKindOfClass:[YSFBotCustomObject class]])
-        {
+            || [attachment isKindOfClass:[YSFBotCustomObject class]]) {
             layoutConfig =  [YSFNotificationCellLayoutConfig new];
-        }
-        else if ([attachment isKindOfClass:[YSFInviteEvaluationObject class]])
-        {
+        } else if ([attachment isKindOfClass:[YSFInviteEvaluationObject class]]) {
             layoutConfig =  [YSFInviteEvaluationCellLayoutConfig new];
         }
     }
