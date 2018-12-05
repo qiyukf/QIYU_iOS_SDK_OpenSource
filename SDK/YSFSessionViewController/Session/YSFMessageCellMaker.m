@@ -27,7 +27,10 @@
 }
 
 + (YSFCustomMessageCell *)cellInTable:(UITableView *)tableView forCustomModel:(QYCustomModel *)model {
-    NSString *identity = [model cellReuseIdentifier];
+    NSString *identity;
+    if ([model respondsToSelector:@selector(cellReuseIdentifier)]) {
+        identity = [model cellReuseIdentifier];
+    }
     if (!identity.length) {
         identity = NSStringFromClass([model class]);
     }

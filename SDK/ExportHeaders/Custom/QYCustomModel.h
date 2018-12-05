@@ -11,7 +11,7 @@
 @class QYCustomMessage;
 
 /**
- *  QYCustomModelLayoutDataSource：model布局协议
+ *  model布局协议
  */
 @protocol QYCustomModelLayoutDataSource <NSObject>
 
@@ -61,7 +61,7 @@
 
 
 /**
- *  QYCustomModel：自定义消息数据源基类（即用于消息列表刷新的数据源）
+ *  自定义消息数据源基类（即用于消息列表刷新的数据源）
  *  使用方法：针对需自定义的消息数据源，写子类继承QYCustomModel，并实现QYCustomModelLayoutDataSource协议
  */
 @interface QYCustomModel : NSObject <QYCustomModelLayoutDataSource>

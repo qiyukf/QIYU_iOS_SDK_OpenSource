@@ -20,6 +20,7 @@ typedef enum : NSUInteger {
 
 @class QYSource;
 @class QYStaffInfo;
+@class YSF_NIMMessage;
 @protocol YSFSessionProtocol <NSObject>
 
 - (void)didBeginSendReqeustWithShopId:(NSString *)shopId;

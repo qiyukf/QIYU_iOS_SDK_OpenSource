@@ -19,11 +19,11 @@ typedef NS_ENUM(NSInteger, QYCustomMessageSourceType) {
 
 
 /**
- *  QYCustomMessageCoding：QYCustomMessage序列化协议
+ *  QYCustomMessage序列化协议
  */
 @protocol QYCustomMessageCoding <NSObject>
 
-@required
+@optional
 /**
  *  缩略消息，用以显示在会话列表
  */
@@ -48,7 +48,7 @@ typedef NS_ENUM(NSInteger, QYCustomMessageSourceType) {
 
 
 /**
- *  QYCustomMessage：自定义消息基类
+ *  自定义消息基类
  *  使用方法：针对需自定义的消息，写子类继承QYCustomMessage，扩展所需属性，并实现QYCustomMessageCoding协议
  */
 @interface QYCustomMessage : NSObject <QYCustomMessageCoding>
