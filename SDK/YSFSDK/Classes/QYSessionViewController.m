@@ -61,8 +61,6 @@
 #import "YSFSetEvaluationReasonRequest.h"
 #import "YSFBypassViewController.h"
 #import "YSFSendSearchQuestionRequest.h"
-#import "YSFSendSearchQuestionResponse.h"
-#import "KFQuickReplyContentView.h"
 #import "YSFSearchQuestionSetting.h"
 #import "KFNewMsgTipViewToDown.h"
 #import "YSFBotCustomObject.h"
@@ -117,7 +115,7 @@ static long long g_sessionId;
 
 @interface QYSessionViewController()
 <UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, UIViewControllerTransitioningDelegate,
-YSF_NIMSystemNotificationManagerDelegate, YSFAppInfoManagerDelegate, YSFEvaluationReasonViewDelegate, YSFQuickReplyContentViewDelegate,
+YSF_NIMSystemNotificationManagerDelegate, YSFAppInfoManagerDelegate, YSFEvaluationReasonViewDelegate,
 YSFCameraViewControllerDelegate>
 
 @property (nonatomic, weak) id<QYSessionViewDelegate> delegate;  //会话窗口回调

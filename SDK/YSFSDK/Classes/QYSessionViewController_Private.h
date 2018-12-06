@@ -27,6 +27,7 @@
 #import "YSFSessionTipView.h"
 #import "YSFRecordTipView.h"
 #import "YSFEvaluationReasonView.h"
+#import "KFQuickReplyContentView.h"
 
 @class YSFReachability;
 @protocol QYCustomMessageDelegate;
@@ -47,7 +48,7 @@ typedef void (^OnEvaluateBlock)(long long sessionId, YSF_NIMMessage *updatedMess
 <UITableViewDataSource, UITableViewDelegate,
 YSF_NIMChatManagerDelegate, YSF_NIMConversationManagerDelegate, YSF_NIMLoginManagerDelegate, YSF_NIMMediaManagerDelgate,
 YSFMessageCellDelegate, YSFInputActionDelegate, YSFMessageCellDelegate, YSFSessionProtocol, YSFSessionTipViewDelegate,
-NIMSessionMsgDatasourceDelegate>
+NIMSessionMsgDatasourceDelegate, YSFQuickReplyContentViewDelegate>
 
 @property (nonatomic, strong) UITableView *tableView;
 @property (nonatomic, strong) UIImageView *sessionBackground;
