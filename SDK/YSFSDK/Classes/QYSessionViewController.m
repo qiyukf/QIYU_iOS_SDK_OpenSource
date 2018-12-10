@@ -2685,7 +2685,7 @@ YSFCameraViewControllerDelegate>
             if ([model respondsToSelector:@selector(cleanCache)]) {
                 [model cleanCache];
             }
-            [self layoutConfig:message];
+            [self layoutConfig:model];
             [self.sessionDataSource.modelArray replaceObjectAtIndex:index withObject:model];
             [self.layoutManager updateCellAtIndex:index model:model];
             
