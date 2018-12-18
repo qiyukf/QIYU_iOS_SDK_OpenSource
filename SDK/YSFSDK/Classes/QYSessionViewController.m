@@ -72,6 +72,7 @@
 #import "YSFEvaluationResult.h"
 #import "YSFEvaluationData.h"
 #import "YSFShopInfo.h"
+#import "YSFDataTrackManager.h"
 
 #import "YSFViewControllerTransitionAnimation.h"
 #import "YSFCameraViewController.h"
@@ -170,9 +171,9 @@ YSFCameraViewControllerDelegate>
 }
 
 - (void)setButtonInfoArray:(NSArray<QYButtonInfo *> *)buttonInfoArray {
-    _ysfActionInfoArray = [NSMutableArray<YSFActionInfo *> new];
+    _ysfActionInfoArray = [NSMutableArray<YSFActionInfo *> array];
     for (QYButtonInfo *info in buttonInfoArray) {
-        YSFActionInfo *ysfActionInfo = [YSFActionInfo new];
+        YSFActionInfo *ysfActionInfo = [[YSFActionInfo alloc] init];
         ysfActionInfo.action = YSFActionTypeOpenUrl;
         ysfActionInfo.buttonId = info.buttonId;
         ysfActionInfo.title = info.title;
@@ -655,6 +656,7 @@ YSFCameraViewControllerDelegate>
         if (weakSelf.buttonClickBlock) {
             weakSelf.buttonClickBlock(qyActionInfo);
         }
+        [weakSelf reportBotDirectButton:action];
     }];
     [self.view addSubview:_sessionInputView];
     /**
@@ -2239,7 +2241,13 @@ YSFCameraViewControllerDelegate>
         if (session.humanOrMachine) {
             [_sessionInputView setActionInfoArray:_ysfActionInfoArray];
         } else {
-            [_sessionInputView setActionInfoArray:session.actionInfoArray];
+            if (session.actionInfoArray.count) {
+                [_sessionInputView setActionInfoArray:session.actionInfoArray];
+            } else {
+                if (_sessionInputView.actionBar.actionInfoArray.count) {
+                    session.actionInfoArray = _sessionInputView.actionBar.actionInfoArray;
+                }
+            }
         }
         
         BOOL isNewSession = NO;
@@ -2280,14 +2288,17 @@ YSFCameraViewControllerDelegate>
             [_sessionInputView setActionInfoArray:_ysfActionInfoArray];
         } else if (error.code == YSFCodeServiceNotExistAndLeaveMessageClosed) {
             [self changeToNotExsitAndLeaveMessageClosedState:session];
+            [_sessionInputView setActionInfoArray:nil];
         } else if (error.code == YSFCodeServiceWaiting) {
             [self changeToWaitingState:session.robotInQueue];
             [self queryWaitingStatus:shopId];
             [_tipView setSessionTipForWaiting:session.showNumber waitingNumber:session.before inQueeuStr:session.inQueeuNotify];
+            [_sessionInputView setActionInfoArray:nil];
         } else {
             [_tipView setSessionTip:YSFSessionTipRequestServiceFailed];
+            [_sessionInputView setActionInfoArray:nil];
         }
-        //若hideHistoryMessages为YES且已收起历史消息，则有错误情况下一律j加载历史消息
+        //若hideHistoryMessages为YES且已收起历史消息，则有错误情况下一律加载历史消息
         if (self.hideHistoryMessages && self.sessionDataSource.modelArray.count == 0) {
             [self.sessionDataSource resetMessagesWithLimit:self.messagePageLimit];
         }
@@ -2381,9 +2392,9 @@ YSFCameraViewControllerDelegate>
         }
     } else if ([object isKindOfClass:[YSFBotEntry class]]) {
         [_sessionInputView setActionInfoArray:((YSFBotEntry *)object).entryArray];
-        YSFSessionManager *sessionManager = [[QYSDK sharedSDK] sessionManager];
-        if (sessionManager) {
-            [sessionManager getOnlineSession:_shopId].actionInfoArray = ((YSFBotEntry *)object).entryArray;
+        YSFServiceSession *onlineSession = [[[QYSDK sharedSDK] sessionManager] getOnlineSession:_shopId];
+        if (onlineSession) {
+            onlineSession.actionInfoArray = ((YSFBotEntry *)object).entryArray;
         }
     }
 }
@@ -3135,8 +3146,7 @@ YSFCameraViewControllerDelegate>
     QYLinkClickBlock clickBlock = [QYCustomActionConfig sharedInstance].linkClickBlock;
     if (clickBlock) {
         clickBlock(urlString);
-    }
-    else {
+    } else {
         UIImage *errorImage = [UIImage ysf_imageInKit:@"icon_loading"];
         YSFWebViewController *webViewController = [[YSFWebViewController alloc] initWithUrl:urlString errorImage:errorImage];
         [self.navigationController pushViewController:webViewController animated:YES];
@@ -3144,6 +3154,7 @@ YSFCameraViewControllerDelegate>
 }
 
 - (void)showImage:(YSF_NIMMessage *)message touchView:(UIView *)touchView {
+    //图片在消息内的index
     NSInteger imageViewIndex = touchView.tag;
     NSMutableArray *allGalleryItems = [NSMutableArray array];
     NSMutableArray *allLoadedImages = [self.sessionDataSource queryAllImageMessages];
@@ -3152,19 +3163,22 @@ YSFCameraViewControllerDelegate>
     [allLoadedImages enumerateObjectsUsingBlock:^(YSF_NIMMessage *obj, NSUInteger idx, BOOL *stop) {
         if (obj.messageType == YSF_NIMMessageTypeImage) {
             YSF_NIMImageObject *object = [obj messageObject];
+            //YSFGalleryItem
             YSFGalleryItem *item = [[YSFGalleryItem alloc] init];
-            item.thumbPath = [object thumbPath];
-            item.imageURL = [object url];
-            item.name = [object displayName];
+            item.thumbPath = object.thumbPath;
+            item.imageURL = object.url;
+            item.name = object.displayName;
             item.message = obj;
             item.indexAtMesaage = 0;
             [allGalleryItems addObject:item];
-            if (message == obj) {
+            //index
+            if (obj == message) {
                 index = currentIndex;
             }
             currentIndex++;
-        } else {
-            if (message == obj) {
+        } else if (obj.messageType == YSF_NIMMessageTypeCustom) {
+            //index
+            if (obj == message) {
                 index = currentIndex + imageViewIndex;
             }
             YSF_NIMCustomObject *object = [obj messageObject];
@@ -3172,30 +3186,36 @@ YSFCameraViewControllerDelegate>
                 || [object.attachment isKindOfClass:[YSFMachineResponse class]]
                 || [object.attachment isKindOfClass:[YSFStaticUnion class]]
                 || [object.attachment isKindOfClass:[YSFSubmittedBotForm class]]) {
-                id richText = object.attachment;
-                [[richText imageUrlStringArray] enumerateObjectsUsingBlock:^(NSString * _Nonnull imageUrlString, NSUInteger idx, BOOL * _Nonnull stop) {
-                    YSFGalleryItem *item = [[YSFGalleryItem alloc] init];
-                    item.imageURL = imageUrlString;
-                    item.message = obj;
-                    item.indexAtMesaage = idx;
-                    [allGalleryItems addObject:item];
-                    currentIndex++;
-                }];
+                id attachment = object.attachment;
+                NSArray *imgURLArray = [attachment imageUrlStringArray];
+                if (imgURLArray.count) {
+                    [imgURLArray enumerateObjectsUsingBlock:^(NSString *imgURLString, NSUInteger idx, BOOL *stop) {
+                        //YSFGalleryItem
+                        YSFGalleryItem *item = [[YSFGalleryItem alloc] init];
+                        item.imageURL = imgURLString;
+                        item.message = obj;
+                        item.indexAtMesaage = idx;
+                        [allGalleryItems addObject:item];
+                        currentIndex++;
+                    }];
+                }
             }
         }
     }];
     
-    __weak typeof(self) weakSelf = self;
-    YSFGalleryViewController *vc = [[YSFGalleryViewController alloc] initWithCurrentIndex:index
-                                                                                 allItems:allGalleryItems
-                                                                                 callback:^(YSFGalleryItem *item) {
-                                                                                     [weakSelf.tableView reloadData];
-                                                                                     return [weakSelf onQueryMessageContentViewCallback:item];
-                                                                                 }];
-    [vc present:self touchView:touchView];
-//    [self.navigationController pushViewController:vc animated:YES];
+    if (allGalleryItems.count) {
+        __weak typeof(self) weakSelf = self;
+        YSFGalleryViewController *vc = [[YSFGalleryViewController alloc] initWithCurrentIndex:index
+                                                                                     allItems:allGalleryItems
+                                                                                     callback:^(YSFGalleryItem *item) {
+                                                                                         [weakSelf.tableView reloadData];
+                                                                                         return [weakSelf onQueryMessageContentViewCallback:item];
+                                                                                     }];
+        [vc present:self touchView:touchView];
+    }
+    
+//    //如果缩略图下跪了，点进看大图的时候再去下一把缩略图
 //    if(![[NSFileManager defaultManager] fileExistsAtPath:object.thumbPath]){
-//        //如果缩略图下跪了，点进看大图的时候再去下一把缩略图
 //        __weak typeof(self) wself = self;
 //        [[YSF_NIMSDK sharedSDK].resourceManager download:object.thumbUrl filepath:object.thumbPath progress:nil completion:^(NSError *error) {
 //            if (!error) {
@@ -3933,6 +3953,18 @@ YSFCameraViewControllerDelegate>
         playerVC.soundOff = NO;
         [self presentViewController:playerVC animated:YES completion:nil];
     }
+}
+
+#pragma mark - Data Tracker
+- (void)reportBotDirectButton:(YSFActionInfo *)actionInfo {
+    NSDictionary *dict = @{
+                           YSFApiKeyContent : YSFStrParam(actionInfo.title),
+                           };
+    long long sessionId = [[QYSDK sharedSDK].sessionManager getOnlineSession:_shopId].sessionId;
+    [[YSFDataTrackManager sharedManager] trackEventType:YSFDataTrackEventTypeBotDirectButton
+                                                   data:dict
+                                                 shopId:_shopId
+                                              sessionId:sessionId];
 }
 
 #pragma mark - kKFInputViewInputTypeChanged

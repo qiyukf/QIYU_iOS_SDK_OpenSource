@@ -261,4 +261,8 @@
     [[[YSF_NIMSDK sharedSDK] conversationManager] deleteAllMessages:YES];
 }
 
+- (void)cleanAuthToken {
+    _authToken = nil;
+}
+
 @end

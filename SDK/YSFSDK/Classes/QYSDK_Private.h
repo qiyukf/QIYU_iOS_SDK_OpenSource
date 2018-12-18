@@ -45,5 +45,7 @@ typedef NS_ENUM(NSUInteger, YSFUseServerSetting) {
 
 - (NSString *)deviceId;
 
+- (void)cleanAuthToken;
+
 
 @end

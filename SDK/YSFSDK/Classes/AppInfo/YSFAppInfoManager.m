@@ -238,6 +238,7 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
 {
     [self cleanAccountInfo];
     [self cleanAppSetting];
+    [[QYSDK sharedSDK] cleanAuthToken];
     [self cleanCurrentForeignUserIdAndCurrentUserInfo];
     [self cleanDeviceId];
     _createAccountCount = 0;
@@ -546,12 +547,12 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
 
 - (NSString *)versionNumber
 {
-    return @"47";
+    return @"48";
 }
 
 - (NSString *)version
 {
-    return @"4.7.0";
+    return @"4.7.1";
 }
 
 #pragma mark - CachedText

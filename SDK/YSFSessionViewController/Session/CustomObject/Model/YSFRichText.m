@@ -63,7 +63,7 @@
 
 - (NSMutableArray<NSString *> *)imageUrlStringArray {
     if (_imageUrlStringArray == nil) {
-        self.imageUrlStringArray = [NSMutableArray new];
+        self.imageUrlStringArray = [NSMutableArray array];
         YSFAttributedTextView *textView = [[YSFAttributedTextView alloc] initWithFrame:CGRectInfinite];
         textView.textDelegate = self;
         textView.shouldDrawImages = NO;
@@ -77,6 +77,7 @@
         NSData *data = [resultStr dataUsingEncoding:NSUTF8StringEncoding];
         NSAttributedString *attributeString = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:0 documentAttributes:NULL];
         textView.attributedString = attributeString;
+        [textView layoutSubviews];
         self.displayContent = attributeString.string;
     }
     return _imageUrlStringArray;

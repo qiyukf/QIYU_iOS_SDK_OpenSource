@@ -236,6 +236,9 @@
 #define     YSFApiKeyBotPreRequestID    @"preRequestId"
 #define     YSFApiKeyBotNodeID          @"nodeId"
 #define     YSFApiKeyBotShowUseful      @"showUseful"
+#define     YSFApiTolerantKeyAppKey     @"appKey"
+#define     YSFApiKeySid                @"sid"
+#define     YSFApiKeyProperty           @"prop"
 //推送相关key
 #define     YSFApiPushKeyCmd            @"cmd"
 #define     YSFApiPushKeyAps            @"aps"
@@ -326,6 +329,8 @@ typedef enum : NSUInteger {
     YSFCommandBotQueryRequest           = 204,      //bot
     YSFCommandBotQueryResponse          = 205,      //bot
     YSFCommandBotEntry                  = 211,      //实时推送bot入口信息
+    
+    YSFCommandDataTrack                 = 4000,     //埋点数据上报
 
 
 

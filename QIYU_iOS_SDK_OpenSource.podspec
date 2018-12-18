@@ -1,13 +1,13 @@
 Pod::Spec.new do |s|
 
     s.name     = 'QIYU_iOS_SDK_OpenSource'
-    s.version  = '4.7.0'
+    s.version  = '4.7.1'
     s.license  = { :"type" => "Copyright",
                  :"text" => " Copyright 2016 Netease \n"}  
     s.summary  = '网易七鱼客服访客端 iOS SDK'
     s.homepage = 'http://www.qiyukf.com'
     s.author   = { 'qiyukf' => 'yunshangfu@126.com' }
-    s.source   = { :git => 'https://github.com/qiyukf/QIYU_iOS_SDK_OpenSource.git', :tag => "4.7.0" }
+    s.source   = { :git => 'https://github.com/qiyukf/QIYU_iOS_SDK_OpenSource.git', :tag => "4.7.1" }
     s.platform = :ios
     s.ios.deployment_target = '7.0'
     s.public_header_files = '**/ExportHeaders/**/*.h'
