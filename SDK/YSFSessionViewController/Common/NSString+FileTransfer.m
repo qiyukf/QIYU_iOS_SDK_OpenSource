@@ -112,12 +112,12 @@
     if (isOutgoingMsg) {
         defaultTextColor = uiConfig.customMessageTextColor;
         defaultLinkColor = uiConfig.customMessageHyperLinkColor;
-    }
-    else {
+    } else {
         defaultTextColor = uiConfig.serviceMessageTextColor;
         defaultLinkColor = uiConfig.serviceMessageHyperLinkColor;
     }
-    NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSValue valueWithCGSize:maxImageSize], YSFMaxImageSize, @(16), YSFDefaultFontSize, defaultTextColor, YSFDefaultTextColor, defaultLinkColor, YSFDefaultLinkColor, nil];
+    CGFloat fontSize = isOutgoingMsg ? uiConfig.customMessageTextFontSize : uiConfig.serviceMessageTextFontSize;
+    NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSValue valueWithCGSize:maxImageSize], YSFMaxImageSize, @(fontSize), YSFDefaultFontSize, defaultTextColor, YSFDefaultTextColor, defaultLinkColor, YSFDefaultLinkColor, nil];
     NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:options documentAttributes:NULL];
     
     return string;

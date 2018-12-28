@@ -73,6 +73,8 @@
 #import "YSFEvaluationData.h"
 #import "YSFShopInfo.h"
 #import "YSFDataTrackManager.h"
+#import "YSFOrderStatus.h"
+#import "YSFOrderDetail.h"
 
 #import "YSFViewControllerTransitionAnimation.h"
 #import "YSFCameraViewController.h"
@@ -2485,6 +2487,9 @@ YSFCameraViewControllerDelegate>
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row >= [[_sessionDataSource modelArray] count]) {
+        return nil;
+    }
     UITableViewCell *cell = nil;
     id model = [[_sessionDataSource modelArray] objectAtIndex:indexPath.row];
     if ([model isKindOfClass:[YSFMessageModel class]]) {
@@ -2805,6 +2810,17 @@ YSFCameraViewControllerDelegate>
                 [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:weakSelf.session completion:nil];
             }
         }];
+        if (!yesOrNo) {
+            YSF_NIMCustomObject *customObject = message.messageObject;
+            if ([customObject.attachment isKindOfClass:[YSFMachineResponse class]]) {
+                YSFMachineResponse *attachment = (YSFMachineResponse *)customObject.attachment;
+                if (attachment.evaluationReason) {
+                    [self onTapEvaluationReasonWithMessage:message];
+                } else {
+                    [self evaluationReasonView:nil message:message didConfirmWithText:@"" isClose:NO];
+                }
+            }
+        }
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapEvaluationReason]) {
         [self onTapEvaluationReasonWithMessage:message];
@@ -2878,13 +2894,26 @@ YSFCameraViewControllerDelegate>
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapGoods]) {
         QYSelectedCommodityInfo *goods = event.data;
-        YSFSelectedCommodityInfo *selectedGoods = [[YSFSelectedCommodityInfo alloc] init];
-        selectedGoods.command = YSFCommandBotSend;
-        selectedGoods.target = goods.target;
-        selectedGoods.params = goods.params;
-        selectedGoods.goods = goods;
-        YSF_NIMMessage *selectedGoodsMessage = [YSFMessageMaker msgWithCustom:selectedGoods];
-        [self sendMessage:selectedGoodsMessage];
+        if (goods.p_url.length) {
+            [self openUrl:goods.p_url];
+        } else {
+            YSFSelectedCommodityInfo *selectedGoods = [[YSFSelectedCommodityInfo alloc] init];
+            selectedGoods.command = YSFCommandBotSend;
+            selectedGoods.target = goods.target;
+            selectedGoods.params = goods.params;
+            selectedGoods.goods = goods;
+            YSF_NIMMessage *selectedGoodsMessage = [YSFMessageMaker msgWithCustom:selectedGoods];
+            [self sendMessage:selectedGoodsMessage];
+        }
+        handled = YES;
+    } else if ([eventName isEqualToString:YSFKitEventNameTapOrderDetail]) {
+        YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)event.message.messageObject;
+        if ([object.attachment isKindOfClass:[YSFOrderDetail class]]) {
+            YSFOrderDetail *detail = (YSFOrderDetail *)object.attachment;
+            if (detail.url.length) {
+                [self openUrl:detail.url];
+            }
+        }
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapMoreOrders]) {
         YSFOrderList *orderList = event.data;
@@ -2898,7 +2927,11 @@ YSFCameraViewControllerDelegate>
 
         __weak typeof(self) weakSelf = self;
         vc.tapItemCallback = ^(QYSelectedCommodityInfo *goods) {
-            [weakSelf sendSelectedCommodityInfo:goods];
+            if (goods.p_url.length) {
+                [weakSelf openUrl:goods.p_url];
+            } else {
+                [weakSelf sendSelectedCommodityInfo:goods];
+            }
             return YES;
         };
         [self presentViewController:vc animated:YES completion:nil];
@@ -2909,7 +2942,14 @@ YSFCameraViewControllerDelegate>
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapBot]) {
         YSFAction *action = (YSFAction *)event.data;
-        [self onTapBotAction:action];
+        YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)event.message.messageObject;
+        if ([object.attachment isKindOfClass:[YSFOrderStatus class]]
+            && action.target.length
+            && [action.type isEqualToString:@"url"]) {
+            [self openUrl:action.target];
+        } else {
+            [self onTapBotAction:action];
+        }
         eventData = YSFStrParam([action toJsonString]);
         handled = YES;
     } else if ([eventName isEqualToString:YSFKitEventNameTapMixReply]) {
@@ -3358,8 +3398,8 @@ YSFCameraViewControllerDelegate>
 }
 
 #pragma mark YSFEvaluationReasonViewDelegate
-- (void)evaluationReasonView:(YSFEvaluationReasonView *)view didConfirmWithText:(NSString *)text {
-    if (!text || !view.data) {
+- (void)evaluationReasonView:(YSFEvaluationReasonView *)view message:(YSF_NIMMessage *)message didConfirmWithText:(NSString *)text isClose:(BOOL)isClose {
+    if (!text || (!view.data && !message)) {
         return;
     }
     if ([[[QYSDK sharedSDK] sessionManager] getSessionStateType:_shopId] == YSFSessionStateTypeError) {
@@ -3370,10 +3410,18 @@ YSFCameraViewControllerDelegate>
         }
         return;
     }
-    YSF_NIMMessage *message = (YSF_NIMMessage*)view.data;
-    YSFSetEvaluationReasonRequest *request = [YSFSetEvaluationReasonRequest new];
-    request.msgId = message.messageId;
+    YSF_NIMMessage *nimMessage = nil;
+    if (view) {
+        nimMessage = (YSF_NIMMessage *)view.data;
+    } else {
+        nimMessage = message;
+    }
+    YSFSetEvaluationReasonRequest *request = [[YSFSetEvaluationReasonRequest alloc] init];
+    request.msgId = nimMessage.messageId;
     request.evaluationContent = text;
+    if (isClose) {
+        request.evaluationContent = @"";
+    }
     __weak typeof(self) weakSelf = self;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error) {
         if (!error) {
@@ -3381,13 +3429,17 @@ YSFCameraViewControllerDelegate>
                 [weakSelf.evaluationResonView removeFromSuperview];
                 weakSelf.evaluationResonView = nil;
             }
-            YSF_NIMCustomObject *customObject = (YSF_NIMCustomObject*)message.messageObject;
-            YSFMachineResponse *machineAttachment = (YSFMachineResponse*)customObject.attachment;
-            machineAttachment.evaluationContent = text;
-            [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:message forSession:weakSelf.session completion:nil];
-            [weakSelf.view ysf_makeToast:@"感谢您的反馈" duration:1 position:YSFToastPositionCenter];
+            if (!isClose && text.length) {
+                YSF_NIMCustomObject *customObject = (YSF_NIMCustomObject*)nimMessage.messageObject;
+                YSFMachineResponse *machineAttachment = (YSFMachineResponse*)customObject.attachment;
+                machineAttachment.evaluationContent = text;
+                [[[YSF_NIMSDK sharedSDK] conversationManager] updateMessage:YES message:nimMessage forSession:weakSelf.session completion:nil];
+                [weakSelf.view ysf_makeToast:@"感谢您的反馈" duration:1 position:YSFToastPositionCenter];
+            }
         } else {
-            [weakSelf.view ysf_makeToast:@"提交失败，请稍后再试" duration:1 position:YSFToastPositionCenter];
+            if (!isClose && text.length) {
+                [weakSelf.view ysf_makeToast:@"提交失败，请稍后再试" duration:1 position:YSFToastPositionCenter];
+            }
         }
     }];
 }
@@ -3948,7 +4000,8 @@ YSFCameraViewControllerDelegate>
     if (YSF_NIMMessageTypeVideo == message.messageType) {
         _messageTouchView = touchView;
         YSFVideoPlayerViewController *playerVC = [[YSFVideoPlayerViewController alloc] init];
-        playerVC.transitioningDelegate = self;
+        //去掉点击视频的放大缩小效果，因横屏时会导致聊天界面异常
+//        playerVC.transitioningDelegate = self;
         playerVC.message = message;
         playerVC.soundOff = NO;
         [self presentViewController:playerVC animated:YES completion:nil];

@@ -117,6 +117,9 @@ static CGFloat const kMaxTextLength = 200;
     [self endEditing:YES];
     if (!self.contentTextView.text.ysf_trim.length || [self.contentTextView.text.ysf_trim isEqualToString:self.contentText]) {
         [self removeView];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(evaluationReasonView:message:didConfirmWithText:isClose:)]) {
+            [self.delegate evaluationReasonView:self message:nil didConfirmWithText:self.contentTextView.text.ysf_trim isClose:YES];
+        }
     } else {
         self.hidden = YES;
         __weak typeof(self) weakSelf = self;
@@ -127,6 +130,9 @@ static CGFloat const kMaxTextLength = 200;
         }];
         [alert addAction:[YSFAlertAction actionWithTitle:@"确定" handler:^(YSFAlertAction * _Nonnull action) {
             [weakSelf removeView];
+            if (weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(evaluationReasonView:message:didConfirmWithText:isClose:)]) {
+                [weakSelf.delegate evaluationReasonView:weakSelf message:nil didConfirmWithText:weakSelf.contentTextView.text.ysf_trim isClose:YES];
+            }
         }]];
         [alert showWithSender:nil controller:self.ysf_viewController animated:YES completion:nil];
     }
@@ -137,26 +143,26 @@ static CGFloat const kMaxTextLength = 200;
     if ([self.contentTextView.text.ysf_trim isEqualToString:self.contentText.ysf_trim]) {
         return;
     }
-    if (self.delegate && [self.delegate respondsToSelector:@selector(evaluationReasonView:didConfirmWithText:)]) {
-        [self.delegate evaluationReasonView:self didConfirmWithText:self.contentTextView.text.ysf_trim];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(evaluationReasonView:message:didConfirmWithText:isClose:)]) {
+        [self.delegate evaluationReasonView:self message:nil didConfirmWithText:self.contentTextView.text.ysf_trim isClose:NO];
     }
 }
 
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
-{
-    UITouch *touch = [touches anyObject];
-    
-    CGPoint point = [touch locationInView:self.contentView];
-    
-    BOOL isInContentView = [self.contentView pointInside:point withEvent:nil];
-    
-    if (isInContentView) {
-        return;
-    }
-    if (!self.contentTextView.text.ysf_trim.length) {
-        [self removeView];
-    }
-}
+//- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+//{
+//    UITouch *touch = [touches anyObject];
+//    
+//    CGPoint point = [touch locationInView:self.contentView];
+//    
+//    BOOL isInContentView = [self.contentView pointInside:point withEvent:nil];
+//    
+//    if (isInContentView) {
+//        return;
+//    }
+//    if (!self.contentTextView.text.ysf_trim.length) {
+//        [self removeView];
+//    }
+//}
 
 #pragma mark - Delegate
 - (void)textViewDidChange:(UITextView *)textView {

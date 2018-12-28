@@ -10,6 +10,7 @@
 #import "QYSDK_Private.h"
 #import "YSFEvaluationData.h"
 #import "YSFMacro.h"
+#import "YSFTimer.h"
 
 static CGFloat kEvaluationContentPortraitHeight = 377;
 static CGFloat kEvaluationContentLandscapeHeight = 220;
@@ -89,6 +90,7 @@ typedef NS_ENUM(NSInteger, YSFEvaluationSubmitType) {
 @property (nonatomic, strong) YSFEvaluationTag *selectedTag; //选中tag数据
 
 @property (nonatomic, assign) CGRect kbFrame;
+@property (nonatomic, strong) YSFTimer *waitTimer;
 
 @end
 
@@ -130,6 +132,8 @@ typedef NS_ENUM(NSInteger, YSFEvaluationSubmitType) {
         
         _satisButtons = [NSMutableArray array];
         _tagViews = [NSMutableArray array];
+        
+        _waitTimer = [[YSFTimer alloc] init];
     }
     return self;
 }
@@ -425,14 +429,20 @@ typedef NS_ENUM(NSInteger, YSFEvaluationSubmitType) {
     //start submitting
     [self updateSubmitButtonEnable:YSFEvaluationSubmitTypeSubmitting];
     
+    __weak typeof(self) weakSelf = self;
+    [_waitTimer start:dispatch_get_main_queue() interval:10 repeats:NO block:^{
+        [weakSelf updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
+        [weakSelf showToast:@"评价失败，请稍后再试"];
+    }];
+    
     YSFEvaluationRequest *request = [[YSFEvaluationRequest alloc] init];
     request.score = _selectedTag.score;
     request.remarks = _textView.text;
     request.sessionId = _sessionId;
     request.tagInfos = selectedTags;
-    __weak typeof(self) weakSelf = self;
     [YSFIMCustomSystemMessageApi sendMessage:request shopId:_shopId completion:^(NSError *error) {
         if (error) {
+            [weakSelf.waitTimer stop];
             [weakSelf updateSubmitButtonEnable:YSFEvaluationSubmitTypeEnable];
             [weakSelf showToast:@"网络连接失败，请稍后再试"];
         }
@@ -456,14 +466,17 @@ typedef NS_ENUM(NSInteger, YSFEvaluationSubmitType) {
 
 - (void)updateSubmitButtonEnable:(YSFEvaluationSubmitType)type {
     if (type == YSFEvaluationSubmitTypeEnable) {
+        self.view.userInteractionEnabled = YES;
         _submitButton.enabled = YES;
         [_submitButton setTitle:@"提 交" forState:UIControlStateNormal];
         _submitButton.backgroundColor = YSFColorFromRGBA(0x5e94e2, 1);
     } else if (type == YSFEvaluationSubmitTypeUnable) {
+        self.view.userInteractionEnabled = YES;
         _submitButton.enabled = NO;
         [_submitButton setTitle:@"提 交" forState:UIControlStateNormal];
         _submitButton.backgroundColor = YSFColorFromRGBA(0x5e94e2, 0.6);
     } else if (type == YSFEvaluationSubmitTypeSubmitting) {
+        self.view.userInteractionEnabled = NO;
         _submitButton.enabled = NO;
         [_submitButton setTitle:@"提交中..." forState:UIControlStateNormal];
         _submitButton.backgroundColor = YSFColorFromRGBA(0x5e94e2, 0.6);
@@ -523,6 +536,7 @@ typedef NS_ENUM(NSInteger, YSFEvaluationSubmitType) {
     id object =  [YSFCustomSystemNotificationParser parse:content shopId:shopId];
     
     if ([object isKindOfClass:[YSFEvaluationResult class]]) {
+        [self.waitTimer stop];
         YSFEvaluationResult *result = (YSFEvaluationResult *)object;
         if (result.code == YSFCodeServiceEvaluationAllow || result.code == YSFCodeServiceEvaluationAlreadyDone) {
             if (result.sessionId == _sessionId) {

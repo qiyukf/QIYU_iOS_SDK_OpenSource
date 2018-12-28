@@ -6,6 +6,11 @@
 //  Copyright (c) 2015 Netease. All rights reserved.
 //
 
+typedef NS_ENUM(NSInteger, YSFCloseServiceReason) {
+    YSFCloseServiceReasonManual = 0,
+    YSFCloseServiceReasonSystem = 2,
+};
+
 @interface YSFCloseServiceNotification : NSObject
 
 @property (nonatomic, assign) long long sessionId;

@@ -605,7 +605,7 @@
         }
     }
     
-    if (object.closeReason == 2 && object.message.length > 0) {
+    if (object.closeReason == YSFCloseServiceReasonSystem && object.message.length > 0) {
         YSFNotification *notification = [[YSFNotification alloc] init];
         notification.command = YSFCommandNotification;
         notification.localCommand = YSFCommandSessionWillClose;
@@ -909,7 +909,7 @@
         recentDict = [[NSMutableDictionary alloc] init];
     }
     BOOL popup = NO;
-    id popupObj = [sessionDict objectForKey:YSFEvaluationKeyAutoPopup];
+    id popupObj = [recentDict objectForKey:YSFEvaluationKeyAutoPopup];
     if (popupObj) {
         popupObj = (NSNumber *)popupObj;
         popup = [popupObj boolValue];

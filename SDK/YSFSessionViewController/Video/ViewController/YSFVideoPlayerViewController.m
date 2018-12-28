@@ -145,12 +145,19 @@ static CGFloat kVideoPlayerViewBarHeight = 18.0f;
     if (!videoObject) {
         return;
     }
+    
     CGSize videoSize = videoObject.coverSize;
     if (videoSize.width == 0 || videoSize.height == 0) {
         videoSize = CGSizeMake(480, 640);
     }
+    
     CGFloat height = (videoSize.height / videoSize.width) * CGRectGetWidth(self.view.frame);
-    self.videoPlayer.frame = CGRectMake(0, roundf((CGRectGetHeight(self.view.frame) - height) / 2), CGRectGetWidth(self.view.frame), height);
+    CGFloat width = (videoSize.width / videoSize.height) * CGRectGetHeight(self.view.frame);
+    if (height > CGRectGetHeight(self.view.frame)) {
+        self.videoPlayer.frame = CGRectMake(roundf((CGRectGetWidth(self.view.frame) - width) / 2), 0, width, CGRectGetHeight(self.view.frame));
+    } else {
+        self.videoPlayer.frame = CGRectMake(0, roundf((CGRectGetHeight(self.view.frame) - height) / 2), CGRectGetWidth(self.view.frame), height);
+    }
     
     CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     self.closeButton.frame = CGRectMake(kVideoPlayerViewSpace,
@@ -163,9 +170,9 @@ static CGFloat kVideoPlayerViewBarHeight = 18.0f;
                                              kVideoPlayerViewCloseSize + 2 * kVideoPlayerViewSpace);
     self.playButton.bounds = CGRectMake(0, 0, kVideoPlayerViewButtonSize, kVideoPlayerViewButtonSize);
     self.playButton.center = self.view.center;
-    self.handleBar.frame = CGRectMake(0,
+    self.handleBar.frame = CGRectMake(CGRectGetMinX(self.videoPlayer.frame),
                                       CGRectGetMaxY(self.videoPlayer.frame) - kVideoPlayerViewBarBottom - kVideoPlayerViewBarHeight,
-                                      CGRectGetWidth(self.view.frame),
+                                      CGRectGetWidth(self.videoPlayer.frame),
                                       kVideoPlayerViewBarHeight);
 }
 

@@ -14,7 +14,7 @@ typedef void(^ReasonViewRemovedBlock)(void);
 
 @protocol YSFEvaluationReasonViewDelegate<NSObject>
 
-- (void)evaluationReasonView:(YSFEvaluationReasonView *)view didConfirmWithText:(NSString *)text;
+- (void)evaluationReasonView:(YSFEvaluationReasonView *)view message:(YSF_NIMMessage *)message didConfirmWithText:(NSString *)text isClose:(BOOL)isClose;
 
 @end
 

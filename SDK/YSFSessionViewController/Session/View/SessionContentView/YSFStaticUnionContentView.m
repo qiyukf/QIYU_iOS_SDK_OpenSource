@@ -218,6 +218,30 @@
     [self.delegate onCatchEvent:event];
 }
 
+- (void)linkPushed:(YSFLinkButton *)button
+{
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameTapLabelLink;
+    event.message = self.model.message;
+    event.data = button.URL.relativeString;
+    [self.delegate onCatchEvent:event];
+}
+
+- (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView viewForLink:(NSURL *)url identifier:(NSString *)identifier2 frame:(CGRect)frame
+{
+    NSURL *URL = url;
+    NSString *identifier = identifier2;
+    
+    YSFLinkButton *button = [[YSFLinkButton alloc] initWithFrame:frame];
+    button.URL = URL;
+    button.minimumHitSize = CGSizeMake(25, 25); // adjusts it's bounds so that button is always large enough
+    button.GUID = identifier;
+    
+    // use normal push action for opening URL
+    [button addTarget:self action:@selector(linkPushed:) forControlEvents:UIControlEventTouchUpInside];
+    
+    return button;
+}
 
 - (UIView *)attributedTextContentView:(YSFAttributedTextContentView *)attributedTextContentView viewForAttachment:(YSFTextAttachment *)attachment frame:(CGRect)frame
 {

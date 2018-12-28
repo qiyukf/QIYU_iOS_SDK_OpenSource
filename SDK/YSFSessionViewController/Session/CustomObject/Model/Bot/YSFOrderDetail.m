@@ -24,6 +24,7 @@
     instance.userName = [dict ysf_jsonString:YSFApiKeyUserName];
     instance.address = [dict ysf_jsonString:YSFApiKeyAddress];
     instance.orderNo = [dict ysf_jsonString:YSFApiKeyOrderNo];
+    instance.url = [dict ysf_jsonString:YSFApiKeyUrl];
     instance.date = [[dict ysf_jsonArray:YSFApiKeyDate] objectAtIndex:0];
     
     return instance;

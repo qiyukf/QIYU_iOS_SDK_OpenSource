@@ -71,6 +71,9 @@
         _date.font = [UIFont systemFontOfSize:16.f];
         _date.textColor = YSFRGB(0x666666);
         [self addSubview:_date];
+        
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTap:)];
+        [self addGestureRecognizer:tap];
     }
     return self;
 }
@@ -181,6 +184,13 @@
     }
     
     offsetY += _date.ysf_frameHeight;
+}
+
+- (void)singleTap:(UIGestureRecognizer *)recognizer {
+    YSFKitEvent *event = [[YSFKitEvent alloc] init];
+    event.eventName = YSFKitEventNameTapOrderDetail;
+    event.message = self.model.message;
+    [self.delegate onCatchEvent:event];
 }
 
 

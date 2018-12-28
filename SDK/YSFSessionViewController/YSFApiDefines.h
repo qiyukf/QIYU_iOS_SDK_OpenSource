@@ -29,6 +29,7 @@
 #define     YSFApiKeyShop               @"shop"
 #define     YSFApiKeyLogo               @"logo"
 #define     YSFApiKeyName               @"name"
+#define     YSFApiKeyIndex              @"index"
 #define     YSFApiKeyBId                @"bid"
 #define     YSFApiKeyEntries            @"entries"
 #define     YSFApiKeyDisable            @"disable"
@@ -151,6 +152,7 @@
 #define     YSFApiKeyPPrice             @"p_price"
 #define     YSFApiKeyPCount             @"p_count"
 #define     YSFApiKeyPAction            @"p_action"
+#define     YSFApiKeyPURL               @"p_url"
 #define     YSFApiKeyPUserData          @"p_userData"
 #define     YSFApiKeyData               @"data"
 #define     YSFApiKeyState              @"state"
@@ -239,6 +241,9 @@
 #define     YSFApiTolerantKeyAppKey     @"appKey"
 #define     YSFApiKeySid                @"sid"
 #define     YSFApiKeyProperty           @"prop"
+#define     YSFApiKeyIsOpen             @"isOpen"
+#define     YSFApiKeyStatusExt          @"statusExt"
+#define     YSFApiKeyStatusExtSet       @"statusExtSet"
 //推送相关key
 #define     YSFApiPushKeyCmd            @"cmd"
 #define     YSFApiPushKeyAps            @"aps"
@@ -341,6 +346,7 @@ typedef enum : NSUInteger {
     YSFCommandKefuLogout                =   10,     //客服登出
     YSFCommandUserSwitchAccount         =   11,     //用户切换账号
     YSFCommandSetOnlineState            =   12,     //设置客服在线状态
+    YSFCommandOnlineStateResult         =   13,     //客服在线状态列表
     YSFCommandUserOffline               =   18,     //客户离线了
     YSFCommandWeChatMessage             =   20,     //微信消息
     YSFCommandRevokeMessageResquest     =   27,     //请求撤回消息

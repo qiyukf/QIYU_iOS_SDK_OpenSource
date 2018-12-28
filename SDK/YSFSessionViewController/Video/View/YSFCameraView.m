@@ -168,6 +168,14 @@ static CGFloat kRecordDegreeTime = 0.02;
 #pragma mark - layout
 - (void)layoutSubviews {
     [super layoutSubviews];
+    CGFloat width = CGRectGetWidth(self.frame);
+    CGFloat height = CGRectGetHeight(self.frame);
+    if (width > height) {
+        self.frame = CGRectMake(0, 0, height, width);
+    } else {
+        self.frame = CGRectMake(0, 0, width, height);
+    }
+    
     self.videoPreview.frame = self.bounds;
     CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     self.closeButton.frame = CGRectMake(kCameraViewSpace, kCameraViewSpace + statusBarHeight, kCameraViewCloseSize, kCameraViewCloseSize);
