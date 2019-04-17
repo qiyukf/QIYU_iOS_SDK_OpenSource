@@ -53,7 +53,7 @@ pod repo update
 从 v3.1.0 开始，没有 QIYU_iOS_SDK_Exclude_Libcrypto、QIYU_iOS_SDK_Exclude_NIM 版本了，统一使用 QIYU_iOS_SDK，此 SDK 中将各个第三方库独立出来了，总共3个.a：libQYSDK.a、libcrypto.a、libevent.a。
 
 1. 如果您同时使用了网易云信 iOS SDK，请只导入 libQYSDK.a，不要导入其他两个 .a 文件。
-2. 如果您同时使用了 OpenSSL 库，或者您集成的其它静态库使用了 OpenSSL 库（比如支付宝 SDK ），请只导入 libQYSDK.a、libevent.a，不要导入 libcrypto.a。
+2. 如果您同时使用了 OpenSSL 库，或者您集成的其它静态库使用了 OpenSSL 库（比如支付宝 SDK ），请只导入 libQYSDK.a、libevent.a，不要导入 libcrypto.a。请注意，SDK 依赖的 OpenSSL 库版本为 1.0.2d，与 1.1.0 及以上版本存在兼容问题。
 3. 如果是其他情况的冲突，请根据实际情况有选择的导入 libevent.a、libcrypto.a。
 
 ### https相关
@@ -110,6 +110,24 @@ v3.1.3 版本开始，SDK 已经全面支持 https，但是聊天消息中可能
 ### 可能遇到的问题1
 1. 无法用 CocoaPods 下载到最新的 SDK
    - 有可能是使用了淘宝源，尝试使用默认源。
+
+2. 使用 CocoaPods 更新 SDK 后编译报错
+
+   - 需检查下载的 SDK 中三个 .a 静态库文件大小，若明显偏小，则需安装 Git LFS（Large File Storage）服务来下载原始 SDK。
+
+   - 可使用 Homebrew 安装 Git LFS：
+
+     ```objective-c
+     brew install git-lfs
+     ```
+
+   - 启动 Git LFS：
+
+     ```objective-c
+     git lfs install
+     ```
+
+   - 安装后请重新 pod update，若仍报错，尝试清理缓存：pod cache clean --all 。
 
 ## 初始化SDK（必须）
 
@@ -231,7 +249,7 @@ sessionViewController.navigationItem.leftBarButtonItem = leftItem;
 ## 注销（必须）
 
 ```objectivec
-[[QYSDK sharedSDK] logout:^{}];
+[[QYSDK sharedSDK] logout:^(BOOL success) {}];
 ```
 
 应用层退出自己的账号时必须调用 SDK 的注销操作。该接口仅在用户注销账号或是账号过期等情况下调用，应避免频繁调用造成反复创建账号。
@@ -691,7 +709,8 @@ typedef NS_ENUM(NSInteger, QYBypassDisplayMode) {
 typedef void (^QYCustomInputItemBlock)();
 
 /**
- *  输入框下方“完全自定义”配置项
+ *  输入框下方“更多”配置项
+ *  注：为达到最佳效果，配置项图片最佳尺寸为55ptx55pt
  */
 @interface QYCustomInputItem : NSObject
 
@@ -706,25 +725,35 @@ typedef void (^QYCustomInputItemBlock)();
 配置 customInputItems 示例如下：
 
 ```objectivec
+/**
+ * 可自由配置customInputItems，目前SDK对外开放了发送图片、文本、商品、订单等能力
+ * 针对相册或拍摄按钮，点击时可直接调用系统UIImagePickerController，也可调起自定义界面，选择照片后调用接口发送图片消息即可
+ */
 QYCustomInputItem *photoItem = [[QYCustomInputItem alloc] init];
-photoItem.normalImage = [UIImage imageNamed:@"icon_media_photo_normal"];
-photoItem.selectedImage = [UIImage imageNamed:@"icon_media_photo_pressed"];
+photoItem.normalImage = [UIImage imageNamed:@"icon_photo_normal"];
+photoItem.selectedImage = [UIImage imageNamed:@"icon_photo_pressed"];
 photoItem.text = @"相册";
 photoItem.block = ^{ };
 
 QYCustomInputItem *cameraItem = [[QYCustomInputItem alloc] init];
-cameraItem.normalImage = [UIImage imageNamed:@"icon_media_camera_normal"];
-cameraItem.selectedImage = [UIImage imageNamed:@"icon_media_camera_pressed"];
+cameraItem.normalImage = [UIImage imageNamed:@"icon_camera_normal"];
+cameraItem.selectedImage = [UIImage imageNamed:@"icon_camera_pressed"];
 cameraItem.text = @"拍摄";
 cameraItem.block = ^{ };
 
-QYCustomInputItem *humanItem = [[QYCustomInputItem alloc] init];
-humanItem.normalImage = [UIImage imageNamed:@"icon_media_human_normal"];
-humanItem.selectedImage = [UIImage imageNamed:@"icon_media_human_pressed"];
-humanItem.text = @"人工客服";
-humanItem.block = ^{ };
+QYCustomInputItem *textItem = [[QYCustomInputItem alloc] init];
+textItem.normalImage = [UIImage imageNamed:@"icon_file_normal"];
+textItem.selectedImage = [UIImage imageNamed:@"icon_file_pressed"];
+textItem.text = @"发送文本";
+textItem.block = ^{ };
+
+QYCustomInputItem *productItem = [[QYCustomInputItem alloc] init];
+productItem.normalImage = [UIImage imageNamed:@"icon_card_normal"];
+productItem.selectedImage = [UIImage imageNamed:@"icon_card_pressed"];
+productItem.text = @"发送商品";
+productItem.block = ^{ };
 	    
-NSArray *items = @[photoItem, cameraItem, humanItem];
+NSArray *items = @[photoItem, cameraItem, textItem, productItem];
 [[QYSDK sharedSDK] customUIConfig].customInputItems = items;
 ```
 
@@ -1304,6 +1333,11 @@ if (data) {
 ```
 [具体请看官网 CRM 相关文档](../crm/qiyu_crm_interface.html)
 
+#### 可能遇到的问题5
+
+1. 首次安装 App 无法连接客服，或客服连接状态不稳定
+   - 检查 setUserInfo: 接口调用时机，应在账号登录成功后立即调用该接口上报 CRM 信息，而不应仅在进入客服界面时刻调用；若 setUserInfo: 接口调用时机与连接客服时机太近，底层账号还未登录及初始化成功，会造成客服连接状态不稳定等问题。
+
 ### 七鱼系统推送消息
 
 七鱼系统推送消息与苹果的 APNS 推送无关。可以主动要求服务器推送指定的消息：
@@ -1578,6 +1612,30 @@ sessionViewController.delegate = self;
 如果您看完此文档后，还有任何集成方面的疑问，可以参考 iOS SDK Demo 源码：https://github.com/qiyukf/QIYU_iOS_SDK_Demo_Source.git 。源码充分的展示了 iOS SDK 的能力，并且为集成 iOS SDK 提供了样例代码。
 
 ## 更新说明
+
+#### V4.11.0（2019-04-16）
+
+1. 留言功能新增表单样式
+2. 新增客服正在输入提示功能
+3. 优化图片浏览体验
+4. 统一消息字体，优化UI相关配置
+5. 增加客服手动结束会话提示语
+6. 修复部分已知问题
+
+#### V4.10.0（2019-03-19）
+
+1. 优化访客分流逻辑
+2. 优化输入栏+按钮功能，提供发送文本消息接口
+3. 支持切换账户后拉取未读历史消息
+4. 修复部分已知问题
+
+#### V4.9.0（2019-02-14）
+
+1. 新增消息阅读状态显示功能
+2. 新增自定义表情功能
+3. 满意度评价入口支持隐藏及回合数设置
+4. 优化账号登录及登出逻辑
+5. 修复部分已知问题
 
 #### V4.8.0（2019-01-03）
 
