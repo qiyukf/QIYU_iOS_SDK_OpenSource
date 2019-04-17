@@ -11,25 +11,22 @@
 @protocol YSFApiProtocol <NSObject>
 
 - (NSString *)apiPath;
-
 - (NSDictionary *)params;
-
-- (id)dataByJson:(NSDictionary *)json
-           error:(NSError **)error;
+- (id)dataByJson:(NSDictionary *)json error:(NSError **)error;
 
 @optional
-- (id)dataByStr:(NSString*)str
-          error:(NSError **)error;
+- (id)dataByStr:(NSString*)str error:(NSError **)error;
+
 @end
 
 
-typedef void(^YSFApiBlock)(NSError *error,id returendObject);
+typedef void(^YSFApiBlock)(NSError *error, id returendObject);
 
 @interface YSFHttpApi : NSObject
-+ (void)post:(id<YSFApiProtocol>)api
-  completion:(YSFApiBlock)block;
 
-+ (void)get:(id<YSFApiProtocol>)api
- completion:(YSFApiBlock)block;
++ (void)post:(id<YSFApiProtocol>)api completion:(YSFApiBlock)block;
++ (void)get:(id<YSFApiProtocol>)api completion:(YSFApiBlock)block;
++ (void)get:(id<YSFApiProtocol>)api timeoutInterval:(NSTimeInterval)timeoutInterval completion:(YSFApiBlock)block;
+
 @end
 

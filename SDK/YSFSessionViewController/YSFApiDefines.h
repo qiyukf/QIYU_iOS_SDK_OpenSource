@@ -25,6 +25,7 @@
 #define     YSFApiKeyUserId             @"userid"
 #define     YSFApiKeyForeignId          @"foreignid"
 #define     YSFApiKeyUserInfo           @"userinfo"
+#define     YSFApiKeyCRMInfo            @"crminfo"
 #define     YSFApiKeySessionId          @"sessionid"
 #define     YSFApiKeyShop               @"shop"
 #define     YSFApiKeyLogo               @"logo"
@@ -244,6 +245,11 @@
 #define     YSFApiKeyIsOpen             @"isOpen"
 #define     YSFApiKeyStatusExt          @"statusExt"
 #define     YSFApiKeyStatusExtSet       @"statusExtSet"
+#define     YSFApiKeyAccessToken        @"accessToken"
+#define     YSFApiKeyFromAccount        @"fromAccount"
+#define     YSFApiKeyBeginTime          @"beginTime"
+#define     YSFApiKeyEndTime            @"endTime"
+#define     YSFApiKeyLimit              @"limit"
 //推送相关key
 #define     YSFApiPushKeyCmd            @"cmd"
 #define     YSFApiPushKeyAps            @"aps"
@@ -260,12 +266,15 @@
 #define     YSFApiKeyHasMobile              @"hasMobile"
 #define     YSFApiKeyQYInfoSwitch           @"qiyuInfoSwitch"
 #define     YSFApiKeySetting                @"setting"
+#define     YSFApiKeyKFCorpSetting          @"corpSetting"
 #define     YSFApiKeySessionOpenSwitch      @"session_open_switch"
 #define     YSFApiKeySessionEndSwitch       @"session_end_switch"
 #define     YSFApiKeySessionTimeoutSwitch   @"session_timeout_switch"
-#define     YSFApiKeyStaffReadSwitch        @"staffReadSwitch"
 #define     YSFApiKeyInputSwitch            @"inputSwitch"
 #define     YSFApiKeySendingRate            @"sendingRate"
+#define     YSFApiKeyStaffReadSwitch        @"staffReadSwitch"
+#define     YSFApiKeyKFStaffReadSwitch      @"staff_read_switch"
+#define     YSFApiKeyKFUserReadSwitch       @"user_read_switch"
 //评价相关
 #define     YSFApiKeyEvaluation                 @"evaluation"
 #define     YSFApiKeyEvaluationData             @"evaluation_data"
@@ -275,11 +284,16 @@
 #define     YSFApiKeyEvaluationModifyEnable     @"enable_evaluation_muttimes"
 #define     YSFApiKeyEvaluationModifyTimeout    @"evaluation_timeout"
 #define     YSFApiKeyEvaluationModifyMaxTime    @"evaluation_modify_limit"
+#define     YSFApiKeyEvaluationShowButton       @"show_evaluation_button"
 #define     YSFApiKeyEvaluationScoreType        @"scoreType"
 #define     YSFApiKeyEvaluationWebAppSort       @"webappSort"
 #define     YSFApiKeyEvaluationWxWbSort         @"wxwbSort"
 #define     YSFApiKeyEvaluationTagRequired      @"tagRequired"
 #define     YSFApiKeyEvaluationCommentRequired  @"commentRequired"
+#define     YSFApiKeyEvaluationResult           @"evaluation_result"
+#define     YSFApiKeyEvaluationInviteStatus     @"evaluation_invite_status"
+#define     YSFApiKeyEvaluationTimes            @"evaluationTimes"
+#define     YSFApiKeySessionSat                 @"session_sat"
 //会话转接相关
 #define     YSFApiKeySessionTransferSwitch      @"session_transfer_switch"
 #define     YSFApiKeyTransferOldSessionId       @"old_sessionid"
@@ -289,7 +303,26 @@
 #define     YSFApiKeyCustomMessageID            @"custom_message_id"
 #define     YSFApiKeyCustomMessageSourceType    @"custom_message_source_type"
 #define     YSFApiKeyCustomMessageData          @"custom_message_data"
-
+//自定义Emoji/表情相关
+#define     YSFApiKeyEmoticonPackageName        @"emojiPackageName"
+#define     YSFApiKeyEmoticonPackageCoverName   @"emojiPackagePicName"
+#define     YSFApiKeyEmoticonPackageCoverURL    @"emojiPackagePicUrl"
+#define     YSFApiKeyEmoticonPackageType        @"emojiType"
+#define     YSFApiKeyEmoticonPackageList        @"emojiList"
+#define     YSFApiKeyEmoticonName               @"emojiName"
+#define     YSFApiKeyEmoticonURL                @"emojiUrl"
+#define     YSFApiKeyEmoticonTag                @"tag"
+#define     YSFApiKeyEmoticonFile               @"file"
+#define     YSFApiKeyEmoticonPath               @"path"
+//留言表单字段
+#define     YSFApiKeyLeaveType      @"leaveType"
+#define     YSFApiKeyFieldId        @"fieldId"
+#define     YSFApiKeyDescription    @"description"
+#define     YSFApiKeySystem         @"system"
+#define     YSFApiKeyMobile         @"mobile"
+#define     YSFApiKeyEmail          @"email"
+#define     YSFApiKeyCustomFields   @"customFields"
+#define     YSFApiKeyAuditResult    @"auditResult"
 
 #define     YSFApiValueIOS              @"iOS"
 
@@ -318,15 +351,20 @@ typedef enum : NSUInteger {
     YSFCommandSetUserInfoRequest        =   52,     //轻量CRM
     YSFCommandEvaluationResult          =   55,     //评价结果
     YSFCommandSystemConfig              =   57,     //系统配置
-    YSFCommandSendInputtingMessageRequest = 58,       //发送正在输入的消息
+    YSFCommandInputtingSend             =   58,     //发送正在输入消息
+    YSFCommandInputtingReceive          =   59,     //接收正在输入消息
     YSFCommandMachine                   =   60,     //机器人问答
     YSFCommandEvaluationAnswer          =   64,     //评价答案
     YSFCommandRichText                  =   65,     //富文本
     YSFCommandEvaluationReason          =   66,     //评价原因，差评原因
+    YSFCommandMessageFormRequest        =   83,     //留言表单数据发送
+    YSFCommandMessageFormResult         =   87,     //留言表单数据发送结果
     YSFCommandKFBypassNotification      =   90,     //客服分流
+    YSFCommandEvaluationConfig          =   108,    //评价入口配置
     YSFCommandSetCommodityInfoRequest   =   121,    //商品信息
     YSFCommandPushMessageRequest        =   133,    //获取推送消息
     YSFCommandPushMessageStatusChangeRequest =   135,    //推送消息状态变更
+    YSFCommandUserReadStatusRequest     =   500,    //访客消息阅读状态上报
     YSFCommandSessionStatusRequest      =   501,    //请求会话状态
     YSFCommandSessionStatusResponse     =   502,    //请求会话状态返回
     YSFCommandBotReceive                = 203,      //bot
@@ -334,6 +372,8 @@ typedef enum : NSUInteger {
     YSFCommandBotQueryRequest           = 204,      //bot
     YSFCommandBotQueryResponse          = 205,      //bot
     YSFCommandBotEntry                  = 211,      //实时推送bot入口信息
+    YSFCommandHistoryMsgTokenRequest    = 700,      //获取历史消息请求token
+    YSFCommandHistoryMsgTokenResult     = 701,      //历史消息请求token结果
     
     YSFCommandDataTrack                 = 4000,     //埋点数据上报
 
@@ -369,6 +409,7 @@ typedef enum : NSUInteger {
     YSFCommandNewWorkOrder              =   115,    //有新的工单分配过来
     YSFCommandMiniProgramPage           =   122,    //小程序卡片
     YSFCommandAudioToText               =   136,    //推送语音转文字结果
+    YSFCommandInviteEvaluationResult    =   300,     //邀请评价结果
     YSFCommandLongMessage               =   405,    //超长消息
     YSFCommandWorkOrderGroupChanged     =   601,    //组内未受理工单工单所在组已被改变
     
@@ -382,6 +423,8 @@ typedef enum : NSUInteger {
     YSFCommandClickNotification         =   10006,  //可点击的通知
     YSFCommandHistoryNotification       =   10007,  //历史消息提示
     YSFCommandCustomMessage             =   10008,  //自定义消息
+    YSFCommandSatisfactionResult        =   10009,  //客服端-满意度结果
+    YSFCommandMessageFormResultCard     =   10010,  //留言结果卡片
 
 
 } YSFCommand;

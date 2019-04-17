@@ -10,18 +10,18 @@
 
 @interface YSFSessionViewLayoutManager : NSObject
 
+@property (nonatomic, weak) UITableView *tableView;
 @property (nonatomic, assign) CGRect viewRect;
 
-@property (nonatomic,weak) UITableView *tableView;
 
 - (instancetype)initWithInputView:(YSFInputView*)inputView tableView:(UITableView*)tableview;
 
 - (void)insertTableViewCellAtRows:(NSArray*)addIndexs scrollToBottom:(BOOL)scrollToBottom;
-
-- (void)updateCellAtIndex:(NSInteger)index model:(id)model;
-
--(void)deleteCellAtIndexs:(NSArray*)delIndexs;
-
--(void)reloadDataToIndex:(NSInteger)index withAnimation:(BOOL)animated;
+- (void)updateCellAtIndex:(NSInteger)index
+             refreshModel:(id)model
+             rowAnimation:(UITableViewRowAnimation)animation;
+- (void)deleteCellAtIndexs:(NSArray*)delIndexs;
+- (void)reloadDataToIndex:(NSInteger)index withAnimation:(BOOL)animated;
+- (void)scrollToBottomAtIndex:(NSInteger)index;
 
 @end

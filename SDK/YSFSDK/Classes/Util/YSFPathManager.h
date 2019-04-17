@@ -14,5 +14,6 @@
 - (NSString *)sdkRootPath;
 - (NSString *)sdkGlobalPath;
 - (NSString *)sdkVideoPath;
+- (NSString *)sdkEmoticonPath;
 
 @end

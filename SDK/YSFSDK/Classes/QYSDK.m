@@ -151,13 +151,16 @@
     YSFLogApp(@"begin to logoutNim");
     __weak typeof(self) weakSelf = self;
     [[[YSF_NIMSDK sharedSDK] loginManager] logout:^(NSError *error) {
-        [weakSelf.sessionManager clear];
-        [weakSelf.infoManager logout];
-        
-        if (completion) {
-            completion();
+        if (!error) {
+            [weakSelf.sessionManager clear];
+            [weakSelf.infoManager logout:completion];
+            YSFLogApp(@"logout end");
+        } else {
+            if (completion) {
+                completion(NO);
+            }
+            YSFLogApp(@"logout error");
         }
-        YSFLogApp(@"logout end");
     }];
 }
 
@@ -176,7 +179,14 @@
     YSFSetLeaveStatusRequest *request = [[YSFSetLeaveStatusRequest alloc] init];
     __weak typeof(self) weakSelf = self;
     [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
-        [weakSelf logoutNim:completion];
+        if (!error) {
+            [weakSelf logoutNim:completion];
+        } else {
+            if (completion) {
+                completion(NO);
+            }
+            YSFLogApp(@"logout error");
+        }
     }];
 }
 

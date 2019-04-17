@@ -52,4 +52,8 @@ extern NSString * const YSFToastPositionBottom;
 - (void)ysf_showToast:(UIView *)toast duration:(NSTimeInterval)interval position:(id)point
       tapCallback:(void(^)(void))tapCallback;
 
+//loading/load success/load fail
+- (void)ysf_makeActivityToast:(NSString *)toast shadow:(BOOL)shadow;
+- (void)ysf_makeToast:(NSString *)toast image:(UIImage *)image shadow:(BOOL)shadow duration:(NSTimeInterval)interval;
+
 @end

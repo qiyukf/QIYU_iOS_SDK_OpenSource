@@ -9,14 +9,14 @@
 #import "YSFInputAudioRecordIndicatorView.h"
 #import "YSFTimer.h"
 
-
 #define YSFKit_ViewWidth 148
 #define YSFKit_ViewHeight 148
 
 #define YSFKit_TimeFontSize 30
 #define YSFKit_TipFontSize 15
 
-@interface YSFInputAudioRecordIndicatorView(){
+
+@interface YSFInputAudioRecordIndicatorView() {
     UIImageView *_backgrounView;
     UIImageView *_microphoneView;
     UIImageView *_microphoneCancelView;
@@ -33,6 +33,7 @@
 
 @end
 
+
 @implementation YSFInputAudioRecordIndicatorView
 - (instancetype)init {
     self = [super init];
@@ -41,8 +42,9 @@
         
         timer = [[YSFTimer alloc] init];
         tipTimer = [[YSFTimer alloc] init];
-        _backgrounView = [[UIImageView alloc] initWithImage:[[UIImage ysf_imageInKit:@"icon_input_record_indicator"]
-                          resizableImageWithCapInsets:UIEdgeInsetsMake(20,20,20,20) resizingMode:UIImageResizingModeStretch]];
+        UIImage *image = [[UIImage ysf_imageInKit:@"icon_input_record_indicator"] resizableImageWithCapInsets:UIEdgeInsetsMake(20,20,20,20)
+                                                                                                 resizingMode:UIImageResizingModeStretch];
+        _backgrounView = [[UIImageView alloc] initWithImage:image];
         [self addSubview:_backgrounView];
         
         _microphoneView = [[UIImageView alloc] initWithImage:[UIImage ysf_imageInKit:@"icon_microphone"]];
@@ -85,28 +87,27 @@
 - (void)setPhase:(NIMAudioRecordPhase)phase {
     if(phase == AudioRecordPhaseStart) {
         __weak typeof(self) weakSelf = self;
-        [timer start:dispatch_get_main_queue() interval:1 repeats:YES block :^{ [weakSelf updateMicrophoneVolumn]; }];
-        [tipTimer start:dispatch_get_main_queue() startAfter:49 interval:1 repeats:YES block :^{ [weakSelf updateTip]; }];
-    }
-    else if(phase == AudioRecordPhaseCancelling) {
+        [timer start:dispatch_get_main_queue() interval:1 repeats:YES block :^{
+            [weakSelf updateMicrophoneVolumn];
+        }];
+        [tipTimer start:dispatch_get_main_queue() startAfter:49 interval:1 repeats:YES block :^{
+            [weakSelf updateTip];
+        }];
+    } else if(phase == AudioRecordPhaseCancelling) {
         _tipLabel.text = @"松开手指，取消发送";
         _tipBackgroundView.hidden = NO;
-
         if (!_countdown) {
             _microphoneCancelView.hidden = NO;
             _microphoneView.hidden = YES;
             _microphoneVolumeView.hidden = YES;
         }
-    }
-    else {
+    } else {
         _tipLabel.text = @"手指上滑，取消发送";
         _tipBackgroundView.hidden = YES;
-
         if (!_countdown) {
             _microphoneCancelView.hidden = YES;
             _microphoneView.hidden = NO;
             _microphoneVolumeView.hidden = NO;
-            
             if (phase == AudioRecordPhaseEnd) {
                 [timer stop];
             }
@@ -114,33 +115,28 @@
     }
 }
 
-- (void) updateTip
-{
+- (void)updateTip {
     if (!_countdown) {
         _countdown = YES;
         _microphoneCancelView.hidden = YES;
         _microphoneView.hidden = YES;
         _microphoneVolumeView.hidden = YES;
         _countDownTipNumber.hidden = NO;
-    }
-    else {
+    } else {
         int intString = [ _countDownTipNumber.text intValue];
         intString -= 1;
         if (intString > 0) {
             NSString *newStringInt = [NSString stringWithFormat:@"%d",intString];
             _countDownTipNumber.text = newStringInt;
-        }
-        else if (intString == 0) {
+        } else if (intString == 0) {
             _timeOverClock.hidden = NO;
             _countDownTipNumber.hidden = YES;
             _tipLabel.text = @"说话时间已到60秒";
         }
     }
-
 }
 
-- (void) updateMicrophoneVolumn
-{
+- (void)updateMicrophoneVolumn {
     float power = [[[YSF_NIMSDK sharedSDK] mediaManager] recordAveragePower];
     float _s = self.frame.size.width*0.25/320;
     float volum = (power + 40)*_s;
@@ -151,25 +147,15 @@
     int volumnPicIndex = 0;
     if (scale < 0.1) {
         volumnPicIndex = 1;
-    }
-    else if (scale < 0.3)
-    {
+    } else if (scale < 0.3) {
         volumnPicIndex = 2;
-    }
-    else if (scale < 0.5)
-    {
+    } else if (scale < 0.5) {
         volumnPicIndex = 3;
-    }
-    else if (scale < 0.7)
-    {
+    } else if (scale < 0.7) {
         volumnPicIndex = 4;
-    }
-    else if (scale < 0.9)
-    {
+    } else if (scale < 0.9) {
         volumnPicIndex = 5;
-    }
-    else
-    {
+    } else {
         volumnPicIndex = 6;
     }
     NSString *stringInt = [NSString stringWithFormat:@"icon_microphone_volumn_0%d",volumnPicIndex];
@@ -201,6 +187,5 @@
     CGSize size = [_tipLabel sizeThatFits:CGSizeMake(YSFKit_ViewWidth, MAXFLOAT)];
     _tipLabel.frame = CGRectMake(0, YSFKit_ViewHeight - 10 - size.height, YSFKit_ViewWidth, size.height);
 }
-
 
 @end

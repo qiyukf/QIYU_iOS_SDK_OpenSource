@@ -7,8 +7,7 @@
 //
 
 #import "NSString+FileTransfer.h"
-#import "YSFInputEmoticonManager.h"
-#import "YSFInputEmoticonParser.h"
+#import "YSFEmoticonDataManager.h"
 #import "YSFCoreText.h"
 #import "QYCustomUIConfig.h"
 
@@ -70,37 +69,45 @@
     return NO;
 }
 
-- (NSAttributedString *)ysf_attributedString:(BOOL)isOutgoingMsg
-{
-    NSRegularExpression *exp = [NSRegularExpression regularExpressionWithPattern:@"\\[[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]"
+- (NSAttributedString *)ysf_attributedString:(BOOL)isOutgoingMsg {
+    //识别文本中的<p>标签，替换为<br>
+    NSString *filterString = [self filterHTMLString:self forTag:@"p"];
+    if (filterString.length <= 0) {
+        filterString = self;
+    }
+    
+    //识别文本中的emoji表情，替换为object
+    NSRegularExpression *exp = [NSRegularExpression regularExpressionWithPattern:@"\\[[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]|\\[:[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]"
                                                                          options:NSRegularExpressionCaseInsensitive
                                                                            error:nil];
     __block NSInteger index = 0;
     __block NSString *resultText = @"";
-    [exp enumerateMatchesInString:self
+    [exp enumerateMatchesInString:filterString
                           options:0
-                            range:NSMakeRange(0, [self length])
+                            range:NSMakeRange(0, [filterString length])
                        usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
-                           NSString *rangeText = [self substringWithRange:result.range];
-                           if ([[YSFInputEmoticonManager sharedManager] emoticonByTag:rangeText])
-                           {
-                               if (result.range.location > index)
-                               {
-                                   NSString *rawText = [self substringWithRange:NSMakeRange(index, result.range.location - index)];
+                           NSString *rangeText = [filterString substringWithRange:result.range];
+                           if ([[YSFEmoticonDataManager sharedManager] emoticonItemForTag:rangeText]) {
+                               if (result.range.location > index) {
+                                   NSString *rawText = [filterString substringWithRange:NSMakeRange(index, result.range.location - index)];
                                    resultText = [resultText stringByAppendingString:rawText];
                                }
-                               NSString *rawText = [NSString stringWithFormat:@"<object type=\"0\" data=\"%@\" width=\"18\" height=\"18\"></object>", rangeText];
+                               NSString *rawText = [NSString stringWithFormat:@"<object type=\"0\" data=\"%@\" width=\"21\" height=\"21\"></object>", rangeText];
                                resultText = [resultText stringByAppendingString:rawText];
                                
                                index = result.range.location + result.range.length;
                            }
                        }];
-    
-    if (index < [self length])
-    {
-        NSString *rawText = [self substringWithRange:NSMakeRange(index, [self length] - index)];
+    if (index < [filterString length]) {
+        NSString *rawText = [filterString substringWithRange:NSMakeRange(index, [filterString length] - index)];
         resultText = [resultText stringByAppendingString:rawText];
     }
+    //处理富文本消息中的换行
+    if ([resultText containsString:@"\n"] || [resultText containsString:@"\r"]) {
+        resultText = [resultText stringByReplacingOccurrencesOfString:@"\n" withString:@"<br>"];
+        resultText = [resultText stringByReplacingOccurrencesOfString:@"\r" withString:@"<br>"];
+    }
+    
     resultText = [NSString stringWithFormat:@"<span>%@</span>", resultText];
     NSData *data = [resultText dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -117,10 +124,49 @@
         defaultLinkColor = uiConfig.serviceMessageHyperLinkColor;
     }
     CGFloat fontSize = isOutgoingMsg ? uiConfig.customMessageTextFontSize : uiConfig.serviceMessageTextFontSize;
-    NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSValue valueWithCGSize:maxImageSize], YSFMaxImageSize, @(fontSize), YSFDefaultFontSize, defaultTextColor, YSFDefaultTextColor, defaultLinkColor, YSFDefaultLinkColor, nil];
+    UIFont *font = [UIFont systemFontOfSize:fontSize];
+    NSDictionary *options = @{
+                              YSFMaxImageSize : [NSValue valueWithCGSize:maxImageSize],
+                              YSFDefaultFontFamily : YSFStrParam(font.familyName),
+                              YSFDefaultFontName : YSFStrParam(font.fontName),
+                              YSFDefaultFontSize : @(fontSize),
+                              YSFDefaultTextColor : defaultTextColor,
+                              YSFDefaultLinkColor : defaultLinkColor,
+                              };
     NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:options documentAttributes:NULL];
     
     return string;
+}
+
+- (NSString *)filterHTMLString:(NSString *)htmlString forTag:(NSString *)tag {
+    if (htmlString.length <= 0 || tag.length <= 0) {
+        return htmlString;
+    }
+    NSString *start = [NSString stringWithFormat:@"<%@>", tag];
+    NSString *end = [NSString stringWithFormat:@"</%@>", tag];
+    if (![htmlString containsString:start] || ![htmlString containsString:end]) {
+        return htmlString;
+    }
+    
+    NSScanner *scanner = [NSScanner scannerWithString:htmlString];
+    NSString *text = nil;
+    while ([scanner isAtEnd] == NO) {
+        [scanner scanUpToString:start intoString:nil];
+        [scanner scanUpToString:end intoString:&text];
+        if (text.length) {
+            NSRange range = [htmlString rangeOfString:text];
+            if (range.location != NSNotFound) {
+                if ((range.location + start.length) <= [htmlString length]) {
+                    htmlString = [htmlString stringByReplacingCharactersInRange:NSMakeRange(range.location, start.length) withString:@""];
+                }
+                if ((range.location + range.length - start.length) >= 0
+                    && (range.location + range.length - start.length + end.length) <= [htmlString length]) {
+                    htmlString = [htmlString stringByReplacingCharactersInRange:NSMakeRange(range.location + range.length - start.length, end.length) withString:@"<br>"];
+                }
+            }
+        }
+    }
+    return htmlString;
 }
 
 @end

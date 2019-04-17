@@ -10,13 +10,15 @@
 
 static NSInteger YSFMaxRetryDelay = 64;
 
+
 @interface YSFLoginManager () <YSF_NIMLoginManagerDelegate> {
     NSInteger _retryDelay;
 }
 
-@property (nonatomic,strong) YSFAccountInfo  *appInfo;
+@property (nonatomic, strong) YSFAccountInfo *appInfo;
 
 @end
+
 
 @implementation YSFLoginManager
 - (instancetype)init {

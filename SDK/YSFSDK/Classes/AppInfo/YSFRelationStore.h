@@ -8,6 +8,7 @@
 
 
 @interface YSFRelationStore : NSObject
-- (void)mapYsf:(NSString *)accid
-        toUser:(NSString *)foreignId;
+
+- (void)mapYsf:(NSString *)accid toUser:(NSString *)foreignId;
+
 @end

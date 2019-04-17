@@ -10,6 +10,10 @@
 #import "QYCustomUIConfig.h"
 
 @implementation YSFInputTextView
+- (void)dealloc {
+    _placeHolder = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self];
+}
 
 - (void)setPlaceHolder:(NSString *)placeHolder {
     if([placeHolder isEqualToString:_placeHolder]) {
@@ -30,8 +34,7 @@
     [self setNeedsDisplay];
 }
 
-- (id)initWithFrame:(CGRect)frame
-{
+- (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         [self customUI];
@@ -43,15 +46,14 @@
     return self;
 }
 
-- (void)setFrame:(CGRect)frame{
+- (void)setFrame:(CGRect)frame {
     if (self.frame.size.width != frame.size.width) {
         [self setNeedsDisplay];
     }
     [super setFrame:frame];
 }
 
-- (void)setCustomUI
-{
+- (void)setCustomUI {
     [self customUI];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didReceiveTextDidChangeNotification:)
@@ -59,8 +61,7 @@
                                                object:self];
 }
 
-- (void)customUI
-{
+- (void)customUI {
     self.scrollIndicatorInsets = UIEdgeInsetsMake(10.0f, 0.0f, 10.0f, 8.0f);
     self.contentInset = UIEdgeInsetsZero;
     self.scrollEnabled = YES;
@@ -75,59 +76,37 @@
     self.textAlignment = NSTextAlignmentLeft;
 }
 
-- (UIResponder *)nextResponder
-{
-    if (_overrideNextResponder != nil)
-    {
+- (UIResponder *)nextResponder {
+    if (_overrideNextResponder != nil) {
         return _overrideNextResponder;
-    }
-    else
-    {
+    } else {
         return [super nextResponder];
     }
 }
 
--(BOOL)canPerformAction:(SEL)action withSender:(id)sender
-{
-    if (_overrideNextResponder != nil)
-    {
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+    if (_overrideNextResponder != nil) {
         return NO;
-    }
-    else
-    {
-        if(action == @selector(paste:))
-        {
+    } else {
+        if(action == @selector(paste:)) {
             UIImage *image = [[UIPasteboard generalPasteboard] image];
-            
-            //        YSFServiceSession *session = [QYSDK sharedSDK].sessionManager.sessions;
-            //        if (image && session && !session.humanOrMachine) {
-            //            return NO;
-            //        }
-            //        else if(image && self.selectedRange.length == 0)
-            //            return YES;
-            
             if (image) {
                 if(image && self.selectedRange.length == 0) {
                     return YES;
-                }
-                else {
+                } else {
                     return NO;
                 }
-            }
-            else {
+            } else {
                 NSString *string = [[UIPasteboard generalPasteboard] string];
                 if (string && string.length > 0) {
                     return YES;
-                }
-                else {
+                } else {
                     return NO;
                 }
             }
         }
-        
         return [super canPerformAction:action withSender:sender];
     }
-
 }
 
 - (void)paste:(id)sender {
@@ -136,22 +115,19 @@
         _pasteImageCallback(image);
         return;
     }
-    
     [super paste:sender];
 }
 
 #pragma mark - Notifications
-
 - (void)didReceiveTextDidChangeNotification:(NSNotification *)notification {
     [self setNeedsDisplay];
 }
 
 #pragma mark - Drawing
-- (void)drawRect:(CGRect)rect
-{
+- (void)drawRect:(CGRect)rect {
     [super drawRect:rect];
     
-    if([self.text length] == 0 && self.placeHolder) {
+    if ([self.text length] == 0 && self.placeHolder) {
         CGRect placeHolderRect = CGRectMake(10.0f,
                                             8.0f,
                                             rect.size.width,
@@ -167,13 +143,5 @@
                                         NSParagraphStyleAttributeName : paragraphStyle }];
     }
 }
-
-
-- (void)dealloc {
-    _placeHolder = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self];
-}
-
-
 
 @end

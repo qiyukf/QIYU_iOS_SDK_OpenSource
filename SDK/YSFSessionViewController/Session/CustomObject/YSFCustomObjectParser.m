@@ -39,6 +39,7 @@
 #import "YSFBotCustomObject.h"
 #import "YSFMixReply.h"
 #import "YSFMiniProgramPage.h"
+#import "YSFMessageFormResultObject.h"
 #import "YSFCustomMessageAttachment.h"
 
 @implementation YSFCustomObjectParser
@@ -237,6 +238,9 @@
                 break;
             case YSFCommandMiniProgramPage:
                 object = [YSFMiniProgramPage objectByDict:dict];
+                break;
+            case YSFCommandMessageFormResultCard:
+                object = [YSFMessageFormResultObject objectByDict:dict];
                 break;
             case YSFCommandCustomMessage:
                 object = [YSFCustomMessageAttachment objectByDict:dict];

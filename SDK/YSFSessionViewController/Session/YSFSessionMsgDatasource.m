@@ -174,6 +174,10 @@
     }
 }
 
+- (void)loadHistoryMessagesWithCompletion:(void(^)(NSInteger index, NSError *error))completion {
+    [self loadHistoryMessagesWithLimit:20 historyTipMessage:nil completion:completion];
+}
+
 #pragma mark - 查询消息
 - (YSF_NIMMessage *)getLastMessageFromDB {
     NSArray *messages = [[[YSF_NIMSDK sharedSDK] conversationManager] messagesInSession:_currentSession

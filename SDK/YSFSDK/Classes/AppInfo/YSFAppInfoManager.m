@@ -15,6 +15,8 @@
 #import "YSFRelationStore.h"
 #import "YSFAppSetting.h"
 #import "YSFSessionStatusRequest.h"
+#import "YSFHistoryMsgTokenRequest.h"
+#import "YSFHistoryMessageRequest.h"
 #import "NIMDataTracker.h"
 #import "NSArray+YSF.h"
 #import "QYSDK_Private.h"
@@ -32,29 +34,35 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
 
 @interface YSFAppInfoManager () <YSFLoginManagerDelegate,YSF_NIMLoginManagerDelegate, YSF_NIMSystemNotificationManagerDelegate>
 
+@property (nonatomic, strong) YSFLoginManager *loginManager;
 @property (nonatomic, strong) YSFAccountInfo *accountInfo;
 @property (nonatomic, strong) YSFAppSetting *appSetting;
 @property (nonatomic, strong) QYUserInfo *qyUserInfo;
-@property (nonatomic, copy) QYCompletionWithResultBlock completionWithResultBlock;
 @property (nonatomic, copy) NSString *currentForeignUserId;
-@property (nonatomic, strong) YSFKeyValueStore *store;
 @property (nonatomic, copy) NSString *deviceId;
-@property (nonatomic, strong) YSFLoginManager *loginManager;
+
+@property (nonatomic, strong) YSFKeyValueStore *store;
 @property (nonatomic, strong) YSFRelationStore *relationStore;
 @property (nonatomic, strong) NSMutableDictionary *cachedTextDict;
+@property (nonatomic, copy) QYCompletionWithResultBlock completionWithResultBlock;
+
 @property (nonatomic, assign) BOOL isSendingTrackData;
 @property (nonatomic, assign) BOOL track;
 @property (nonatomic, assign) BOOL uploadedLog;
 @property (nonatomic, assign) NSInteger createAccountCount;
+@property (nonatomic, copy) QYCompletionBlock logoutCompletion;
 
 @end
 
-@implementation YSFAppInfoManager
 
-- (instancetype)init
-{
-    if (self = [super init])
-    {
+@implementation YSFAppInfoManager
+- (void)dealloc {
+    [[[YSF_NIMSDK sharedSDK] loginManager] removeDelegate:self];
+    [[[YSF_NIMSDK sharedSDK] systemNotificationManager] removeDelegate:self];
+}
+
+- (instancetype)init {
+    if (self = [super init]) {
         _loginManager = [[YSFLoginManager alloc] init];
         _loginManager.delegate = self;
         
@@ -66,52 +74,72 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     return self;
 }
 
-- (void)dealloc
-{
-    [[[YSF_NIMSDK sharedSDK] loginManager] removeDelegate:self];
-    [[[YSF_NIMSDK sharedSDK] systemNotificationManager] removeDelegate:self];
+- (void)initSessionViewControllerInfo {
+    NSDictionary *dict = [self dictByKey:YSFAppSettingKey];
+    if (dict) {
+        YSFAppSetting *info = [YSFAppSetting infoByDict:dict];
+        if ([info isValid]) {
+            _appSetting = info;
+        }
+    } else {
+        YSFAppSetting *info = [YSFAppSetting defaultSetting];
+        if ([info isValid]) {
+            _appSetting = info;
+        }
+    }
+    [self changeNimSDKAudioPlayMode];
+    _cachedTextDict = [[[self store] dictByKey:YSFCachedTextKey] mutableCopy];
+    if (!_cachedTextDict) {
+        _cachedTextDict = [NSMutableDictionary dictionary];
+    }
 }
 
-- (NSString *)currentUserId
-{
+- (void)saveAppSetting {
+    if ([_appSetting isValid]) {
+        NSDictionary *dict = [_appSetting toDict];
+        [self saveDict:dict forKey:YSFAppSettingKey];
+        [self changeNimSDKAudioPlayMode];
+    }
+}
+
+- (void)cleanAppSetting {
+    _appSetting = nil;
+    [[self store] removeObjectByID:YSFAppSettingKey];
+}
+
+- (void)changeNimSDKAudioPlayMode {
+    if (_appSetting.recevierOrSpeaker) {
+        [[YSF_NIMSDK sharedSDK].mediaManager setNeedProximityMonitor:NO];
+        [[YSF_NIMSDK sharedSDK].mediaManager switchAudioOutputDevice:YSF_NIMAudioOutputDeviceReceiver];
+    } else {
+        [[YSF_NIMSDK sharedSDK].mediaManager setNeedProximityMonitor:YES];
+        [[YSF_NIMSDK sharedSDK].mediaManager switchAudioOutputDevice:YSF_NIMAudioOutputDeviceSpeaker];
+    }
+}
+
+#pragma mark - version
+- (NSString *)version {
+    return @"4.11.0";
+}
+
+- (NSString *)versionNumber {
+    return @"52";
+}
+
+#pragma mark - ID
+- (NSString *)currentUserId {
     return _accountInfo.accid;
 }
 
-- (NSString *)currentForeignUserId
-{
+- (NSString *)currentForeignUserId {
     return _currentForeignUserId;
 }
 
-- (void)checkAppInfo {
-    [self readAccountInfo];
-    [self readUserInfo];
-    
-    if (![_accountInfo isValid]) {
-        _createAccountCount = 0;
-        [self createAccount];
-    } else {
-        [self login];
-    }
-    
-    __weak typeof(self) weakSelf = self;
-    YSFDARequestConfig *request = [YSFDARequestConfig new];
-    [YSFHttpApi get:request
-         completion:^(NSError *error, YSFDARequestConfig *config){
-             if (!error) {
-                 weakSelf.track = config.track;
-             }
-         }];
-}
-
-- (NSString *)appDeviceId
-{
-    @synchronized(self)
-    {
-        if(_deviceId == nil)
-        {
+- (NSString *)appDeviceId {
+    @synchronized(self) {
+        if (!_deviceId) {
             _deviceId = [[self store] valueByKey:YSFDeviceInfoKey];;
-            if ([_deviceId length] == 0)
-            {
+            if ([_deviceId length] == 0) {
                 _deviceId = [[[[[NSUUID UUID] UUIDString] lowercaseString] componentsSeparatedByString:@"-"] componentsJoinedByString:@""];
                 [[self store] saveValue:_deviceId forKey:YSFDeviceInfoKey];
             }
@@ -120,8 +148,305 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     }
 }
 
-- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key
-{
+- (void)cleanCurrentForeignUserIdAndCurrentUserInfo {
+    _currentForeignUserId = nil;
+    [[self store] removeObjectByID:YSFCurrentForeignUserIdKey];
+    [self cleanCurrentUserInfo];
+}
+
+- (void)cleanDeviceId {
+    @synchronized(self) {
+        _deviceId = nil;
+        [[self store] removeObjectByID:YSFDeviceInfoKey];
+    }
+}
+
+#pragma mark - AccountInfo
+- (void)readAccountInfo {
+    NSDictionary *dict = [self dictByKey:YSFAppInfoKey];
+    if (dict) {
+        YSFAccountInfo *info = [YSFAccountInfo infoByDict:dict];
+        if ([info isValid]) {
+            _accountInfo = info;
+        }
+    }
+}
+
+- (void)saveAccountInfo {
+    if ([_accountInfo isValid]) {
+        NSDictionary *dict = [_accountInfo toDict];
+        [self saveDict:dict forKey:YSFAppInfoKey];
+    }
+}
+
+- (void)cleanAccountInfo {
+    _accountInfo = nil;
+    [[self store] removeObjectByID:YSFAppInfoKey];
+}
+
+#pragma mark - Register/Login/Logout
+- (void)checkAppInfo {
+    [self readAccountInfo];
+    [self readUserInfo];
+    if (![_accountInfo isValid]) {
+        _createAccountCount = 0;
+        [self createAccount];
+    } else {
+        [self login];
+    }
+    //访问/行为轨迹是否可用
+    YSFDARequestConfig *request = [[YSFDARequestConfig alloc] init];
+    __weak typeof(self) weakSelf = self;
+    [YSFHttpApi get:request completion:^(NSError *error, YSFDARequestConfig *config) {
+        if (!error) {
+            weakSelf.track = config.track;
+        }
+    }];
+}
+
+- (void)login {
+    _uploadedLog = NO;
+    [_loginManager tryToLogin:_accountInfo];
+}
+
+- (void)logout:(QYCompletionBlock)completion {
+    [self cleanAccountInfo];
+    [self cleanAppSetting];
+    [[QYSDK sharedSDK] cleanAuthToken];
+    [self cleanCurrentForeignUserIdAndCurrentUserInfo];
+    [self cleanDeviceId];
+    
+    _logoutCompletion = completion;
+    _createAccountCount = 0;
+    [self createAccount];
+}
+
+- (void)createAccount {
+    _createAccountCount++;
+    YSFCreateAccountRequest *request = [[YSFCreateAccountRequest alloc] init];
+    __weak typeof(self) weakSelf = self;
+    [YSFHttpApi post:request completion:^(NSError *error, id returendObject) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!error && [returendObject isKindOfClass:[YSFAccountInfo class]]) {
+            strongSelf.accountInfo = returendObject;
+            YSFLogApp(@"createAccount success accid: %@", strongSelf.accountInfo.accid);
+            [strongSelf saveAccountInfo];
+            [strongSelf login];
+            //创建账号成功后回调
+            if (strongSelf.delegate && [strongSelf.delegate respondsToSelector:@selector(didCreateAccountSuccessfully)]) {
+                [strongSelf.delegate didCreateAccountSuccessfully];
+            }
+        } else {
+            if (strongSelf->_createAccountCount <= YSFMaxCreateAccountCount) {
+                YSFLogErr(@"createAccount failed %@", error);
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [strongSelf createAccount];
+                });
+            }
+        }
+    }];
+}
+
+- (YSFRelationStore *)relationStore {
+    if (!_relationStore) {
+        _relationStore = [[YSFRelationStore alloc] init];
+    }
+    return _relationStore;
+}
+
+- (void)mapForeignId:(NSString *)foreignId {
+    NSString *accid = [_accountInfo accid];
+    [[self relationStore] mapYsf:accid toUser:foreignId];
+}
+
+#pragma mark - UserInfo
+- (void)readUserInfo {
+    _currentForeignUserId = [[self dictByKey:YSFCurrentForeignUserIdKey] objectForKey:@"id"];
+    
+    NSString *userId = [[self dictByKey:YSFCurrentUserInfoKey] objectForKey:@"id"];
+    NSString *data = [[self dictByKey:YSFCurrentUserInfoKey] objectForKey:@"data"];
+    if (userId) {
+        _qyUserInfo = [[QYUserInfo alloc] init];
+        _qyUserInfo.userId = userId;
+        _qyUserInfo.data = data;
+    }
+}
+
+- (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block; {
+    if (userInfo) {
+        self.qyUserInfo = userInfo;
+        self.currentForeignUserId = userInfo.userId;
+        self.completionWithResultBlock = block;
+        [self saveUserInfo];
+        [self reportUserInfo];
+    }
+}
+
+- (void)saveUserInfo {
+    if (_currentForeignUserId) {
+        [self saveDict:@{@"id" : _currentForeignUserId} forKey:YSFCurrentForeignUserIdKey];
+        
+        NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+        if (_qyUserInfo.userId) {
+            [userInfo setValue:_qyUserInfo.userId forKey:@"id"];
+        }
+        if (_qyUserInfo.data) {
+            [userInfo setValue:_qyUserInfo.data forKey:@"data"];
+        }
+        [self saveDict:userInfo forKey:YSFCurrentUserInfoKey];
+    }
+}
+
+- (void)reportUserInfo {
+    if (_qyUserInfo) {
+        YSFLogApp(@"reportUserInfo userId:%@ data:%@", _qyUserInfo.userId, _qyUserInfo.data);
+        
+        YSFCreateAccountRequest *request = [[YSFCreateAccountRequest alloc] init];
+        request.foreignID = _currentForeignUserId;
+        request.authToken = [[QYSDK sharedSDK] authToken];
+        NSMutableArray *array = [[_qyUserInfo.data ysf_toArray] mutableCopy];
+        if (array) {
+            NSDictionary *versionDict = @{ @"key" : @"sdk_version",
+                                           @"value" : YSFStrParam([[QYSDK sharedSDK].infoManager versionNumber]),
+                                           @"hidden" : @(YES),
+                                          };
+            [array addObject:versionDict];
+            NSString *crmInfo = [array ysf_toUTF8String];
+            if (crmInfo.length) {
+                NSString *chars = @"?!@#$^&%*+,:;='\"`<>()[]{}/\\| ";
+                NSCharacterSet *allowedChars = [[NSCharacterSet characterSetWithCharactersInString:chars] invertedSet];
+                request.crmInfo = [crmInfo stringByAddingPercentEncodingWithAllowedCharacters:allowedChars];
+            }
+        }
+        __weak typeof(self) weakSelf = self;
+        [YSFHttpApi post:request completion:^(NSError *error, id returendObject) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!error && [returendObject isKindOfClass:[YSFAccountInfo class]]) {
+                YSFAccountInfo *account = (YSFAccountInfo *)returendObject;
+                //若账号发生变化，需重新记录并登录
+                if (!strongSelf.accountInfo || ![account isEqual:strongSelf.accountInfo]) {
+                    strongSelf.accountInfo = account;
+                    [strongSelf saveAccountInfo];
+                    [strongSelf login];
+                    if (strongSelf.delegate && [strongSelf.delegate respondsToSelector:@selector(didCreateAccountSuccessfully)]) {
+                        [strongSelf.delegate didCreateAccountSuccessfully];
+                    }
+                }
+                YSFLogApp(@"reportUserInfo success accid: %@", strongSelf.accountInfo.accid);
+                [weakSelf cleanCurrentUserInfo];
+                [weakSelf mapForeignId:strongSelf.qyUserInfo.userId];
+                //拉取未读消息
+                [weakSelf requestHistoryMessagesToken];
+            } else {
+                YSFLogErr(@"reportUserInfo failed error: %@", error);
+            }
+        }];
+    }
+}
+
+- (void)cleanCurrentUserInfo {
+    _qyUserInfo = nil;
+    [[self store] removeObjectByID:YSFCurrentUserInfoKey];
+}
+
+#pragma mark - YSFLoginManagerDelegate
+- (void)onLoginSuccess:(NSString *)accid {
+    YSFLogApp(@"on login success %@ vs cache account %@", accid, _accountInfo.accid);
+    if (_accountInfo.accid && accid && [_accountInfo.accid isEqualToString:accid] && !_accountInfo.isEverLogined) {
+        _accountInfo.isEverLogined = YES;
+        [self saveAccountInfo];
+    }
+}
+
+- (void)onFatalLoginFailed:(NSError *)error {
+    YSFLogErr(@"on fatal login error rebuild account ing......%@", error);
+    [self cleanAccountInfo];
+    [self cleanAppSetting];
+    [self cleanDeviceId];
+    _createAccountCount = 0;
+    [self createAccount];
+    //日志上传节点：SDK初始化失败
+    [self uploadLog];
+    if (_logoutCompletion) {
+        _logoutCompletion(NO);
+        _logoutCompletion = nil;
+    }
+}
+
+- (void)uploadLog {
+    if (!_uploadedLog) {
+        YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
+        uploadLog.version = [self version];
+        uploadLog.type = YSFUploadLogTypeSDKInitFail;
+        uploadLog.logString = YSF_GetMessage(50000);
+        [YSFHttpApi post:uploadLog
+              completion:^(NSError *error, id returendObject) {
+                  
+              }];
+        _uploadedLog = YES;
+    }
+}
+
+#pragma mark - YSF_NIMLoginManagerDelegate
+- (void)onLogin:(YSF_NIMLoginStep)step {
+    if (step == YSF_NIMLoginStepSyncOK) {
+        [self reportUserInfo];
+        [self requestSessionStatus];
+        /**
+         * 去掉wfd.netease.im域名访问，云信已不采集此部分数据
+         [[YSF_NIMDataTracker shared] trackEvent];
+         */
+        [self sendTrackHistoryData];
+        if (_logoutCompletion) {
+            _logoutCompletion(YES);
+            _logoutCompletion = nil;
+        }
+    }
+}
+
+- (void)requestSessionStatus {
+    if ([[[QYSDK sharedSDK] infoManager].accountInfo isPop]) {
+        YSFSessionStatusRequest *request = [[YSFSessionStatusRequest alloc] init];
+        [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
+            YSFLogApp(@"requestSessionStatus error:%@", error);
+        }];
+    }
+}
+
+#pragma mark - YSF_NIMSystemNotificationManagerDelegate
+- (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification {
+    NSString *content = notification.content;
+    YSFLogApp(@"notification: %@",content);
+    NSDictionary *dict = [content ysf_toDict];
+    if (dict) {
+        NSInteger cmd = [dict ysf_jsonInteger:YSFApiKeyCmd];
+        switch (cmd) {
+            case YSFCommandSetCrmResult: {
+                NSString *foreignId = [dict ysf_jsonString:YSFApiKeyForeignId];
+                NSString *authToken = [dict ysf_jsonString:YSFApiKeyAuthToken];
+                BOOL result = [dict ysf_jsonBool:YSFApiKeyResult];
+                if ([_currentForeignUserId isEqualToString:foreignId]
+                    && [[QYSDK sharedSDK].authToken isEqualToString:authToken]) {
+                    if (_completionWithResultBlock) {
+                        _completionWithResultBlock(result);
+                    }
+                }
+            }
+                break;
+            case YSFCommandHistoryMsgTokenResult: {
+                NSString *token = [dict ysf_jsonString:YSFApiKeyAccessToken];
+                if (token.length) {
+                    NSString *shopId = notification.sender ? notification.sender : @"-1";
+                    [self requestHistoryMessages:token shopId:shopId];
+                }
+            }
+                break;
+        }
+    }
+}
+
+#pragma mark - 访问/行为轨迹
+- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key {
     if (!_track) {
         return;
     }
@@ -212,127 +537,80 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
          }];
 }
 
-- (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block;
-{
-    if (userInfo) {
-        self.qyUserInfo = userInfo;
-        self.currentForeignUserId = userInfo.userId;
-        self.completionWithResultBlock = block;
-        [self saveUserInfo];
-        [self reportUserInfo];
-    }
+#pragma mark - 拉取历史消息
+- (void)requestHistoryMessagesToken {
+    YSFHistoryMsgTokenRequest *request = [[YSFHistoryMsgTokenRequest alloc] init];
+    [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
+        YSFLogApp(@"requestHistoryMessagesToken error:%@", error);
+    }];
 }
 
-- (BOOL)isRecevierOrSpeaker;
-{
-    return _appSetting.recevierOrSpeaker;
-}
-
-- (void)setRecevierOrSpeaker:(BOOL)recevierOrSpeaker
-{
-    _appSetting.recevierOrSpeaker = recevierOrSpeaker;
-    [self saveAppSetting];
-}
-
-- (void)logout
-{
-    [self cleanAccountInfo];
-    [self cleanAppSetting];
-    [[QYSDK sharedSDK] cleanAuthToken];
-    [self cleanCurrentForeignUserIdAndCurrentUserInfo];
-    [self cleanDeviceId];
-    _createAccountCount = 0;
-    [self createAccount];
-}
-
-
-#pragma mark - 申请匿名账号
-- (void)createAccount {
-    _createAccountCount++;
-    YSFCreateAccountRequest *request = [[YSFCreateAccountRequest alloc] init];
+- (void)requestHistoryMessages:(NSString *)token shopId:(NSString *)shopId {
+    YSFHistoryMessageRequest *request = [[YSFHistoryMessageRequest alloc] init];
+    request.token = token;
+    long long endTime = round([[NSDate date] timeIntervalSince1970] * 1000);
+    //过去7天毫秒：60 * 60 * 24 * 7 * 1000 = 604800000
+    long long beginTime = endTime - 604800000;
+    request.beginTime = beginTime;
+    request.endTime = endTime;
+    request.limit = 20;
     __weak typeof(self) weakSelf = self;
-    [YSFHttpApi post:request completion:^(NSError *error, id returendObject) {
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (!error && [returendObject isKindOfClass:[YSFAccountInfo class]]) {
-            strongSelf.accountInfo = returendObject;
-            YSFLogApp(@"createAccount success accid: %@", strongSelf.accountInfo.accid);
-            [strongSelf saveAccountInfo];
-            [strongSelf login];
-            //创建账号成功后回调
-            if (strongSelf.delegate && [strongSelf.delegate respondsToSelector:@selector(didCreateAccountSuccessfully)]) {
-                [strongSelf.delegate didCreateAccountSuccessfully];
-            }
+    [YSFHttpApi get:request completion:^(NSError *error, id returendObject) {
+        if (!error && [returendObject isKindOfClass:[NSArray class]]) {
+            [weakSelf makeHistoryMessages:returendObject shopId:shopId];
         } else {
-            if (strongSelf->_createAccountCount <= YSFMaxCreateAccountCount) {
-                YSFLogErr(@"createAccount failed %@", error);
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    [strongSelf createAccount];
-                });
-            }
+            YSFLogApp(@"requestHistoryMessages error:%@", error);
         }
     }];
 }
 
-#pragma mark - 汇报用户信息
-
-- (void)reportUserInfo
-{
-    if (_qyUserInfo)
-    {
-        YSFLogApp(@"reportUserInfo userId:%@ data:%@", _qyUserInfo.userId, _qyUserInfo.data);
-        QYUserInfo *newUserInfo = [QYUserInfo new];
-        newUserInfo.userId = _qyUserInfo.userId;
-        NSMutableArray *array = [[_qyUserInfo.data ysf_toArray] mutableCopy];
-        if (array) {
-            NSString *version = [NSString stringWithFormat:@"{\"key\":\"sdk_version\", \"value\":\"%@\", \"hidden\":true}",
-                                  [[QYSDK sharedSDK].infoManager versionNumber]];
-            NSDictionary *versionDict = [version ysf_toDict];
-            [array addObject:versionDict];
-            newUserInfo.data = [array ysf_toUTF8String];
+- (void)makeHistoryMessages:(NSArray *)jsonMessages shopId:(NSString *)shopId {
+    if (jsonMessages && [jsonMessages count]) {
+        YSF_NIMSession *session = [YSF_NIMSession session:shopId type:YSF_NIMSessionTypeYSF];
+        NSMutableArray *saveMsgs = [NSMutableArray arrayWithCapacity:[jsonMessages count]];
+        //构建消息对象并去重
+        for (NSDictionary *dict in jsonMessages) {
+            YSF_NIMMessage *message = [YSF_NIMMessage msgWithDict:dict];
+            //去重，注意部分带#消息ID
+            BOOL needSave = NO;
+            YSF_NIMMessage *queryMsg = [[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:message.messageId forSession:session];
+            if (!queryMsg) {
+                needSave = YES;
+                NSRange range = [message.messageId rangeOfString:@"#"];
+                if (range.location != NSNotFound) {
+                    NSString *msgId = [message.messageId substringFromIndex:(range.location + 1)];
+                    queryMsg = [[[YSF_NIMSDK sharedSDK] conversationManager] queryMessage:msgId forSession:session];
+                    if (queryMsg) {
+                        needSave = NO;
+                    }
+                }
+            }
+            if (needSave) {
+                [saveMsgs addObject:message];
+            }
         }
-        
-        YSFSetInfoRequest *request = [[YSFSetInfoRequest alloc] init];
-        request.authToken = [QYSDK sharedSDK].authToken;
-        request.userInfo = newUserInfo;
-        QYUserInfo *cachedUserInfo = _qyUserInfo;
-        
-        __weak typeof(self) weakSelf = self;
-        [YSFIMCustomSystemMessageApi sendMessage:request
-                                          shopId:@"-1"
-                                      completion:^(NSError *error) {
-                                          if (error == nil && cachedUserInfo == weakSelf.qyUserInfo) {
-                                              [weakSelf cleanCurrentUserInfo];
-                                              [weakSelf mapForeignId:cachedUserInfo.userId];
-                                          }
-                                          YSFLogApp(@"reportUserInfo error:%@", error);
-                                      }];
+        //按照服务器时间排序
+        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"timestamp" ascending:YES];
+        NSArray *sortedMsgs = [saveMsgs sortedArrayUsingDescriptors:@[descriptor]];
+        //持久化消息，同时更新界面，下载附件
+        for (YSF_NIMMessage *message in sortedMsgs) {
+            [[[YSF_NIMSDK sharedSDK] conversationManager] saveMessage:YES
+                                                              message:message
+                                                           forSession:session
+                                                       addUnreadCount:NO
+                                                           completion:^(NSError *error) {
+                                                               
+                                                           }];
+            [[[YSF_NIMSDK sharedSDK] chatManager] fetchMessageAttachment:message error:nil];
+        }
     }
 }
 
-- (void)mapForeignId:(NSString *)foreignId
-{
-    NSString *accid = [_accountInfo accid];
-    [[self relationStore] mapYsf:accid
-                          toUser:foreignId];
-}
-
-- (YSFRelationStore *)relationStore
-{
-    if (_relationStore == nil) {
-        _relationStore = [[YSFRelationStore alloc] init];
-    }
-    return _relationStore;
-}
-
-
-#pragma mark - Info读写
-- (YSFKeyValueStore *)store
-{
-    if (_store == nil)
-    {
+#pragma mark - 数据持久化
+- (YSFKeyValueStore *)store {
+    if (!_store) {
         NSString *path = [[[QYSDK sharedSDK] pathManager] sdkGlobalPath];
-        if (path)
-        {
+        if (path) {
             NSString *storePath = [path stringByAppendingPathComponent:@"app_info.db"];
             _store = [YSFKeyValueStore storeByPath:storePath];
         }
@@ -340,8 +618,37 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     return _store;
 }
 
-- (NSDictionary *)dictByKey:(NSString *)key
-{
+- (void)saveDict:(NSDictionary *)dict forKey:(NSString *)key {
+    if ([dict isKindOfClass:[NSDictionary class]]) {
+        NSError *error = nil;
+        NSData *data = [NSJSONSerialization dataWithJSONObject:dict
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&error];
+        if (error) {
+            YSFLogErr(@"save dict %@ failed", dict);
+        }
+        if (data) {
+            [[self store] saveValue:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] forKey:key];
+        }
+    }
+}
+
+- (void)saveArray:(NSArray *)array forKey:(NSString *)key {
+    if ([array isKindOfClass:[NSArray class]]) {
+        NSError *error = nil;
+        NSData *data = [NSJSONSerialization dataWithJSONObject:array
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&error];
+        if (error) {
+            YSFLogErr(@"save dict %@ failed",array);
+        }
+        if (data) {
+            [[self store] saveValue:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] forKey:key];
+        }
+    }
+}
+
+- (NSDictionary *)dictByKey:(NSString *)key {
     NSDictionary *dict = nil;
     NSString *value = [[self store] valueByKey:key];
     if (value)
@@ -362,312 +669,32 @@ typedef NS_ENUM(NSInteger, YSFTrackHistoryType) {
     return array;
 }
 
-- (void)saveDict:(NSDictionary *)dict forKey:(NSString *)key
-{
-    if ([dict isKindOfClass:[NSDictionary class]]) {
-        NSError *error = nil;
-        NSData *data = [NSJSONSerialization dataWithJSONObject:dict
-                                                       options:NSJSONWritingPrettyPrinted
-                                                         error:&error];
-        if (error)
-        {
-            YSFLogErr(@"save dict %@ failed",dict);
-        }
-        
-        if (data)
-        {
-            [[self store] saveValue:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]
-                             forKey:key];
-
-        }
-
-    }
+#pragma mark - Audio
+- (BOOL)isRecevierOrSpeaker; {
+    return _appSetting.recevierOrSpeaker;
 }
 
-- (void)saveArray:(NSArray *)array forKey:(NSString *)key
-{
-    if ([array isKindOfClass:[NSArray class]]) {
-        NSError *error = nil;
-        NSData *data = [NSJSONSerialization dataWithJSONObject:array
-                                                       options:NSJSONWritingPrettyPrinted
-                                                         error:&error];
-        if (error)
-        {
-            YSFLogErr(@"save dict %@ failed",array);
-        }
-        
-        if (data)
-        {
-            [[self store] saveValue:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]
-                             forKey:key];
-            
-        }
-        
-    }
+- (void)setRecevierOrSpeaker:(BOOL)recevierOrSpeaker {
+    _appSetting.recevierOrSpeaker = recevierOrSpeaker;
+    [self saveAppSetting];
 }
 
-#pragma mark - UserInfo
-- (void)readUserInfo
-{
-    _currentForeignUserId = [[self dictByKey:YSFCurrentForeignUserIdKey] objectForKey:@"id"];
-    
-    NSString *userId = [[self dictByKey:YSFCurrentUserInfoKey] objectForKey:@"id"];
-    NSString *data = [[self dictByKey:YSFCurrentUserInfoKey] objectForKey:@"data"];
-    if (userId) {
-        _qyUserInfo = [QYUserInfo new];
-        _qyUserInfo.userId = userId;
-        _qyUserInfo.data = data;
-    }
-}
-
-- (void)saveUserInfo
-{
-    if (_currentForeignUserId) {
-        [self saveDict:@{@"id" : _currentForeignUserId}
-                forKey:YSFCurrentForeignUserIdKey];
-        
-        NSMutableDictionary *userInfo = [NSMutableDictionary new];
-        if (_qyUserInfo.userId) {
-            [userInfo setValue:_qyUserInfo.userId forKey:@"id"];
-        }
-        if (_qyUserInfo.data) {
-            [userInfo setValue:_qyUserInfo.data forKey:@"data"];
-        }
-        [self saveDict:userInfo forKey:YSFCurrentUserInfoKey];
-    }
-}
-
-- (void)cleanCurrentForeignUserIdAndCurrentUserInfo
-{
-    _currentForeignUserId = nil;
-    [[self store] removeObjectByID:YSFCurrentForeignUserIdKey];
-    [self cleanCurrentUserInfo];
-}
-
-- (void)cleanCurrentUserInfo
-{
-    _qyUserInfo = nil;
-    [[self store] removeObjectByID:YSFCurrentUserInfoKey];
-}
-
-#pragma mark - AppInfo
-- (void)readAccountInfo
-{
-    NSDictionary *dict = [self dictByKey:YSFAppInfoKey];
-    if (dict)
-    {
-        YSFAccountInfo *info = [YSFAccountInfo infoByDict:dict];
-        if ([info isValid]) {
-            _accountInfo = info;
-        }
-
-    }
-}
-
-- (void)saveAccountInfo
-{
-    if ([_accountInfo isValid])
-    {
-        NSDictionary *dict = [_accountInfo toDict];
-        [self saveDict:dict
-                forKey:YSFAppInfoKey];
-    }
-}
-
-- (void)cleanAccountInfo
-{
-    _accountInfo = nil;
-    [[self store] removeObjectByID:YSFAppInfoKey];
-}
-
-#pragma mark - AppSetting
-- (void)initSessionViewControllerInfo
-{
-    NSDictionary *dict = [self dictByKey:YSFAppSettingKey];
-    if (dict)
-    {
-        YSFAppSetting *info = [YSFAppSetting infoByDict:dict];
-        if ([info isValid]) {
-            _appSetting = info;
-        }
-    }
-    else {
-        YSFAppSetting *info = [YSFAppSetting defaultSetting];
-        if ([info isValid]) {
-            _appSetting = info;
-        }
-    }
-    
-    [self changeNimSDKAudioPlayMode];
-    
-    _cachedTextDict = [[[self store] dictByKey:YSFCachedTextKey] mutableCopy];
-    if (!_cachedTextDict) {
-        _cachedTextDict = [NSMutableDictionary new];
-    }
-}
-
-- (void)saveAppSetting
-{
-    if ([_appSetting isValid])
-    {
-        NSDictionary *dict = [_appSetting toDict];
-        [self saveDict:dict
-                forKey:YSFAppSettingKey];
-        [self changeNimSDKAudioPlayMode];
-    }
-}
-
-- (void)changeNimSDKAudioPlayMode
-{
-    if (_appSetting.recevierOrSpeaker) {
-        [[YSF_NIMSDK sharedSDK].mediaManager setNeedProximityMonitor:NO];
-        [[YSF_NIMSDK sharedSDK].mediaManager switchAudioOutputDevice:YSF_NIMAudioOutputDeviceReceiver];
-    }
-    else {
-        [[YSF_NIMSDK sharedSDK].mediaManager setNeedProximityMonitor:YES];
-        [[YSF_NIMSDK sharedSDK].mediaManager switchAudioOutputDevice:YSF_NIMAudioOutputDeviceSpeaker];
-    }
-}
-
-- (void)cleanAppSetting
-{
-    _appSetting = nil;
-    [[self store] removeObjectByID:YSFAppSettingKey];
-}
-
-#pragma mark - DeviceId
-- (void)cleanDeviceId
-{
-    @synchronized(self)
-    {
-        _deviceId = nil;
-        [[self store] removeObjectByID:YSFDeviceInfoKey];
-    }
-}
-
-- (NSString *)versionNumber
-{
-    return @"49";
-}
-
-- (NSString *)version
-{
-    return @"4.8.0";
-}
-
-#pragma mark - CachedText
-- (NSString *)cachedText:(NSString *)shopId
-{
+#pragma mark - Cache Text
+- (NSString *)cachedText:(NSString *)shopId {
     NSString *catchText = @"";
     if (shopId) {
         catchText = _cachedTextDict[shopId];
     }
-    
     return catchText;
 }
 
-- (void)setCachedText:(NSString *)cachedText shopId:(NSString *)shopId
-{
-    if (cachedText && shopId && ![_cachedTextDict[shopId] isEqualToString:cachedText])
-    {
+- (void)setCachedText:(NSString *)cachedText shopId:(NSString *)shopId {
+    if (cachedText && shopId && ![_cachedTextDict[shopId] isEqualToString:cachedText]) {
         _cachedTextDict[shopId] = cachedText;
         [[self store] saveDict:_cachedTextDict forKey:YSFCachedTextKey];
     }
 }
 
-
-#pragma mark - misc
-- (void)login {
-    _uploadedLog = NO;
-    [_loginManager tryToLogin:_accountInfo];
-}
-
-#pragma mark - YSFLoginManagerDelegate
-- (void)onLoginSuccess:(NSString *)accid
-{
-    YSFLogApp(@"on login success %@ vs cache account %@",accid,_accountInfo.accid);
-    if (_accountInfo.accid && accid && [_accountInfo.accid isEqualToString:accid] &&
-        !_accountInfo.isEverLogined)
-    {
-        _accountInfo.isEverLogined = YES;
-        [self saveAccountInfo];
-    }
-}
-
-- (void)onFatalLoginFailed:(NSError *)error
-{
-    YSFLogErr(@"on fatal login error rebuild account ing......%@", error);
-    [self cleanAccountInfo];
-    [self cleanAppSetting];
-    [self cleanDeviceId];
-    _createAccountCount = 0;
-    [self createAccount];
-    //日志上传节点：SDK初始化失败
-    [self uploadLog];
-}
-
-- (void)uploadLog {
-    if (!_uploadedLog) {
-        YSFUploadLog *uploadLog = [[YSFUploadLog alloc] init];
-        uploadLog.version = [self version];
-        uploadLog.type = YSFUploadLogTypeSDKInitFail;
-        uploadLog.logString = YSF_GetMessage(50000);
-        [YSFHttpApi post:uploadLog
-              completion:^(NSError *error, id returendObject) {
-                  
-              }];
-        _uploadedLog = YES;
-    }
-}
-
-#pragma mark - YSF_NIMLoginManagerDelegate
-- (void)onLogin:(YSF_NIMLoginStep)step
-{
-    if (step == YSF_NIMLoginStepSyncOK)
-    {
-        [self reportUserInfo];
-        [self requestSessionStatus];
-        /**
-         * 去掉wfd.netease.im域名访问，云信已不采集此部分数据
-         [[YSF_NIMDataTracker shared] trackEvent];
-         */
-        [self sendTrackHistoryData];
-    }
-}
-
-- (void)requestSessionStatus
-{
-    if ([[[QYSDK sharedSDK] infoManager].accountInfo isPop]) {
-        YSFSessionStatusRequest *request = [YSFSessionStatusRequest new];
-        [YSFIMCustomSystemMessageApi sendMessage:request completion:^(NSError *error) {
-            YSFLogApp(@"requestSessionStatus error:%@", error);
-        }];
-    }
-}
-
-- (void)onReceiveCustomSystemNotification:(YSF_NIMCustomSystemNotification *)notification
-{
-    NSString *content = notification.content;
-    YSFLogApp(@"notification: %@",content);
-    NSDictionary *dict = [content ysf_toDict];
-    if (dict) {
-        NSInteger cmd = [dict ysf_jsonInteger:YSFApiKeyCmd];
-        switch (cmd) {
-            case YSFCommandSetCrmResult:
-            {
-                NSString *foreignId = [dict ysf_jsonString:YSFApiKeyForeignId];
-                NSString *authToken = [dict ysf_jsonString:YSFApiKeyAuthToken];
-                BOOL result = [dict ysf_jsonBool:YSFApiKeyResult];
-                if ([_currentForeignUserId isEqualToString:foreignId]
-                    && [[QYSDK sharedSDK].authToken isEqualToString:authToken]) {
-                    if (_completionWithResultBlock) {
-                        _completionWithResultBlock(result);
-                    }
-                }
-            }
-                break;
-        }
-    }
-}
-
 @end
+
+

@@ -23,6 +23,7 @@
     setting.sendingRate = [json ysf_jsonDouble:YSFApiKeySendingRate];
     setting.multEvaluationEnable = [json ysf_jsonBool:YSFApiKeyEvaluationModifyEnable];
     setting.evaluationTimeLimit = [json ysf_jsonInteger:YSFApiKeyEvaluationModifyTimeout];
+    setting.showEvaluationButton = [json ysf_jsonBool:YSFApiKeyEvaluationShowButton];
     return setting;
 }
 
@@ -37,6 +38,7 @@
                            YSFApiKeySendingRate : @(self.sendingRate),
                            YSFApiKeyEvaluationModifyEnable : @(self.multEvaluationEnable),
                            YSFApiKeyEvaluationModifyTimeout : @(self.evaluationTimeLimit),
+                           YSFApiKeyEvaluationShowButton : @(self.showEvaluationButton),
                            };
     return dict;
 }

@@ -48,6 +48,9 @@ static CGFloat kRecordDegreeTime = 0.02;
 @end
 
 @implementation YSFCameraView
+- (void)dealloc {
+    YSFLogApp(@"");
+}
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];

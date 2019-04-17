@@ -9,34 +9,38 @@
 #import <UIKit/UIKit.h>
 #import "YSFPresentViewController.h"
 
+
 /**
  *  YSFGalleryItem: 图片对象
  */
 @interface YSFGalleryItem : NSObject
 
-@property (nonatomic, copy) NSString *thumbPath;
-@property (nonatomic, copy) NSString *imageURL;
-@property (nonatomic, copy) NSString *name;
-
 @property (nonatomic, weak) id message;
 @property (nonatomic, assign) NSUInteger indexAtMesaage;
+
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, copy) NSString *path;         //图片path
+@property (nonatomic, copy) NSString *thumbPath;    //缩略图path
+@property (nonatomic, copy) NSString *imageURL;     //远程下载url
+@property (nonatomic, assign) BOOL isOriginal;      //是否已加载原图
 
 @end
 
 
 /**
- *  回调
+ *  回调：取消息流中消息contentView
  */
-typedef UIView * (^queryMessageContentViewCallback)(YSFGalleryItem *item);
+typedef UIView * (^messageContentViewCallback)(YSFGalleryItem *item);
+
 
 /**
  *  YSFGalleryViewController: 图片浏览VC
  */
 @interface YSFGalleryViewController : YSFPresentViewController
 
-- (instancetype)initWithCurrentIndex:(NSUInteger)currentIndex
-                            allItems:(NSMutableArray *)allItems
-                            callback:(queryMessageContentViewCallback)callBack;
+- (instancetype)initWithGalleryItems:(NSArray *)galleryItems
+                        currentIndex:(NSUInteger)currentIndex
+                            callback:(messageContentViewCallback)msgViewCallback;
 
 @end
 

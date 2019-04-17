@@ -6,7 +6,6 @@
 
 @interface YSFSelectedGoodsContentView()
 
-@property (nonatomic,strong) UIView *backgroundView;
 @property (nonatomic,strong) UIImageView * imageView;
 @property (nonatomic,strong) UILabel * goodName;
 @property (nonatomic,strong) UILabel * stock;
@@ -23,11 +22,6 @@
 - (instancetype)initSessionMessageContentView{
     self = [super initSessionMessageContentView];
     if (self) {
-
-        _backgroundView = [UIView new];
-        _backgroundView.backgroundColor = [UIColor whiteColor];
-        [self addSubview:_backgroundView];
-        
         _imageView = [UIImageView new];
         [self addSubview:_imageView];
         
@@ -83,7 +77,7 @@
     _number.text = selectedGoods.goods.p_count;
     _status.text = selectedGoods.goods.p_status;
     
-    if (selectedGoods.goods.p_action.length > 0) {
+    if ([YSF_NIMSDK sharedSDK].sdkOrKf && selectedGoods.goods.p_action.length > 0) {
         _splitLine.hidden = NO;
         _button.hidden = NO;
         [_button setTitle:selectedGoods.goods.p_action forState:UIControlStateNormal];
@@ -95,13 +89,6 @@
 
 - (void)layoutSubviews
 {
-    _backgroundView.ysf_frameLeft = 2;
-    _backgroundView.ysf_frameWidth = self.ysf_frameWidth - 9;
-    _backgroundView.ysf_frameTop = 2;
-    _backgroundView.ysf_frameHeight = self.ysf_frameHeight - 4;
-    if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
-        _backgroundView.ysf_frameLeft += 5;
-    }
     _imageView.ysf_frameTop = 10;
     _imageView.ysf_frameLeft = 10;
     _imageView.ysf_frameWidth = 60;
@@ -170,20 +157,20 @@
     }
     if (![YSF_NIMSDK sharedSDK].sdkOrKf) {
         _stock.ysf_frameLeft += 5;
-    }
-    
-    YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.model.message.messageObject;
-    YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
-    if (selectedGoods.goods.p_action.length > 0) {
-        _splitLine.ysf_frameWidth = self.ysf_frameWidth - 13;
-        _splitLine.ysf_frameLeft = 4;
-        _splitLine.ysf_frameTop = CGRectGetMaxY(_stock.frame);
-        _splitLine.ysf_frameHeight = 1. / [UIScreen mainScreen].scale;
-        
-        _button.ysf_frameWidth = self.ysf_frameWidth - 20;
-        _button.ysf_frameLeft = 10;
-        _button.ysf_frameTop = CGRectGetMaxY(_splitLine.frame);
-        _button.ysf_frameHeight = 36;
+    } else {
+        YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)self.model.message.messageObject;
+        YSFSelectedCommodityInfo *selectedGoods = (YSFSelectedCommodityInfo *)object.attachment;
+        if (selectedGoods.goods.p_action.length > 0) {
+            _splitLine.ysf_frameWidth = self.ysf_frameWidth - 13;
+            _splitLine.ysf_frameLeft = 4;
+            _splitLine.ysf_frameTop = CGRectGetMaxY(_stock.frame);
+            _splitLine.ysf_frameHeight = 1. / [UIScreen mainScreen].scale;
+            
+            _button.ysf_frameWidth = self.ysf_frameWidth - 20;
+            _button.ysf_frameLeft = 10;
+            _button.ysf_frameTop = CGRectGetMaxY(_splitLine.frame);
+            _button.ysf_frameHeight = 36;
+        }
     }
 }
 
@@ -192,6 +179,29 @@
     event.eventName = YSFKitEventNameTapCommdityAction;
     event.message = self.model.message;
     [self.delegate onCatchEvent:event];
+}
+
+#pragma mark - Private
+//商品信息展示需要显示白色底
+- (UIImage *)chatNormalBubbleImage {
+    UIImage *customerNormalImage = [[UIImage ysf_imageInKit:@"icon_sender_commodityInfo_normal"]
+                                    resizableImageWithCapInsets:UIEdgeInsetsMake(25, 10, 10, 10)
+                                    resizingMode:UIImageResizingModeStretch];
+    UIImage *serviceNormalImage = [[UIImage ysf_imageInKit:@"icon_receiver_commodityInfo_normal"]
+                                   resizableImageWithCapInsets:UIEdgeInsetsMake(25, 10, 10, 10)
+                                   resizingMode:UIImageResizingModeStretch];
+    return self.model.message.isOutgoingMsg ? customerNormalImage : serviceNormalImage;
+}
+
+//商品信息展示需要显示白色底
+- (UIImage *)chatHighlightedBubbleImage {
+    UIImage *customerNormalImage = [[UIImage ysf_imageInKit:@"icon_sender_commodityInfo_pressed"]
+                                    resizableImageWithCapInsets:UIEdgeInsetsMake(25, 10, 10, 10)
+                                    resizingMode:UIImageResizingModeStretch];
+    UIImage *serviceNormalImage = [[UIImage ysf_imageInKit:@"icon_receiver_commodityInfo_pressed"]
+                                   resizableImageWithCapInsets:UIEdgeInsetsMake(25, 10, 10, 10)
+                                   resizingMode:UIImageResizingModeStretch];
+    return self.model.message.isOutgoingMsg ? customerNormalImage : serviceNormalImage;
 }
 
 @end

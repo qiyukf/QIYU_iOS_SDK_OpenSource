@@ -9,6 +9,9 @@
 #import "YSFCameraManager.h"
 
 @implementation YSFCameraManager
+- (void)dealloc {
+    YSFLogApp(@"");
+}
 
 - (AVCaptureDeviceInput *)flipCamera:(AVCaptureSession *)session
                             oldInput:(AVCaptureDeviceInput *)oldInput
@@ -20,6 +23,7 @@
         [session commitConfiguration];
         return newInput;
     } else {
+        YSFLogApp(@"FlipCamera ERROR: can not add new input");
         [session addInput:oldInput];
         [session commitConfiguration];
         return oldInput;

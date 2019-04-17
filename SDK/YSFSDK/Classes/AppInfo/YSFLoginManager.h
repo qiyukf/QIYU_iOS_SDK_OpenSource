@@ -9,13 +9,17 @@
 #import "YSFAccountInfo.h"
 
 @protocol YSFLoginManagerDelegate <NSObject>
-- (void)onLoginSuccess:(NSString *)accid;
 
+- (void)onLoginSuccess:(NSString *)accid;
 - (void)onFatalLoginFailed:(NSError *)error;
+
 @end
 
+
 @interface YSFLoginManager : NSObject
-@property (nonatomic,weak)  id<YSFLoginManagerDelegate> delegate;
+
+@property (nonatomic, weak) id<YSFLoginManagerDelegate> delegate;
 
 - (void)tryToLogin:(YSFAccountInfo *)info;
+
 @end

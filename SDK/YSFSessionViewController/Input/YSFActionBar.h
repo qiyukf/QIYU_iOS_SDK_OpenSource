@@ -22,9 +22,8 @@ typedef void (^SelectActionCallback)(YSFActionInfo *action);
 
 @interface YSFActionBar : UIView
 
-@property (nonatomic, copy) SelectActionCallback selectActionCallback;
 @property (nonatomic, strong) NSArray *actionInfoArray;
-@property (nonatomic, strong) UIScrollView *scrollView;
+@property (nonatomic, copy) SelectActionCallback selectActionCallback;
 
 + (CGFloat)heightForActionBar;
 

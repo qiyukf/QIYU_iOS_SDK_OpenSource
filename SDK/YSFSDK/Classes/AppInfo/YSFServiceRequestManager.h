@@ -8,17 +8,19 @@
 
 
 @protocol YSFServiceRequestDelegate <NSObject>
+
 - (void)onServiceRequestTimeout:(NSString *)serviceId;
+
 @end
 
 @interface YSFServiceRequestManager : NSObject
-@property (nonatomic,weak)  id<YSFServiceRequestDelegate>   delegate;
+
+@property (nonatomic, weak) id<YSFServiceRequestDelegate> delegate;
 
 - (BOOL)isInRequest:(NSString *)shopId;
-
 - (void)updateRequestState:(NSString *)shopId inRequest:(BOOL)inRequest;
 
 - (void)startWaitResponseTimer:(NSString *)shopId;
-
 - (void)stopWaitResponseTimer:(NSString *)shopId;
+
 @end

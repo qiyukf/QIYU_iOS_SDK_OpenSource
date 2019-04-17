@@ -297,6 +297,20 @@ typedef void(^YSF_NIMSearchMessageBlock)(NSError *error,NSArray *messages);
                 result:(YSF_NIMSearchMessageBlock)block;
 
 /**
+ *  搜索(startTime, endTime)时间范围内的本地消息
+ *
+ *  @param session 消息所属的会话
+ *  @param startTime 开始时间（ms为单位）
+ *  @param endTime   结束时间（ms为单位）
+ *  @param block   读取的消息列表结果
+ *
+ */
+- (void)searchMessages:(YSF_NIMSession *)session
+             startTime:(long long)startTime
+               endTime:(long long)endTime
+                result:(YSF_NIMSearchMessageBlock)block;
+
+/**
  *  删除服务器端最近会话
  *
  *  @param sessions 需要删除的会话列表，内部只能是YSF_NIMSession

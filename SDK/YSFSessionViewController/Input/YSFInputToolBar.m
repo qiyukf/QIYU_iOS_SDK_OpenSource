@@ -9,20 +9,22 @@
 #import "YSFInputToolBar.h"
 #import "YSFInputTextView.h"
 #import "QYCustomUIConfig.h"
+#import "YSFEmoticonDataManager.h"
 
 @interface YSFInputToolBar()
+
 @property (nonatomic,strong) UIView *topSep;
 
 @end
 
-@implementation YSFInputToolBar
 
-- (instancetype)initWithFrame:(CGRect)frame{
+@implementation YSFInputToolBar
+- (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         [self setBackgroundColor:[UIColor whiteColor]];
-        
         _humanOrMachine = YES;
+        
         _voiceBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         [_voiceBtn setImage:[UIImage ysf_imageInKit:@"icon_toolview_voice_normal"] forState:UIControlStateNormal];
         [_voiceBtn setImage:[UIImage ysf_imageInKit:@"icon_toolview_voice_pressed"] forState:UIControlStateHighlighted];
@@ -42,8 +44,14 @@
         [self addSubview:_emoticonBtn];
         
         _recordButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_recordButton setImage:[[UIImage ysf_imageInKit:@"icon_input_text_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(20,20,20,20) resizingMode:UIImageResizingModeStretch] forState:UIControlStateNormal];
-        [_recordButton setImage:[[UIImage ysf_imageInKit:@"icon_input_audio_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(20,20,20,20) resizingMode:UIImageResizingModeStretch] forState:UIControlStateHighlighted];
+        [_recordButton setImage:[[UIImage ysf_imageInKit:@"icon_input_text_bg"]
+                                 resizableImageWithCapInsets:UIEdgeInsetsMake(20,20,20,20)
+                                 resizingMode:UIImageResizingModeStretch]
+                       forState:UIControlStateNormal];
+        [_recordButton setImage:[[UIImage ysf_imageInKit:@"icon_input_audio_bg"]
+                                 resizableImageWithCapInsets:UIEdgeInsetsMake(20,20,20,20)
+                                 resizingMode:UIImageResizingModeStretch]
+                       forState:UIControlStateHighlighted];
         [_recordButton sizeToFit];
         _recordButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentFill;
         _recordButton.contentVerticalAlignment = UIControlContentVerticalAlignmentFill;
@@ -56,7 +64,9 @@
         [self addSubview:_recordLabel];
         
         _inputTextBkgImage = [[UIImageView alloc] initWithFrame:CGRectZero];
-        [_inputTextBkgImage setImage:[[UIImage ysf_imageInKit:@"icon_input_text_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(20,20,20,20) resizingMode:UIImageResizingModeStretch]];
+        [_inputTextBkgImage setImage:[[UIImage ysf_imageInKit:@"icon_input_text_bg"]
+                                      resizableImageWithCapInsets:UIEdgeInsetsMake(20,20,20,20)
+                                      resizingMode:UIImageResizingModeStretch]];
         [self addSubview:_inputTextBkgImage];
         
         _inputTextView = [[YSFInputTextView alloc] initWithFrame:CGRectZero];
@@ -84,103 +94,98 @@
         _topSep = [[UIView alloc] initWithFrame:CGRectZero];
         _topSep.backgroundColor = YSFColorFromRGB(0xcccccc);
         [self addSubview:_topSep];
-        
     }
     return self;
 }
 
-- (CGSize)sizeThatFits:(CGSize)size{
+- (CGSize)sizeThatFits:(CGSize)size {
     CGFloat height = 50.f;
     return CGSizeMake(size.width,height);
 }
 
-- (void)layoutSubviews
-{
+- (void)layoutSubviews {
     [super layoutSubviews];
-    CGFloat leftSpacing           = 12.5f;
-    CGFloat sepHeight             = .5f;
-    CGFloat topSepMargin          = .0f;
-    CGFloat spacing               = 9.f;
-    CGFloat textViewMargin        = 0.f;
+    CGFloat leftSpacing = 12.5f;
+    CGFloat sepHeight = .5f;
+    CGFloat topSepMargin = .0f;
+    CGFloat spacing = 9.f;
+    CGFloat textViewMargin = 0.f;
     
-    //左边话筒按钮
-    self.voiceBtn.ysf_frameLeft        = leftSpacing - 7;
-    self.voiceBtn.ysf_frameBottom     = self.ysf_frameHeight - 2;
+    self.voiceBtn.ysf_frameLeft = leftSpacing - 7;
+    self.voiceBtn.ysf_frameBottom = self.ysf_frameHeight - 2;
     
     if (_humanOrMachine) {
-        //中间输入框按钮
-        self.inputTextBkgImage.ysf_frameWidth     = self.ysf_frameWidth - 2*leftSpacing;
+        self.inputTextBkgImage.ysf_frameWidth = self.ysf_frameWidth - 2 * leftSpacing;
         if (!_imageButton.hidden) {
-            self.inputTextBkgImage.ysf_frameWidth      += -self.imageButton.ysf_frameWidth - leftSpacing + 14;
+            self.inputTextBkgImage.ysf_frameWidth += -self.imageButton.ysf_frameWidth - leftSpacing + 14;
         }
         if (!_moreMediaBtn.hidden) {
-            self.inputTextBkgImage.ysf_frameWidth      += -self.moreMediaBtn.ysf_frameWidth - leftSpacing + 14;
+            self.inputTextBkgImage.ysf_frameWidth += -self.moreMediaBtn.ysf_frameWidth - leftSpacing + 14;
         }
         if (!_voiceBtn.hidden) {
-            self.inputTextBkgImage.ysf_frameWidth      += -self.voiceBtn.ysf_frameWidth - leftSpacing + 14;
+            self.inputTextBkgImage.ysf_frameWidth += -self.voiceBtn.ysf_frameWidth - leftSpacing + 14;
         }
         if (!_emoticonBtn.hidden) {
-            self.inputTextBkgImage.ysf_frameWidth      += -self.emoticonBtn.ysf_frameWidth - leftSpacing + 14;
+            self.inputTextBkgImage.ysf_frameWidth += -self.emoticonBtn.ysf_frameWidth - leftSpacing + 14;
         }
-        self.inputTextBkgImage.ysf_frameHeight    = self.ysf_frameHeight - spacing * 2;
-        self.inputTextBkgImage.ysf_frameLeft      = leftSpacing;
+        self.inputTextBkgImage.ysf_frameHeight = self.ysf_frameHeight - spacing * 2;
+        self.inputTextBkgImage.ysf_frameLeft = leftSpacing;
         if (!_voiceBtn.hidden) {
-            self.inputTextBkgImage.ysf_frameLeft      += self.voiceBtn.ysf_frameRight - 7;
+            self.inputTextBkgImage.ysf_frameLeft += self.voiceBtn.ysf_frameRight - 7;
         }
-        self.inputTextBkgImage.ysf_frameCenterY   = self.ysf_frameHeight * .5f;
+        self.inputTextBkgImage.ysf_frameCenterY = self.ysf_frameHeight * .5f;
         self.inputTextView.frame = CGRectInset(self.inputTextBkgImage.frame, textViewMargin, textViewMargin);
-    }
-    else {
-        //中间输入框按钮
-        self.inputTextBkgImage.ysf_frameWidth     = self.ysf_frameWidth - 2 * leftSpacing;
+    } else {
+        self.inputTextBkgImage.ysf_frameWidth = self.ysf_frameWidth - 2 * leftSpacing;
         if (!_voiceBtn.hidden) {
-            self.inputTextBkgImage.ysf_frameWidth      += -self.voiceBtn.ysf_frameWidth - leftSpacing + 14;
+            self.inputTextBkgImage.ysf_frameWidth += -self.voiceBtn.ysf_frameWidth - leftSpacing + 14;
         }
-        self.inputTextBkgImage.ysf_frameHeight    = self.ysf_frameHeight - spacing * 2;
-        self.inputTextBkgImage.ysf_frameLeft      = leftSpacing;
+        self.inputTextBkgImage.ysf_frameHeight = self.ysf_frameHeight - spacing * 2;
+        self.inputTextBkgImage.ysf_frameLeft = leftSpacing;
         if (!_voiceBtn.hidden) {
-            self.inputTextBkgImage.ysf_frameLeft      += self.voiceBtn.ysf_frameRight - 7;
+            self.inputTextBkgImage.ysf_frameLeft += self.voiceBtn.ysf_frameRight - 7;
         }
-        self.inputTextBkgImage.ysf_frameCenterY   = self.ysf_frameHeight * .5f;
+        self.inputTextBkgImage.ysf_frameCenterY = self.ysf_frameHeight * .5f;
         self.inputTextView.frame = CGRectInset(self.inputTextBkgImage.frame, textViewMargin, textViewMargin);
     }
     
-    //中间点击录音按钮
-    self.recordButton.frame    = self.inputTextBkgImage.frame;
+    self.recordButton.frame = self.inputTextBkgImage.frame;
     self.recordButton.ysf_frameTop = self.recordButton.ysf_frameTop - 7;
     self.recordButton.ysf_frameHeight = self.recordButton.ysf_frameHeight + 14;
     self.recordButton.imageEdgeInsets = UIEdgeInsetsMake(7, 0, 7, 0);
-    self.recordLabel.frame    = self.recordButton.frame;
+    self.recordLabel.frame = self.recordButton.frame;
 
-    //右边表情按钮
-    self.emoticonBtn.ysf_frameLeft     = self.recordButton.ysf_frameRight + leftSpacing - 7;
-    self.emoticonBtn.ysf_frameBottom     = self.ysf_frameHeight - 2;
+    self.emoticonBtn.ysf_frameLeft = self.recordButton.ysf_frameRight + leftSpacing - 7;
+    self.emoticonBtn.ysf_frameBottom = self.ysf_frameHeight - 2;
     
-    self.imageButton.ysf_frameRight      = self.ysf_frameWidth - leftSpacing + 7;
-    self.imageButton.ysf_frameBottom     = self.ysf_frameHeight - 2;
-    self.moreMediaBtn.ysf_frameRight      = self.ysf_frameWidth - leftSpacing + 7;
-    self.moreMediaBtn.ysf_frameBottom     = self.ysf_frameHeight - 2;
+    self.imageButton.ysf_frameRight = self.ysf_frameWidth - leftSpacing + 7;
+    self.imageButton.ysf_frameBottom = self.ysf_frameHeight - 2;
     
-    //底部分割线
-    _topSep.ysf_frameSize        = CGSizeMake(self.ysf_frameWidth, sepHeight);
-    _topSep.ysf_frameTop         = topSepMargin;
+    self.moreMediaBtn.ysf_frameRight = self.ysf_frameWidth - leftSpacing + 7;
+    self.moreMediaBtn.ysf_frameBottom = self.ysf_frameHeight - 2;
+    
+    _topSep.ysf_frameSize = CGSizeMake(self.ysf_frameWidth, sepHeight);
+    _topSep.ysf_frameTop = topSepMargin;
 }
 
-- (void)setHumanOrMachine:(BOOL)humanOrMachine
-{
+- (void)setHumanOrMachine:(BOOL)humanOrMachine {
     _humanOrMachine = humanOrMachine;
     if (humanOrMachine) {
         self.voiceBtn.hidden = ![QYCustomUIConfig sharedInstance].showAudioEntry;
-    }
-    else {
+    } else {
         self.voiceBtn.hidden = ![QYCustomUIConfig sharedInstance].showAudioEntryInRobotMode;
     }
+    
     if ([QYCustomUIConfig sharedInstance].showEmoticonEntry) {
         self.emoticonBtn.hidden = !humanOrMachine;
+        //若显示表情按钮则标记位置为YES
+        [YSFEmoticonDataManager sharedManager].needRequest = !self.emoticonBtn.hidden;
     }
+    
     self.moreMediaBtn.hidden = !([QYCustomUIConfig sharedInstance].customInputItems.count > 0 && humanOrMachine);
     self.imageButton.hidden = !([QYCustomUIConfig sharedInstance].showImageEntry && humanOrMachine && self.moreMediaBtn.hidden);
     
     [self setNeedsLayout];
 }
+
 @end

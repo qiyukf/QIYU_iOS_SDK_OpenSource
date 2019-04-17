@@ -11,9 +11,7 @@ typedef void (^PasteImageCallback)(UIImage *image);
 @interface YSFInputTextView : UITextView
 
 @property (nonatomic, weak) UIResponder *overrideNextResponder;
-
 @property (nonatomic, strong) NSString *placeHolder;
-
 @property (nonatomic, copy) PasteImageCallback pasteImageCallback;
 
 - (void)setCustomUI;

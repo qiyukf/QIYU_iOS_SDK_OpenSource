@@ -9,8 +9,7 @@
 #import "KFQuickReplyPreviewView.h"
 #import "YSFCoreText.h"
 #import "UIImageView+YSFWebCache.h"
-#import "YSFInputEmoticonManager.h"
-#import "YSFInputEmoticonParser.h"
+#import "YSFEmoticonDataManager.h"
 
 static CGFloat const kContentMarginSpace = 25;
 static CGFloat const kTitleHeight = 47;
@@ -148,19 +147,33 @@ static CGFloat const kTextMaxHeight = 172;
         imageView.userInteractionEnabled = YES;
         
         return imageView;
-    }
-    else if ([attachment isKindOfClass:[YSFObjectTextAttachment class]])
-    {
-        UIImageView *someView = [[UIImageView alloc] initWithFrame:frame];
+    } else if ([attachment isKindOfClass:[YSFObjectTextAttachment class]]) {
         NSInteger type = [[attachment.attributes objectForKey:@"type"] integerValue];
-        if (type == 0) {    //emoji
+        if (type == 0) {
             NSString *emojiStr = [attachment.attributes objectForKey:@"data"];
-            YSFInputEmoticon *emoticon = [[YSFInputEmoticonManager sharedManager] emoticonByTag:emojiStr];
-            UIImage *image = [UIImage imageNamed:emoticon.filename];
-            someView.image = image;
+            YSFEmoticonItem *item = [[YSFEmoticonDataManager sharedManager] emoticonItemForTag:emojiStr];
+            if (item && (item.type == YSFEmoticonTypeDefaultEmoji || item.type == YSFEmoticonTypeCustomEmoji)) {
+                if (item.type == YSFEmoticonTypeDefaultEmoji) {
+                    UIImage *image = [UIImage imageNamed:item.filePath];
+                    UIImageView *someView = [[UIImageView alloc] initWithFrame:frame];
+                    someView.image = image;
+                    return someView;
+                } else {
+                    if ([item.fileURL length]) {
+                        UIImageView *someView = [[UIImageView alloc] initWithFrame:frame];
+                        someView.backgroundColor = [UIColor lightGrayColor];
+                        someView.contentMode = UIViewContentModeScaleAspectFill;
+                        [someView ysf_setImageWithURL:[NSURL URLWithString:item.fileURL]
+                                            completed:^(UIImage * _Nullable image, NSError * _Nullable error, YSFImageCacheType cacheType, NSURL * _Nullable imageURL) {
+                                                if (!error && image) {
+                                                    someView.backgroundColor = [UIColor clearColor];
+                                                }
+                                            }];
+                        return someView;
+                    }
+                }
+            }
         }
-        
-        return someView;
     }
     
     return nil;
@@ -169,7 +182,7 @@ static CGFloat const kTextMaxHeight = 172;
 #pragma mark - Private Methods
 - (NSAttributedString *)attributedString:(NSString *)text
 {
-    NSRegularExpression *exp = [NSRegularExpression regularExpressionWithPattern:@"\\[[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]" options:NSRegularExpressionCaseInsensitive error:nil];
+    NSRegularExpression *exp = [NSRegularExpression regularExpressionWithPattern:@"\\[[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]|\\[:[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]" options:NSRegularExpressionCaseInsensitive error:nil];
     __block NSInteger index = 0;
     __block NSString *resultText = @"";
     [exp enumerateMatchesInString:text
@@ -177,14 +190,14 @@ static CGFloat const kTextMaxHeight = 172;
                             range:NSMakeRange(0, [text length])
                        usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
                            NSString *rangeText = [text substringWithRange:result.range];
-                           if ([[YSFInputEmoticonManager sharedManager] emoticonByTag:rangeText])
+                           if ([[YSFEmoticonDataManager sharedManager] emoticonItemForTag:rangeText])
                            {
                                if (result.range.location > index)
                                {
                                    NSString *rawText = [text substringWithRange:NSMakeRange(index, result.range.location - index)];
                                    resultText = [resultText stringByAppendingString:rawText];
                                }
-                               NSString *rawText = [NSString stringWithFormat:@"<object type=\"0\" data=\"%@\" width=\"18\" height=\"18\"></object>", rangeText];
+                               NSString *rawText = [NSString stringWithFormat:@"<object type=\"0\" data=\"%@\" width=\"21\" height=\"21\"></object>", rangeText];
                                resultText = [resultText stringByAppendingString:rawText];
                                
                                index = result.range.location + result.range.length;
@@ -201,8 +214,16 @@ static CGFloat const kTextMaxHeight = 172;
     
     // Create attributed string from HTML
     CGSize maxImageSize = CGSizeMake(239, 425);
-
-    NSMutableDictionary *options = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSValue valueWithCGSize:maxImageSize], YSFMaxImageSize, @(16), YSFDefaultFontSize, [UIColor blackColor], YSFDefaultTextColor, [UIColor blueColor], YSFDefaultLinkColor, nil];
+    UIFont *font = [UIFont systemFontOfSize:16];
+    NSDictionary *options = @{
+                              YSFMaxImageSize : [NSValue valueWithCGSize:maxImageSize],
+                              YSFDefaultFontFamily : YSFStrParam(font.familyName),
+                              YSFDefaultFontName : YSFStrParam(font.fontName),
+                              YSFDefaultFontSize : @(16),
+                              YSFDefaultTextColor : [UIColor blackColor],
+                              YSFDefaultLinkColor : [UIColor blueColor],
+                              };
+    
     NSAttributedString *string = [[NSAttributedString alloc] ysf_initWithHTMLData:data options:options documentAttributes:NULL];
     
     return string;

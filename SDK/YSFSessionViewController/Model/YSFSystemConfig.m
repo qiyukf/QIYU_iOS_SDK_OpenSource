@@ -8,9 +8,7 @@
 
 
 @implementation YSFSystemConfig
-
-+ (instancetype)sharedInstance
-{
++ (instancetype)sharedInstance {
     static YSFSystemConfig *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -19,8 +17,7 @@
     return instance;
 }
 
-- (instancetype)init
-{
+- (instancetype)init {
     if (self = [super init]) {
         _switchOpen = YES;
         _sendingRate = 1.5;
@@ -29,22 +26,20 @@
     return self;
 }
 
-+ (instancetype)sharedInstance:(NSString *)shopId
-{
++ (instancetype)sharedInstance:(NSString *)shopId {
     if (!shopId) {
         return nil;
     }
     
     YSFSystemConfig *systemConfig = [YSFSystemConfig sharedInstance].systemConfigDict[shopId];
     if (!systemConfig) {
-        systemConfig = [YSFSystemConfig new];
+        systemConfig = [[YSFSystemConfig alloc] init];
         [YSFSystemConfig sharedInstance].systemConfigDict[shopId] = systemConfig;
     }
     return systemConfig;
 }
 
-- (instancetype)setNewConfig:(NSDictionary *)dict
-{
+- (instancetype)setNewConfig:(NSDictionary *)dict {
     NSString *type = [dict ysf_jsonString:YSFApiKeyType];
     if ([type isEqualToString:@"client_input"]) {
         NSDictionary *config = [dict ysf_jsonDict:YSFApiKeyConfig];

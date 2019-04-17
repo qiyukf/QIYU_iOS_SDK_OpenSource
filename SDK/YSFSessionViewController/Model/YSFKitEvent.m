@@ -35,6 +35,7 @@ NSString *const YSFKitEventNameSendCommdityInfo = @"YSFKitEventNameSendMessage";
 NSString *const YSFKitEventNameTapCommdityAction = @"YSFKitEventNameTapCommdityAction";
 NSString *const YSFKitEventNameTapExtraViewAction = @"YSFKitEventNameTapExtraViewAction";
 NSString *const YSFKitEventNameTapSystemNotification = @"YSFKitEventNameTapSystemNotification";
+NSString *const YSFKitEventNameTapInviteEvaluation = @"YSFKitEventNameTapInviteEvaluation";
 
 @implementation YSFKitEvent
 

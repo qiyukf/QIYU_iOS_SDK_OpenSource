@@ -9,17 +9,20 @@
 #import "YSFMotionManager.h"
 #import <CoreMotion/CoreMotion.h>
 
+
 @interface YSFMotionManager ()
 
 @property (nonatomic, strong) CMMotionManager *motionManager;
 
 @end
 
+
 @implementation YSFMotionManager
 
 - (void)dealloc {
-//    NSLog(@"YSFMotionManager dealloc");
+    YSFLogApp(@"");
     [_motionManager stopDeviceMotionUpdates];
+    _motionManager = nil;
 }
 
 - (instancetype)init {
@@ -28,6 +31,7 @@
         _motionManager = [[CMMotionManager alloc] init];
         _motionManager.deviceMotionUpdateInterval = 1/15.0;
         if (!_motionManager.deviceMotionAvailable) {
+            YSFLogApp(@"CMMotionManager unavailable");
             _motionManager = nil;
             return self;
         }

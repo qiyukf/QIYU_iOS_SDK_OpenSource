@@ -23,6 +23,12 @@
 #define YSFShopInfoKey      @"shopInfo"
 #define YSFUnreadPushMessageSessionId @"unreadPushMessageSessionId"
 #define YSFLastSessionIdKey      @"last_session_id"
+#define YSFStaffReadStatusKey     @"staff_read_status"
+#define YSFRequestStaffParameterKey @"request_staff_parameter"
+#define YSFRequestStaffIDKey @"request_staff_id"
+#define YSFRequestGroupIDKey @"request_group_id"
+#define YSFRequestRobotIDKey @"request_robot_id"
+#define YSFRequestTemplateIDKey @"request_template_id"
 
 //Evaluation
 #define YSFEvaluation_2                        @"evalution_2.0"
@@ -36,6 +42,7 @@
 #define YSFEvaluationKeyAutoPopup              @"evaluation_auto"
 #define YSFEvaluationKeyAutoPopupSessionId     @"session_id_auto"
 #define YSFEvaluationKeyAutoPopupMessageID     @"message_id_auto"
+#define YSFEvaluationKeyShowButton             @"show_evaluation_button"
 //history data:保存了多个会话的评价数据
 #define YSFEvaluationKeyMessageID              @"message_id"
 #define YSFEvaluationKeyData                   @"evaluation_data"
@@ -57,42 +64,39 @@
 
 @interface YSFAppInfoManager : NSObject
 
-- (NSString *)versionNumber;
-- (NSString *)version;
-
-- (NSString *)cachedText:(NSString *)shopId;
-- (void)setCachedText:(NSString *)cachedText shopId:(NSString *)shopId;
-
-@property (nonatomic,strong,readonly)    YSFAccountInfo *accountInfo;
-
 @property (nonatomic, weak) id<YSFAppInfoManagerDelegate> delegate;
+@property (nonatomic, strong, readonly) YSFAccountInfo *accountInfo;
 
 - (void)initSessionViewControllerInfo;
-
-- (NSString *)currentUserId;
-
-- (NSString *)currentForeignUserId;
-
 - (void)checkAppInfo;
+- (void)logout:(QYCompletionBlock)completion;
 
+//版本
+- (NSString *)version;
+- (NSString *)versionNumber;
+
+//ID
+- (NSString *)currentUserId;
+- (NSString *)currentForeignUserId;
 - (NSString *)appDeviceId;
 
-- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key;
-
-- (void)trackHistory:(NSString *)title description:(NSDictionary *)description key:(NSString *)key;
-
+//UserInfo
 - (void)setUserInfo:(QYUserInfo *)userInfo authTokenVerificationResultBlock:(QYCompletionWithResultBlock)block;
 
-- (BOOL)isRecevierOrSpeaker;
+//访问/行为轨迹
+- (void)trackHistory:(NSString *)title enterOrOut:(BOOL)enterOrOut key:(NSString *)key;
+- (void)trackHistory:(NSString *)title description:(NSDictionary *)description key:(NSString *)key;
 
-- (void)setRecevierOrSpeaker:(BOOL)recevierOrSpeaker;
-
-- (void)logout;
-
+//持久化
+- (void)saveDict:(NSDictionary *)dict forKey:(NSString *)key;
+- (void)saveArray:(NSArray *)array forKey:(NSString *)key;
 - (NSDictionary *)dictByKey:(NSString *)key;
 - (NSArray *)arrayByKey:(NSString *)key;
 
-- (void)saveDict:(NSDictionary *)dict forKey:(NSString *)key;
-- (void)saveArray:(NSArray *)array forKey:(NSString *)key;
+- (BOOL)isRecevierOrSpeaker;
+- (void)setRecevierOrSpeaker:(BOOL)recevierOrSpeaker;
+
+- (NSString *)cachedText:(NSString *)shopId;
+- (void)setCachedText:(NSString *)cachedText shopId:(NSString *)shopId;
 
 @end

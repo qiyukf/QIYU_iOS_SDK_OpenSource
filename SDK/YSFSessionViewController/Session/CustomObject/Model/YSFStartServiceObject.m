@@ -58,4 +58,9 @@
     
     return instance;
 }
+
+- (BOOL)shouldIgnoreUnread {
+    return YES;
+}
+
 @end

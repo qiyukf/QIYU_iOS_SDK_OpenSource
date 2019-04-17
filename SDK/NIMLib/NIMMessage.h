@@ -55,15 +55,23 @@ typedef NS_ENUM(NSInteger, YSF_NIMMessageAttachmentDownloadState) {
 };
 
 typedef NS_ENUM(NSInteger, YSF_NIMMessageSubStatus) {
-    YSF_NIMMessageSubStatusIsDeliveried  = 1 << 1,  //消息已发送到服务器  0没有投递  1已投递
-    YSF_NIMMessageSubStatusIsPlayed      = 1 << 3,  //语音视频是否播放过  0为播放    1已播放
-    YSF_NIMMessageSubStatusIsReceivedMsg = 1 << 20, //是否是收到的消息    0发送的消息 1收到的消息
+    YSF_NIMMessageSubStatusIsDeliveried  = 1 << 1,  //消息已发送到服务器，0没有投递，1已投递
+    YSF_NIMMessageSubStatusIsPlayed      = 1 << 3,  //语音视频是否播放过，0为播放，1已播放
+    YSF_NIMMessageSubStatusReadVisible   = 1 << 5,  //消息阅读状态是否可见，0为不可见，1为可见
+    YSF_NIMMessageSubStatusReadStatus    = 1 << 6,  //消息阅读状态，0为未读，1为已读
+    YSF_NIMMessageSubStatusIsReceivedMsg = 1 << 20, //是否是收到的消息，0发送的消息，1收到的消息
 };
 
 typedef NS_ENUM(NSInteger, YSF_NIMMessageStatus) {
     YSF_NIMMessageStatusNone        =   0,      //消息初始状态
     YSF_NIMMessageStatusRead        =   1,      //已读
     YSF_NIMMessageStatusDeleted     =   2,      //已删除
+};
+
+typedef NS_ENUM(NSInteger, YSF_NIMMessageReadStatus) {
+    YSF_NIMMessageReadStatusNone    =   0,      //无阅读状态
+    YSF_NIMMessageReadStatusUnread  =   1,      //未读
+    YSF_NIMMessageReadStatusRead    =   2,      //已读
 };
 
 
@@ -127,6 +135,11 @@ typedef NS_ENUM(NSInteger, YSF_NIMMessageStatus) {
 @property (nonatomic, assign) YSF_NIMMessageSubStatus subStatus;
 
 /**
+ *  消息阅读状态
+ */
+@property (nonatomic, assign) YSF_NIMMessageReadStatus readStatus;
+
+/**
  *  消息附件内容
  */
 @property (nonatomic, strong, readwrite) id<YSF_NIMMessageObject> messageObject;
@@ -163,7 +176,7 @@ typedef NS_ENUM(NSInteger, YSF_NIMMessageStatus) {
 /**
  *  扩展字段，用于数据存储
  */
-@property (nonatomic,copy)         NSString *ext;
+@property (nonatomic, copy) NSString *ext;
 
 @property (nonatomic, assign) BOOL isDeliveried;
 @property (nonatomic, assign, readonly) BOOL isPushMessageType;
@@ -172,6 +185,11 @@ typedef NS_ENUM(NSInteger, YSF_NIMMessageStatus) {
 @property (nonatomic, assign) NSInteger toType;
 
 - (NSError *)prepareForSend;
+
+/**
+ *  使用服务端下发的json数据构建对象
+ */
++ (YSF_NIMMessage *)msgWithDict:(NSDictionary *)dict;
 
 @end
 

@@ -14,6 +14,7 @@
 @property (nonatomic, copy) NSString *sdkRootPath;
 @property (nonatomic, copy) NSString *globalPath;
 @property (nonatomic, copy) NSString *videoPath;
+@property (nonatomic, copy) NSString *emoticonPath;
 
 @end
 
@@ -33,9 +34,11 @@
     NSString *appRootPath = [_sdkRootPath stringByAppendingPathComponent:appKeyMD5];
     _globalPath = [appRootPath stringByAppendingPathComponent:@"Global"];
     _videoPath = [_globalPath stringByAppendingString:@"/video"];
+    _emoticonPath = [_globalPath stringByAppendingString:@"/Emoticon"];
     
     [self createDirIfNotExists:_globalPath];
     [self createDirIfNotExists:_videoPath];
+    [self createDirIfNotExists:_emoticonPath];
     [self addSkipBackup:_globalPath];
 }
 
@@ -66,6 +69,25 @@
                                      error:nil];
     }
     return _videoPath;
+}
+
+- (NSString *)sdkEmoticonPath {
+    BOOL isDir = NO;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    BOOL existed = [fileManager fileExistsAtPath:_emoticonPath isDirectory:&isDir];
+    if (!existed) {
+        [fileManager createDirectoryAtPath:_emoticonPath
+               withIntermediateDirectories:YES
+                                attributes:nil
+                                     error:nil];
+    } else if (!isDir) {
+        [fileManager removeItemAtPath:_emoticonPath error:nil];
+        [fileManager createDirectoryAtPath:_emoticonPath
+               withIntermediateDirectories:YES
+                                attributes:nil
+                                     error:nil];
+    }
+    return _emoticonPath;
 }
 
 #pragma mark - misc

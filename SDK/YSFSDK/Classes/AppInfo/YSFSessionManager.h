@@ -50,6 +50,9 @@ typedef enum : NSUInteger {
 - (YSFServiceSession *)getOnlineSession:(NSString *)shopId;
 - (YSFServiceSession *)getOnlineOrWaitingSession:(NSString *)shopId;
 
+- (void)saveStaffId:(int64_t)staffId groupId:(int64_t)groupId robotId:(int64_t)robotId templateId:(int64_t)templateId;
+- (NSDictionary *)getRequestStaffParameter;
+
 - (void)addStaffIconURL:(NSString *)iconURL forStaffId:(NSString *)staffId;
 - (NSString *)getIconURLFromStaffId:(NSString *)staffId;
 - (void)updateStaffInfoForOnlineSession:(NSString *)shopId;
@@ -70,6 +73,12 @@ typedef enum : NSUInteger {
 
 - (void)reportPushMessageReadedStatus;
 - (long long)getLastUnreadPushMessageSessionId;
+
+- (BOOL)readStatusSwitchForShopID:(NSString *)shopId;
+- (long long)getLastReadTime;
+- (void)saveLastReadTime:(long long)time;
+- (BOOL)canMarkReadStatusForMessage:(YSF_NIMMessage *)message;
+- (BOOL)canReportReadStatusForMessage:(YSF_NIMMessage *)message;
 
 - (void)clear;
 - (void)clearByShopId:(NSString *)shopId;

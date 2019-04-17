@@ -12,6 +12,8 @@
 static CGFloat kHeadImageSize = 40.0f;
 static CGFloat kHeadHorizontalMargin = 8.0f;
 static CGFloat kHeadVerticalMargin = 3.0f;
+static CGFloat kReadStatusHeight = 15.0f;
+static CGFloat kReadStatusHorizontalMargin = 5.0f;
 
 
 @class YSFAvatarImageView;
@@ -30,6 +32,7 @@ static CGFloat kHeadVerticalMargin = 3.0f;
 @property (nonatomic, strong) UILabel *trashWordsTip;   //违禁词提示
 @property (nonatomic, strong) UIButton *retryButton;    //重试按钮
 @property (nonatomic, strong) UIButton *submitForm;     //表单提交按钮
+@property (nonatomic, strong) UILabel *readStatusLabel; //消息阅读状态
 
 @property (nonatomic, strong) UIView<YSFExtraViewParamConfig> *extraView;   //扩展视图
 

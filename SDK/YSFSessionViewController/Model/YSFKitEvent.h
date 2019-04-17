@@ -48,3 +48,4 @@ extern NSString *const YSFKitEventNameSendCommdityInfo;
 extern NSString *const YSFKitEventNameTapCommdityAction;
 extern NSString *const YSFKitEventNameTapExtraViewAction;
 extern NSString *const YSFKitEventNameTapSystemNotification;
+extern NSString *const YSFKitEventNameTapInviteEvaluation;

@@ -11,5 +11,6 @@
 @interface UIView (Animation)
 
 - (void)animation_shakeImageWithDuration;
+- (void)animation_stopShake;
 
 @end

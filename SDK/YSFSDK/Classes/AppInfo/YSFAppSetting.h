@@ -1,14 +1,12 @@
 
 @interface YSFAppSetting : NSObject
 
-@property (nonatomic)      BOOL    recevierOrSpeaker;
-
-- (BOOL)isValid;
+@property (nonatomic, assign) BOOL recevierOrSpeaker;
 
 + (instancetype)infoByDict:(NSDictionary *)dict;
-+ (instancetype)defaultSetting;
-
 - (NSDictionary *)toDict;
 
++ (instancetype)defaultSetting;
+- (BOOL)isValid;
 
 @end

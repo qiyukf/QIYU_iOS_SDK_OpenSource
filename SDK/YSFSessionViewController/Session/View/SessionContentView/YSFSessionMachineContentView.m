@@ -14,8 +14,7 @@
 #import "YSFApiDefines.h"
 #import "YSFCoreText.h"
 #import "UIImageView+YSFWebCache.h"
-#import "YSFInputEmoticonManager.h"
-#import "YSFInputEmoticonParser.h"
+#import "YSFEmoticonDataManager.h"
 #import "YSFRichText.h"
 #import "NSString+FileTransfer.h"
 
@@ -456,15 +455,32 @@
         [_imageViewsArray addObject:imageView];
         return imageView;
     } else if ([attachment isKindOfClass:[YSFObjectTextAttachment class]]) {
-        UIImageView *someView = [[UIImageView alloc] initWithFrame:frame];
         NSInteger type = [[attachment.attributes objectForKey:@"type"] integerValue];
-        if (type == 0) {    //emoji
+        if (type == 0) {
             NSString *emojiStr = [attachment.attributes objectForKey:@"data"];
-            YSFInputEmoticon *emoticon = [[YSFInputEmoticonManager sharedManager] emoticonByTag:emojiStr];
-            UIImage *image = [UIImage imageNamed:emoticon.filename];
-            someView.image = image;
+            YSFEmoticonItem *item = [[YSFEmoticonDataManager sharedManager] emoticonItemForTag:emojiStr];
+            if (item && (item.type == YSFEmoticonTypeDefaultEmoji || item.type == YSFEmoticonTypeCustomEmoji)) {
+                if (item.type == YSFEmoticonTypeDefaultEmoji) {
+                    UIImage *image = [UIImage imageNamed:item.filePath];
+                    UIImageView *someView = [[UIImageView alloc] initWithFrame:frame];
+                    someView.image = image;
+                    return someView;
+                } else {
+                    if ([item.fileURL length]) {
+                        UIImageView *someView = [[UIImageView alloc] initWithFrame:frame];
+                        someView.backgroundColor = [UIColor lightGrayColor];
+                        someView.contentMode = UIViewContentModeScaleAspectFill;
+                        [someView ysf_setImageWithURL:[NSURL URLWithString:item.fileURL]
+                                            completed:^(UIImage * _Nullable image, NSError * _Nullable error, YSFImageCacheType cacheType, NSURL * _Nullable imageURL) {
+                                                if (!error && image) {
+                                                    someView.backgroundColor = [UIColor clearColor];
+                                                }
+                                            }];
+                        return someView;
+                    }
+                }
+            }
         }
-        return someView;
     }
     return nil;
 }

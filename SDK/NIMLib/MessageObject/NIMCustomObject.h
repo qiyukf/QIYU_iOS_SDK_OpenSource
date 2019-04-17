@@ -101,6 +101,21 @@
  *  @return 是否支持多端同步
  */
 - (BOOL)messageSyncEnabled;
+
+/**
+ *  是否忽略未读数
+ *
+ *  @return 是否忽略未读数
+ */
+- (BOOL)shouldIgnoreUnread;
+
+/**
+ *  微信消息内容
+ *
+ *  @return 微信消息内容
+ */
+- (NSString *)contentForWeChat;
+
 @end
 
 

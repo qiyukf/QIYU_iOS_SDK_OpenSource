@@ -78,6 +78,12 @@
                           completion:(void(^)(NSInteger index, NSError *error))completion;
 
 /**
+ *  加载历史消息(客服端使用)
+ *  @return 加载后table要滑动到的位置
+ */
+- (void)loadHistoryMessagesWithCompletion:(void(^)(NSInteger index, NSError *error))completion;
+
+/**
  *  查询最后一条消息
  */
 - (YSF_NIMMessage *)getLastMessageFromDB;

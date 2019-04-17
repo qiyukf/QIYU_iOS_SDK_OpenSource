@@ -33,7 +33,7 @@ static CGFloat kVideoHandleBarProgressHeight = 6.0f;
 @implementation YSFVideoHandleBar
 
 - (void)dealloc {
-//    NSLog(@"YSFVideoHandleBar dealloc");
+    YSFLogApp(@"");
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {

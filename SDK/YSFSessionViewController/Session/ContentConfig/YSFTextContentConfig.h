@@ -8,6 +8,6 @@
 
 #import "YSFBaseSessionContentConfig.h"
 
-@interface YSFTextContentConfig : YSFBaseSessionContentConfig<YSFSessionContentConfig>
+@interface YSFTextContentConfig : YSFBaseSessionContentConfig <YSFSessionContentConfig>
 
 @end

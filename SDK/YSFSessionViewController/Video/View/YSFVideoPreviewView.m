@@ -9,6 +9,9 @@
 #import "YSFVideoPreviewView.h"
 
 @implementation YSFVideoPreviewView
+- (void)dealloc {
+    YSFLogApp(@"");
+}
 
 + (Class)layerClass {
     return [AVCaptureVideoPreviewLayer class];

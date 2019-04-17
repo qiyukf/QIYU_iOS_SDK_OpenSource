@@ -13,7 +13,24 @@
 @implementation YSFRichText
 
 - (NSString *)thumbText {
+    if (self.customEmoticon) {
+        return @"[图片]";
+    }
     return self.displayContent;
+}
+
+- (NSString *)contentForWeChat {
+    NSDictionary *dict = [self encodeAttachment];
+    return [dict ysf_toUTF8String];
+}
+
+- (BOOL)customEmoticon {
+    if ([self.content length]) {
+        if ([self.content hasPrefix:@"<img"] && [self.content hasSuffix:@">"]) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (YSFRichTextContentConfig *)contentConfig {

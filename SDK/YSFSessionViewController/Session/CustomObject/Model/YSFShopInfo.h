@@ -17,6 +17,7 @@
 @property (nonatomic, assign) double sendingRate;
 @property (nonatomic, assign) BOOL multEvaluationEnable;    //多次评价开关
 @property (nonatomic, assign) NSInteger evaluationTimeLimit;    //评价时效，单位：分钟
+@property (nonatomic, assign) BOOL showEvaluationButton;    //是否显示导航栏评价按钮
 
 + (instancetype)instanceByJson:(NSDictionary *)json;
 - (NSDictionary *)toDict;

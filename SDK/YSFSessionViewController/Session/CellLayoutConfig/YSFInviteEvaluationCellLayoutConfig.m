@@ -10,6 +10,8 @@
 #import "YSFInviteEvaluationObject.h"
 #import "YSFMessageModel.h"
 #import "YSFAttributedLabel.h"
+#import "YSFApiDefines.h"
+#import "YSFMacro.h"
 
 @implementation YSFInviteEvaluationCellLayoutConfig
 
@@ -22,19 +24,25 @@
     textLabel.font = [UIFont systemFontOfSize:14.f];
     textLabel.ysf_frameWidth = 280 - 30;
     
+    CGFloat height = 90;
     YSF_NIMCustomObject *object = (YSF_NIMCustomObject *)model.message.messageObject;
     if ([object.attachment isKindOfClass:[YSFInviteEvaluationObject class]]) {
         YSFInviteEvaluationObject *attachment = (YSFInviteEvaluationObject *)object.attachment;
-        if (attachment.inviteText.length > 0) {
-            [textLabel setText:attachment.inviteText];
-        } else {
-            [textLabel setText:@"感谢您的咨询，请对我们的服务作出评价"];
+        if (attachment.localCommand == YSFCommandInviteEvaluation) {
+            if (attachment.inviteText.length > 0) {
+                [textLabel setText:attachment.inviteText];
+            } else {
+                [textLabel setText:@"感谢您的咨询，请对我们的服务作出评价"];
+            }
+        } else if (attachment.localCommand == YSFCommandSatisfactionResult) {
+            [textLabel setText:[NSString stringWithFormat:@"用户提交的服务评价为：%@", YSFStrParam(attachment.evaluationResult)]];
+            height = (attachment.inviteStatus == YSFInviteEvaluateStatusHidden) ? 45 : 71;
         }
     }
     
     [textLabel sizeToFit];
     
-    return CGSizeMake(width, 90 + textLabel.ysf_frameHeight);
+    return CGSizeMake(width, height + textLabel.ysf_frameHeight);
 }
 
 - (NSString *)cellContent:(YSFMessageModel *)model

@@ -30,7 +30,7 @@
 @implementation YSFVideoPlayer
 
 - (void)dealloc {
-//    NSLog(@"YSFVideoPlayer dealloc");
+    YSFLogApp(@"");
 }
 
 #pragma mark - init

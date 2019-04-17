@@ -15,15 +15,16 @@
 #import "YSF_NIMMessage+YSF.h"
 #import "UIControl+BlocksKit.h"
 
-@interface YSFSessionTextContentView()<YSFAttributedLabelDelegate>
+@interface YSFSessionTextContentView() <YSFAttributedLabelDelegate>
+
 @property (nonatomic, strong) UIView *splitLine;
 @property (nonatomic, strong) UIButton *action;
+
 @end
 
-@implementation YSFSessionTextContentView
 
--(instancetype)initSessionMessageContentView
-{
+@implementation YSFSessionTextContentView
+- (instancetype)initSessionMessageContentView {
     if (self = [super initSessionMessageContentView]) {
         _textLabel = [[YSFAttributedLabel alloc] initWithFrame:CGRectZero];
         _textLabel.delegate = self;
@@ -34,7 +35,7 @@
         _textLabel.highlightColor = YSFRGBA2(0x1a000000);
         [self addSubview:_textLabel];
         
-        _splitLine = [UIView new];
+        _splitLine = [[UIView alloc] init];
         _splitLine.backgroundColor = YSFRGB(0xdbdbdb);
         [self addSubview:_splitLine];
         
@@ -49,20 +50,19 @@
     return self;
 }
 
-- (void)refresh:(YSFMessageModel *)data{
+- (void)refresh:(YSFMessageModel *)data {
     [super refresh:data];
 
     QYCustomUIConfig *uiConfig = [QYCustomUIConfig sharedInstance];
     if (self.model.message.isOutgoingMsg) {
         _textLabel.textColor = uiConfig.customMessageTextColor;
         _textLabel.linkColor = uiConfig.customMessageHyperLinkColor;
-    }
-    else {
+    } else {
         _textLabel.textColor = uiConfig.serviceMessageTextColor;
         _textLabel.linkColor = uiConfig.serviceMessageHyperLinkColor;
     }
-    
     _textLabel.underLineForLink = YES;
+    
     CGFloat fontSize = self.model.message.isOutgoingMsg ? uiConfig.customMessageTextFontSize : uiConfig.serviceMessageTextFontSize;
     _textLabel.font = [UIFont systemFontOfSize:fontSize];
     
@@ -74,19 +74,16 @@
     if (self.model.message.isPushMessageType) {
         [_textLabel ysf_setText:@""];
         [_textLabel appendHTMLText:text];
-    }
-    else {
+    } else {
         [_textLabel ysf_setText:text];
     }
     
-    if (self.model.message.isPushMessageType
-        && self.model.message.actionText.length) {
+    if (self.model.message.isPushMessageType && self.model.message.actionText.length) {
         _splitLine.hidden = NO;
         _action.hidden = NO;
         [_action setTitle:self.model.message.actionText forState:UIControlStateNormal];
         _action.titleLabel.font = [UIFont systemFontOfSize:15];
-    }
-    else {
+    } else {
         _splitLine.hidden = YES;
         _action.hidden = YES;
     }
@@ -95,12 +92,10 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     UIEdgeInsets contentInsets = self.model.contentViewInsets;
-    CGSize contentsize         = self.model.contentSize;
-    CGRect labelFrame = CGRectMake(contentInsets.left, contentInsets.top, contentsize.width, contentsize.height);
-    self.textLabel.frame = labelFrame;
+    CGSize contentsize = self.model.contentSize;
+    self.textLabel.frame = CGRectMake(contentInsets.left, contentInsets.top, contentsize.width, contentsize.height);
     
-    if (self.model.message.isPushMessageType
-        && self.model.message.actionText.length) {
+    if (self.model.message.isPushMessageType && self.model.message.actionText.length) {
         _textLabel.ysf_frameHeight -= 44;
         _splitLine.ysf_frameTop = _textLabel.ysf_frameBottom;
         _splitLine.ysf_frameHeight = 0.5;
@@ -117,36 +112,27 @@
     }
 }
 
-
 #pragma mark - NIMAttributedLabelDelegate
-- (void)ysfAttributedLabel:(YSFAttributedLabel *)label
-             clickedOnLink:(id)linkData{
-    
+- (void)ysfAttributedLabel:(YSFAttributedLabel *)label clickedOnLink:(id)linkData {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     if ([linkData isKindOfClass:[NSString class]]) {
-
-        NSDataDetector	*linkDetector	= [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink | NSTextCheckingTypePhoneNumber error:nil];
-        NSArray			*matches		= [linkDetector matchesInString:linkData options:0 range:NSMakeRange(0, [linkData length])];
-        
+        NSDataDetector *linkDetector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink | NSTextCheckingTypePhoneNumber error:nil];
+        NSArray *matches = [linkDetector matchesInString:linkData options:0 range:NSMakeRange(0, [linkData length])];
         for (NSTextCheckingResult *match in matches) {
             if (match.resultType == NSTextCheckingTypePhoneNumber) {
                 event.eventName = YSFKitEventNameTapLabelPhoneNumber;
-            }
-            else {
+            } else {
                 event.eventName = YSFKitEventNameTapLabelLink;
             }
             break;
         }
-        
         event.message = self.model.message;
         event.data = linkData;
         [self.delegate onCatchEvent:event];
     }
-
 }
 
-- (void)actionClick:(NSString *)actionUrl
-{
+- (void)actionClick:(NSString *)actionUrl {
     YSFKitEvent *event = [[YSFKitEvent alloc] init];
     event.eventName = YSFKitEventNameTapPushMessageActionUrl;
     event.message = self.model.message;

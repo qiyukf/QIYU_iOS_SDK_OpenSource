@@ -8,6 +8,8 @@
 @property (nonatomic, copy) NSString *displayContent;
 @property (nonatomic, strong, readonly) NSMutableArray<NSString *> *imageUrlStringArray;
 
+@property (nonatomic, assign) BOOL customEmoticon;
+
 + (YSFRichText *)objectByDict:(NSDictionary *)dict;
 + (YSFRichText *)objectByParams:(NSInteger)cmd content:(NSString *)content;
 

@@ -13,17 +13,19 @@
 #import "YSFAlertController.h"
 #import "YSFVideoDataManager.h"
 
-typedef NS_ENUM(NSInteger, YSFVideoPlayerStatus) {
-    YSFVideoPlayerStatusHidden = 0,    //初始状态：全屏播放，没有任何按钮
-    YSFVideoPlayerStatusHandle,      //操作状态：出现关闭按钮、操作条
-    YSFVideoPlayerStatusDone,        //完成状态：
-};
 
 static CGFloat kVideoPlayerViewSpace = 15.0f;
 static CGFloat kVideoPlayerViewCloseSize = 20.0f;
 static CGFloat kVideoPlayerViewButtonSize = 72.0f;
 static CGFloat kVideoPlayerViewBarBottom = 15.0f;
 static CGFloat kVideoPlayerViewBarHeight = 18.0f;
+
+typedef NS_ENUM(NSInteger, YSFVideoPlayerStatus) {
+    YSFVideoPlayerStatusHidden = 0,     //初始状态：全屏播放，没有任何按钮
+    YSFVideoPlayerStatusHandle,         //操作状态：出现关闭按钮、操作条
+    YSFVideoPlayerStatusDone,           //完成状态：出现关闭按钮、播放按钮、操作条
+};
+
 
 @interface YSFVideoPlayerViewController () <YSFVideoHandleBarDelegate> {
     YSFTimer *_timer;
@@ -39,10 +41,10 @@ static CGFloat kVideoPlayerViewBarHeight = 18.0f;
 
 @end
 
-@implementation YSFVideoPlayerViewController
 
+@implementation YSFVideoPlayerViewController
 - (void)dealloc {
-//    NSLog(@"YSFVideoPlayerViewController dealloc");
+    YSFLogApp(@"");
 }
 
 #pragma mark - view load
@@ -146,9 +148,14 @@ static CGFloat kVideoPlayerViewBarHeight = 18.0f;
         return;
     }
     
+    CGFloat safeAreaBottom = 0;
+    if (@available(iOS 11, *)) {
+        safeAreaBottom = self.view.safeAreaInsets.bottom;
+    }
+    
     CGSize videoSize = videoObject.coverSize;
     if (videoSize.width == 0 || videoSize.height == 0) {
-        videoSize = CGSizeMake(480, 640);
+        videoSize = [UIScreen mainScreen].bounds.size;
     }
     
     CGFloat height = (videoSize.height / videoSize.width) * CGRectGetWidth(self.view.frame);
@@ -170,8 +177,12 @@ static CGFloat kVideoPlayerViewBarHeight = 18.0f;
                                              kVideoPlayerViewCloseSize + 2 * kVideoPlayerViewSpace);
     self.playButton.bounds = CGRectMake(0, 0, kVideoPlayerViewButtonSize, kVideoPlayerViewButtonSize);
     self.playButton.center = self.view.center;
+    CGFloat max_H = CGRectGetMaxY(self.videoPlayer.frame);
+    if (max_H >= (CGRectGetHeight(self.view.bounds) - (safeAreaBottom / 2))) {
+        max_H = max_H - safeAreaBottom;
+    }
     self.handleBar.frame = CGRectMake(CGRectGetMinX(self.videoPlayer.frame),
-                                      CGRectGetMaxY(self.videoPlayer.frame) - kVideoPlayerViewBarBottom - kVideoPlayerViewBarHeight,
+                                      max_H - kVideoPlayerViewBarBottom - kVideoPlayerViewBarHeight,
                                       CGRectGetWidth(self.videoPlayer.frame),
                                       kVideoPlayerViewBarHeight);
 }

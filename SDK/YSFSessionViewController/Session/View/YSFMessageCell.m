@@ -90,6 +90,11 @@
     [_submitForm setTitleColor:YSFRGB(0x5092E1) forState:UIControlStateNormal];
     [_submitForm setTitle:@"填写表单" forState:UIControlStateNormal];
     [self.contentView addSubview:_submitForm];
+    //readStatusLabel
+    _readStatusLabel = [[UILabel alloc] init];
+    _readStatusLabel.backgroundColor = [UIColor clearColor];
+    _readStatusLabel.font = [UIFont systemFontOfSize:12.0f];
+    [self.contentView addSubview:_readStatusLabel];
 }
 
 - (void)makeGesture {
@@ -161,7 +166,8 @@
     [_retryButton setHidden:[self retryButtonHidden]];
     _retryButton.userInteractionEnabled = YES;
     [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_message_cell_error"] forState:UIControlStateNormal];
-    if (self.model.message.isOutgoingMsg && [self.model.message hasTrashWords]) {
+    BOOL hasTrash = [self.model.message hasTrashWords];
+    if (self.model.message.isOutgoingMsg && hasTrash) {
         [_retryButton setImage:[UIImage ysf_imageInKit:@"icon_file_transfer_cancel"] forState:UIControlStateNormal];
         _retryButton.hidden = NO;
         _retryButton.userInteractionEnabled = NO;
@@ -185,6 +191,21 @@
             _submitForm.hidden = ((YSFBotForm *)customObject.attachment).submitted;
         }
     }
+    //消息阅读状态
+    if (hasTrash || self.model.message.readStatus == YSF_NIMMessageReadStatusNone) {
+        _readStatusLabel.hidden = YES;
+    } else {
+        _readStatusLabel.hidden = NO;
+        _readStatusLabel.textAlignment = self.model.message.isOutgoingMsg ? NSTextAlignmentRight : NSTextAlignmentLeft;
+        if (self.model.message.readStatus == YSF_NIMMessageReadStatusUnread) {
+            _readStatusLabel.text = @"未读";
+            _readStatusLabel.textColor = YSFRGB(0x008fff);
+        } else if (self.model.message.readStatus == YSF_NIMMessageReadStatusRead) {
+            _readStatusLabel.text = @"已读";
+            _readStatusLabel.textColor = YSFRGB(0xa3afb7);
+        }
+    }
+    
     //扩展视图
     if ([self needShowExtraView] && !_extraView) {
         [self makeupExtraView];
@@ -249,6 +270,7 @@
     [self layoutRetryButton];
     [self layoutAudioPlayedIcon];
     [self layoutActivityIndicator];
+    [self layoutReadStatusLabel];
     [self layoutExtraView];
     
     _trashWordsTip.frame = CGRectMake(0, _bubbleView.ysf_frameBottom + 10, self.ysf_frameWidth - 112, 0);
@@ -315,6 +337,23 @@
             centerX = CGRectGetMaxX(_bubbleView.frame) + [self retryButtonBubblePadding] + CGRectGetWidth(_loadingIndicator.bounds) / 2;
         }
         self.loadingIndicator.center = CGPointMake(centerX, _bubbleView.center.y);
+    }
+}
+
+- (void)layoutReadStatusLabel {
+    if (self.model.message.readStatus == YSF_NIMMessageReadStatusUnread
+        || self.model.message.readStatus == YSF_NIMMessageReadStatusRead) {
+        if (self.model.message.isOutgoingMsg) {
+            self.readStatusLabel.frame = CGRectMake(0,
+                                                    CGRectGetMaxY(self.bubbleView.frame) - kReadStatusHeight,
+                                                    CGRectGetMinX(self.bubbleView.frame) - kReadStatusHorizontalMargin,
+                                                    kReadStatusHeight);
+        } else {
+            self.readStatusLabel.frame = CGRectMake(CGRectGetMaxX(self.bubbleView.frame) + kReadStatusHorizontalMargin,
+                                                    CGRectGetMaxY(self.bubbleView.frame) - kReadStatusHeight,
+                                                    CGRectGetWidth(self.bounds) - CGRectGetMaxX(self.bubbleView.frame) - kReadStatusHorizontalMargin,
+                                                    kReadStatusHeight);
+        }
     }
 }
 

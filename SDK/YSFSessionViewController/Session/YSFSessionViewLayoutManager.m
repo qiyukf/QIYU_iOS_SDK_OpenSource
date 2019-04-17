@@ -56,39 +56,73 @@ YSFNotification(kKFInputViewInputTypeChanged);
         [addIndexPathes addObject:[NSIndexPath indexPathForRow:[obj integerValue] inSection:0]];
     }];
     
-    [_tableView beginUpdates];
-    [_tableView insertRowsAtIndexPaths:addIndexPathes withRowAnimation:UITableViewRowAnimationNone];
-    [_tableView endUpdates];
-    
     __weak typeof(self) weakSelf = self;
-    NSTimeInterval scrollDelay = .05f;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(scrollDelay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        NSIndexPath *indexPath = [addIndexPathes lastObject];
-        NSInteger sectionNumber = [weakSelf.tableView numberOfRowsInSection:indexPath.section];
-        if (indexPath.row > sectionNumber - 1) {
-            indexPath = [NSIndexPath indexPathForRow:sectionNumber - 1 inSection:indexPath.section];
-        }
-        if ([YSF_NIMSDK sharedSDK].sdkOrKf) {
-            [weakSelf.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
-        }
-        else {
-            if (scrollToBottom) {
-                [weakSelf.tableView ysf_scrollToBottom:YES];
-            }
-        }
-    });
+    if (@available(iOS 11.0, *)) {
+        [_tableView performBatchUpdates:^{
+            [weakSelf.tableView insertRowsAtIndexPaths:addIndexPathes withRowAnimation:UITableViewRowAnimationNone];
+        } completion:^(BOOL finished) {
+            NSIndexPath *indexPath = [addIndexPathes lastObject];
+            [weakSelf scrollToRow:indexPath scrollToBottom:scrollToBottom];
+        }];
+    } else {
+        [_tableView beginUpdates];
+        [_tableView insertRowsAtIndexPaths:addIndexPathes withRowAnimation:UITableViewRowAnimationNone];
+        [_tableView endUpdates];
+        
+        NSTimeInterval scrollDelay = .05f;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(scrollDelay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            NSIndexPath *indexPath = [addIndexPathes lastObject];
+            [weakSelf scrollToRow:indexPath scrollToBottom:scrollToBottom];
+        });
+    }
 }
 
-- (void)updateCellAtIndex:(NSInteger)index model:(id)model
-{
-    if (index > -1) {
+- (void)scrollToRow:(NSIndexPath *)indexPath scrollToBottom:(BOOL)scrollToBottom {
+    if (!indexPath) {
+        return;
+    }
+    NSInteger sectionNumber = [self.tableView numberOfRowsInSection:indexPath.section];
+    if (indexPath.row > (sectionNumber - 1)) {
+        indexPath = [NSIndexPath indexPathForRow:(sectionNumber - 1) inSection:indexPath.section];
+    }
+    if ([YSF_NIMSDK sharedSDK].sdkOrKf) {
+        if (indexPath.row >= 0 && indexPath.row < sectionNumber) {
+            [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        }
+    } else {
+        if (scrollToBottom) {
+            if (indexPath.row >= 0 && indexPath.row < sectionNumber) {
+                [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+            }
+        }
+    }
+}
+
+- (void)updateCellAtIndex:(NSInteger)index
+             refreshModel:(id)model
+             rowAnimation:(UITableViewRowAnimation)animation {
+    NSInteger rows = [_tableView numberOfRowsInSection:0];
+    if (index >= 0 && index < rows) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-        if ([model isKindOfClass:[YSFMessageModel class]]) {
-            YSFMessageCell *cell = (YSFMessageCell *)[_tableView cellForRowAtIndexPath:indexPath];
-            [cell refreshData:model];
-        } else if ([model isKindOfClass:[QYCustomModel class]]) {
-            YSFCustomMessageCell *cell = (YSFCustomMessageCell *)[_tableView cellForRowAtIndexPath:indexPath];
-            [cell refreshData:model];
+        if (model) {
+            if ([model isKindOfClass:[YSFMessageModel class]]) {
+                YSFMessageCell *cell = (YSFMessageCell *)[_tableView cellForRowAtIndexPath:indexPath];
+                [cell refreshData:model];
+            } else if ([model isKindOfClass:[QYCustomModel class]]) {
+                YSFCustomMessageCell *cell = (YSFCustomMessageCell *)[_tableView cellForRowAtIndexPath:indexPath];
+                [cell refreshData:model];
+            }
+        } else {
+            __weak typeof(self) weakSelf = self;
+            if (@available(iOS 11.0, *)) {
+                [_tableView performBatchUpdates:^{
+                    [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:animation];
+                } completion:nil];
+            } else {
+                [_tableView beginUpdates];
+                [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:animation];
+                [_tableView endUpdates];
+            }
         }
     }
 }
@@ -111,6 +145,23 @@ YSFNotification(kKFInputViewInputTypeChanged);
         [_tableView beginUpdates];
         [_tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:animated];
         [_tableView endUpdates];
+    }
+}
+
+- (void)scrollToBottomAtIndex:(NSInteger)index {
+    NSInteger rows = [_tableView numberOfRowsInSection:0];
+    if (index >= 0 && index < rows) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+        __weak typeof(self) weakSelf = self;
+        if (@available(iOS 11.0, *)) {
+            [_tableView performBatchUpdates:^{
+                [weakSelf.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+            } completion:nil];
+        } else {
+            [_tableView beginUpdates];
+            [_tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+            [_tableView endUpdates];
+        }
     }
 }
 

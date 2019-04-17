@@ -79,12 +79,13 @@
     
     self.actionButtonTextColor = YSFRGB(0x4f82ae);
     self.actionButtonBorderColor = YSFRGB(0x4f82ae);
-    self.rightBarButtonItemColorBlackOrWhite = YES;
+    self.rightItemStyleGrayOrWhite = YES;
     self.showAudioEntry = YES;
     self.showAudioEntryInRobotMode = YES;
     self.showEmoticonEntry = YES;
     self.showImageEntry = YES;
     self.autoShowKeyboard = YES;
+    self.bottomMargin = 0;
     
     self.showShopEntrance = NO;
     self.shopEntranceImage = nil;
@@ -94,7 +95,7 @@
     self.sessionListEntrancePosition = YES;
     self.sessionListEntranceImage = nil;
     
-    self.compressQuality = 0.5;
+    self.compressQuality = 1.0;
     self.showTransWords = NO;
     self.showEvaluationEntry = YES;
     self.bypassDisplayMode = QYBypassDisplayModeBottom;

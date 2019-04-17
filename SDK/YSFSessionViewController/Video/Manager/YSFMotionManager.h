@@ -11,10 +11,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ * 监测视频方向
+ */
 @interface YSFMotionManager : NSObject
 
-@property(nonatomic, assign)UIDeviceOrientation deviceOrientation;
-@property(nonatomic, assign)AVCaptureVideoOrientation videoOrientation;
+@property(nonatomic, assign) UIDeviceOrientation deviceOrientation;
+@property(nonatomic, assign) AVCaptureVideoOrientation videoOrientation;
 
 @end
 
