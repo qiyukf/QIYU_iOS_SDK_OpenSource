@@ -34,8 +34,9 @@
 }
 
 - (NSDictionary *)encodeAttachment {
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    dict[YSFApiKeyLabel] = YSFStrParam(self.label);
+    NSMutableDictionary *template = [NSMutableDictionary dictionary];
+    template[YSFApiKeyId] = YSFApiKeyMixReply;
+    template[YSFApiKeyLabel] = YSFStrParam(self.label);
     NSMutableArray *array = [NSMutableArray array];
     for (YSFAction *action in self.actionList) {
         NSDictionary *dict = [action toDict];
@@ -43,7 +44,12 @@
             [array addObject:dict];
         }
     }
-    dict[YSFApiKeyList] = array;
+    template[YSFApiKeyList] = array;
+    
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    dict[YSFApiKeyCmd] = @(YSFCommandBotReceive);
+    dict[YSFApiKeyType] = @(11);
+    dict[YSFApiKeyTemplate] = template;
     
     return dict;
 }
