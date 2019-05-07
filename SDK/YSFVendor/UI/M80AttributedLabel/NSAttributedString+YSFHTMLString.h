@@ -1,5 +1,5 @@
 //
-//  NSAttributedString+HTML.h
+//  NSAttributedString+YSFHTMLString.h
 //  yixin_iphone
 //
 //  Created by Xuhui on 15/1/11.
@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NSAttributedString (YSFHTML)
+@interface NSAttributedString (YSFHTMLString)
 
 - (instancetype)initWithHTMLString:(NSString *)str defautAttributes:(NSDictionary *)attributes;
 
