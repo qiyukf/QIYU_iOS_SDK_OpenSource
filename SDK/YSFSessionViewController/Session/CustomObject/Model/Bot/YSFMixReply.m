@@ -33,4 +33,19 @@
     return instance;
 }
 
+- (NSDictionary *)encodeAttachment {
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    dict[YSFApiKeyLabel] = YSFStrParam(self.label);
+    NSMutableArray *array = [NSMutableArray array];
+    for (YSFAction *action in self.actionList) {
+        NSDictionary *dict = [action toDict];
+        if (dict) {
+            [array addObject:dict];
+        }
+    }
+    dict[YSFApiKeyList] = array;
+    
+    return dict;
+}
+
 @end

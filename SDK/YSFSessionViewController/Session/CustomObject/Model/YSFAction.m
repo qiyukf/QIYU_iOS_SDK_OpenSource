@@ -4,9 +4,7 @@
 
 
 @implementation YSFAction
-
-+ (instancetype)objectByDict:(NSDictionary *)dict
-{
++ (instancetype)objectByDict:(NSDictionary *)dict {
     YSFAction *action = [YSFAction new];
     action.style = [dict ysf_jsonString:YSFApiKeyStyle];
     action.type = [dict ysf_jsonString:YSFApiKeyType];
@@ -29,17 +27,20 @@
     return action;
 }
 
+- (NSDictionary *)toDict {
+    return @{
+             YSFApiKeyStyle : YSFStrParam(self.style),
+             YSFApiKeyType : YSFStrParam(self.type),
+             YSFApiKeyUrl : YSFStrParam(self.url),
+             YSFApiKeyParams : YSFStrParam(self.params),
+             YSFApiKeyTarget : YSFStrParam(self.target),
+             YSFApiKeyValidOperation : YSFStrParam(self.validOperation),
+             YSFApiKeyTitle : YSFStrParam(self.title),
+             };
+}
+
 - (NSString *)toJsonString {
-    NSDictionary *dict = @{
-                           YSFApiKeyStyle : YSFStrParam(self.style),
-                           YSFApiKeyType : YSFStrParam(self.type),
-                           YSFApiKeyUrl : YSFStrParam(self.url),
-                           YSFApiKeyParams : YSFStrParam(self.params),
-                           YSFApiKeyTarget : YSFStrParam(self.target),
-                           YSFApiKeyValidOperation : YSFStrParam(self.validOperation),
-                           YSFApiKeyTitle : YSFStrParam(self.title),
-                           };
-    return [dict ysf_toUTF8String];
+    return [[self toDict] ysf_toUTF8String];
 }
 
 @end

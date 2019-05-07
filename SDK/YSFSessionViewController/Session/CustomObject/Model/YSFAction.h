@@ -10,6 +10,7 @@
 @property (nonatomic,copy)    NSString *title;
 
 + (instancetype)objectByDict:(NSDictionary *)dict;
+- (NSDictionary *)toDict;
 - (NSString *)toJsonString;
 
 @end
