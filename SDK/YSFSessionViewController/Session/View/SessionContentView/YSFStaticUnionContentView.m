@@ -3,7 +3,7 @@
 #import "YSFMessageModel.h"
 #import "YSFStaticUnion.h"
 #import "UIImageView+YSFWebCache.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 #import "YSFCoreText.h"
 #import "NSString+FileTransfer.h"
 #import "YSFEmoticonDataManager.h"

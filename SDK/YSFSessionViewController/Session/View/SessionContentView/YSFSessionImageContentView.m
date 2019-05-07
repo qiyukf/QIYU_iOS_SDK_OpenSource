@@ -9,7 +9,7 @@
 #import "YSFSessionImageContentView.h"
 #import "YSFMessageModel.h"
 #import "YSFLoadProgressView.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 #import "YSF_NIMMessage+YSF.h"
 
 @interface YSFSessionImageContentView()

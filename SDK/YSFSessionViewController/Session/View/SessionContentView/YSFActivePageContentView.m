@@ -3,7 +3,7 @@
 #import "YSFMessageModel.h"
 #import "YSFActivePage.h"
 #import "UIImageView+YSFWebCache.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 
 
 

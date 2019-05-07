@@ -1,5 +1,5 @@
 //
-//  UIControl+BlocksKit.h
+//  UIControl+YSFBlocksKit.h
 //  BlocksKit
 //
 
@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  @warning UIControl is only available on a platform with UIKit.
  */
-@interface UIControl (YSF_BlocksKit)
+@interface UIControl (YSFBlocksKit)
 
 ///-----------------------------------
 /// @name Block event handling

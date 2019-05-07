@@ -13,7 +13,7 @@
 #import "YSFAttributedLabel+YSF.h"
 #import "YSFApiDefines.h"
 #import "YSF_NIMMessage+YSF.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 
 @interface YSFSessionTextContentView() <YSFAttributedLabelDelegate>
 

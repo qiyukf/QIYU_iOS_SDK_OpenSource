@@ -9,7 +9,7 @@
 #import "YSFSessionCommodityInfoContentView.h"
 #import "YSFMessageModel.h"
 #import "QYCommodityInfo_private.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 #import "YSFApiDefines.h"
 
 @interface YSFSessionCommodityInfoContentView ()

@@ -1,7 +1,7 @@
 #import "YSFBypassViewController.h"
 #import "YSFEvaluationRequest.h"
 #import "NSDictionary+YSFJson.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 #import "UIScrollView+YSFKit.h"
 #import "QYCustomUIConfig.h"
 

@@ -4,7 +4,7 @@
 #import "YSFKeyboardManager.h"
 #import "YSFEvaluationRequest.h"
 #import "NSDictionary+YSFJson.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 #import "UIScrollView+YSFKit.h"
 #import "NSArray+YSF.h"
 #import "QYSDK_Private.h"

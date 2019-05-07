@@ -7,7 +7,7 @@
 #import "YSFAnimatedImageView.h"
 #import "YSFRichText.h"
 #import "QYCustomUIConfig.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 #import "YSF_NIMMessage+YSF.h"
 
 

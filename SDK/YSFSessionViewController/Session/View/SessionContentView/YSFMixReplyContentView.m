@@ -9,7 +9,7 @@
 #import "YSFMixReplyContentView.h"
 #import "YSFMessageModel.h"
 #import "YSFMixReply.h"
-#import "UIControl+BlocksKit.h"
+#import "UIControl+YSFBlocksKit.h"
 #import "NSString+FileTransfer.h"
 #import "NSAttributedString+YSF.h"
 #import "YSFCoreText.h"
