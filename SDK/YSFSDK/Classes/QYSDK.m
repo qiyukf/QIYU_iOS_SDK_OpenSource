@@ -69,9 +69,13 @@
 - (void)registerAppId:(NSString *)appKey
               appName:(NSString *)appName
 {
+    [self registerAppId:appKey appName:appName cleanLbsConfig:NO];
+}
+
+- (void)registerAppId:(NSString *)appKey appName:(NSString *)appName cleanLbsConfig:(BOOL)clean {
     YSFLogApp(@"appKey: %@ appName: %@", appKey, appName);
     
-    [[YSF_NIMSDK sharedSDK] registerWithAppID:YES appKey:appKey cerName:appName];
+    [[YSF_NIMSDK sharedSDK] registerWithAppID:YES appKey:appKey cerName:appName cleanLbsConfig:clean];
     
     /**
      * 去掉wfd.netease.im域名访问，云信已不采集此部分数据

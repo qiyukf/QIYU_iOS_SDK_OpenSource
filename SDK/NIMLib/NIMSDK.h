@@ -33,8 +33,10 @@
  *  @param appKey  申请的appKey
  *  @param cerName 推送证书名
  */
-- (void)registerWithAppID:(BOOL)sdkOrKf appKey:(NSString *)appKey
-                  cerName:(NSString *)cerName;
+- (void)registerWithAppID:(BOOL)sdkOrKf
+                   appKey:(NSString *)appKey
+                  cerName:(NSString *)cerName
+           cleanLbsConfig:(BOOL)clean;
 
 
 /**

@@ -53,6 +53,13 @@ typedef void(^QYCleanResourceCacheCompleteBlock)(NSError *error);
 - (void)registerAppId:(NSString *)appKey appName:(NSString *)appName;
 
 /**
+ *  注册SDK（新增）
+ *
+ *  @param clean  是否清除本地存储的link及lbs地址信息
+ */
+- (void)registerAppId:(NSString *)appKey appName:(NSString *)appName cleanLbsConfig:(BOOL)clean;
+
+/**
  *  返回客服聊天ViewController，必须嵌入至UINavigationController中
  *  须保证全局只有一个sessionViewController实例，退出后能够正确释放实例
  *
